@@ -4,6 +4,7 @@ const navLinks = [
   { href: "/blog", label: "Blog" },
   { href: "/recipes", label: "Recipes" },
   { href: "/gallery", label: "Gallery" },
+  { href: "/interests", label: "Interests" },
 ] as const;
 
 export default function Header() {

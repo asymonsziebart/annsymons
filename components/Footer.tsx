@@ -33,6 +33,12 @@ export default function Footer() {
             >
               Gallery
             </Link>
+            <Link
+              href="/interests"
+              className="text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors"
+            >
+              Interests
+            </Link>
           </nav>
         </div>
       </div>
