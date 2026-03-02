@@ -13,8 +13,8 @@ export async function POST() {
     const sql = getSqlOrThrow();
     for (const post of staticPosts) {
       await sql`
-        INSERT INTO posts (slug, title, date, excerpt, body)
-        VALUES (${post.slug}, ${post.title}, ${post.date}, ${post.excerpt ?? null}, ${post.body})
+        INSERT INTO posts (slug, title, date, excerpt, body, image)
+        VALUES (${post.slug}, ${post.title}, ${post.date}, ${post.excerpt ?? null}, ${post.body}, ${post.image ?? null})
         ON CONFLICT (slug) DO NOTHING
       `;
     }

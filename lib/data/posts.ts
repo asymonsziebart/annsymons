@@ -8,7 +8,7 @@ export async function getAllPosts(): Promise<Post[]> {
   if (!sql) return getStaticPosts();
   try {
     const rows = await sql`
-      SELECT slug, title, date::text as date, excerpt, body
+      SELECT slug, title, date::text as date, excerpt, body, image
       FROM posts
       ORDER BY date DESC
     `;
@@ -26,7 +26,7 @@ export async function getPostBySlug(slug: string): Promise<Post | undefined> {
   if (!sql) return getStaticPostBySlug(slug);
   try {
     const rows = await sql`
-      SELECT slug, title, date::text as date, excerpt, body
+      SELECT slug, title, date::text as date, excerpt, body, image
       FROM posts
       WHERE slug = ${slug}
       LIMIT 1

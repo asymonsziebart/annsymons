@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS posts (
   date       DATE NOT NULL DEFAULT CURRENT_DATE,
   excerpt    TEXT,
   body       TEXT NOT NULL,
+  image      TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

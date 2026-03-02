@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { GalleryItem } from "@/lib/gallery";
+import ImageUploadField from "../ImageUploadField";
 
 type Props = Partial<GalleryItem> & { id?: string };
 
@@ -56,10 +57,7 @@ export default function GalleryItemForm(initial: Props) {
         <label className="mb-1 block text-sm font-medium text-[var(--color-ink-muted)]">Description (optional)</label>
         <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} className={inputClass} />
       </div>
-      <div>
-        <label className="mb-1 block text-sm font-medium text-[var(--color-ink-muted)]">Src (e.g. /gallery/photo.jpg)</label>
-        <input type="text" value={src} onChange={(e) => setSrc(e.target.value)} className={inputClass} required />
-      </div>
+      <ImageUploadField folder="gallery" value={src} onChange={setSrc} label="Image (src)" inputClass={inputClass} required />
       <div>
         <label className="mb-1 block text-sm font-medium text-[var(--color-ink-muted)]">Type</label>
         <select value={type} onChange={(e) => setType(e.target.value as "image" | "file")} className={inputClass}>

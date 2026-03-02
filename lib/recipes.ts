@@ -16,7 +16,7 @@ export const recipes: Recipe[] = [
     title: "Steak with Shrimp and Lobster Sauce",
     description: "Filet mignon with a rich shrimp and lobster cream sauce.",
     servings: "2",
-    image: "/recipes/steak-shrimp-lobster-sauce.webp",
+    image: "/recipes/steak-shrimp-lobster-sauce.png",
     ingredients: [
       "Steak: 2 (8–10 oz) filet mignon steaks 1½–2 inches thick",
       "garlic powder",
@@ -81,6 +81,7 @@ export const recipes: Recipe[] = [
     slug: "pasta-chicken-broccoli",
     title: "Pasta with Chicken and Broccoli",
     description: "Bow tie pasta with chicken, broccoli, and sun-dried tomatoes in a white wine and broth sauce.",
+    image: "/recipes/pasta-chicken-broccoli.png",
     ingredients: [
       "4 tbsp extra virgin olive oil",
       "2 garlic cloves, finely chopped",
@@ -109,7 +110,7 @@ export const recipes: Recipe[] = [
     title: "Classic Lasagna Recipe",
     description: "Traditional lasagna with meat sauce, ricotta, and mozzarella.",
     cookTime: "~2 hours",
-    image: "/recipes/classic-lasagna.webp",
+    image: "/recipes/classic-lasagna.png",
     ingredients: [
       "9–12 lasagna noodles",
       "1 lb ground beef or Italian sausage",
@@ -144,7 +145,7 @@ export const recipes: Recipe[] = [
     slug: "annies-favorite-pancakes",
     title: "Annie's Favorite Pancakes (Blueberry and Chocolate Chip)",
     description: "Fluffy pancakes with blueberries and chocolate chips.",
-    image: "/recipes/annies-favorite-pancakes.webp",
+    image: "/recipes/annies-favorite-pancakes.png",
     ingredients: [
       "1½ cups all-purpose flour",
       "3½ tsp baking powder",

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Recipe } from "@/lib/recipes";
+import ImageUploadField from "../ImageUploadField";
 
 type Props = Partial<Recipe>;
 
@@ -94,10 +95,7 @@ export default function RecipeForm(initial: Props) {
         <label className="mb-1 block text-sm font-medium text-[var(--color-ink-muted)]">Steps (one per line)</label>
         <textarea value={stepsText} onChange={(e) => setStepsText(e.target.value)} rows={8} className={inputClass} />
       </div>
-      <div>
-        <label className="mb-1 block text-sm font-medium text-[var(--color-ink-muted)]">Image URL (e.g. /recipes/photo.webp)</label>
-        <input type="text" value={image} onChange={(e) => setImage(e.target.value)} className={inputClass} />
-      </div>
+      <ImageUploadField folder="recipes" value={image} onChange={setImage} label="Recipe image" inputClass={inputClass} />
       {error && <p className="text-sm text-red-600">{error}</p>}
       <div className="flex gap-3">
         <button type="submit" disabled={loading} className="rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)] disabled:opacity-50">

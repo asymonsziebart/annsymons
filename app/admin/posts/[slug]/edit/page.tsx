@@ -32,6 +32,7 @@ export default async function EditPostPage({ params }: Props) {
         date={post.date}
         excerpt={post.excerpt}
         body={post.body}
+        image={post.image}
       />
     </div>
   );

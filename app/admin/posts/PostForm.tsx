@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ImageUploadField from "../ImageUploadField";
 
 type Props = {
   slug?: string;
@@ -10,14 +11,16 @@ type Props = {
   date?: string;
   excerpt?: string;
   body?: string;
+  image?: string;
 };
 
-export default function PostForm({ slug: initialSlug, title: initialTitle, date: initialDate, excerpt: initialExcerpt, body: initialBody }: Props) {
+export default function PostForm({ slug: initialSlug, title: initialTitle, date: initialDate, excerpt: initialExcerpt, body: initialBody, image: initialImage }: Props) {
   const [slug, setSlug] = useState(initialSlug ?? "");
   const [title, setTitle] = useState(initialTitle ?? "");
   const [date, setDate] = useState(initialDate ?? new Date().toISOString().slice(0, 10));
   const [excerpt, setExcerpt] = useState(initialExcerpt ?? "");
   const [body, setBody] = useState(initialBody ?? "");
+  const [image, setImage] = useState(initialImage ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -31,8 +34,8 @@ export default function PostForm({ slug: initialSlug, title: initialTitle, date:
       const url = isEdit ? `/api/admin/posts/${initialSlug}` : "/api/admin/posts";
       const method = isEdit ? "PUT" : "POST";
       const payload = isEdit
-        ? { title, date, excerpt, body }
-        : { slug, title, date, excerpt, body };
+        ? { title, date, excerpt, body, image: image || null }
+        : { slug, title, date, excerpt, body, image: image || null };
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -109,6 +112,13 @@ export default function PostForm({ slug: initialSlug, title: initialTitle, date:
           className={inputClass}
         />
       </div>
+      <ImageUploadField
+        folder="blog"
+        value={image}
+        onChange={setImage}
+        label="Post image (optional)"
+        inputClass={inputClass}
+      />
       <div>
         <label htmlFor="body" className="mb-1 block text-sm font-medium text-[var(--color-ink-muted)]">
           Body
