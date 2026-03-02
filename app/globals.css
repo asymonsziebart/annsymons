@@ -1,16 +1,25 @@
 @import "tailwindcss";
 
 @theme {
-  /* Warm editorial palette */
-  --color-cream: #f8f6f3;
+  /* Warm editorial + paint-splash palette */
+  --color-cream: #faf7f4;
   --color-cream-dark: #efeae4;
-  --color-ink: #1c1917;
+  --color-ink: #1a1918;
   --color-ink-muted: #44403c;
   --color-muted: #78716c;
-  --color-accent: #b45309;
-  --color-accent-hover: #92400e;
+  --color-accent: #c2410c;
+  --color-accent-hover: #9a3412;
   --color-surface: #ffffff;
   --color-border: #e7e5e4;
+  /* Extra colors for variety (buttons, links, highlights) */
+  --color-teal: #0d9488;
+  --color-teal-hover: #0f766e;
+  --color-coral: #e11d48;
+  --color-mustard: #ca8a04;
+  /* Paint splash backgrounds (soft, blurred) */
+  --color-splash-coral: #f472b6;
+  --color-splash-teal: #5eead4;
+  --color-splash-mustard: #fde047;
   --font-heading: var(--font-fraunces), ui-serif, serif;
   --font-body: var(--font-source-sans), ui-sans-serif, system-ui, sans-serif;
 }

@@ -1,11 +1,12 @@
-import { galleryItems } from "@/lib/gallery";
+import { getGalleryItems } from "@/lib/data/gallery";
 
 export const metadata = {
   title: "Gallery | Ann Symons",
   description: "Photos and uploads.",
 };
 
-export default function GalleryPage() {
+export default async function GalleryPage() {
+  const galleryItems = await getGalleryItems();
   return (
     <main className="mx-auto max-w-5xl px-4 py-14 sm:px-8 sm:py-20">
       <header className="mb-12">

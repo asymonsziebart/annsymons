@@ -1,23 +1,24 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getRecipeBySlug, getAllRecipes } from "@/lib/recipes";
+import { getRecipeBySlug, getAllRecipes } from "@/lib/data/recipes";
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateStaticParams() {
-  return getAllRecipes().map((recipe) => ({ slug: recipe.slug }));
+  const recipes = await getAllRecipes();
+  return recipes.map((recipe) => ({ slug: recipe.slug }));
 }
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const recipe = getRecipeBySlug(slug);
+  const recipe = await getRecipeBySlug(slug);
   if (!recipe) return { title: "Recipe | Ann Symons" };
   return { title: `${recipe.title} | Ann Symons` };
 }
 
 export default async function RecipePage({ params }: Props) {
   const { slug } = await params;
-  const recipe = getRecipeBySlug(slug);
+  const recipe = await getRecipeBySlug(slug);
   if (!recipe) notFound();
 
   return (

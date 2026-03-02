@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { getAllRecipes } from "@/lib/recipes";
+import { getAllRecipes } from "@/lib/data/recipes";
 
 export const metadata = {
   title: "Recipes | Ann Symons",
   description: "Recipes and cooking ideas.",
 };
 
-export default function RecipesPage() {
-  const recipes = getAllRecipes();
+export default async function RecipesPage() {
+  const recipes = await getAllRecipes();
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-14 sm:px-8 sm:py-20">
@@ -23,7 +23,8 @@ export default function RecipesPage() {
       <ul className="grid gap-6 sm:grid-cols-2">
         {recipes.length === 0 ? (
           <li className="col-span-full rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center text-[var(--color-muted)]">
-            No recipes yet. Add them in{" "}
+            No recipes yet. Add them in the{" "}
+            <Link href="/admin" className="text-[var(--color-accent)] hover:underline">admin portal</Link> or{" "}
             <code className="rounded bg-[var(--color-cream-dark)] px-1.5 py-0.5 text-[var(--color-ink-muted)]">
               lib/recipes.ts
             </code>

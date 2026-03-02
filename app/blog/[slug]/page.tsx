@@ -1,23 +1,24 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPostBySlug, getAllPosts } from "@/lib/posts";
+import { getPostBySlug, getAllPosts } from "@/lib/data/posts";
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateStaticParams() {
-  return getAllPosts().map((post) => ({ slug: post.slug }));
+  const posts = await getAllPosts();
+  return posts.map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getPostBySlug(slug);
   if (!post) return { title: "Post | Ann Symons" };
   return { title: `${post.title} | Ann Symons` };
 }
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getPostBySlug(slug);
   if (!post) notFound();
 
   return (

@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { getAllPosts } from "@/lib/posts";
+import { getAllPosts } from "@/lib/data/posts";
 
 export const metadata = {
   title: "Blog | Ann Symons",
   description: "Blog posts and updates.",
 };
 
-export default function BlogPage() {
-  const posts = getAllPosts();
+export default async function BlogPage() {
+  const posts = await getAllPosts();
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-14 sm:px-8 sm:py-20">
@@ -23,7 +23,8 @@ export default function BlogPage() {
       <ul className="space-y-6">
         {posts.length === 0 ? (
           <li className="rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center text-[var(--color-muted)]">
-            No posts yet. Add entries in{" "}
+            No posts yet. Add entries in the{" "}
+            <Link href="/admin" className="text-[var(--color-accent)] hover:underline">admin portal</Link> or{" "}
             <code className="rounded bg-[var(--color-cream-dark)] px-1.5 py-0.5 text-[var(--color-ink-muted)]">
               lib/posts.ts
             </code>
