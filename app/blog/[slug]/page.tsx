@@ -43,6 +43,16 @@ export default async function BlogPostPage({ params }: Props) {
             day: "numeric",
           })}
         </time>
+        {post.image && (
+          <div className="mt-6 overflow-hidden rounded-xl">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={post.image}
+              alt=""
+              className="w-full object-cover"
+            />
+          </div>
+        )}
         <div className="mt-8 whitespace-pre-line text-[var(--color-ink-muted)] leading-relaxed">
           {post.body}
         </div>
