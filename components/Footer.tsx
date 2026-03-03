@@ -28,12 +28,6 @@ export default function Footer() {
               Recipes
             </Link>
             <Link
-              href="/gallery"
-              className="text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors"
-            >
-              Gallery
-            </Link>
-            <Link
               href="/interests"
               className="text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors"
             >

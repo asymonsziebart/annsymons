@@ -75,3 +75,25 @@
 .link-accent:hover::after {
   width: 100%;
 }
+
+/* Hero headshot: straight up from bottom center, starts much bigger and shrinks as it flies in */
+@keyframes hero-headshot-fly-in {
+  0% {
+    transform: translateY(220px) scale(2.8);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+.hero-headshot-fly-in {
+  animation: hero-headshot-fly-in 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform;
+}
+
+/* Smooth transition when scrolling up/down – only applied after entrance finishes */
+.hero-headshot-circle {
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}

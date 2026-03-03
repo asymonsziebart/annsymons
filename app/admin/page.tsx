@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { getAllPosts } from "@/lib/data/posts";
 import { getAllRecipes } from "@/lib/data/recipes";
-import { getGalleryItems } from "@/lib/data/gallery";
 import AdminLogoutButton from "./AdminLogoutButton";
 import AdminSeedButton from "./AdminSeedButton";
 
@@ -11,10 +10,9 @@ export const metadata = {
 };
 
 export default async function AdminDashboardPage() {
-  const [posts, recipes, galleryItems] = await Promise.all([
+  const [posts, recipes] = await Promise.all([
     getAllPosts(),
     getAllRecipes(),
-    getGalleryItems(),
   ]);
 
   return (
@@ -98,37 +96,6 @@ export default async function AdminDashboardPage() {
                   </Link>
                   <Link
                     href={`/admin/recipes/${recipe.slug}/edit`}
-                    className="text-sm text-[var(--color-accent)] hover:underline"
-                  >
-                    Edit
-                  </Link>
-                </li>
-              ))
-            )}
-          </ul>
-        </section>
-
-        <section className="rounded-2xl bg-[var(--color-surface)] p-6 ring-1 ring-[var(--color-border)]">
-          <div className="flex items-center justify-between">
-            <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
-              Gallery
-            </h2>
-            <Link
-              href="/admin/gallery/new"
-              className="text-sm font-medium text-[var(--color-accent)] hover:underline"
-            >
-              + Add item
-            </Link>
-          </div>
-          <ul className="mt-4 space-y-2">
-            {galleryItems.length === 0 ? (
-              <li className="text-sm text-[var(--color-muted)]">No gallery items yet.</li>
-            ) : (
-              galleryItems.map((item) => (
-                <li key={item.id} className="flex items-center justify-between gap-4">
-                  <span className="text-[var(--color-ink-muted)]">{item.title}</span>
-                  <Link
-                    href={`/admin/gallery/${item.id}/edit`}
                     className="text-sm text-[var(--color-accent)] hover:underline"
                   >
                     Edit
