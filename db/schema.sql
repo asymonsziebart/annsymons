@@ -42,6 +42,16 @@ CREATE TABLE IF NOT EXISTS gallery_items (
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Task management (/tasks, password via TASKS_PASSWORD)
+CREATE TABLE IF NOT EXISTS tasks (
+  id                      SERIAL PRIMARY KEY,
+  title                   TEXT NOT NULL,
+  done                    BOOLEAN NOT NULL DEFAULT FALSE,
+  sort_order              INT DEFAULT 0,
+  created_at              TIMESTAMPTZ DEFAULT NOW(),
+  last_overdue_email_at   TIMESTAMPTZ
+);
+
 -- Optional: index for lookups by slug
 CREATE INDEX IF NOT EXISTS idx_posts_slug ON posts(slug);
 CREATE INDEX IF NOT EXISTS idx_recipes_slug ON recipes(slug);

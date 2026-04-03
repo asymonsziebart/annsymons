@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/tasks-overdue",
+      "schedule": "0 14 * * *"
+    }
+  ]
+}
