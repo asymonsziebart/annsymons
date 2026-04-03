@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getTasksPassword } from "@/lib/tasksPassword";
 
 const ADMIN_COOKIE = "admin_session";
 const ADMIN_SALT = "annsymons-admin";
@@ -22,7 +23,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     }
     const cookie = request.cookies.get(TASKS_COOKIE)?.value;
-    const password = process.env.TASKS_PASSWORD;
+    const password = getTasksPassword();
     if (!password) {
       return NextResponse.redirect(new URL("/tasks/login", request.url));
     }

@@ -1,13 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function TasksLoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -24,8 +22,8 @@ export default function TasksLoginForm() {
         setError(data.error || "Invalid password");
         return;
       }
-      router.push("/tasks");
-      router.refresh();
+      // Full navigation so the new session cookie is always sent (avoids client router missing cookie)
+      window.location.assign("/tasks");
     } catch {
       setError("Something went wrong");
     } finally {

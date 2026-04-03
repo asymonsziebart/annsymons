@@ -1,11 +1,12 @@
 import { cookies } from "next/headers";
 import { createHash } from "crypto";
+import { getTasksPassword } from "@/lib/tasksPassword";
 
 const COOKIE_NAME = "tasks_session";
 const SALT = "annsymons-tasks";
 
 function getToken(): string {
-  const password = process.env.TASKS_PASSWORD;
+  const password = getTasksPassword();
   if (!password) return "";
   return createHash("sha256").update(password + SALT).digest("hex");
 }
