@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isTasksAuth } from "@/lib/tasksAuth";
-import { updateTaskDone, deleteTask } from "@/lib/data/tasks";
+import { updateTask, deleteTask, isTaskStatus, type TaskStatus } from "@/lib/data/tasks";
 
 export async function PATCH(
   request: Request,
@@ -15,11 +15,33 @@ export async function PATCH(
   }
   try {
     const body = await request.json();
-    if (typeof body?.done === "boolean") {
-      await updateTaskDone(id, body.done);
-      return NextResponse.json({ ok: true });
+    const patch: {
+      title?: string;
+      description?: string | null;
+      due_date?: string | null;
+      status?: TaskStatus;
+    } = {};
+
+    if (typeof body?.title === "string") patch.title = body.title;
+    if (body?.description === null || typeof body?.description === "string") {
+      patch.description = body.description;
     }
-    return NextResponse.json({ error: "Invalid body" }, { status: 400 });
+    if (body?.due_date === null || typeof body?.due_date === "string") {
+      patch.due_date = body.due_date === "" ? null : body.due_date;
+    }
+    if (typeof body?.status === "string" && isTaskStatus(body.status)) {
+      patch.status = body.status;
+    }
+
+    if (Object.keys(patch).length === 0) {
+      return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
+    }
+
+    const task = await updateTask(id, patch);
+    if (!task) {
+      return NextResponse.json({ error: "Task not found or update failed" }, { status: 404 });
+    }
+    return NextResponse.json({ ok: true, task });
   } catch {
     return NextResponse.json({ error: "Failed" }, { status: 500 });
   }

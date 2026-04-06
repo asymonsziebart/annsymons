@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
   getTasksNeedingOverdueReminder,
   markOverdueReminderSent,
+  TASK_STATUS_LABELS,
 } from "@/lib/data/tasks";
 import { sendOverdueTasksDigest } from "@/lib/email/sendOverdueTasksDigest";
 
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * Vercel Cron (or manual): GET with Authorization: Bearer CRON_SECRET
- * Sends one email listing all open tasks that are 7+ days old (at most once per week per task).
+ * Sends one email for overdue tasks (past due date, or no due date and 7+ days open), at most weekly per task.
  */
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;
@@ -24,7 +25,12 @@ export async function GET(request: Request) {
   }
 
   const result = await sendOverdueTasksDigest(
-    tasks.map((t) => ({ title: t.title, createdAt: t.created_at }))
+    tasks.map((t) => ({
+      title: t.title,
+      createdAt: t.created_at,
+      dueDate: t.due_date,
+      statusLabel: TASK_STATUS_LABELS[t.status],
+    }))
   );
 
   if (!result.ok) {

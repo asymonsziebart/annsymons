@@ -6,6 +6,8 @@
 export type OverdueTaskLine = {
   title: string;
   createdAt: string;
+  dueDate: string | null;
+  statusLabel: string;
 };
 
 export async function sendOverdueTasksDigest(
@@ -30,14 +32,17 @@ export async function sendOverdueTasksDigest(
   const tasksUrl = `${site}/tasks`;
 
   const lines = tasks
-    .map(
-      (t) =>
-        `<li><strong>${escapeHtml(t.title)}</strong> — added ${escapeHtml(formatDate(t.createdAt))}</li>`
-    )
+    .map((t) => {
+      const due =
+        t.dueDate != null && t.dueDate !== ""
+          ? `Due ${escapeHtml(formatDate(t.dueDate))}`
+          : `No due date — open since ${escapeHtml(formatDate(t.createdAt))}`;
+      return `<li><strong>${escapeHtml(t.title)}</strong><br/><span style="color:#555;font-size:14px">${escapeHtml(t.statusLabel)} · ${due}</span></li>`;
+    })
     .join("");
 
   const html = `
-    <p>The following open tasks are at least a week old:</p>
+    <p>The following tasks need attention (past due date, or open more than a week with no due date):</p>
     <ul>${lines}</ul>
     <p style="color:#666;font-size:14px;margin-top:24px">You get this at most once per week per task while it stays open. Mark tasks done in your <a href="${escapeHtml(tasksUrl)}">tasks</a> list.</p>
   `.trim();

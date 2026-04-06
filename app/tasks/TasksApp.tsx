@@ -2,7 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import type { TaskRow } from "@/lib/data/tasks";
+import {
+  type TaskRow,
+  type TaskStatus,
+  TASK_STATUSES,
+  TASK_STATUS_LABELS,
+  isTaskOverdue,
+} from "@/lib/data/tasks";
 
 type Props = { initialTasks: TaskRow[] };
 
@@ -10,6 +16,9 @@ export default function TasksApp({ initialTasks }: Props) {
   const router = useRouter();
   const [tasks, setTasks] = useState<TaskRow[]>(initialTasks);
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [newStatus, setNewStatus] = useState<TaskStatus>("todo");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -24,6 +33,8 @@ export default function TasksApp({ initialTasks }: Props) {
     setTasks(initialTasks);
   }, [initialTasks]);
 
+  const openCount = tasks.filter((t) => t.status !== "done" && t.status !== "cancelled").length;
+
   async function addTask(e: React.FormEvent) {
     e.preventDefault();
     const t = title.trim();
@@ -34,7 +45,12 @@ export default function TasksApp({ initialTasks }: Props) {
       const res = await fetch("/api/tasks/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: t }),
+        body: JSON.stringify({
+          title: t,
+          description: description.trim() || null,
+          due_date: dueDate || null,
+          status: newStatus,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -42,7 +58,10 @@ export default function TasksApp({ initialTasks }: Props) {
         return;
       }
       setTitle("");
-      if (data.task) setTasks((prev) => [...prev, data.task]);
+      setDescription("");
+      setDueDate("");
+      setNewStatus("todo");
+      if (data.task) setTasks((prev) => sortTasksClient([...prev, data.task]));
       else await refresh();
     } catch {
       setError("Something went wrong");
@@ -51,17 +70,33 @@ export default function TasksApp({ initialTasks }: Props) {
     }
   }
 
-  async function toggleDone(task: TaskRow) {
-    const res = await fetch(`/api/tasks/${task.id}`, {
+  function sortTasksClient(list: TaskRow[]): TaskRow[] {
+    return [...list].sort((a, b) => {
+      const ac = a.status === "done" || a.status === "cancelled" ? 1 : 0;
+      const bc = b.status === "done" || b.status === "cancelled" ? 1 : 0;
+      if (ac !== bc) return ac - bc;
+      if (!a.due_date && !b.due_date) return a.id - b.id;
+      if (!a.due_date) return 1;
+      if (!b.due_date) return -1;
+      if (a.due_date !== b.due_date) return a.due_date.localeCompare(b.due_date);
+      return a.id - b.id;
+    });
+  }
+
+  function replaceTask(updated: TaskRow) {
+    setTasks((prev) =>
+      sortTasksClient(prev.map((x) => (x.id === updated.id ? updated : x)))
+    );
+  }
+
+  async function patchTask(id: number, patch: Record<string, unknown>) {
+    const res = await fetch(`/api/tasks/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ done: !task.done }),
+      body: JSON.stringify(patch),
     });
-    if (res.ok) {
-      setTasks((prev) =>
-        prev.map((x) => (x.id === task.id ? { ...x, done: !x.done } : x))
-      );
-    }
+    const data = await res.json();
+    if (res.ok && data.task) replaceTask(data.task as TaskRow);
   }
 
   async function remove(id: number) {
@@ -77,16 +112,17 @@ export default function TasksApp({ initialTasks }: Props) {
 
   const inputClass =
     "w-full rounded-lg border border-[var(--color-border)] bg-white px-4 py-2 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]";
+  const labelClass = "mb-1 block text-xs font-medium text-[var(--color-ink-muted)]";
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-10 sm:px-8">
+    <div className="mx-auto max-w-2xl px-4 py-10 sm:px-8">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="font-heading text-2xl font-semibold text-[var(--color-ink)]">
             Tasks
           </h1>
           <p className="mt-1 text-sm text-[var(--color-muted)]">
-            {tasks.length === 0 ? "No tasks yet." : `${tasks.filter((t) => !t.done).length} open`}
+            {tasks.length === 0 ? "No tasks yet." : `${openCount} open`}
           </p>
         </div>
         <button
@@ -98,60 +134,209 @@ export default function TasksApp({ initialTasks }: Props) {
         </button>
       </div>
 
-      <form onSubmit={addTask} className="mt-8 flex gap-2">
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="New task…"
-          className={inputClass}
-          disabled={loading}
-        />
-        <button
-          type="submit"
-          disabled={loading || !title.trim()}
-          className="shrink-0 rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)] disabled:opacity-50"
-        >
-          Add
-        </button>
-      </form>
-      {error && (
-        <p className="mt-2 text-sm text-red-600" role="alert">
-          {error}
-        </p>
-      )}
-
-      <ul className="mt-8 space-y-2">
-        {tasks.map((task) => (
-          <li
-            key={task.id}
-            className="flex items-center gap-3 rounded-xl bg-[var(--color-surface)] px-4 py-3 ring-1 ring-[var(--color-border)]"
+      <section className="mt-8 rounded-2xl bg-[var(--color-surface)] p-5 ring-1 ring-[var(--color-border)]">
+        <h2 className="font-heading text-sm font-semibold text-[var(--color-ink)]">
+          New task
+        </h2>
+        <form onSubmit={addTask} className="mt-4 space-y-4">
+          <div>
+            <label htmlFor="new-title" className={labelClass}>
+              Title
+            </label>
+            <input
+              id="new-title"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="What needs to be done?"
+              className={inputClass}
+              disabled={loading}
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="new-desc" className={labelClass}>
+              Description (optional)
+            </label>
+            <textarea
+              id="new-desc"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Notes, links, context…"
+              rows={3}
+              className={inputClass}
+              disabled={loading}
+            />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="new-due" className={labelClass}>
+                Due date (optional)
+              </label>
+              <input
+                id="new-due"
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className={inputClass}
+                disabled={loading}
+              />
+            </div>
+            <div>
+              <label htmlFor="new-status" className={labelClass}>
+                Status
+              </label>
+              <select
+                id="new-status"
+                value={newStatus}
+                onChange={(e) => setNewStatus(e.target.value as TaskStatus)}
+                className={inputClass}
+                disabled={loading}
+              >
+                {TASK_STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {TASK_STATUS_LABELS[s]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          {error && (
+            <p className="text-sm text-red-600" role="alert">
+              {error}
+            </p>
+          )}
+          <button
+            type="submit"
+            disabled={loading || !title.trim()}
+            className="rounded-xl bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)] disabled:opacity-50"
           >
-            <button
-              type="button"
-              onClick={() => void toggleDone(task)}
-              className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-[var(--color-border)] bg-white text-sm hover:border-[var(--color-accent)]"
-              aria-label={task.done ? "Mark incomplete" : "Mark complete"}
-            >
-              {task.done ? "✓" : ""}
-            </button>
-            <span
-              className={`min-w-0 flex-1 text-left ${
-                task.done ? "text-[var(--color-muted)] line-through" : "text-[var(--color-ink)]"
-              }`}
-            >
-              {task.title}
-            </span>
-            <button
-              type="button"
-              onClick={() => void remove(task.id)}
-              className="shrink-0 text-sm text-[var(--color-muted)] hover:text-red-600"
-            >
-              Delete
-            </button>
-          </li>
+            {loading ? "Adding…" : "Add task"}
+          </button>
+        </form>
+      </section>
+
+      <ul className="mt-8 space-y-4">
+        {tasks.map((task) => (
+          <TaskCard
+            key={task.id}
+            task={task}
+            inputClass={inputClass}
+            labelClass={labelClass}
+            onPatch={(patch) => void patchTask(task.id, patch)}
+            onDelete={() => void remove(task.id)}
+          />
         ))}
       </ul>
     </div>
+  );
+}
+
+function TaskCard({
+  task,
+  inputClass,
+  labelClass,
+  onPatch,
+  onDelete,
+}: {
+  task: TaskRow;
+  inputClass: string;
+  labelClass: string;
+  onPatch: (patch: Record<string, unknown>) => void;
+  onDelete: () => void;
+}) {
+  const [title, setTitle] = useState(task.title);
+  const [description, setDescription] = useState(task.description ?? "");
+  const [dueDate, setDueDate] = useState(task.due_date ?? "");
+
+  useEffect(() => {
+    setTitle(task.title);
+    setDescription(task.description ?? "");
+    setDueDate(task.due_date ?? "");
+  }, [task]);
+
+  const overdue = isTaskOverdue(task);
+
+  return (
+    <li
+      className={`rounded-2xl bg-[var(--color-surface)] p-4 ring-1 ring-[var(--color-border)] sm:p-5 ${
+        overdue ? "ring-2 ring-[var(--color-coral)]/40" : ""
+      }`}
+    >
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 flex-1 space-y-3">
+          <div>
+            <label className={labelClass}>Title</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onBlur={() => {
+                const next = title.trim();
+                if (next && next !== task.title) onPatch({ title: next });
+              }}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className={labelClass}>Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              onBlur={() => {
+                const next = description.trim();
+                const prev = (task.description ?? "").trim();
+                if (next !== prev) onPatch({ description: next || null });
+              }}
+              rows={2}
+              placeholder="Add details…"
+              className={inputClass}
+            />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className={labelClass}>Due date</label>
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                onBlur={() => {
+                  const next = dueDate.trim();
+                  const prev = task.due_date ?? "";
+                  if (next !== prev) onPatch({ due_date: next || null });
+                }}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Status</label>
+              <select
+                value={task.status}
+                onChange={(e) => onPatch({ status: e.target.value })}
+                className={inputClass}
+              >
+                {TASK_STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {TASK_STATUS_LABELS[s]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          {overdue && (
+            <p className="text-xs font-medium text-[var(--color-coral)]">
+              Overdue or open longer than a week
+            </p>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={onDelete}
+          className="shrink-0 self-start rounded-lg border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-muted)] hover:border-red-300 hover:text-red-600 sm:self-auto"
+        >
+          Delete
+        </button>
+      </div>
+    </li>
   );
 }
