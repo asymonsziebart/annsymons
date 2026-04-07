@@ -33,7 +33,7 @@ export default function RootLayout({
         <PaintSplashes />
         <Header />
         <div className="relative z-10 flex min-h-[calc(100vh-4rem)] flex-col">
-          <div className="flex-1">{children}</div>
+          <div className="min-w-0 w-full flex-1">{children}</div>
           <Footer />
         </div>
       </body>

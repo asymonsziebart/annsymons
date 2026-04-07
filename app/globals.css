@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+/*
+ * Tailwind v4 only emits utilities for classes found in scanned files.
+ * Use paths relative to THIS file (app/globals.css → parent is repo root):
+ * explicit ../app, ../components, ../lib avoids Windows/resolver issues where
+ * "./**" missed client pages like /tasks (unstyled HTML, theme CSS still loads).
+ */
+@source "../app/**/*.{js,ts,jsx,tsx,mdx}";
+@source "../components/**/*.{js,ts,jsx,tsx,mdx}";
+@source "../lib/**/*.{js,ts,jsx,tsx,mdx}";
+
 @theme {
   /* Warm editorial + paint-splash palette */
   --color-cream: #faf7f4;

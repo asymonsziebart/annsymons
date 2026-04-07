@@ -1,3 +1,4 @@
+import { getSections } from "@/lib/data/taskSections";
 import { getTasks } from "@/lib/data/tasks";
 import TasksApp from "./TasksApp";
 
@@ -9,6 +10,6 @@ export const metadata = {
 };
 
 export default async function TasksPage() {
-  const initialTasks = await getTasks();
-  return <TasksApp initialTasks={initialTasks} />;
+  const [initialTasks, initialSections] = await Promise.all([getTasks(), getSections()]);
+  return <TasksApp initialTasks={initialTasks} initialSections={initialSections} />;
 }

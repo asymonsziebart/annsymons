@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { isTasksAuth } from "@/lib/tasksAuth";
-import { createTask, isTaskStatus, type TaskStatus } from "@/lib/data/tasks";
+import {
+  createTask,
+  isTaskStatus,
+  isTaskPriority,
+  type TaskStatus,
+  type TaskPriority,
+} from "@/lib/data/tasks";
 
 export async function POST(request: Request) {
   const ok = await isTasksAuth();
@@ -8,6 +14,11 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const title = typeof body?.title === "string" ? body.title : "";
+    const section_id = Number(body?.section_id);
+    if (!Number.isFinite(section_id)) {
+      return NextResponse.json({ error: "section_id is required" }, { status: 400 });
+    }
+
     const description =
       body?.description === null || body?.description === undefined
         ? null
@@ -20,17 +31,67 @@ export async function POST(request: Request) {
         : typeof body.due_date === "string"
           ? body.due_date
           : null;
+
     let status: TaskStatus | undefined;
-    if (typeof body?.status === "string" && isTaskStatus(body.status)) {
-      status = body.status;
+    if (typeof body?.status === "string" && isTaskStatus(body.status)) status = body.status;
+
+    let priority: TaskPriority | undefined;
+    if (typeof body?.priority === "string" && isTaskPriority(body.priority)) {
+      priority = body.priority;
     }
 
-    const task = await createTask({ title, description, due_date, status });
+    const assignee =
+      typeof body?.assignee === "string" || body?.assignee === null ? body.assignee : undefined;
+    const estimated_minutes =
+      body?.estimated_minutes === null || body?.estimated_minutes === undefined
+        ? undefined
+        : Number(body.estimated_minutes);
+    const actual_minutes =
+      body?.actual_minutes === null || body?.actual_minutes === undefined
+        ? undefined
+        : Number(body.actual_minutes);
+    const dependencies =
+      typeof body?.dependencies === "string" || body?.dependencies === null
+        ? body.dependencies
+        : undefined;
+    const requester =
+      typeof body?.requester === "string" || body?.requester === null
+        ? body.requester
+        : undefined;
+    const quarter =
+      typeof body?.quarter === "string" || body?.quarter === null ? body.quarter : undefined;
+    const project_label =
+      typeof body?.project_label === "string" || body?.project_label === null
+        ? body.project_label
+        : undefined;
+
+    const task = await createTask({
+      title,
+      section_id,
+      description,
+      due_date,
+      status,
+      assignee: assignee === undefined ? undefined : assignee,
+      priority,
+      estimated_minutes:
+        estimated_minutes === undefined || Number.isNaN(estimated_minutes)
+          ? undefined
+          : estimated_minutes,
+      actual_minutes:
+        actual_minutes === undefined || Number.isNaN(actual_minutes)
+          ? undefined
+          : actual_minutes,
+      dependencies,
+      requester,
+      quarter,
+      project_label,
+    });
+
     if (!task) {
       return NextResponse.json(
         {
           error:
-            "Could not create task. Run db/migrate-tasks-v2-fields.sql in Neon if you upgraded from an older tasks table.",
+            "Could not create task. Run db/migrate-tasks-asana-layout.sql in Neon (sections + columns + subtasks table).",
         },
         { status: 503 }
       );

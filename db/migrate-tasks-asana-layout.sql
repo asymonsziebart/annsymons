@@ -1,4 +1,4 @@
--- Full tasks schema (sections + tasks + subtasks). For empty Neon DBs only.
+-- Asana-style: sections, extra task fields, subtasks. Run once in Neon after tasks v2 exists.
 
 CREATE TABLE IF NOT EXISTS task_sections (
   id          SERIAL PRIMARY KEY,
@@ -19,30 +19,25 @@ FROM (
 ) AS v(name, color_key, sort_order)
 WHERE NOT EXISTS (SELECT 1 FROM task_sections LIMIT 1);
 
-CREATE TABLE IF NOT EXISTS tasks (
-  id                      SERIAL PRIMARY KEY,
-  title                   TEXT NOT NULL,
-  description             TEXT,
-  due_date                DATE,
-  status                  TEXT NOT NULL DEFAULT 'todo',
-  sort_order              INT DEFAULT 0,
-  created_at              TIMESTAMPTZ DEFAULT NOW(),
-  last_overdue_email_at   TIMESTAMPTZ,
-  section_id              INT NOT NULL REFERENCES task_sections(id),
-  assignee                TEXT,
-  priority                TEXT NOT NULL DEFAULT 'none',
-  estimated_minutes       INT,
-  actual_minutes          INT,
-  dependencies            TEXT,
-  requester               TEXT,
-  quarter                 TEXT,
-  project_label           TEXT,
-  CONSTRAINT tasks_status_check CHECK (
-    status IN ('todo', 'in_progress', 'blocked', 'done', 'cancelled')
-  ),
-  CONSTRAINT tasks_priority_check CHECK (
-    priority IN ('none', 'high', 'medium', 'low')
-  )
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS section_id INT REFERENCES task_sections(id);
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS assignee TEXT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS priority TEXT DEFAULT 'none';
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS estimated_minutes INT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS actual_minutes INT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS dependencies TEXT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS requester TEXT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS quarter TEXT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS project_label TEXT;
+
+UPDATE tasks
+SET section_id = (SELECT id FROM task_sections ORDER BY sort_order LIMIT 1)
+WHERE section_id IS NULL;
+
+ALTER TABLE tasks ALTER COLUMN section_id SET NOT NULL;
+
+ALTER TABLE tasks DROP CONSTRAINT IF EXISTS tasks_priority_check;
+ALTER TABLE tasks ADD CONSTRAINT tasks_priority_check CHECK (
+  priority IN ('none', 'high', 'medium', 'low')
 );
 
 CREATE TABLE IF NOT EXISTS task_subtasks (

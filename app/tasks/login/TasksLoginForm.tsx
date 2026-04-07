@@ -7,8 +7,12 @@ export default function TasksLoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    void submitLogin();
+  }
+
+  async function submitLogin() {
     setError("");
     setLoading(true);
     try {
@@ -17,12 +21,19 @@ export default function TasksLoginForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
       });
-      const data = await res.json();
+      let data: { error?: string } = {};
+      const ct = res.headers.get("content-type");
+      if (ct?.includes("application/json")) {
+        try {
+          data = (await res.json()) as { error?: string };
+        } catch {
+          /* non-JSON body */
+        }
+      }
       if (!res.ok) {
         setError(data.error || "Invalid password");
         return;
       }
-      // Full navigation so the new session cookie is always sent (avoids client router missing cookie)
       window.location.assign("/tasks");
     } catch {
       setError("Something went wrong");
