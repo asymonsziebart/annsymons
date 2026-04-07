@@ -29,11 +29,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${fraunces.variable} ${sourceSans.variable}`}>
-      <body className="min-h-screen antialiased relative">
+      <body className="flex min-h-screen flex-col antialiased relative">
         <PaintSplashes />
         <Header />
-        <div className="relative z-10 flex min-h-[calc(100vh-4rem)] flex-col">
-          <div className="min-w-0 w-full flex-1">{children}</div>
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+          <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col">{children}</div>
           <Footer />
         </div>
       </body>

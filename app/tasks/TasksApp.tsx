@@ -860,7 +860,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   const openCount = tasks.filter((t) => t.status !== "done" && t.status !== "cancelled").length;
 
   const shell =
-    "flex min-h-[calc(100vh-5rem)] w-full min-w-0 flex-col bg-stone-50 text-stone-900 antialiased";
+    "flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden bg-stone-50 text-stone-900 antialiased";
   const input =
     "w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 placeholder:text-stone-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500";
   const filterSelect = `${input} w-full min-w-0 sm:w-auto sm:min-w-[7.5rem] sm:max-w-[11rem]`;
@@ -898,9 +898,9 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
 
   return (
     <div className={shell}>
-      <div className="flex min-h-0 w-full min-w-0 flex-1 border-t border-stone-200">
+      <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden border-t border-stone-200">
         {/* List pane — grows to full width when detail pane is minimized */}
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <header className="flex shrink-0 items-center justify-between gap-4 border-b border-stone-200 bg-white px-4 py-3 sm:px-6 lg:px-8">
             <div>
               <h1 className="font-heading text-lg font-semibold text-stone-900">My tasks</h1>
@@ -1430,7 +1430,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
 
         {/* Detail pane — fixed width; list uses remaining horizontal space */}
         {showDetailPane && (
-          <aside className="hidden h-full min-h-0 w-[min(100%,26rem)] shrink-0 border-l border-stone-200 bg-white shadow-[inset_1px_0_0_0_rgb(231_229_228)] lg:flex lg:w-[26rem] lg:flex-col xl:w-[28rem]">
+          <aside className="hidden min-h-0 w-[min(100%,26rem)] shrink-0 overflow-hidden border-l border-stone-200 bg-white shadow-[inset_1px_0_0_0_rgb(231_229_228)] lg:flex lg:w-[26rem] lg:flex-col xl:w-[28rem]">
             <TaskDetail
               task={selected!}
               sections={sections}
