@@ -1466,14 +1466,14 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
         </button>
       )}
 
-      {/* Mobile detail sheet */}
+      {/* Mobile detail sheet — z above site header (z-50) so Back stays tappable */}
       {selected && selectedTaskIds.length === 1 && (
-        <div className="fixed inset-0 z-40 flex flex-col bg-stone-50 lg:hidden">
-          <div className="flex items-center justify-between border-b border-stone-200 bg-white px-4 py-3 shadow-sm">
+        <div className="fixed inset-0 z-[60] flex flex-col bg-stone-50 lg:hidden">
+          <div className="flex shrink-0 items-center justify-between border-b border-stone-200 bg-white px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] shadow-sm">
             <button
               type="button"
               onClick={() => setSelectedTaskIds([])}
-              className="text-sm font-medium text-sky-700 hover:text-sky-800"
+              className="min-h-11 min-w-11 touch-manipulation py-2 text-left text-sm font-medium text-sky-700 hover:text-sky-800"
             >
               ← Back
             </button>
@@ -1496,6 +1496,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               onToggleSubtask={(s) => void toggleSubtask(s)}
               onRenameSubtask={(s, title) => void renameSubtask(s, title)}
               onRemoveSubtask={(id) => void removeSubtask(id, selected.id)}
+              onMinimize={() => setSelectedTaskIds([])}
+              minimizeButtonLabel="Back to list"
               inputClass={input}
               labelClass={label}
             />
@@ -1773,6 +1775,7 @@ function TaskDetail({
   onRenameSubtask,
   onRemoveSubtask,
   onMinimize,
+  minimizeButtonLabel,
   inputClass,
   labelClass,
 }: {
@@ -1788,6 +1791,8 @@ function TaskDetail({
   onRenameSubtask: (s: SubtaskRow, title: string) => void;
   onRemoveSubtask: (id: number) => void;
   onMinimize?: () => void;
+  /** Defaults to "Minimize" (desktop). Use e.g. "Back to list" on mobile. */
+  minimizeButtonLabel?: string;
   inputClass: string;
   labelClass: string;
 }) {
@@ -1811,10 +1816,10 @@ function TaskDetail({
           <button
             type="button"
             onClick={onMinimize}
-            className="rounded-md border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-600 shadow-sm hover:bg-stone-50"
-            aria-label="Minimize task details"
+            className="min-h-11 touch-manipulation rounded-md border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-600 shadow-sm hover:bg-stone-50"
+            aria-label={minimizeButtonLabel ?? "Minimize task details"}
           >
-            Minimize
+            {minimizeButtonLabel ?? "Minimize"}
           </button>
         ) : null}
       </div>
