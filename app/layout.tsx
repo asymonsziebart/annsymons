@@ -29,12 +29,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${fraunces.variable} ${sourceSans.variable}`}>
-      <body className="flex min-h-screen flex-col antialiased relative">
+      <body className="relative flex h-dvh min-h-0 flex-col overflow-hidden antialiased">
         <PaintSplashes />
         <Header />
-        <div className="relative z-10 flex min-h-0 flex-1 flex-col">
-          <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col">{children}</div>
-          <Footer />
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col overflow-y-auto overscroll-y-contain">
+            {children}
+            <Footer />
+          </div>
         </div>
       </body>
     </html>

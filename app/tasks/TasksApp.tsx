@@ -1128,7 +1128,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
           </div>
 
           <div
-            className={`min-h-0 min-w-0 flex-1 overflow-y-auto py-4 ${showBulkBar ? "pb-28" : ""}`}
+            className={`min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain py-4 ${showBulkBar ? "pb-28" : ""}`}
           >
             {sections.map((sec) => {
               const list = tasksBySectionSorted.get(sec.id) ?? [];
@@ -1824,7 +1824,7 @@ function TaskDetail({
         ) : null}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-4">
         <p className="text-xs text-stone-500">My tasks › {task.section_name}</p>
         <input
           type="text"
