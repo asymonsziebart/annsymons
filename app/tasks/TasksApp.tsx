@@ -290,7 +290,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   const [dragOverSectionId, setDragOverSectionId] = useState<number | null>(null);
   const draggingTaskIdRef = useRef<number | null>(null);
   /** When false, tasks with status "done" are omitted from the list (still in data). */
-  const [showCompleted, setShowCompleted] = useState(true);
+  const [showCompleted, setShowCompleted] = useState(false);
   const [taskSearchQuery, setTaskSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | TaskStatus>("all");
   const [filterPriority, setFilterPriority] = useState<"all" | TaskPriority>("all");
