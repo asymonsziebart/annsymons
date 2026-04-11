@@ -143,10 +143,14 @@ const TASK_TABLE_LABELS: Record<keyof TaskRow, string> = {
 const TASK_TABLE_HIDDEN_STORAGE_KEY = "annsymons.tasks.tableHiddenColumns.v1";
 const TASK_FILTERS_COLLAPSED_STORAGE_KEY = "annsymons.tasks.filtersCollapsed.v1";
 
-function loadFiltersBarCollapsedFromStorage(): boolean {
+/** Respects saved preference; if unset, default collapsed on small viewports so the list stays visible. */
+function readFiltersCollapsedPreference(): boolean {
   if (typeof window === "undefined") return false;
   try {
-    return localStorage.getItem(TASK_FILTERS_COLLAPSED_STORAGE_KEY) === "1";
+    const raw = localStorage.getItem(TASK_FILTERS_COLLAPSED_STORAGE_KEY);
+    if (raw === "1") return true;
+    if (raw === "0") return false;
+    return window.matchMedia("(max-width: 1023px)").matches;
   } catch {
     return false;
   }
@@ -388,8 +392,13 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     };
   }, [selectedId]);
 
+  /** Desktop: show detail pane when a single task is selected. Mobile/tablet: keep the list visible until "Task details" is used. */
   useEffect(() => {
-    if (selectedId != null) setDetailsMinimized(false);
+    if (selectedId == null) return;
+    const wide =
+      typeof window !== "undefined" &&
+      window.matchMedia("(min-width: 1024px)").matches;
+    setDetailsMinimized(!wide);
   }, [selectedId]);
 
   useEffect(() => {
@@ -416,7 +425,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   }, []);
 
   useEffect(() => {
-    setFiltersBarCollapsed(loadFiltersBarCollapsedFromStorage());
+    setFiltersBarCollapsed(readFiltersCollapsedPreference());
     setFiltersBarHydrated(true);
   }, []);
 
@@ -982,9 +991,10 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 <button
                   type="button"
                   onClick={() => setDetailsMinimized(false)}
-                  className="hidden rounded-md border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs font-medium text-sky-800 shadow-sm hover:bg-sky-100 lg:inline"
+                  className="rounded-md border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs font-medium text-sky-800 shadow-sm hover:bg-sky-100"
                 >
-                  Show details
+                  <span className="lg:hidden">Task details</span>
+                  <span className="hidden lg:inline">Show details</span>
                 </button>
               )}
               <span className="hidden rounded-md bg-stone-100 px-2 py-1 text-xs text-stone-600 sm:inline">
@@ -1229,7 +1239,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
           </div>
 
           <div
-            className={`min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain py-4 ${showBulkBar ? "pb-28" : ""}`}
+            className={`min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain py-4 [-webkit-overflow-scrolling:touch] ${showBulkBar ? "pb-28" : ""}`}
           >
             {sections.map((sec) => {
               const list = tasksBySectionSorted.get(sec.id) ?? [];
@@ -1567,13 +1577,13 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
         </button>
       )}
 
-      {/* Mobile detail sheet — z above site header (z-50) so Back stays tappable */}
-      {selected && selectedTaskIds.length === 1 && (
+      {/* Mobile detail sheet — only when user opens details; list stays usable otherwise */}
+      {selected && selectedTaskIds.length === 1 && !detailsMinimized && (
         <div className="fixed inset-0 z-[60] flex flex-col bg-stone-50 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] lg:hidden">
           <div className="flex shrink-0 items-center justify-between border-b border-stone-200 bg-white px-4 pb-3 pt-3 shadow-sm">
             <button
               type="button"
-              onClick={() => setSelectedTaskIds([])}
+              onClick={() => setDetailsMinimized(true)}
               className="min-h-11 min-w-11 touch-manipulation py-2 text-left text-sm font-medium text-sky-700 hover:text-sky-800"
             >
               ← Back
@@ -1597,7 +1607,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               onToggleSubtask={(s) => void toggleSubtask(s)}
               onRenameSubtask={(s, title) => void renameSubtask(s, title)}
               onRemoveSubtask={(id) => void removeSubtask(id, selected.id)}
-              onMinimize={() => setSelectedTaskIds([])}
+              onMinimize={() => setDetailsMinimized(true)}
               minimizeButtonLabel="Back to list"
               inputClass={input}
               labelClass={label}
