@@ -141,6 +141,16 @@ const TASK_TABLE_LABELS: Record<keyof TaskRow, string> = {
 };
 
 const TASK_TABLE_HIDDEN_STORAGE_KEY = "annsymons.tasks.tableHiddenColumns.v1";
+const TASK_FILTERS_COLLAPSED_STORAGE_KEY = "annsymons.tasks.filtersCollapsed.v1";
+
+function loadFiltersBarCollapsedFromStorage(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return localStorage.getItem(TASK_FILTERS_COLLAPSED_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
 /** Single column kept visible when using "Deselect all" (minimum one data column required). */
 const TASK_TABLE_DESELECT_ALL_KEEP: keyof TaskRow = "title";
@@ -310,6 +320,9 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   /** Hidden data columns (drag / done / sub stay always visible). New fields default to visible. */
   const [hiddenTaskColumns, setHiddenTaskColumns] = useState<(keyof TaskRow)[]>([]);
   const [taskColumnsHydrated, setTaskColumnsHydrated] = useState(false);
+  /** When true, search + filter row is collapsed so the task list uses more vertical space. */
+  const [filtersBarCollapsed, setFiltersBarCollapsed] = useState(false);
+  const [filtersBarHydrated, setFiltersBarHydrated] = useState(false);
 
   const visibleTaskTableKeys = useMemo(() => {
     const hidden = new Set(hiddenTaskColumns);
@@ -401,6 +414,23 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     setHiddenTaskColumns(loadHiddenTaskColumnsFromStorage());
     setTaskColumnsHydrated(true);
   }, []);
+
+  useEffect(() => {
+    setFiltersBarCollapsed(loadFiltersBarCollapsedFromStorage());
+    setFiltersBarHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!filtersBarHydrated) return;
+    try {
+      localStorage.setItem(
+        TASK_FILTERS_COLLAPSED_STORAGE_KEY,
+        filtersBarCollapsed ? "1" : "0"
+      );
+    } catch {
+      /* storage full or disabled */
+    }
+  }, [filtersBarCollapsed, filtersBarHydrated]);
 
   useEffect(() => {
     if (!taskColumnsHydrated) return;
@@ -787,6 +817,31 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     taskSearchQuery,
   ]);
 
+  const filtersCollapsedSummary = useMemo(() => {
+    const parts: string[] = [];
+    const q = taskSearchQuery.trim();
+    if (q) {
+      const short = q.length > 28 ? `${q.slice(0, 28)}…` : q;
+      parts.push(`Search: “${short}”`);
+    }
+    if (filterStatus !== "all") parts.push(TASK_STATUS_LABELS[filterStatus]);
+    if (filterPriority !== "all") parts.push(TASK_PRIORITY_LABELS[filterPriority]);
+    if (filterSectionId !== "all") {
+      const sec = sections.find((s) => s.id === filterSectionId);
+      if (sec) parts.push(sec.name);
+    }
+    if (filterOverdueOnly) parts.push("Overdue only");
+    if (parts.length === 0) return "No filters";
+    return parts.join(" · ");
+  }, [
+    taskSearchQuery,
+    filterStatus,
+    filterPriority,
+    filterSectionId,
+    filterOverdueOnly,
+    sections,
+  ]);
+
   const tasksBySection = useMemo(() => {
     const m = new Map<number, TaskRow[]>();
     for (const s of sections) m.set(s.id, []);
@@ -1028,103 +1083,149 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
             </div>
           </header>
 
-          <div className="shrink-0 border-b border-stone-200 bg-white px-4 py-2.5 sm:px-6 lg:px-8">
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
-              <div className="min-w-0 flex-1 sm:min-w-[12rem] sm:max-w-md">
-                <label htmlFor="task-search" className={`${label} mb-0.5 block`}>
-                  Search
-                </label>
-                <input
-                  id="task-search"
-                  type="search"
-                  value={taskSearchQuery}
-                  onChange={(e) => setTaskSearchQuery(e.target.value)}
-                  placeholder="Title, assignee, notes, ID…"
-                  className={input}
-                  autoComplete="off"
-                />
-              </div>
-              <div>
-                <label htmlFor="task-filter-status" className={`${label} mb-0.5 block`}>
-                  Status
-                </label>
-                <select
-                  id="task-filter-status"
-                  value={filterStatus}
-                  onChange={(e) =>
-                    setFilterStatus(e.target.value === "all" ? "all" : (e.target.value as TaskStatus))
-                  }
-                  className={filterSelect}
-                >
-                  <option value="all">All</option>
-                  {TASK_STATUSES.map((s) => (
-                    <option key={s} value={s}>
-                      {TASK_STATUS_LABELS[s]}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="task-filter-priority" className={`${label} mb-0.5 block`}>
-                  Priority
-                </label>
-                <select
-                  id="task-filter-priority"
-                  value={filterPriority}
-                  onChange={(e) =>
-                    setFilterPriority(
-                      e.target.value === "all" ? "all" : (e.target.value as TaskPriority)
-                    )
-                  }
-                  className={filterSelect}
-                >
-                  <option value="all">All</option>
-                  {TASK_PRIORITIES.map((p) => (
-                    <option key={p} value={p}>
-                      {TASK_PRIORITY_LABELS[p]}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="task-filter-section" className={`${label} mb-0.5 block`}>
-                  Section
-                </label>
-                <select
-                  id="task-filter-section"
-                  value={filterSectionId === "all" ? "all" : String(filterSectionId)}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    setFilterSectionId(v === "all" ? "all" : Number(v));
-                  }}
-                  className={filterSelect}
-                >
-                  <option value="all">All sections</option>
-                  {sections.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <label className="flex cursor-pointer items-center gap-2 pb-0.5 text-sm text-stone-700 sm:pb-2">
-                <input
-                  type="checkbox"
-                  checked={filterOverdueOnly}
-                  onChange={(e) => setFilterOverdueOnly(e.target.checked)}
-                  className="rounded border-stone-300 text-sky-600 focus:ring-sky-500"
-                />
-                Overdue only
-              </label>
+          <div className="shrink-0 border-b border-stone-200 bg-white">
+            <div className="px-4 py-2 sm:px-6 lg:px-8">
               <button
                 type="button"
-                disabled={!hasActiveTaskFilters}
-                onClick={() => clearTaskFilters()}
-                className="rounded-md border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-sm hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
+                onClick={() => setFiltersBarCollapsed((c) => !c)}
+                className="flex min-h-10 w-full touch-manipulation items-center gap-2 rounded-md py-1.5 text-left text-sm text-stone-800 hover:bg-stone-50"
+                aria-expanded={!filtersBarCollapsed}
+                aria-controls="task-filters-panel"
+                aria-label={
+                  filtersBarCollapsed
+                    ? "Expand search and filters"
+                    : "Minimize search and filters"
+                }
               >
-                Clear filters
+                <span className="shrink-0 text-stone-400" aria-hidden>
+                  {filtersBarCollapsed ? "▸" : "▾"}
+                </span>
+                <span className="shrink-0 font-medium">Search & filters</span>
+                {filtersBarCollapsed ? (
+                  <span className="min-w-0 truncate text-xs font-normal text-stone-500">
+                    · {filtersCollapsedSummary}
+                    {hasActiveTaskFilters ? (
+                      <span className="whitespace-nowrap text-stone-600">
+                        {" "}
+                        · {filteredTasks.length} matching
+                      </span>
+                    ) : (
+                      <span className="whitespace-nowrap text-stone-500">
+                        {" "}
+                        · {filteredTasks.length} in list
+                      </span>
+                    )}
+                  </span>
+                ) : (
+                  <span className="ml-auto shrink-0 text-xs font-medium text-stone-500">
+                    Minimize
+                  </span>
+                )}
               </button>
             </div>
+            {!filtersBarCollapsed ? (
+              <div
+                id="task-filters-panel"
+                className="border-t border-stone-100 px-4 py-2.5 sm:px-6 lg:px-8"
+              >
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+                  <div className="min-w-0 flex-1 sm:min-w-[12rem] sm:max-w-md">
+                    <label htmlFor="task-search" className={`${label} mb-0.5 block`}>
+                      Search
+                    </label>
+                    <input
+                      id="task-search"
+                      type="search"
+                      value={taskSearchQuery}
+                      onChange={(e) => setTaskSearchQuery(e.target.value)}
+                      placeholder="Title, assignee, notes, ID…"
+                      className={input}
+                      autoComplete="off"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="task-filter-status" className={`${label} mb-0.5 block`}>
+                      Status
+                    </label>
+                    <select
+                      id="task-filter-status"
+                      value={filterStatus}
+                      onChange={(e) =>
+                        setFilterStatus(e.target.value === "all" ? "all" : (e.target.value as TaskStatus))
+                      }
+                      className={filterSelect}
+                    >
+                      <option value="all">All</option>
+                      {TASK_STATUSES.map((s) => (
+                        <option key={s} value={s}>
+                          {TASK_STATUS_LABELS[s]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="task-filter-priority" className={`${label} mb-0.5 block`}>
+                      Priority
+                    </label>
+                    <select
+                      id="task-filter-priority"
+                      value={filterPriority}
+                      onChange={(e) =>
+                        setFilterPriority(
+                          e.target.value === "all" ? "all" : (e.target.value as TaskPriority)
+                        )
+                      }
+                      className={filterSelect}
+                    >
+                      <option value="all">All</option>
+                      {TASK_PRIORITIES.map((p) => (
+                        <option key={p} value={p}>
+                          {TASK_PRIORITY_LABELS[p]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="task-filter-section" className={`${label} mb-0.5 block`}>
+                      Section
+                    </label>
+                    <select
+                      id="task-filter-section"
+                      value={filterSectionId === "all" ? "all" : String(filterSectionId)}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setFilterSectionId(v === "all" ? "all" : Number(v));
+                      }}
+                      className={filterSelect}
+                    >
+                      <option value="all">All sections</option>
+                      {sections.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <label className="flex cursor-pointer items-center gap-2 pb-0.5 text-sm text-stone-700 sm:pb-2">
+                    <input
+                      type="checkbox"
+                      checked={filterOverdueOnly}
+                      onChange={(e) => setFilterOverdueOnly(e.target.checked)}
+                      className="rounded border-stone-300 text-sky-600 focus:ring-sky-500"
+                    />
+                    Overdue only
+                  </label>
+                  <button
+                    type="button"
+                    disabled={!hasActiveTaskFilters}
+                    onClick={() => clearTaskFilters()}
+                    className="rounded-md border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-sm hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Clear filters
+                  </button>
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <div
