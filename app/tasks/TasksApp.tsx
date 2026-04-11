@@ -862,7 +862,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   const shell =
     "flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden bg-stone-50 text-stone-900 antialiased";
   const input =
-    "w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-sm text-stone-900 placeholder:text-stone-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500";
+    "w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-base text-stone-900 placeholder:text-stone-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm";
   const filterSelect = `${input} w-full min-w-0 sm:w-auto sm:min-w-[7.5rem] sm:max-w-[11rem]`;
   const label = "text-xs font-medium text-stone-500";
 
@@ -901,8 +901,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
       <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden border-t border-stone-200">
         {/* List pane — grows to full width when detail pane is minimized */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <header className="flex shrink-0 items-center justify-between gap-4 border-b border-stone-200 bg-white px-4 py-3 sm:px-6 lg:px-8">
-            <div>
+          <header className="flex shrink-0 flex-col gap-3 border-b border-stone-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-6 lg:px-8">
+            <div className="min-w-0">
               <h1 className="font-heading text-lg font-semibold text-stone-900">My tasks</h1>
               <p className="text-xs text-stone-500">
                 {hasActiveTaskFilters ? (
@@ -915,11 +915,11 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                   </>
                 ) : null}
                 {openCount} open ·{" "}
-                <span className="text-stone-400">
-                  Ctrl/⌘+click or Shift+click to select multiple
-                </span>{" "}
-                · drag{" "}
-                <span className="whitespace-nowrap text-stone-400">⋮⋮</span> between sections
+                <span className="hidden text-stone-400 md:inline">
+                  Ctrl/⌘+click or Shift+click to select multiple · drag{" "}
+                  <span className="whitespace-nowrap">⋮⋮</span> between sections
+                </span>
+                <span className="text-stone-400 md:hidden">Tap a task for details</span>
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -1468,8 +1468,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
 
       {/* Mobile detail sheet — z above site header (z-50) so Back stays tappable */}
       {selected && selectedTaskIds.length === 1 && (
-        <div className="fixed inset-0 z-[60] flex flex-col bg-stone-50 lg:hidden">
-          <div className="flex shrink-0 items-center justify-between border-b border-stone-200 bg-white px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] shadow-sm">
+        <div className="fixed inset-0 z-[60] flex flex-col bg-stone-50 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] lg:hidden">
+          <div className="flex shrink-0 items-center justify-between border-b border-stone-200 bg-white px-4 pb-3 pt-3 shadow-sm">
             <button
               type="button"
               onClick={() => setSelectedTaskIds([])}
@@ -1508,7 +1508,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
       {showBulkBar && (
         <div
           ref={bulkBarRef}
-          className="pointer-events-auto fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center gap-2"
+          className="pointer-events-auto fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 z-50 flex max-w-[calc(100vw-1.5rem-env(safe-area-inset-left)-env(safe-area-inset-right))] -translate-x-1/2 flex-col items-center gap-2"
         >
           {bulkPanel === "section" && (
             <div className="max-h-64 min-w-[14rem] overflow-y-auto rounded-xl border border-stone-200 bg-white p-2 shadow-lg">

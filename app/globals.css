@@ -37,11 +37,24 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
   }
   body {
     font-family: var(--font-body);
     background: var(--color-cream);
     color: var(--color-ink);
+  }
+  /* Avoid iOS zoom on focus when controls use smaller than 16px text */
+  @media (max-width: 639px) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]),
+    select,
+    textarea {
+      font-size: 1rem;
+    }
+  }
+  a[href],
+  button:not(:disabled) {
+    touch-manipulation: manipulation;
   }
   /* Subtle paper texture overlay */
   body::before {

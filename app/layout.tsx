@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
@@ -22,6 +22,13 @@ export const metadata: Metadata = {
   description: "Resume, blog, recipes, and more.",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#faf7f4",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,8 +39,8 @@ export default function RootLayout({
       <body className="relative flex h-dvh min-h-0 flex-col overflow-hidden antialiased">
         <PaintSplashes />
         <Header />
-        <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden">
-          <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col overflow-y-auto overscroll-y-contain">
+        <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+          <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col overflow-y-auto overscroll-y-contain pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
             {children}
             <Footer />
           </div>
