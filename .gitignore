@@ -30,3 +30,6 @@ next-env.d.ts
 # IDE
 .idea
 .vscode
+
+# Local-only uploads for /statephotos (when BLOB_READ_WRITE_TOKEN is unset)
+public/statephotos-uploads/

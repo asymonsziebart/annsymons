@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Map · US State Photos{% endblock %}
+{% block body %}
+<section class="map-section">
+  <p class="intro">Click any state to add photos or set a cover. States with a cover show your photo on the map.</p>
+  <div class="map-wrap">
+    {{ svg_map|safe }}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}{{ name }} · US State Photos{% endblock %}
+{% block body %}
+<nav class="crumb"><a href="{{ url_for('main.index') }}">Map</a> / {{ code }}</nav>
+<h1 class="page-title">{{ name }} <span class="code">({{ code }})</span></h1>
+
+{% if shape %}
+<section class="panel preview-panel" id="framing-root" {% if cover %}data-cover-href="{{ url_for('main.uploaded_file', name=cover.stored_name) }}"{% endif %}>
+  <h2>How it looks on {{ code }}</h2>
+  <p class="hint">Use the sliders to pan and zoom inside the outline. This matches the map (same crop rules).</p>
+  <div class="preview-layout">
+    <div class="preview-svg-wrap">
+      <svg class="state-preview-svg" viewBox="0 0 959 593" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <pattern id="preview-pat" patternContentUnits="objectBoundingBox" width="1" height="1">
+            <image id="preview-img" width="1" height="1" preserveAspectRatio="xMidYMid slice" {% if cover %}href="{{ url_for('main.uploaded_file', name=cover.stored_name) }}"{% endif %} transform="translate(0.5 0.5) scale(1) translate(-0.5 -0.5) translate(0 0)"/>
+          </pattern>
+        </defs>
+        {% if shape.kind == 'path' %}
+        <path id="preview-shape" fill="url(#preview-pat)" stroke="#e7ecf3" stroke-width="1.2" stroke-opacity="0.35" d="{{ shape.d }}"/>
+        {% else %}
+        <circle id="preview-shape" fill="url(#preview-pat)" stroke="#e7ecf3" stroke-width="1.2" stroke-opacity="0.35" cx="{{ shape.cx }}" cy="{{ shape.cy }}" r="{{ shape.r }}"/>
+        {% endif %}
+      </svg>
+    </div>
+    <div class="preview-controls">
+      <div class="slider-row">
+        <label for="slider-focus-x">Horizontal <span class="slider-val" id="val-focus-x">{{ framing_fx|round|int }}</span></label>
+        <input type="range" id="slider-focus-x" min="0" max="100" step="1" value="{{ framing_fx }}">
+      </div>
+      <div class="slider-row">
+        <label for="slider-focus-y">Vertical <span class="slider-val" id="val-focus-y">{{ framing_fy|round|int }}</span></label>
+        <input type="range" id="slider-focus-y" min="0" max="100" step="1" value="{{ framing_fy }}">
+      </div>
+      <div class="slider-row">
+        <label for="slider-zoom">Zoom <span class="slider-val" id="val-zoom">{{ framing_zoom|round(2) }}</span></label>
+        <input type="range" id="slider-zoom" min="1" max="2.5" step="0.02" value="{{ framing_zoom }}">
+      </div>
+      <p class="hint tiny">Horizontal / vertical shift which part of the photo sits in the center (like object-position). Zoom crops tighter.</p>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="panel upload-panel">
+  <h2>Add a photo</h2>
+  <form method="post" action="{{ url_for('main.state_upload', code=code) }}" enctype="multipart/form-data" class="upload-form" id="upload-form" data-framing-submit>
+    <input type="hidden" name="focus_x" class="fr-hx" value="{{ framing_fx }}">
+    <input type="hidden" name="focus_y" class="fr-hy" value="{{ framing_fy }}">
+    <input type="hidden" name="zoom" class="fr-hz" value="{{ framing_zoom }}">
+    <input type="file" name="photo" id="photo-input" accept="image/png,image/jpeg,image/webp,image/gif">
+    <button type="submit">Upload</button>
+  </form>
+  <p class="hint">Pick a file to load it into the preview above, adjust framing, then upload. First photo for this state becomes the cover automatically.</p>
+</section>
+
+{% if cover %}
+<section class="panel frame-save-panel">
+  <h2>Save cover framing</h2>
+  <p class="hint">If this photo is your map cover, save slider settings without re-uploading.</p>
+  <form method="post" action="{{ url_for('main.update_frame', photo_id=cover.id) }}" id="frame-form" data-framing-submit>
+    <input type="hidden" name="focus_x" class="fr-hx" value="{{ framing_fx }}">
+    <input type="hidden" name="focus_y" class="fr-hy" value="{{ framing_fy }}">
+    <input type="hidden" name="zoom" class="fr-hz" value="{{ framing_zoom }}">
+    <button type="submit" class="btn-secondary" id="frame-save-btn">Save framing for cover</button>
+  </form>
+  <p class="hint tiny" id="frame-blocked-hint" hidden>Clear the new file picker to save framing for your current cover.</p>
+</section>
+{% endif %}
+
+{% if photos %}
+<section class="panel gallery-panel">
+  <h2>Photos <span class="count">({{ photos|length }})</span></h2>
+  <ul class="photo-grid">
+    {% for p in photos %}
+    <li class="photo-card {% if p.is_cover %}is-cover{% endif %}">
+      <a href="{{ url_for('main.uploaded_file', name=p.stored_name) }}" target="_blank" rel="noopener">
+        <img src="{{ url_for('main.uploaded_file', name=p.stored_name) }}" alt="" loading="lazy">
+      </a>
+      <div class="photo-meta">
+        {% if p.is_cover %}
+          <span class="badge">Cover</span>
+        {% else %}
+          <form method="post" action="{{ url_for('main.set_cover', photo_id=p.id) }}" class="inline-form">
+            <button type="submit" class="btn-secondary">Set as cover</button>
+          </form>
+        {% endif %}
+        <form method="post" action="{{ url_for('main.delete_photo', photo_id=p.id) }}" class="inline-form" onsubmit="return confirm('Delete this photo?');">
+          <button type="submit" class="btn-danger">Delete</button>
+        </form>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% else %}
+<p class="empty">No photos yet for this state. Choose a file above to see it in the outline, then upload.</p>
+{% endif %}
+
+{% if shape %}
+<script>
+(function () {
+  function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+  function patternImageTransform(fx, fy, z) {
+    fx = clamp(Number(fx) || 50, 0, 100);
+    fy = clamp(Number(fy) || 50, 0, 100);
+    z = clamp(Number(z) || 1, 1, 2.5);
+    var k = 0.35;
+    var dx = ((50 - fx) / 100) * k;
+    var dy = ((50 - fy) / 100) * k;
+    return 'translate(0.5 0.5) scale(' + z + ') translate(-0.5 -0.5) translate(' + dx.toFixed(5) + ' ' + dy.toFixed(5) + ')';
+  }
+  var img = document.getElementById('preview-img');
+  var sx = document.getElementById('slider-focus-x');
+  var sy = document.getElementById('slider-focus-y');
+  var sz = document.getElementById('slider-zoom');
+  if (!img || !sx || !sy || !sz) return;
+
+  function syncFraming() {
+    var fx = sx.value, fy = sy.value, z = sz.value;
+    img.setAttribute('transform', patternImageTransform(fx, fy, z));
+    document.querySelectorAll('.fr-hx').forEach(function (el) { el.value = fx; });
+    document.querySelectorAll('.fr-hy').forEach(function (el) { el.value = fy; });
+    document.querySelectorAll('.fr-hz').forEach(function (el) { el.value = z; });
+    var vfx = document.getElementById('val-focus-x');
+    var vfy = document.getElementById('val-focus-y');
+    var vz = document.getElementById('val-zoom');
+    if (vfx) vfx.textContent = Math.round(fx);
+    if (vfy) vfy.textContent = Math.round(fy);
+    if (vz) vz.textContent = Number(z).toFixed(2);
+  }
+
+  var framingRoot = document.getElementById('framing-root');
+  var coverHref = framingRoot && framingRoot.dataset.coverHref;
+  var fileInput = document.getElementById('photo-input');
+  var frameBtn = document.getElementById('frame-save-btn');
+  var frameHint = document.getElementById('frame-blocked-hint');
+  var lastUrl = null;
+  function setFrameSaveBlocked(blocked) {
+    if (!frameBtn) return;
+    frameBtn.disabled = blocked;
+    if (frameHint) frameHint.hidden = !blocked;
+  }
+  if (fileInput) {
+    fileInput.addEventListener('change', function () {
+      if (lastUrl) URL.revokeObjectURL(lastUrl);
+      lastUrl = null;
+      var hasFile = !!(fileInput.files && fileInput.files[0]);
+      setFrameSaveBlocked(hasFile);
+      if (!hasFile) {
+        if (coverHref) img.setAttribute('href', coverHref);
+        else img.removeAttribute('href');
+        syncFraming();
+        return;
+      }
+      lastUrl = URL.createObjectURL(fileInput.files[0]);
+      img.setAttribute('href', lastUrl);
+      syncFraming();
+    });
+  }
+
+  ['input', 'change'].forEach(function (ev) {
+    sx.addEventListener(ev, syncFraming);
+    sy.addEventListener(ev, syncFraming);
+    sz.addEventListener(ev, syncFraming);
+  });
+  syncFraming();
+})();
+</script>
+{% endif %}
+{% endblock %}

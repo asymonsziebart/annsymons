@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import PaintSplashes from "@/components/PaintSplashes";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -37,14 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${fraunces.variable} ${sourceSans.variable}`}>
       <body className="relative flex h-dvh min-h-0 flex-col overflow-hidden antialiased">
-        <PaintSplashes />
-        <Header />
-        <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col overflow-y-auto overscroll-y-contain pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
-            {children}
-            <Footer />
-          </div>
-        </div>
+        {children}
       </body>
     </html>
   );
