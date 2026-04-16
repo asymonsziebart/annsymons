@@ -50,7 +50,8 @@ export function buildMapSvg(
   pathPrefix: string
 ): string {
   const base = pathPrefix.replace(/\/$/, "");
-  const stateBase = base ? `${base}/state` : "/state";
+  /** Next.js route is `app/statephotos/[code]` → `/statephotos/TX`, not `/statephotos/state/TX` (Flask). */
+  const stateHref = (code: string) => (base ? `${base}/${code}` : `/state/${code}`);
 
   const doc = new DOMParser().parseFromString(svgXml, "image/svg+xml") as unknown as SvgDom;
   const root = doc.documentElement;
@@ -94,7 +95,7 @@ export function buildMapSvg(
     }
     el.setAttribute("id", `state-path-${code}`);
     el.setAttribute("data-state", code);
-    const onclick = `window.location.href='${stateBase}/${code}';`;
+    const onclick = `window.location.href='${stateHref(code)}';`;
     if (covers[code]) {
       el.setAttribute("fill", `url(#photo-pat-${code})`);
       el.setAttribute("style", `cursor:pointer;${el.getAttribute("style") ?? ""}`);
@@ -110,7 +111,7 @@ export function buildMapSvg(
     if (code !== "DC") continue;
     el.setAttribute("id", "state-path-DC");
     el.setAttribute("data-state", "DC");
-    const onclick = `window.location.href='${stateBase}/DC';`;
+    const onclick = `window.location.href='${stateHref("DC")}';`;
     if (covers.DC) {
       el.setAttribute("fill", "url(#photo-pat-DC)");
     }
