@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { upload } from "@vercel/blob/client";
 
 import type { StateShape } from "@/lib/statePhotos/stateGeometry";
 import { patternImageTransform } from "@/lib/statePhotos/framing";
@@ -13,7 +14,19 @@ type Props = {
   coverId: number | null;
   framingF: [number, number, number];
   shape: StateShape | null;
+  /** When true, file goes browser → Blob (avoids Vercel ~4.5 MB Server Action limit). */
+  useClientBlobUpload: boolean;
 };
+
+function extFromFileName(name: string): string {
+  const i = name.lastIndexOf(".");
+  if (i === -1) return "jpg";
+  const ext = name
+    .slice(i + 1)
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+  return ext || "jpg";
+}
 
 export default function FramingPreview({
   stateCode,
@@ -21,19 +34,24 @@ export default function FramingPreview({
   coverId,
   framingF,
   shape,
+  useClientBlobUpload,
 }: Props) {
   const [fx, setFx] = useState(framingF[0]);
   const [fy, setFy] = useState(framingF[1]);
   const [z, setZ] = useState(framingF[2]);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [hasFile, setHasFile] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [clientError, setClientError] = useState<string | null>(null);
   const lastUrl = useRef<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const effectiveCover = blobUrl ?? coverUrl;
   const transform = patternImageTransform(fx, fy, z);
   const usePattern = !!effectiveCover;
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setClientError(null);
     if (lastUrl.current) URL.revokeObjectURL(lastUrl.current);
     lastUrl.current = null;
     const f = e.target.files?.[0];
@@ -54,10 +72,68 @@ export default function FramingPreview({
     };
   }, []);
 
+  async function handleClientUpload(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setClientError(null);
+    const input = fileInputRef.current;
+    const file = input?.files?.[0];
+    if (!file || file.size === 0) {
+      setClientError("Choose a photo to upload.");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const ext = extFromFileName(file.name);
+      const pathname = `statephotos/${crypto.randomUUID()}.${ext}`;
+      const result = await upload(pathname, file, {
+        access: "public",
+        handleUploadUrl: "/api/statephotos/blob-upload",
+        multipart: file.size > 4 * 1024 * 1024,
+      });
+
+      const reg = await fetch("/api/statephotos/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          stateCode,
+          publicUrl: result.url,
+          originalName: file.name,
+          focus_x: fx,
+          focus_y: fy,
+          zoom: z,
+        }),
+      });
+
+      if (!reg.ok) {
+        window.location.href = `/statephotos/${stateCode}?err=register`;
+        return;
+      }
+
+      window.location.href = `/statephotos/${stateCode}?ok=upload`;
+      return;
+    } catch (err) {
+      console.error(err);
+      setClientError(
+        err instanceof Error ? err.message : "Upload failed. Try a smaller image or check your connection."
+      );
+    } finally {
+      setUploading(false);
+    }
+  }
+
   if (!shape) return null;
 
   return (
     <>
+      {clientError ? (
+        <ul className="flash-list">
+          <li className="flash flash-error" role="alert">
+            {clientError}
+          </li>
+        </ul>
+      ) : null}
+
       <section className="panel preview-panel" id="framing-root">
         <h2>How it looks on {stateCode}</h2>
         <p className="hint">
@@ -166,23 +242,43 @@ export default function FramingPreview({
 
       <section className="panel upload-panel">
         <h2>Add a photo</h2>
-        <form action={uploadStatePhoto} encType="multipart/form-data" className="upload-form">
-          <input type="hidden" name="state_code" value={stateCode} />
-          <input type="hidden" name="focus_x" value={fx} />
-          <input type="hidden" name="focus_y" value={fy} />
-          <input type="hidden" name="zoom" value={z} />
-          <input
-            type="file"
-            name="photo"
-            id="photo-input"
-            accept="image/png,image/jpeg,image/webp,image/gif"
-            onChange={onFileChange}
-          />
-          <button type="submit">Upload</button>
-        </form>
+        {useClientBlobUpload ? (
+          <form onSubmit={handleClientUpload} className="upload-form">
+            <input
+              ref={fileInputRef}
+              type="file"
+              name="photo"
+              id="photo-input"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              onChange={onFileChange}
+            />
+            <button type="submit" disabled={uploading}>
+              {uploading ? "Uploading…" : "Upload"}
+            </button>
+          </form>
+        ) : (
+          <form action={uploadStatePhoto} encType="multipart/form-data" className="upload-form">
+            <input type="hidden" name="state_code" value={stateCode} />
+            <input type="hidden" name="focus_x" value={fx} />
+            <input type="hidden" name="focus_y" value={fy} />
+            <input type="hidden" name="zoom" value={z} />
+            <input
+              ref={fileInputRef}
+              type="file"
+              name="photo"
+              id="photo-input"
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              onChange={onFileChange}
+            />
+            <button type="submit">Upload</button>
+          </form>
+        )}
         <p className="hint">
           Pick a file to load it into the preview above, adjust framing, then upload. First photo for this state
           becomes the cover automatically.
+          {useClientBlobUpload
+            ? " On Vercel, large files upload directly to Blob (not through the server), so you are not limited to ~4.5 MB."
+            : " Without Vercel Blob configured, keep files under about 4 MB on deployed sites to avoid errors."}
         </p>
       </section>
 

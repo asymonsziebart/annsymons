@@ -42,11 +42,17 @@ export default async function StatePhotoDetailPage({
   const cover = photos.find((p) => p.is_cover) ?? null;
   const framingF = cover ? photoFramingValues(cover) : ([50, 50, 1] as [number, number, number]);
 
+  const useClientBlobUpload = !!process.env.BLOB_READ_WRITE_TOKEN;
+
   const errMsg =
     sp.err === "no-database"
       ? "Database is not configured."
       : sp.err === "no-file"
         ? "Choose a photo to upload."
+        : sp.err === "too-large"
+          ? "That file is too large for a server upload. Use a smaller image, or deploy with BLOB_READ_WRITE_TOKEN so uploads go directly to Blob (up to 20 MB)."
+        : sp.err === "register"
+          ? "Photo uploaded to storage but could not be saved to the database. Try again."
         : sp.err === "upload"
           ? "Upload failed. On production, set BLOB_READ_WRITE_TOKEN in Vercel."
           : sp.err === "save"
@@ -102,6 +108,7 @@ export default async function StatePhotoDetailPage({
           coverId={cover?.id ?? null}
           framingF={framingF}
           shape={shape}
+          useClientBlobUpload={useClientBlobUpload}
         />
       ) : null}
 

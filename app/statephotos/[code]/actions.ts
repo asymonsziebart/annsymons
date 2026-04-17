@@ -28,6 +28,12 @@ export async function uploadStatePhoto(formData: FormData) {
     redirect(`/statephotos/${code}?err=no-file`);
   }
 
+  /** Server Actions send the whole file through Vercel (~4.5 MB limit). Use Blob client upload when token is set. */
+  const maxServerBytes = 4 * 1024 * 1024;
+  if (file.size > maxServerBytes) {
+    redirect(`/statephotos/${code}?err=too-large`);
+  }
+
   let url: string;
   try {
     url = await storeStatePhotoFile(file);
