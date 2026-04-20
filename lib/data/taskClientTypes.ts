@@ -57,6 +57,33 @@ export function normalizeTaskPriority(s: string): TaskPriority {
   return isTaskPriority(s) ? s : "none";
 }
 
+/**
+ * Best-effort: map a section *name* to a task priority (e.g. "High Priority (3)" → high).
+ * Returns null if the name does not suggest a level.
+ */
+export function priorityInferredFromSectionName(sectionName: string): TaskPriority | null {
+  const t = sectionName.toLowerCase();
+  if (/\bhighlight\b/.test(t) && !/\bhigh[-\s]*priority\b|high[-\s]*pri/.test(t)) {
+    return null;
+  }
+  if (
+    /\bhigh[-\s]*priority\b|high-priority|highest|urgent|critical|asap|\bp0\b|sev[-\s]*0/.test(t) ||
+    (t.includes("high") && t.includes("priority") && !t.includes("low"))
+  ) {
+    return "high";
+  }
+  if (
+    /\blow[-\s]*priority\b|low-priority|lowest|icebox|someday/.test(t) ||
+    (t.includes("low") && t.includes("priority") && !t.includes("high"))
+  ) {
+    return "low";
+  }
+  if (/\bmed(?:ium|\.?)\b|normal|standard|p1\b|soon/.test(t) || (t.includes("medium") && t.includes("priority"))) {
+    return "medium";
+  }
+  return null;
+}
+
 export type TaskRow = {
   id: number;
   title: string;

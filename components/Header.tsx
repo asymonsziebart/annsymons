@@ -12,6 +12,8 @@ const navLinks = [
 
 export default function Header() {
   const pathname = usePathname();
+  const isTasksApp =
+    pathname === "/tasks" || (pathname != null && pathname.startsWith("/tasks/"));
   const [menuOpen, setMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
 
@@ -44,10 +46,20 @@ export default function Header() {
       ref={headerRef}
       className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-surface)]/90 pt-[env(safe-area-inset-top)] backdrop-blur-md"
     >
-      <div className="mx-auto flex h-[3.75rem] max-w-5xl items-center justify-between gap-3 px-4 sm:h-20 sm:gap-4 sm:px-8">
+      <div
+        className={
+          isTasksApp
+            ? "mx-auto flex h-12 max-w-5xl items-center justify-between gap-2 px-2.5 sm:px-3 md:h-[3.75rem] md:gap-3 md:px-6 lg:h-20 lg:gap-4 lg:px-8"
+            : "mx-auto flex h-[3.75rem] max-w-5xl items-center justify-between gap-3 px-4 sm:h-20 sm:gap-4 sm:px-8"
+        }
+      >
         <Link
           href="/"
-          className="font-heading min-h-11 min-w-0 shrink text-lg font-semibold text-[var(--color-ink)] transition-colors hover:text-[var(--color-accent)] sm:text-xl"
+          className={
+            isTasksApp
+              ? "font-heading min-h-0 min-w-0 shrink text-base font-semibold leading-tight text-[var(--color-ink)] transition-colors hover:text-[var(--color-accent)] md:min-h-11 md:text-lg md:leading-normal lg:text-xl"
+              : "font-heading min-h-11 min-w-0 shrink text-lg font-semibold text-[var(--color-ink)] transition-colors hover:text-[var(--color-accent)] sm:text-xl"
+          }
         >
           Ann Symons
         </Link>
@@ -67,7 +79,11 @@ export default function Header() {
         </nav>
         <button
           type="button"
-          className="touch-manipulation rounded-lg p-2 text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)] hover:text-[var(--color-ink)] md:hidden"
+          className={
+            isTasksApp
+              ? "touch-manipulation rounded-md p-1.5 text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)] hover:text-[var(--color-ink)] md:hidden"
+              : "touch-manipulation rounded-lg p-2 text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)] hover:text-[var(--color-ink)] md:hidden"
+          }
           aria-expanded={menuOpen}
           aria-controls="mobile-main-nav"
           onClick={() => setMenuOpen((o) => !o)}
@@ -101,17 +117,29 @@ export default function Header() {
       {menuOpen ? (
         <div
           id="mobile-main-nav"
-          className="border-t border-[var(--color-border)] bg-[var(--color-surface)]/95 shadow-lg backdrop-blur-md md:hidden"
+          className={
+            isTasksApp
+              ? "border-t border-[var(--color-border)] bg-[var(--color-surface)]/95 shadow-md backdrop-blur-md md:hidden"
+              : "border-t border-[var(--color-border)] bg-[var(--color-surface)]/95 shadow-lg backdrop-blur-md md:hidden"
+          }
         >
           <nav
-            className="mx-auto flex max-w-5xl flex-col px-4 py-3 sm:px-8"
+            className={
+              isTasksApp
+                ? "mx-auto flex max-w-5xl flex-col px-3 py-2 sm:px-6"
+                : "mx-auto flex max-w-5xl flex-col px-4 py-3 sm:px-8"
+            }
             aria-label="Main"
           >
             {navLinks.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
-                className="link-accent touch-manipulation rounded-lg px-2 py-3 text-base font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]/60 hover:text-[var(--color-ink)]"
+                className={
+                  isTasksApp
+                    ? "link-accent touch-manipulation rounded-lg px-2 py-2.5 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]/60 hover:text-[var(--color-ink)]"
+                    : "link-accent touch-manipulation rounded-lg px-2 py-3 text-base font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]/60 hover:text-[var(--color-ink)]"
+                }
               >
                 {label}
               </Link>

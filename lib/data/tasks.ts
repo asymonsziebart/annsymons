@@ -1,6 +1,11 @@
 import { getSqlOrThrow } from "@/lib/db";
 import type { CreateTaskInput, TaskPatch, TaskRow, TaskPriority } from "./taskClientTypes";
-import { normalizeTaskPriority, normalizeTaskStatus, TASK_PRIORITIES } from "./taskClientTypes";
+import {
+  normalizeTaskPriority,
+  normalizeTaskStatus,
+  TASK_PRIORITIES,
+  priorityInferredFromSectionName,
+} from "./taskClientTypes";
 
 export type { CreateTaskInput, TaskPatch, TaskRow } from "./taskClientTypes";
 export {
@@ -13,6 +18,7 @@ export {
   isTaskStatus,
   normalizeTaskPriority,
   normalizeTaskStatus,
+  priorityInferredFromSectionName,
   type TaskPriority,
   type TaskStatus,
 } from "./taskClientTypes";
@@ -126,6 +132,43 @@ function defaultPriorityFromSectionTaskRows(
     if (atMax.includes(p)) return p;
   }
   return atMax[0]!;
+}
+
+function resolvePriorityForTaskInSection(task: TaskRow, allInSection: TaskRow[]): TaskPriority {
+  const fromName = priorityInferredFromSectionName(task.section_name);
+  if (fromName) return fromName;
+  const peers = allInSection.filter((x) => x.id !== task.id);
+  const raw: Record<string, unknown>[] = peers.map((p) => ({
+    priority: p.priority,
+    sort_order: p.sort_order,
+    id: p.id,
+  }));
+  const fromPeers = defaultPriorityFromSectionTaskRows(raw);
+  if (fromPeers !== "none") return fromPeers;
+  return "medium";
+}
+
+/**
+ * Set priority for tasks that are still "none" using the section name and/or other tasks in that section; persists to the DB.
+ */
+export async function backfillTaskPrioritiesFromSection(): Promise<number> {
+  const tasks = await getTasks();
+  const bySec = new Map<number, TaskRow[]>();
+  for (const t of tasks) {
+    const list = bySec.get(t.section_id) ?? [];
+    list.push(t);
+    bySec.set(t.section_id, list);
+  }
+  let n = 0;
+  for (const t of tasks) {
+    if (t.priority !== "none") continue;
+    const allIn = bySec.get(t.section_id) ?? [t];
+    const next = resolvePriorityForTaskInSection(t, allIn);
+    if (next === "none") continue;
+    const row = await updateTask(t.id, { priority: next });
+    if (row) n += 1;
+  }
+  return n;
 }
 
 export async function createTask(input: CreateTaskInput): Promise<TaskRow> {

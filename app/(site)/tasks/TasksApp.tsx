@@ -337,7 +337,7 @@ function SortableTaskTh({
     <th
       scope="col"
       aria-sort={ariaSort}
-      className={`relative isolate border-r-2 border-stone-500 bg-stone-50 ${className ?? ""}`.trim()}
+      className={`relative isolate border-r border-stone-200 bg-stone-50 ${className ?? ""}`.trim()}
       style={
         widthPx != null
           ? { width: widthPx, minWidth: widthPx, maxWidth: widthPx, boxSizing: "border-box" }
@@ -346,13 +346,12 @@ function SortableTaskTh({
     >
       <button
         type="button"
-        className="relative z-0 flex min-h-9 w-[calc(100%-0.75rem)] min-w-0 max-w-[calc(100%-0.75rem)] items-center gap-0.5 pr-0.5 text-left text-[0.65rem] font-semibold uppercase tracking-wide text-stone-600 hover:bg-stone-100 hover:text-stone-900 whitespace-nowrap"
+        className="relative z-0 flex min-h-9 w-[calc(100%-0.5rem)] min-w-0 max-w-[calc(100%-0.5rem)] items-center gap-0.5 pr-0.5 text-left text-[0.65rem] font-semibold uppercase tracking-wide text-stone-600 hover:bg-stone-100 hover:text-stone-900 whitespace-nowrap"
         onClick={() => onSort(colKey)}
       >
         <span className="min-w-0 flex-1 truncate text-left">{label}</span>
         {active ? <span className="shrink-0 tabular-nums">{sort!.dir === "asc" ? "↑" : "↓"}</span> : null}
       </button>
-      {/* Inset shadow + th border = visible “fat” rule; hit target is solid so it can’t be washed out */}
       <div
         role="separator"
         aria-orientation="vertical"
@@ -364,7 +363,7 @@ function SortableTaskTh({
           e.preventDefault();
           onColumnAutoFit(colKey);
         }}
-        className="pointer-events-auto absolute right-0 top-0 z-[100] w-2.5 min-h-9 touch-none select-none bg-stone-800 hover:bg-sky-600"
+        className="pointer-events-auto absolute right-0 top-0 z-[100] w-2 min-h-9 touch-none select-none bg-stone-300/80 hover:bg-sky-500/80"
         style={{
           bottom: 0,
           touchAction: "none",
@@ -1456,7 +1455,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                 aria-label="Mark done"
                               />
                               <th
-                                className="w-8 border-r-2 border-stone-500 px-0 py-2.5"
+                                className="w-8 border-r border-stone-200 px-0 py-2.5"
                                 aria-label="Expand subtasks"
                               />
                               {visibleTaskTableKeys.map((k) => (
