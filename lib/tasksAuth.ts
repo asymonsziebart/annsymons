@@ -1,18 +1,26 @@
 import { cookies } from "next/headers";
 import { createHash } from "crypto";
-import { getTasksPassword } from "@/lib/tasksPassword";
+import { getAllTasksPasswords, getTasksPassword } from "@/lib/tasksPassword";
 
 const COOKIE_NAME = "tasks_session";
 const SALT = "annsymons-tasks";
 
-function getToken(): string {
-  const password = getTasksPassword();
-  if (!password) return "";
-  return createHash("sha256").update(password + SALT).digest("hex");
+function sessionTokenForPassword(plain: string): string {
+  if (!plain) return "";
+  return createHash("sha256").update(plain + SALT).digest("hex");
 }
 
-export async function setTasksSession(): Promise<void> {
-  const token = getToken();
+function getValidTaskSessionTokenSet(): Set<string> {
+  const s = new Set<string>();
+  for (const p of getAllTasksPasswords()) {
+    s.add(sessionTokenForPassword(p));
+  }
+  return s;
+}
+
+/** Set session after login with the exact password the user entered (so Tim vs primary hash differs). */
+export async function setTasksSession(plainPassword: string): Promise<void> {
+  const token = sessionTokenForPassword(plainPassword);
   if (!token) return;
   const c = await cookies();
   c.set(COOKIE_NAME, token, {
@@ -31,15 +39,16 @@ export async function clearTasksSession(): Promise<void> {
 
 export async function isTasksAuth(): Promise<boolean> {
   const c = await cookies();
-  const cookie = c.get(COOKIE_NAME);
-  const token = getToken();
-  return !!token && cookie?.value === token;
+  const cookie = c.get(COOKIE_NAME)?.value;
+  if (!cookie) return false;
+  return getValidTaskSessionTokenSet().has(cookie);
 }
 
 export function getTasksCookieName(): string {
   return COOKIE_NAME;
 }
 
+/** @deprecated use getValidTaskSessionTokenSet; kept for a single “primary” token in edge tooling */
 export function getTasksTokenForMiddleware(): string {
-  return getToken();
+  return sessionTokenForPassword(getTasksPassword());
 }

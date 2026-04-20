@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getTasksPassword } from "@/lib/tasksPassword";
+import { getAllTasksPasswords } from "@/lib/tasksPassword";
 
 const ADMIN_COOKIE = "admin_session";
 const ADMIN_SALT = "annsymons-admin";
@@ -22,13 +22,22 @@ export async function middleware(request: NextRequest) {
     if (path === "/tasks/login") {
       return NextResponse.next();
     }
-    const cookie = request.cookies.get(TASKS_COOKIE)?.value;
-    const password = getTasksPassword();
-    if (!password) {
+    const passwords = getAllTasksPasswords();
+    if (passwords.length === 0) {
       return NextResponse.redirect(new URL("/tasks/login", request.url));
     }
-    const expected = await sha256(password + TASKS_SALT);
-    if (cookie !== expected) {
+    const cookie = request.cookies.get(TASKS_COOKIE)?.value;
+    if (!cookie) {
+      return NextResponse.redirect(new URL("/tasks/login", request.url));
+    }
+    let allowed = false;
+    for (const p of passwords) {
+      if (cookie === (await sha256(p + TASKS_SALT))) {
+        allowed = true;
+        break;
+      }
+    }
+    if (!allowed) {
       return NextResponse.redirect(new URL("/tasks/login", request.url));
     }
     return NextResponse.next();

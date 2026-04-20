@@ -1178,7 +1178,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 </button>
                 {columnsPanelOpen ? (
                   <div
-                    className="absolute right-0 z-50 mt-1 w-[min(100vw-2rem,18rem)] rounded-lg border border-stone-200 bg-white py-2 shadow-lg"
+                    className="z-[200] rounded-lg border border-stone-200 bg-white py-2 shadow-lg max-md:fixed max-md:left-2 max-md:right-2 max-md:top-1/2 max-md:mt-0 max-md:w-auto max-md:-translate-y-1/2 md:absolute md:right-0 md:top-full md:mt-1 md:w-[min(100vw-2rem,18rem)] md:translate-y-0"
                     role="dialog"
                     aria-label="Choose visible columns"
                   >
@@ -1191,7 +1191,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                         Your choices are saved in this browser and load automatically next time.
                       </p>
                     </div>
-                    <ul className="max-h-[min(70vh,22rem)] overflow-y-auto px-2 pt-2">
+                    <ul className="max-h-[min(70vh,22rem)] overflow-y-auto px-2 pt-2 max-md:max-h-[min(55dvh,18rem)]">
                       {TASK_TABLE_KEYS.map((k) => {
                         const checked = visibleTaskTableKeys.includes(k);
                         const onlyOne = visibleTaskTableKeys.length === 1 && checked;
