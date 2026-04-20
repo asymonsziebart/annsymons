@@ -4,6 +4,7 @@ import {
   Fragment,
   useState,
   useEffect,
+  useLayoutEffect,
   useCallback,
   useMemo,
   useRef,
@@ -419,7 +420,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     return () => document.removeEventListener("mousedown", close);
   }, [bulkPanel]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setHiddenTaskColumns(loadHiddenTaskColumnsFromStorage());
     setTaskColumnsHydrated(true);
   }, []);
@@ -1011,6 +1012,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 <button
                   type="button"
                   onClick={() => setColumnsPanelOpen((o) => !o)}
+                  title="Choose which columns appear in the list. Your selection is saved in this browser."
                   className={`rounded-md border px-3 py-1.5 text-xs font-medium shadow-sm ${
                     columnsPanelOpen
                       ? "border-sky-300 bg-sky-50 text-sky-900"
@@ -1031,6 +1033,9 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                       <p className="text-xs font-medium text-stone-500">Visible fields</p>
                       <p className="mt-0.5 text-[0.65rem] text-stone-400">
                         At least one column stays on. “Deselect all” keeps Title only.
+                      </p>
+                      <p className="mt-1.5 text-[0.65rem] text-sky-700/90">
+                        Your choices are saved in this browser and load automatically next time.
                       </p>
                     </div>
                     <ul className="max-h-[min(70vh,22rem)] overflow-y-auto px-2 pt-2">
