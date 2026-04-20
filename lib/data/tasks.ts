@@ -1,6 +1,6 @@
 import { getSqlOrThrow } from "@/lib/db";
-import type { CreateTaskInput, TaskPatch, TaskRow } from "./taskClientTypes";
-import { normalizeTaskPriority, normalizeTaskStatus } from "./taskClientTypes";
+import type { CreateTaskInput, TaskPatch, TaskRow, TaskPriority } from "./taskClientTypes";
+import { normalizeTaskPriority, normalizeTaskStatus, TASK_PRIORITIES } from "./taskClientTypes";
 
 export type { CreateTaskInput, TaskPatch, TaskRow } from "./taskClientTypes";
 export {
@@ -95,10 +95,56 @@ export async function getTaskById(id: number): Promise<TaskRow | null> {
   return r ? mapRow(r) : null;
 }
 
+/**
+ * When no priority is specified for a new task, use the most common priority in the section;
+ * on a tie, prefer the last task in section order (as if the new row followed it).
+ */
+function defaultPriorityFromSectionTaskRows(
+  rawRows: Record<string, unknown>[]
+): TaskPriority {
+  if (rawRows.length === 0) return "none";
+  const rows = rawRows.map((r) => ({
+    priority: String(r.priority ?? "none"),
+    sort_order: Number(r.sort_order ?? 0),
+    id: Number(r.id),
+  }));
+  const counts = new Map<TaskPriority, number>();
+  for (const p of TASK_PRIORITIES) counts.set(p, 0);
+  for (const r of rows) {
+    const p = normalizeTaskPriority(r.priority);
+    counts.set(p, (counts.get(p) ?? 0) + 1);
+  }
+  let bestCount = 0;
+  for (const c of counts.values()) {
+    if (c > bestCount) bestCount = c;
+  }
+  const atMax = TASK_PRIORITIES.filter((p) => (counts.get(p) ?? 0) === bestCount);
+  if (atMax.length === 1) return atMax[0]!;
+
+  for (let i = rows.length - 1; i >= 0; i--) {
+    const p = normalizeTaskPriority(rows[i]!.priority);
+    if (atMax.includes(p)) return p;
+  }
+  return atMax[0]!;
+}
+
 export async function createTask(input: CreateTaskInput): Promise<TaskRow> {
   const sql = getSqlOrThrow();
   const status = normalizeTaskStatus(input.status ?? "todo");
-  const priority = normalizeTaskPriority(input.priority ?? "none");
+  let priority: TaskPriority;
+  if (input.priority !== undefined) {
+    priority = normalizeTaskPriority(input.priority);
+  } else {
+    const existing = await sql`
+      SELECT priority, sort_order, id
+      FROM tasks
+      WHERE section_id = ${input.section_id}
+      ORDER BY sort_order ASC, id ASC
+    `;
+    priority = defaultPriorityFromSectionTaskRows(
+      existing as Record<string, unknown>[]
+    );
+  }
   const rows = await sql`
     INSERT INTO tasks (
       title, description, due_date, status, section_id, sort_order,

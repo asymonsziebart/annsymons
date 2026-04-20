@@ -10,6 +10,7 @@ import {
   useRef,
   type ReactNode,
 } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   type SubtaskRow,
@@ -160,6 +161,9 @@ function readFiltersCollapsedPreference(): boolean {
 /** Single column kept visible when using "Deselect all" (minimum one data column required). */
 const TASK_TABLE_DESELECT_ALL_KEEP: keyof TaskRow = "title";
 
+const MIN_TASK_COL_PX = 48;
+const MAX_TASK_COL_PX = 640;
+
 function loadHiddenTaskColumnsFromStorage(): (keyof TaskRow)[] {
   if (typeof window === "undefined") return [];
   try {
@@ -232,6 +236,59 @@ function taskTableDataCell(task: TaskRow, key: keyof TaskRow): ReactNode {
   }
 }
 
+/** Plain text for a column, aligned with `taskTableDataCell` (used to auto-fit width). */
+function taskFieldPlainTextForMeasure(task: TaskRow, key: keyof TaskRow): string {
+  const v = task[key];
+  switch (key) {
+    case "due_date":
+      return formatShortDate(v as string | null);
+    case "created_at":
+    case "last_overdue_email_at":
+      return formatCellDateTime(v as string | null | undefined);
+    case "description":
+    case "dependencies":
+      return (v as string | null) == null || v === "" ? "—" : String(v);
+    case "priority":
+      return TASK_PRIORITY_LABELS[v as TaskPriority];
+    case "status":
+      return TASK_STATUS_LABELS[v as TaskStatus] ?? String(v);
+    case "subtask_count":
+      return String(v ?? 0);
+    default:
+      if (v == null || v === "") return "—";
+      return String(v);
+  }
+}
+
+function measureTaskColumnAutoWidth(
+  col: keyof TaskRow,
+  tasks: TaskRow[],
+  headerLabel: string
+): number {
+  if (typeof document === "undefined") return MIN_TASK_COL_PX;
+  const samples: string[] = [headerLabel];
+  for (const t of tasks) {
+    samples.push(taskFieldPlainTextForMeasure(t, col));
+  }
+  const el = document.createElement("span");
+  el.setAttribute("class", "whitespace-nowrap text-sm");
+  el.style.cssText =
+    "position:absolute;left:-9999px;top:0;white-space:nowrap;padding:0 0.5rem;font-size:0.875rem";
+  document.body.appendChild(el);
+  let max = 0;
+  for (const s of samples) {
+    el.textContent = s;
+    const w = el.getBoundingClientRect().width;
+    if (w > max) max = w;
+  }
+  document.body.removeChild(el);
+  let n = Math.ceil(max) + 2;
+  if (col === "priority") {
+    n += 20;
+  }
+  return Math.max(MIN_TASK_COL_PX, Math.min(MAX_TASK_COL_PX, n));
+}
+
 /** Case-insensitive substring search across common task text fields. */
 function taskMatchesSearchQuery(task: TaskRow, raw: string): boolean {
   const q = raw.trim().toLowerCase();
@@ -261,25 +318,59 @@ function SortableTaskTh({
   sort,
   onSort,
   className,
+  widthPx,
+  onResizePointerDown,
+  onColumnAutoFit,
 }: {
   colKey: keyof TaskRow;
   label: string;
   sort: { key: keyof TaskRow; dir: "asc" | "desc" } | null;
   onSort: (k: keyof TaskRow) => void;
   className?: string;
+  widthPx?: number;
+  onResizePointerDown: (e: ReactPointerEvent<HTMLDivElement>, col: keyof TaskRow) => void;
+  onColumnAutoFit: (col: keyof TaskRow) => void;
 }) {
   const active = sort?.key === colKey;
   const ariaSort = active ? (sort!.dir === "asc" ? "ascending" : "descending") : "none";
   return (
-    <th scope="col" aria-sort={ariaSort} className={className}>
+    <th
+      scope="col"
+      aria-sort={ariaSort}
+      className={`relative isolate border-r-2 border-stone-500 bg-stone-50 ${className ?? ""}`.trim()}
+      style={
+        widthPx != null
+          ? { width: widthPx, minWidth: widthPx, maxWidth: widthPx, boxSizing: "border-box" }
+          : undefined
+      }
+    >
       <button
         type="button"
-        className="flex w-full min-w-0 items-center gap-0.5 whitespace-nowrap text-left text-[0.65rem] font-semibold uppercase tracking-wide text-stone-600 hover:bg-stone-100 hover:text-stone-900"
+        className="relative z-0 flex min-h-9 w-[calc(100%-0.75rem)] min-w-0 max-w-[calc(100%-0.75rem)] items-center gap-0.5 pr-0.5 text-left text-[0.65rem] font-semibold uppercase tracking-wide text-stone-600 hover:bg-stone-100 hover:text-stone-900 whitespace-nowrap"
         onClick={() => onSort(colKey)}
       >
-        <span className="truncate">{label}</span>
+        <span className="min-w-0 flex-1 truncate text-left">{label}</span>
         {active ? <span className="shrink-0 tabular-nums">{sort!.dir === "asc" ? "↑" : "↓"}</span> : null}
       </button>
+      {/* Inset shadow + th border = visible “fat” rule; hit target is solid so it can’t be washed out */}
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        aria-label={`Resize or auto-fit ${label} column`}
+        title="Drag the bar to resize. Double-click to auto-fit to content."
+        onPointerDown={(e) => onResizePointerDown(e, colKey)}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          onColumnAutoFit(colKey);
+        }}
+        className="pointer-events-auto absolute right-0 top-0 z-[100] w-2.5 min-h-9 touch-none select-none bg-stone-800 hover:bg-sky-600"
+        style={{
+          bottom: 0,
+          touchAction: "none",
+          cursor: "col-resize",
+        }}
+      />
     </th>
   );
 }
@@ -328,6 +419,15 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   /** When true, search + filter row is collapsed so the task list uses more vertical space. */
   const [filtersBarCollapsed, setFiltersBarCollapsed] = useState(false);
   const [filtersBarHydrated, setFiltersBarHydrated] = useState(false);
+  /** Per-column width in px (session only; not persisted). */
+  const [taskColumnWidths, setTaskColumnWidths] = useState<Partial<Record<keyof TaskRow, number>>>(
+    {}
+  );
+  const taskColumnWidthsRef = useRef<Partial<Record<keyof TaskRow, number>>>({});
+  const resizingTaskColRef = useRef<keyof TaskRow | null>(null);
+  const taskResizeStartXRef = useRef(0);
+  const taskResizeStartWRef = useRef(0);
+  taskColumnWidthsRef.current = taskColumnWidths;
 
   const visibleTaskTableKeys = useMemo(() => {
     const hidden = new Set(hiddenTaskColumns);
@@ -596,7 +696,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
       const res = await fetch("/api/tasks/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, section_id: sectionId, status: "todo", priority: "none" }),
+        body: JSON.stringify({ title, section_id: sectionId, status: "todo" }),
       });
       const data = await parseJson<{ task?: TaskRow }>(res);
       if (res.ok && data?.task) {
@@ -871,6 +971,60 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
       return { key, dir: "asc" };
     });
   }, []);
+
+  const onTaskColumnAutoFit = useCallback((col: keyof TaskRow) => {
+    const w = measureTaskColumnAutoWidth(col, filteredTasks, TASK_TABLE_LABELS[col]);
+    setTaskColumnWidths((prev) => ({ ...prev, [col]: w }));
+  }, [filteredTasks]);
+
+  const onTaskColumnResizePointerDown = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>, col: keyof TaskRow) => {
+      e.stopPropagation();
+      if (e.button !== 0) return;
+      const th = e.currentTarget.closest("th");
+      const measured = th?.getBoundingClientRect().width;
+      const startW =
+        taskColumnWidthsRef.current[col] ??
+        (measured != null && !Number.isNaN(measured) && measured > 0 ? measured : 120);
+      const startX = e.clientX;
+      const DRAG_THRESHOLD = 3;
+      let dragActive = false;
+
+      const onMove = (ev: PointerEvent) => {
+        if (!dragActive) {
+          if (Math.abs(ev.clientX - startX) < DRAG_THRESHOLD) return;
+          dragActive = true;
+          resizingTaskColRef.current = col;
+          document.body.style.cursor = "col-resize";
+          document.body.style.userSelect = "none";
+        }
+        const next = Math.round(
+          Math.max(
+            MIN_TASK_COL_PX,
+            Math.min(MAX_TASK_COL_PX, startW + (ev.clientX - startX))
+          )
+        );
+        setTaskColumnWidths((prev) => {
+          if (prev[col] === next) return prev;
+          return { ...prev, [col]: next };
+        });
+      };
+      const onUp = () => {
+        if (dragActive) {
+          resizingTaskColRef.current = null;
+          document.body.style.removeProperty("cursor");
+          document.body.style.removeProperty("user-select");
+        }
+        document.removeEventListener("pointermove", onMove);
+        document.removeEventListener("pointerup", onUp);
+        document.removeEventListener("pointercancel", onUp);
+      };
+      document.addEventListener("pointermove", onMove);
+      document.addEventListener("pointerup", onUp);
+      document.addEventListener("pointercancel", onUp);
+    },
+    []
+  );
 
   const tasksBySectionSorted = useMemo(() => {
     if (!taskTableSort) return tasksBySection;
@@ -1290,15 +1444,21 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                         onDragLeave={(e) => sectionDragLeave(e, sec.id)}
                         onDrop={(e) => void dropTaskOnSection(e, sec.id)}
                       >
-                        <table className="w-max min-w-full border-collapse text-left text-sm">
+                        <table className="w-max min-w-full border-separate border-spacing-0 text-left text-sm">
                           <thead>
                             <tr className="border-b border-stone-200 bg-stone-50 text-stone-500">
                               <th
-                                className="w-9 px-2 py-2.5 pl-4 sm:pl-6 lg:pl-8"
+                                className="w-9 border-r border-stone-200 px-2 py-2.5 pl-4 sm:pl-6 lg:pl-8"
                                 aria-label="Drag"
                               />
-                              <th className="w-12 whitespace-nowrap px-0 py-2.5" aria-label="Mark done" />
-                              <th className="w-8 px-0 py-2.5" aria-label="Expand subtasks" />
+                              <th
+                                className="w-12 border-r border-stone-200 whitespace-nowrap px-0 py-2.5"
+                                aria-label="Mark done"
+                              />
+                              <th
+                                className="w-8 border-r-2 border-stone-500 px-0 py-2.5"
+                                aria-label="Expand subtasks"
+                              />
                               {visibleTaskTableKeys.map((k) => (
                                 <SortableTaskTh
                                   key={k}
@@ -1306,7 +1466,10 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                   label={TASK_TABLE_LABELS[k]}
                                   sort={taskTableSort}
                                   onSort={toggleTaskColumnSort}
-                                  className="min-w-[4.5rem] px-2 py-1 align-bottom"
+                                  widthPx={taskColumnWidths[k]}
+                                  onResizePointerDown={onTaskColumnResizePointerDown}
+                                  onColumnAutoFit={onTaskColumnAutoFit}
+                                  className="min-w-[4.5rem] overflow-visible px-2 py-1 pl-1.5 pr-0 align-bottom"
                                 />
                               ))}
                             </tr>
@@ -1402,17 +1565,41 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                       <span className="inline-block w-7" aria-hidden />
                                     )}
                                   </td>
-                                  {visibleTaskTableKeys.map((colKey) => (
+                                  {visibleTaskTableKeys.map((colKey) => {
+                                    const customW = taskColumnWidths[colKey];
+                                    const isLongText =
+                                      colKey === "description" ||
+                                      colKey === "dependencies" ||
+                                      colKey === "requester" ||
+                                      colKey === "project_label";
+                                    const tdClass = [
+                                      "border-l border-stone-100 px-2 py-2.5 align-middle text-stone-700",
+                                      customW == null &&
+                                        (isLongText
+                                          ? "max-w-[14rem] whitespace-normal break-words"
+                                          : "whitespace-nowrap"),
+                                      customW == null && colKey === "title"
+                                        ? "min-w-[8rem] max-w-[12rem]"
+                                        : "",
+                                      customW != null && isLongText ? "whitespace-normal break-words" : "",
+                                      customW != null && !isLongText ? "whitespace-nowrap" : "",
+                                    ]
+                                      .filter(Boolean)
+                                      .join(" ");
+                                    return (
                                     <td
                                       key={colKey}
-                                      className={`border-l border-stone-100 px-2 py-2.5 align-middle text-stone-700 ${
-                                        colKey === "description" ||
-                                        colKey === "dependencies" ||
-                                        colKey === "requester" ||
-                                        colKey === "project_label"
-                                          ? "max-w-[14rem] whitespace-normal break-words"
-                                          : "whitespace-nowrap"
-                                      } ${colKey === "title" ? "min-w-[8rem] max-w-[12rem]" : ""}`}
+                                      className={tdClass}
+                                      style={
+                                        customW != null
+                                          ? {
+                                              width: customW,
+                                              minWidth: customW,
+                                              maxWidth: customW,
+                                              boxSizing: "border-box",
+                                            }
+                                          : undefined
+                                      }
                                     >
                                       {colKey === "title" ? (
                                         <span
@@ -1427,7 +1614,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                         taskTableDataCell(task, colKey)
                                       )}
                                     </td>
-                                  ))}
+                                    );
+                                  })}
                                 </tr>
                                 {subCount > 0 && subsOpen && (
                                   <tr className="border-b border-stone-100 bg-stone-50/90">
