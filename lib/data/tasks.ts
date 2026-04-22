@@ -6,6 +6,14 @@ import {
   TASK_PRIORITIES,
   priorityInferredFromSectionName,
 } from "./taskClientTypes";
+import {
+  parseDependsOnTaskIds,
+  serializeDependsOnTaskIds,
+  validateDependsOnForSave,
+  normalizeDependsOnIds,
+  TaskCompletionBlockedError,
+  TaskDependsInvalidError,
+} from "./taskDependencies";
 
 export type { CreateTaskInput, TaskPatch, TaskRow } from "./taskClientTypes";
 export {
@@ -59,6 +67,7 @@ function mapRow(r: Record<string, unknown>): TaskRow {
       r.estimated_minutes != null ? Number(r.estimated_minutes) : null,
     actual_minutes: r.actual_minutes != null ? Number(r.actual_minutes) : null,
     dependencies: r.dependencies != null ? String(r.dependencies) : null,
+    depends_on_task_ids: parseDependsOnTaskIds(r.depends_on_task_ids),
     requester: r.requester != null ? String(r.requester) : null,
     quarter: r.quarter != null ? String(r.quarter) : null,
     project_label: r.project_label != null ? String(r.project_label) : null,
@@ -74,7 +83,7 @@ export async function getTasks(): Promise<TaskRow[]> {
            t.last_overdue_email_at::text AS last_overdue_email_at,
            t.section_id, s.name AS section_name,
            t.assignee, t.priority, t.estimated_minutes, t.actual_minutes,
-           t.dependencies, t.requester, t.quarter, t.project_label,
+           t.dependencies, t.depends_on_task_ids, t.requester, t.quarter, t.project_label,
            (SELECT COUNT(*)::int FROM task_subtasks st WHERE st.task_id = t.id) AS subtask_count
     FROM tasks t
     JOIN task_sections s ON s.id = t.section_id
@@ -91,7 +100,7 @@ export async function getTaskById(id: number): Promise<TaskRow | null> {
            t.last_overdue_email_at::text AS last_overdue_email_at,
            t.section_id, s.name AS section_name,
            t.assignee, t.priority, t.estimated_minutes, t.actual_minutes,
-           t.dependencies, t.requester, t.quarter, t.project_label,
+           t.dependencies, t.depends_on_task_ids, t.requester, t.quarter, t.project_label,
            (SELECT COUNT(*)::int FROM task_subtasks st WHERE st.task_id = t.id) AS subtask_count
     FROM tasks t
     JOIN task_sections s ON s.id = t.section_id
@@ -188,11 +197,30 @@ export async function createTask(input: CreateTaskInput): Promise<TaskRow> {
       existing as Record<string, unknown>[]
     );
   }
+  const depIds = normalizeDependsOnIds(input.depends_on_task_ids);
+  const all = depIds.length > 0 ? await getTasks() : [];
+  if (depIds.length > 0) {
+    const provisionalId = all.reduce((m, t) => Math.max(m, t.id), 0) + 1;
+    validateDependsOnForSave(provisionalId, input.section_id, depIds, all);
+  }
+  if (status === "done" && depIds.length > 0) {
+    const blocking: number[] = [];
+    for (const depId of depIds) {
+      const dep = all.find((t) => t.id === depId);
+      if (!dep || (dep.status !== "done" && dep.status !== "cancelled")) {
+        blocking.push(depId);
+      }
+    }
+    if (blocking.length > 0) {
+      throw new TaskCompletionBlockedError(blocking);
+    }
+  }
+
   const rows = await sql`
     INSERT INTO tasks (
       title, description, due_date, status, section_id, sort_order,
       assignee, priority, estimated_minutes, actual_minutes,
-      dependencies, requester, quarter, project_label
+      dependencies, depends_on_task_ids, requester, quarter, project_label
     )
     VALUES (
       ${input.title},
@@ -206,6 +234,7 @@ export async function createTask(input: CreateTaskInput): Promise<TaskRow> {
       ${input.estimated_minutes ?? null},
       ${input.actual_minutes ?? null},
       ${input.dependencies ?? null},
+      ${serializeDependsOnTaskIds(depIds)},
       ${input.requester ?? null},
       ${input.quarter ?? null},
       ${input.project_label ?? null}
@@ -227,7 +256,6 @@ export async function updateTask(id: number, patch: TaskPatch): Promise<TaskRow 
   const description =
     patch.description !== undefined ? patch.description : existing.description;
   const due_date = patch.due_date !== undefined ? patch.due_date : existing.due_date;
-  const status = patch.status !== undefined ? normalizeTaskStatus(patch.status) : existing.status;
   const section_id = patch.section_id ?? existing.section_id;
   const assignee = patch.assignee !== undefined ? patch.assignee : existing.assignee;
   const priority =
@@ -242,10 +270,38 @@ export async function updateTask(id: number, patch: TaskPatch): Promise<TaskRow 
     patch.actual_minutes !== undefined ? patch.actual_minutes : existing.actual_minutes;
   const dependencies =
     patch.dependencies !== undefined ? patch.dependencies : existing.dependencies;
+  const depends_on_task_ids =
+    patch.depends_on_task_ids !== undefined
+      ? normalizeDependsOnIds(patch.depends_on_task_ids)
+      : existing.depends_on_task_ids;
   const requester = patch.requester !== undefined ? patch.requester : existing.requester;
   const quarter = patch.quarter !== undefined ? patch.quarter : existing.quarter;
   const project_label =
     patch.project_label !== undefined ? patch.project_label : existing.project_label;
+  const status =
+    patch.status !== undefined ? normalizeTaskStatus(patch.status) : existing.status;
+
+  const allTasks = await getTasks();
+  const sectionChanged =
+    patch.section_id !== undefined && patch.section_id !== existing.section_id;
+  if (
+    patch.depends_on_task_ids !== undefined ||
+    (sectionChanged && depends_on_task_ids.length > 0)
+  ) {
+    validateDependsOnForSave(id, section_id, depends_on_task_ids, allTasks);
+  }
+  if (status === "done") {
+    const blocking: number[] = [];
+    for (const depId of depends_on_task_ids) {
+      const dep = allTasks.find((t) => t.id === depId);
+      if (!dep || (dep.status !== "done" && dep.status !== "cancelled")) {
+        blocking.push(depId);
+      }
+    }
+    if (blocking.length > 0) {
+      throw new TaskCompletionBlockedError(blocking);
+    }
+  }
 
   await sql`
     UPDATE tasks SET
@@ -259,6 +315,7 @@ export async function updateTask(id: number, patch: TaskPatch): Promise<TaskRow 
       estimated_minutes = ${estimated_minutes},
       actual_minutes = ${actual_minutes},
       dependencies = ${dependencies},
+      depends_on_task_ids = ${serializeDependsOnTaskIds(depends_on_task_ids)},
       requester = ${requester},
       quarter = ${quarter},
       project_label = ${project_label}
@@ -307,7 +364,7 @@ export async function getTasksNeedingOverdueReminder(): Promise<TaskRow[]> {
            t.last_overdue_email_at::text AS last_overdue_email_at,
            t.section_id, s.name AS section_name,
            t.assignee, t.priority, t.estimated_minutes, t.actual_minutes,
-           t.dependencies, t.requester, t.quarter, t.project_label,
+           t.dependencies, t.depends_on_task_ids, t.requester, t.quarter, t.project_label,
            (SELECT COUNT(*)::int FROM task_subtasks st WHERE st.task_id = t.id) AS subtask_count
     FROM tasks t
     JOIN task_sections s ON s.id = t.section_id

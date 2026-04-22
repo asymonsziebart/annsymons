@@ -7,6 +7,10 @@ import {
   type TaskStatus,
   type TaskPriority,
 } from "@/lib/data/tasks";
+import {
+  TaskCompletionBlockedError,
+  TaskDependsInvalidError,
+} from "@/lib/data/taskDependencies";
 
 export async function POST(request: Request) {
   const ok = await isTasksAuth();
@@ -65,6 +69,17 @@ export async function POST(request: Request) {
         ? body.project_label
         : undefined;
 
+    let depends_on_task_ids: number[] | undefined;
+    if (Array.isArray(body?.depends_on_task_ids)) {
+      const ids: number[] = [];
+      for (const x of body.depends_on_task_ids) {
+        const n =
+          typeof x === "number" ? x : typeof x === "string" ? parseInt(String(x), 10) : NaN;
+        if (Number.isInteger(n) && n > 0) ids.push(n);
+      }
+      depends_on_task_ids = [...new Set(ids)].sort((a, b) => a - b);
+    }
+
     const task = await createTask({
       title,
       section_id,
@@ -85,6 +100,7 @@ export async function POST(request: Request) {
       requester,
       quarter,
       project_label,
+      depends_on_task_ids,
     });
 
     if (!task) {
@@ -97,7 +113,16 @@ export async function POST(request: Request) {
       );
     }
     return NextResponse.json({ task });
-  } catch {
+  } catch (e) {
+    if (e instanceof TaskCompletionBlockedError) {
+      return NextResponse.json(
+        { error: e.message, blocking_task_ids: e.blockingIds },
+        { status: 409 }
+      );
+    }
+    if (e instanceof TaskDependsInvalidError) {
+      return NextResponse.json({ error: e.message }, { status: 400 });
+    }
     return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }

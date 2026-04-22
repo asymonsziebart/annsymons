@@ -7,6 +7,10 @@ import {
   isTaskPriority,
   type TaskPatch,
 } from "@/lib/data/tasks";
+import {
+  TaskCompletionBlockedError,
+  TaskDependsInvalidError,
+} from "@/lib/data/taskDependencies";
 
 function parsePatch(body: Record<string, unknown>): TaskPatch | null {
   const patch: TaskPatch = {};
@@ -47,6 +51,15 @@ function parsePatch(body: Record<string, unknown>): TaskPatch | null {
   if (body.project_label === null || typeof body.project_label === "string") {
     patch.project_label = body.project_label === "" ? null : body.project_label;
   }
+  if (Array.isArray(body.depends_on_task_ids)) {
+    const ids: number[] = [];
+    for (const x of body.depends_on_task_ids) {
+      const n =
+        typeof x === "number" ? x : typeof x === "string" ? parseInt(String(x), 10) : NaN;
+      if (Number.isInteger(n) && n > 0) ids.push(n);
+    }
+    patch.depends_on_task_ids = [...new Set(ids)].sort((a, b) => a - b);
+  }
   return Object.keys(patch).length ? patch : null;
 }
 
@@ -72,7 +85,16 @@ export async function PATCH(
       return NextResponse.json({ error: "Task not found or update failed" }, { status: 404 });
     }
     return NextResponse.json({ ok: true, task });
-  } catch {
+  } catch (e) {
+    if (e instanceof TaskCompletionBlockedError) {
+      return NextResponse.json(
+        { error: e.message, blocking_task_ids: e.blockingIds },
+        { status: 409 }
+      );
+    }
+    if (e instanceof TaskDependsInvalidError) {
+      return NextResponse.json({ error: e.message }, { status: 400 });
+    }
     return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }

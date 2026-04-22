@@ -100,6 +100,8 @@ export type TaskRow = {
   estimated_minutes: number | null;
   actual_minutes: number | null;
   dependencies: string | null;
+  /** Task IDs in the same section that must be done (or cancelled) before this task can be completed. */
+  depends_on_task_ids: number[];
   requester: string | null;
   quarter: string | null;
   project_label: string | null;
@@ -119,6 +121,7 @@ export type TaskPatch = Partial<
     | "estimated_minutes"
     | "actual_minutes"
     | "dependencies"
+    | "depends_on_task_ids"
     | "requester"
     | "quarter"
     | "project_label"
@@ -136,6 +139,7 @@ export type CreateTaskInput = {
   estimated_minutes?: number | null;
   actual_minutes?: number | null;
   dependencies?: string | null;
+  depends_on_task_ids?: number[];
   requester?: string | null;
   quarter?: string | null;
   project_label?: string | null;

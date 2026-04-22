@@ -24,6 +24,7 @@ import {
   TASK_PRIORITY_LABELS,
   isTaskOverdue,
 } from "@/lib/data/taskClientTypes";
+import { blockingPrerequisiteTasks } from "@/lib/data/taskDependencies";
 
 type Props = { initialTasks: TaskRow[]; initialSections: TaskSectionRow[] };
 
@@ -114,6 +115,7 @@ const TASK_TABLE_KEYS: (keyof TaskRow)[] = [
   "estimated_minutes",
   "actual_minutes",
   "dependencies",
+  "depends_on_task_ids",
   "requester",
   "quarter",
   "project_label",
@@ -136,6 +138,7 @@ const TASK_TABLE_LABELS: Record<keyof TaskRow, string> = {
   estimated_minutes: "Est. min",
   actual_minutes: "Act. min",
   dependencies: "Dependencies",
+  depends_on_task_ids: "Prereq IDs",
   requester: "Requester",
   quarter: "Quarter",
   project_label: "Project",
@@ -218,6 +221,15 @@ function taskTableDataCell(task: TaskRow, key: keyof TaskRow): ReactNode {
           {(v as string | null) ?? "—"}
         </span>
       );
+    case "depends_on_task_ids": {
+      const ids = v as number[];
+      const s = ids.length ? ids.map((id) => `#${id}`).join(", ") : "—";
+      return (
+        <span className="block max-w-[10rem] truncate align-middle" title={s}>
+          {s}
+        </span>
+      );
+    }
     case "priority":
       return (
         <span className="flex items-center gap-1.5 whitespace-nowrap">
@@ -248,6 +260,10 @@ function taskFieldPlainTextForMeasure(task: TaskRow, key: keyof TaskRow): string
     case "description":
     case "dependencies":
       return (v as string | null) == null || v === "" ? "—" : String(v);
+    case "depends_on_task_ids": {
+      const ids = v as number[];
+      return ids.length ? ids.map((id) => `#${id}`).join(", ") : "—";
+    }
     case "priority":
       return TASK_PRIORITY_LABELS[v as TaskPriority];
     case "status":
@@ -301,6 +317,9 @@ function taskMatchesSearchQuery(task: TaskRow, raw: string): boolean {
     task.project_label,
     task.quarter,
     task.dependencies,
+    task.depends_on_task_ids.length
+      ? task.depends_on_task_ids.map((id) => `#${id}`).join(" ")
+      : "",
     task.section_name,
     String(task.id),
     TASK_STATUS_LABELS[task.status],
@@ -397,6 +416,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   /** When false, tasks with status "done" are omitted from the list (still in data). */
   const [showCompleted, setShowCompleted] = useState(false);
   const [taskSearchQuery, setTaskSearchQuery] = useState("");
+  const [saveNotice, setSaveNotice] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<"all" | TaskStatus>("all");
   const [filterPriority, setFilterPriority] = useState<"all" | TaskPriority>("all");
   const [filterSectionId, setFilterSectionId] = useState<"all" | number>("all");
@@ -639,16 +659,26 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   }
 
   async function patchTask(id: number, patch: Record<string, unknown>) {
+    setSaveNotice(null);
     try {
       const res = await fetch(`/api/tasks/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(patch),
       });
-      const data = await parseJson<{ task?: TaskRow }>(res);
-      if (res.ok && data?.task) replaceTask(data.task);
+      const data = await parseJson<{ task?: TaskRow; error?: string }>(res);
+      if (res.ok && data?.task) {
+        replaceTask(data.task);
+        return;
+      }
+      const msg =
+        data?.error ??
+        (res.status === 409
+          ? "Complete prerequisite tasks first."
+          : `Save failed (${res.status}).`);
+      setSaveNotice(msg);
     } catch {
-      /* network / parse */
+      setSaveNotice("Could not reach the server — try again.");
     }
   }
 
@@ -925,6 +955,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     filterOverdueOnly,
     taskSearchQuery,
   ]);
+
+  const tasksById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
 
   const filtersCollapsedSummary = useMemo(() => {
     const parts: string[] = [];
@@ -1251,6 +1283,22 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
             </div>
           </header>
 
+          {saveNotice ? (
+            <div
+              role="status"
+              className="flex shrink-0 items-start justify-between gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-950 sm:px-6 lg:px-8"
+            >
+              <span className="min-w-0">{saveNotice}</span>
+              <button
+                type="button"
+                className="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-amber-900 hover:bg-amber-100"
+                onClick={() => setSaveNotice(null)}
+              >
+                Dismiss
+              </button>
+            </div>
+          ) : null}
+
           <div className="shrink-0 border-b border-stone-200 bg-white">
             <div className="px-4 py-2 sm:px-6 lg:px-8">
               <button
@@ -1476,6 +1524,15 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                           <tbody>
                             {list.map((task) => {
                               const done = task.status === "done";
+                              const prereqBlockers = !done
+                                ? blockingPrerequisiteTasks(task, tasksById)
+                                : [];
+                              const completionBlocked = prereqBlockers.length > 0;
+                              const completionBlockedTitle = completionBlocked
+                                ? `Complete first: ${prereqBlockers
+                                    .map((t) => t.title || `#${t.id}`)
+                                    .join(", ")}`
+                                : undefined;
                               const overdue = isTaskOverdue(task);
                               const subCount = task.subtask_count ?? 0;
                               const subsOpen = Boolean(inlineSubExpanded[task.id]);
@@ -1489,7 +1546,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                     selectedTaskIds.includes(task.id) ? "bg-sky-50" : ""
                                   } ${overdue && !done ? "bg-red-50" : ""} ${
                                     draggingTaskId === task.id ? "opacity-40" : ""
-                                  }`}
+                                  } ${completionBlocked ? "opacity-[0.92]" : ""}`}
                                 >
                                   <td
                                     className="px-2 py-2.5 pl-4 align-middle sm:pl-6 lg:pl-8"
@@ -1526,6 +1583,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                   >
                                     <button
                                       type="button"
+                                      disabled={!done && completionBlocked}
+                                      title={completionBlockedTitle}
                                       onClick={() =>
                                         void patchTask(task.id, {
                                           status: done ? "todo" : "done",
@@ -1535,6 +1594,10 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                         done
                                           ? "border-sky-600 bg-sky-600 text-white"
                                           : "border-stone-300 bg-white"
+                                      } ${
+                                        !done && completionBlocked
+                                          ? "cursor-not-allowed opacity-50"
+                                          : ""
                                       }`}
                                       aria-label={done ? "Mark incomplete" : "Complete"}
                                     >
@@ -1736,6 +1799,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
           <aside className="hidden min-h-0 w-[min(100%,26rem)] shrink-0 overflow-hidden border-l border-stone-200 bg-white shadow-[inset_1px_0_0_0_rgb(231_229_228)] lg:flex lg:w-[26rem] lg:flex-col xl:w-[28rem]">
             <TaskDetail
               task={selected!}
+              allTasks={tasks}
               sections={sections}
               subtasks={subtasks}
               subtaskDraft={subtaskDraft}
@@ -1786,6 +1850,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
           <div className="min-h-0 flex-1 overflow-y-auto">
             <TaskDetail
               task={selected}
+              allTasks={tasks}
               sections={sections}
               subtasks={subtasks}
               subtaskDraft={subtaskDraft}
@@ -2065,8 +2130,125 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   );
 }
 
+function TaskPrerequisiteDeps({
+  task,
+  allTasks,
+  onPatch,
+  inputClass,
+}: {
+  task: TaskRow;
+  allTasks: TaskRow[];
+  onPatch: (p: Record<string, unknown>) => void;
+  inputClass: string;
+}) {
+  const [q, setQ] = useState("");
+  const tasksById = useMemo(() => new Map(allTasks.map((t) => [t.id, t])), [allTasks]);
+
+  const peerMatches = useMemo(() => {
+    const selected = new Set(task.depends_on_task_ids);
+    const ql = q.trim().toLowerCase();
+    return allTasks
+      .filter(
+        (t) =>
+          t.id !== task.id &&
+          t.section_id === task.section_id &&
+          !selected.has(t.id) &&
+          (!ql ||
+            t.title.toLowerCase().includes(ql) ||
+            String(t.id).includes(ql))
+      )
+      .sort((a, b) => a.title.localeCompare(b.title));
+  }, [allTasks, task.id, task.section_id, task.depends_on_task_ids, q]);
+
+  const selectedTasks = useMemo(
+    () =>
+      task.depends_on_task_ids
+        .map((id) => tasksById.get(id))
+        .filter((t): t is TaskRow => t != null),
+    [task.depends_on_task_ids, tasksById]
+  );
+
+  function addPrereq(id: number) {
+    if (task.depends_on_task_ids.includes(id)) return;
+    const next = [...task.depends_on_task_ids, id].sort((a, b) => a - b);
+    onPatch({ depends_on_task_ids: next });
+    setQ("");
+  }
+
+  function removePrereq(id: number) {
+    onPatch({
+      depends_on_task_ids: task.depends_on_task_ids.filter((x) => x !== id),
+    });
+  }
+
+  return (
+    <div className="space-y-2">
+      {selectedTasks.length > 0 ? (
+        <ul className="flex flex-wrap gap-1.5">
+          {selectedTasks.map((t) => (
+            <li key={t.id}>
+              <span className="inline-flex max-w-full items-center gap-1 rounded-full border border-stone-200 bg-stone-50 px-2 py-0.5 text-xs text-stone-800">
+                <span className="min-w-0 max-w-[14rem] truncate" title={t.title}>
+                  #{t.id} {t.title}
+                </span>
+                <button
+                  type="button"
+                  className="shrink-0 rounded px-0.5 text-stone-500 hover:text-stone-900"
+                  onClick={() => removePrereq(t.id)}
+                  aria-label={`Remove prerequisite ${t.title}`}
+                >
+                  ×
+                </button>
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-xs text-stone-500">
+          None — this task is not waiting on others in this section.
+        </p>
+      )}
+      <div>
+        <input
+          type="search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search tasks in this section…"
+          className={inputClass}
+          aria-label="Search tasks to add as prerequisite"
+        />
+        {q.trim() !== "" ? (
+          <ul className="mt-1 max-h-40 overflow-y-auto rounded-md border border-stone-200 bg-white text-left text-sm shadow-sm">
+            {peerMatches.length === 0 ? (
+              <li className="px-3 py-2 text-stone-500">No matching tasks</li>
+            ) : (
+              peerMatches.slice(0, 50).map((t) => (
+                <li key={t.id} className="border-b border-stone-100 last:border-0">
+                  <button
+                    type="button"
+                    className="w-full px-3 py-2 text-left text-stone-800 hover:bg-stone-50"
+                    onClick={() => addPrereq(t.id)}
+                  >
+                    <span className="text-stone-400 tabular-nums">#{t.id}</span>{" "}
+                    <span className="break-words">{t.title}</span>
+                  </button>
+                </li>
+              ))
+            )}
+          </ul>
+        ) : null}
+      </div>
+      <p className="text-[0.65rem] leading-snug text-stone-500">
+        Prerequisites must be in this section. This task cannot be completed until each prerequisite
+        is done or cancelled.
+      </p>
+    </div>
+  );
+}
+
 function TaskDetail({
   task,
+  allTasks,
   sections,
   subtasks,
   subtaskDraft,
@@ -2083,6 +2265,7 @@ function TaskDetail({
   labelClass,
 }: {
   task: TaskRow;
+  allTasks: TaskRow[];
   sections: TaskSectionRow[];
   subtasks: SubtaskRow[];
   subtaskDraft: string;
@@ -2100,18 +2283,32 @@ function TaskDetail({
   labelClass: string;
 }) {
   const done = task.status === "done";
+  const tasksByIdDetail = useMemo(
+    () => new Map(allTasks.map((t) => [t.id, t])),
+    [allTasks]
+  );
+  const prereqBlockers = useMemo(() => {
+    if (done) return [];
+    return blockingPrerequisiteTasks(task, tasksByIdDetail);
+  }, [task, done, tasksByIdDetail]);
+  const completionBlocked = prereqBlockers.length > 0;
+  const blockedTitle = completionBlocked
+    ? `Complete first: ${prereqBlockers.map((t) => t.title).join(", ")}`
+    : undefined;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-stone-200 bg-stone-50/80 px-4 py-3">
         <button
           type="button"
+          disabled={!done && completionBlocked}
+          title={blockedTitle}
           onClick={() => onPatch({ status: done ? "todo" : "done" })}
           className={`rounded-md px-3 py-1.5 text-sm font-medium ${
             done
               ? "border border-stone-200 bg-white text-stone-700 shadow-sm hover:bg-stone-50"
               : "bg-sky-600 text-white hover:bg-sky-500"
-          }`}
+          } ${!done && completionBlocked ? "cursor-not-allowed opacity-50 hover:bg-sky-600" : ""}`}
         >
           {done ? "Mark incomplete" : "Mark complete"}
         </button>
@@ -2176,7 +2373,16 @@ function TaskDetail({
               className={inputClass}
             />
           </Field>
-          <Field label="Dependencies" className={labelClass}>
+          <Field label="Prerequisites" className={labelClass}>
+            <TaskPrerequisiteDeps
+              key={task.id}
+              task={task}
+              allTasks={allTasks}
+              onPatch={onPatch}
+              inputClass={inputClass}
+            />
+          </Field>
+          <Field label="Dependency notes" className={labelClass}>
             <textarea
               defaultValue={task.dependencies ?? ""}
               key={task.id + "-dep"}
@@ -2186,7 +2392,7 @@ function TaskDetail({
                 const p = task.dependencies ?? "";
                 if (v !== p) onPatch({ dependencies: v || null });
               }}
-              placeholder="Task names or links"
+              placeholder="Free text: names, links, context"
               className={inputClass}
             />
           </Field>
