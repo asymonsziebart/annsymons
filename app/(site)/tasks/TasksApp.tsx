@@ -2148,17 +2148,21 @@ function TaskPrerequisiteDeps({
     const selected = new Set(task.depends_on_task_ids);
     const ql = q.trim().toLowerCase();
     return allTasks
-      .filter(
-        (t) =>
-          t.id !== task.id &&
-          t.section_id === task.section_id &&
-          !selected.has(t.id) &&
-          (!ql ||
-            t.title.toLowerCase().includes(ql) ||
-            String(t.id).includes(ql))
-      )
-      .sort((a, b) => a.title.localeCompare(b.title));
-  }, [allTasks, task.id, task.section_id, task.depends_on_task_ids, q]);
+      .filter((t) => {
+        if (t.id === task.id || selected.has(t.id)) return false;
+        if (!ql) return true;
+        return (
+          t.title.toLowerCase().includes(ql) ||
+          t.section_name.toLowerCase().includes(ql) ||
+          String(t.id).includes(ql)
+        );
+      })
+      .sort((a, b) => {
+        const sec = a.section_name.localeCompare(b.section_name, undefined, { sensitivity: "base" });
+        if (sec !== 0) return sec;
+        return a.title.localeCompare(b.title, undefined, { sensitivity: "base" });
+      });
+  }, [allTasks, task.id, task.depends_on_task_ids, q]);
 
   const selectedTasks = useMemo(
     () =>
@@ -2188,8 +2192,12 @@ function TaskPrerequisiteDeps({
           {selectedTasks.map((t) => (
             <li key={t.id}>
               <span className="inline-flex max-w-full items-center gap-1 rounded-full border border-stone-200 bg-stone-50 px-2 py-0.5 text-xs text-stone-800">
-                <span className="min-w-0 max-w-[14rem] truncate" title={t.title}>
-                  #{t.id} {t.title}
+                <span
+                  className="min-w-0 max-w-[16rem] truncate"
+                  title={`${t.section_name} — ${t.title}`}
+                >
+                  <span className="text-stone-500">{t.section_name}</span>
+                  <span className="text-stone-400"> · </span>#{t.id} {t.title}
                 </span>
                 <button
                   type="button"
@@ -2205,7 +2213,7 @@ function TaskPrerequisiteDeps({
         </ul>
       ) : (
         <p className="text-xs text-stone-500">
-          None — this task is not waiting on others in this section.
+          None — this task is not waiting on any other task.
         </p>
       )}
       <div>
@@ -2213,7 +2221,7 @@ function TaskPrerequisiteDeps({
           type="search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search tasks in this section…"
+          placeholder="Search by title, section, or #id…"
           className={inputClass}
           aria-label="Search tasks to add as prerequisite"
         />
@@ -2229,6 +2237,9 @@ function TaskPrerequisiteDeps({
                     className="w-full px-3 py-2 text-left text-stone-800 hover:bg-stone-50"
                     onClick={() => addPrereq(t.id)}
                   >
+                    <span className="block text-[0.65rem] font-medium text-stone-500">
+                      {t.section_name}
+                    </span>
                     <span className="text-stone-400 tabular-nums">#{t.id}</span>{" "}
                     <span className="break-words">{t.title}</span>
                   </button>
@@ -2239,8 +2250,8 @@ function TaskPrerequisiteDeps({
         ) : null}
       </div>
       <p className="text-[0.65rem] leading-snug text-stone-500">
-        Prerequisites must be in this section. This task cannot be completed until each prerequisite
-        is done or cancelled.
+        Prerequisites can be any task. This task cannot be completed until each prerequisite is done
+        or cancelled.
       </p>
     </div>
   );

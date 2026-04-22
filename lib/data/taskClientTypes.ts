@@ -100,7 +100,7 @@ export type TaskRow = {
   estimated_minutes: number | null;
   actual_minutes: number | null;
   dependencies: string | null;
-  /** Task IDs in the same section that must be done (or cancelled) before this task can be completed. */
+  /** Task IDs that must be done (or cancelled) before this task can be completed. */
   depends_on_task_ids: number[];
   requester: string | null;
   quarter: string | null;

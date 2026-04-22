@@ -16,6 +16,35 @@ import {
 } from "./taskDependencies";
 
 export type { CreateTaskInput, TaskPatch, TaskRow } from "./taskClientTypes";
+
+/** Cached: whether `tasks.depends_on_task_ids` exists (Neon must run db/migrate-task-depends-on-ids.sql). */
+let tasksDependsColumnPromise: Promise<boolean> | null = null;
+
+function tasksTableHasDependsOnColumn(): Promise<boolean> {
+  if (!tasksDependsColumnPromise) {
+    tasksDependsColumnPromise = (async () => {
+      try {
+        const sql = getSqlOrThrow();
+        const rows = await sql`
+          SELECT 1 AS ok
+          FROM information_schema.columns
+          WHERE table_schema = 'public'
+            AND table_name = 'tasks'
+            AND column_name = 'depends_on_task_ids'
+          LIMIT 1
+        `;
+        return Array.isArray(rows) && rows.length > 0;
+      } catch {
+        return false;
+      }
+    })();
+  }
+  return tasksDependsColumnPromise;
+}
+
+export const TASK_PREREQS_MIGRATION_HINT =
+  "Run db/migrate-task-depends-on-ids.sql on the database to enable task prerequisites.";
+
 export {
   TASK_PRIORITIES,
   TASK_PRIORITY_LABELS,
@@ -201,7 +230,7 @@ export async function createTask(input: CreateTaskInput): Promise<TaskRow> {
   const all = depIds.length > 0 ? await getTasks() : [];
   if (depIds.length > 0) {
     const provisionalId = all.reduce((m, t) => Math.max(m, t.id), 0) + 1;
-    validateDependsOnForSave(provisionalId, input.section_id, depIds, all);
+    validateDependsOnForSave(provisionalId, depIds, all);
   }
   if (status === "done" && depIds.length > 0) {
     const blocking: number[] = [];
@@ -288,7 +317,7 @@ export async function updateTask(id: number, patch: TaskPatch): Promise<TaskRow 
     patch.depends_on_task_ids !== undefined ||
     (sectionChanged && depends_on_task_ids.length > 0)
   ) {
-    validateDependsOnForSave(id, section_id, depends_on_task_ids, allTasks);
+    validateDependsOnForSave(id, depends_on_task_ids, allTasks);
   }
   if (status === "done") {
     const blocking: number[] = [];

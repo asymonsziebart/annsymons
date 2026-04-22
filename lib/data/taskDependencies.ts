@@ -98,7 +98,6 @@ export function normalizeDependsOnIds(raw: unknown): number[] {
 
 export function validateDependsOnForSave(
   taskId: number,
-  sectionId: number,
   ids: number[],
   allTasks: TaskRow[]
 ): void {
@@ -110,11 +109,6 @@ export function validateDependsOnForSave(
     const dep = byId.get(depId);
     if (!dep) {
       throw new TaskDependsInvalidError(`Task #${depId} does not exist.`);
-    }
-    if (dep.section_id !== sectionId) {
-      throw new TaskDependsInvalidError(
-        "Prerequisites must be in the same section as this task."
-      );
     }
   }
   if (dependencyWouldCycle(taskId, ids, allTasks)) {
