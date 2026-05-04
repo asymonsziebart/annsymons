@@ -1398,6 +1398,15 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               >
                 Refresh
               </button>
+              <a
+                href="https://shl-slc.na2.iiivega.com/portal"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Suburban Library Cooperative Vega portal (Sterling Heights card) — checkouts & due dates (new tab)"
+                className="inline-flex items-center rounded-md border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-sky-800 shadow-sm hover:bg-sky-50"
+              >
+                Library account
+              </a>
               <button
                 type="button"
                 onClick={() => void logout()}
