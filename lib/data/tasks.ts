@@ -344,6 +344,12 @@ export async function updateTask(id: number, patch: TaskPatch): Promise<TaskRow 
           : existing.recurrence_month
       : existing.recurrence_month;
 
+  const becameDone =
+    patch.status !== undefined &&
+    normalizeTaskStatus(patch.status) === "done" &&
+    existing.status !== "done" &&
+    existing.status !== "cancelled";
+
   const allTasks = await getTasks();
   const sectionChanged =
     patch.section_id !== undefined && patch.section_id !== existing.section_id;
@@ -353,7 +359,7 @@ export async function updateTask(id: number, patch: TaskPatch): Promise<TaskRow 
   ) {
     validateDependsOnForSave(id, depends_on_task_ids, allTasks);
   }
-  if (status === "done") {
+  if (becameDone) {
     const blocking: number[] = [];
     for (const depId of depends_on_task_ids) {
       if (depId === id) continue;
@@ -370,13 +376,14 @@ export async function updateTask(id: number, patch: TaskPatch): Promise<TaskRow 
 
   let finalDue = due_date;
   let finalStatus = status;
+  const refNow = new Date();
   if (
-    status === "done" &&
+    becameDone &&
     recurrence_month != null &&
     isValidRecurrenceMonth(recurrence_month)
   ) {
     finalStatus = "todo";
-    finalDue = advanceYearlyRecurringDueAfterComplete(due_date, recurrence_month);
+    finalDue = advanceYearlyRecurringDueAfterComplete(due_date, recurrence_month, refNow);
   }
 
   await sql`

@@ -30,17 +30,26 @@ export function yearlyMonthFirstInCurrentYear(month: number, ref = new Date()): 
   return `${y}-${mm}-01`;
 }
 
-/** After completing a yearly month-1st task: next due is same month, following year, on the 1st. */
+/**
+ * After completing a yearly month-1st task: next due is the 1st of that month in the following
+ * calendar year of the current due, but never more than one year past "today" (stops runaway
+ * years from double-submits or bad data).
+ */
 export function advanceYearlyRecurringDueAfterComplete(
   dueDate: string | null,
-  month: number
+  month: number,
+  ref = new Date()
 ): string {
   const mm = String(month).padStart(2, "0");
+  const capYear = ref.getFullYear() + 1;
   if (dueDate && /^\d{4}-\d{2}-\d{2}$/.test(dueDate)) {
     const y = parseInt(dueDate.slice(0, 4), 10);
-    if (Number.isFinite(y)) return `${y + 1}-${mm}-01`;
+    if (Number.isFinite(y)) {
+      const nextYear = Math.min(y + 1, capYear);
+      return `${nextYear}-${mm}-01`;
+    }
   }
-  return nextYearlyFirstOfMonthDue(month, new Date());
+  return nextYearlyFirstOfMonthDue(month, ref);
 }
 
 export function isValidRecurrenceMonth(n: unknown): n is number {
