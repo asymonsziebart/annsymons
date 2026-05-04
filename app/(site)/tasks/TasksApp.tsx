@@ -110,6 +110,107 @@ function startOfWeekMonday(d: Date): Date {
   return x;
 }
 
+/** 42 cells (6×7), Monday-first week rows for a calendar month. */
+function monthGridCells(viewYear: number, viewMonth0: number): { iso: string; inMonth: boolean }[] {
+  const out: { iso: string; inMonth: boolean }[] = [];
+  const first = new Date(viewYear, viewMonth0, 1);
+  const monStart = startOfWeekMonday(first);
+  const d = new Date(monStart);
+  for (let i = 0; i < 42; i++) {
+    out.push({
+      iso: toIsoDateLocalFromDate(d),
+      inMonth: d.getMonth() === viewMonth0,
+    });
+    d.setDate(d.getDate() + 1);
+  }
+  return out;
+}
+
+/** Every YYYY-MM-DD in `year` (local). */
+function yearDayIsos(year: number): string[] {
+  const out: string[] = [];
+  const d = new Date(year, 0, 1);
+  while (d.getFullYear() === year) {
+    out.push(toIsoDateLocalFromDate(d));
+    d.setDate(d.getDate() + 1);
+  }
+  return out;
+}
+
+type CalendarBuckets = {
+  todayIso: string;
+  overdue: TaskRow[];
+  noDue: TaskRow[];
+  byDay: Map<string, TaskRow[]>;
+  laterOpenCount: number;
+  linearIds: number[];
+};
+
+function partitionCalendarTasks(
+  filteredTasks: TaskRow[],
+  showCompleted: boolean,
+  dayIsoKeys: readonly string[],
+  rangeEndIsoForLaterCount: string
+): CalendarBuckets {
+  const todayIso = toIsoDateLocalFromDate(new Date());
+  const keySet = new Set(dayIsoKeys);
+  const passes = (t: TaskRow) => {
+    if (!showCompleted && (t.status === "done" || t.status === "cancelled")) return false;
+    return true;
+  };
+  const open = (t: TaskRow) => t.status !== "done" && t.status !== "cancelled";
+  const byDay = new Map<string, TaskRow[]>();
+  for (const k of dayIsoKeys) byDay.set(k, []);
+  const overdue: TaskRow[] = [];
+  const noDue: TaskRow[] = [];
+
+  for (const t of filteredTasks) {
+    if (!passes(t)) continue;
+    const duRaw = t.due_date?.trim() ?? "";
+    const validDue = Boolean(duRaw && /^\d{4}-\d{2}-\d{2}$/.test(duRaw));
+    if (validDue) {
+      const du = duRaw;
+      if (open(t) && du < todayIso) {
+        overdue.push(t);
+        continue;
+      }
+      if (keySet.has(du)) {
+        byDay.get(du)!.push(t);
+      }
+      continue;
+    }
+    if (open(t) && isTaskOverdue(t)) overdue.push(t);
+    else noDue.push(t);
+  }
+
+  const cmp = (a: TaskRow, b: TaskRow) => {
+    const pa = TASK_PRIORITIES.indexOf(a.priority);
+    const pb = TASK_PRIORITIES.indexOf(b.priority);
+    if (pa !== pb) return pa - pb;
+    return (a.title || "").localeCompare(b.title || "", undefined, { sensitivity: "base" });
+  };
+  overdue.sort(cmp);
+  noDue.sort(cmp);
+  for (const k of dayIsoKeys) byDay.get(k)!.sort(cmp);
+
+  const linearIds: number[] = [
+    ...overdue.map((x) => x.id),
+    ...dayIsoKeys.flatMap((iso) => byDay.get(iso)!.map((x) => x.id)),
+    ...noDue.map((x) => x.id),
+  ];
+
+  let laterOpenCount = 0;
+  for (const t of filteredTasks) {
+    if (!passes(t) || !open(t)) continue;
+    const du = t.due_date?.trim() ?? "";
+    if (du && /^\d{4}-\d{2}-\d{2}$/.test(du) && du > rangeEndIsoForLaterCount) {
+      laterOpenCount += 1;
+    }
+  }
+
+  return { todayIso, overdue, noDue, byDay, laterOpenCount, linearIds };
+}
+
 function formatCellDateTime(iso: string | null | undefined): string {
   if (iso == null || iso === "") return "—";
   const trimmed = iso.trim();
@@ -175,6 +276,12 @@ const TASK_FILTERS_COLLAPSED_STORAGE_KEY = "annsymons.tasks.filtersCollapsed.v1"
 const TASK_LIST_SORT_STORAGE_KEY = "annsymons.tasks.listSort.v1";
 const TASK_VIEW_MODE_STORAGE_KEY = "annsymons.tasks.viewMode.v1";
 const TASK_VIEW_WEEK_OFFSET_STORAGE_KEY = "annsymons.tasks.weekViewOffset.v1";
+const TASK_VIEW_MONTH_OFFSET_STORAGE_KEY = "annsymons.tasks.monthViewOffset.v1";
+const TASK_VIEW_YEAR_OFFSET_STORAGE_KEY = "annsymons.tasks.yearViewOffset.v1";
+
+type TaskViewMode = "list" | "week" | "month" | "year";
+
+const CALENDAR_WEEKDAY_HEADERS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 
 /** Read saved list sort (browser only; call from useLayoutEffect after mount). */
 function readTaskTableSortFromStorage(): {
@@ -536,8 +643,10 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   const draggingTaskIdRef = useRef<number | null>(null);
   /** When false, tasks with status "done" are omitted from the list (still in data). */
   const [showCompleted, setShowCompleted] = useState(false);
-  const [taskViewMode, setTaskViewMode] = useState<"list" | "week">("list");
+  const [taskViewMode, setTaskViewMode] = useState<TaskViewMode>("list");
   const [weekOffset, setWeekOffset] = useState(0);
+  const [monthOffset, setMonthOffset] = useState(0);
+  const [yearOffset, setYearOffset] = useState(0);
   const [taskViewHydrated, setTaskViewHydrated] = useState(false);
   const [taskSearchQuery, setTaskSearchQuery] = useState("");
   const [saveNotice, setSaveNotice] = useState<string | null>(null);
@@ -682,11 +791,21 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   useLayoutEffect(() => {
     try {
       const m = localStorage.getItem(TASK_VIEW_MODE_STORAGE_KEY);
-      if (m === "week" || m === "list") setTaskViewMode(m);
+      if (m === "week" || m === "month" || m === "year" || m === "list") setTaskViewMode(m);
       const o = localStorage.getItem(TASK_VIEW_WEEK_OFFSET_STORAGE_KEY);
       if (o != null) {
         const n = parseInt(o, 10);
         if (Number.isFinite(n) && n >= -104 && n <= 104) setWeekOffset(n);
+      }
+      const mo = localStorage.getItem(TASK_VIEW_MONTH_OFFSET_STORAGE_KEY);
+      if (mo != null) {
+        const n = parseInt(mo, 10);
+        if (Number.isFinite(n) && n >= -240 && n <= 240) setMonthOffset(n);
+      }
+      const yo = localStorage.getItem(TASK_VIEW_YEAR_OFFSET_STORAGE_KEY);
+      if (yo != null) {
+        const n = parseInt(yo, 10);
+        if (Number.isFinite(n) && n >= -50 && n <= 50) setYearOffset(n);
       }
     } catch {
       /* ignore */
@@ -699,10 +818,12 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     try {
       localStorage.setItem(TASK_VIEW_MODE_STORAGE_KEY, taskViewMode);
       localStorage.setItem(TASK_VIEW_WEEK_OFFSET_STORAGE_KEY, String(weekOffset));
+      localStorage.setItem(TASK_VIEW_MONTH_OFFSET_STORAGE_KEY, String(monthOffset));
+      localStorage.setItem(TASK_VIEW_YEAR_OFFSET_STORAGE_KEY, String(yearOffset));
     } catch {
       /* ignore */
     }
-  }, [taskViewMode, weekOffset, taskViewHydrated]);
+  }, [taskViewMode, weekOffset, monthOffset, yearOffset, taskViewHydrated]);
 
   useEffect(() => {
     setFiltersBarCollapsed(readFiltersCollapsedPreference());
@@ -1128,7 +1249,6 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   ]);
 
   const weekViewLayout = useMemo(() => {
-    const todayIso = toIsoDateLocalFromDate(new Date());
     const ref = new Date();
     ref.setDate(ref.getDate() + weekOffset * 7);
     const weekStart = startOfWeekMonday(ref);
@@ -1143,75 +1263,66 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
         dateLabel: d.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
       });
     }
-    const weekStartIso = days[0]!.iso;
+    const dayIsoKeys = days.map((d) => d.iso);
     const weekEndIso = days[6]!.iso;
-
-    const passes = (t: TaskRow) => {
-      if (!showCompleted && (t.status === "done" || t.status === "cancelled")) return false;
-      return true;
-    };
-    const open = (t: TaskRow) => t.status !== "done" && t.status !== "cancelled";
-    const byDay = new Map<string, TaskRow[]>();
-    for (const day of days) byDay.set(day.iso, []);
-    const overdue: TaskRow[] = [];
-    const noDue: TaskRow[] = [];
-
-    for (const t of filteredTasks) {
-      if (!passes(t)) continue;
-      const duRaw = t.due_date?.trim() ?? "";
-      const validDue = Boolean(duRaw && /^\d{4}-\d{2}-\d{2}$/.test(duRaw));
-      if (validDue) {
-        const du = duRaw;
-        if (open(t) && du < todayIso) {
-          overdue.push(t);
-          continue;
-        }
-        if (du >= weekStartIso && du <= weekEndIso) {
-          byDay.get(du)!.push(t);
-        }
-        continue;
-      }
-      if (open(t) && isTaskOverdue(t)) overdue.push(t);
-      else noDue.push(t);
-    }
-
-    const cmp = (a: TaskRow, b: TaskRow) => {
-      const pa = TASK_PRIORITIES.indexOf(a.priority);
-      const pb = TASK_PRIORITIES.indexOf(b.priority);
-      if (pa !== pb) return pa - pb;
-      return (a.title || "").localeCompare(b.title || "", undefined, { sensitivity: "base" });
-    };
-    overdue.sort(cmp);
-    noDue.sort(cmp);
-    for (const day of days) byDay.get(day.iso)!.sort(cmp);
-
-    const linearIds: number[] = [
-      ...overdue.map((x) => x.id),
-      ...days.flatMap((day) => byDay.get(day.iso)!.map((x) => x.id)),
-      ...noDue.map((x) => x.id),
-    ];
-
-    let laterOpenCount = 0;
-    for (const t of filteredTasks) {
-      if (!passes(t)) continue;
-      if (!open(t)) continue;
-      const du = t.due_date?.trim() ?? "";
-      if (du && /^\d{4}-\d{2}-\d{2}$/.test(du) && du > weekEndIso) laterOpenCount += 1;
-    }
-
+    const bucket = partitionCalendarTasks(filteredTasks, showCompleted, dayIsoKeys, weekEndIso);
     return {
       days,
-      overdue,
-      byDay,
-      noDue,
-      todayIso,
-      weekStartIso,
+      ...bucket,
+      weekStartIso: days[0]!.iso,
       weekEndIso,
-      weekLabel: `${formatShortDate(weekStartIso)} – ${formatShortDate(weekEndIso)}`,
-      linearIds,
-      laterOpenCount,
+      weekLabel: `${formatShortDate(days[0]!.iso)} – ${formatShortDate(weekEndIso)}`,
+      laterHint: "due after this week",
     };
   }, [filteredTasks, showCompleted, weekOffset]);
+
+  const monthViewLayout = useMemo(() => {
+    const now = new Date();
+    const anchor = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
+    const viewYear = anchor.getFullYear();
+    const viewMonth0 = anchor.getMonth();
+    const cells = monthGridCells(viewYear, viewMonth0);
+    const lastD = new Date(viewYear, viewMonth0 + 1, 0);
+    const monthEndIso = toIsoDateLocalFromDate(lastD);
+    const dayIsoKeys = cells.map((c) => c.iso);
+    const bucket = partitionCalendarTasks(filteredTasks, showCompleted, dayIsoKeys, monthEndIso);
+    return {
+      viewYear,
+      viewMonth0,
+      cells,
+      monthTitle: anchor.toLocaleDateString(undefined, { month: "long", year: "numeric" }),
+      ...bucket,
+      laterHint: "due after this month",
+    };
+  }, [filteredTasks, showCompleted, monthOffset]);
+
+  const yearViewLayout = useMemo(() => {
+    const viewYear = new Date().getFullYear() + yearOffset;
+    const dayIsoKeys = yearDayIsos(viewYear);
+    const rangeEnd = `${viewYear}-12-31`;
+    const bucket = partitionCalendarTasks(filteredTasks, showCompleted, dayIsoKeys, rangeEnd);
+    const months = Array.from({ length: 12 }, (_, m) => ({
+      month0: m,
+      label: new Date(viewYear, m, 1).toLocaleDateString(undefined, { month: "short" }),
+      cells: monthGridCells(viewYear, m),
+    }));
+    return {
+      viewYear,
+      yearTitle: String(viewYear),
+      months,
+      ...bucket,
+      laterHint: "due after this year",
+    };
+  }, [filteredTasks, showCompleted, yearOffset]);
+
+  const calendarBuckets =
+    taskViewMode === "list"
+      ? null
+      : taskViewMode === "week"
+        ? weekViewLayout
+        : taskViewMode === "month"
+          ? monthViewLayout
+          : yearViewLayout;
 
   const tasksById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
 
@@ -1336,10 +1447,18 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     return ids;
   }, [sections, tasksBySectionSorted]);
 
-  const taskSelectionOrderIds = useMemo(
-    () => (taskViewMode === "week" ? weekViewLayout.linearIds : orderedVisibleTaskIds),
-    [taskViewMode, weekViewLayout.linearIds, orderedVisibleTaskIds]
-  );
+  const taskSelectionOrderIds = useMemo(() => {
+    if (taskViewMode === "week") return weekViewLayout.linearIds;
+    if (taskViewMode === "month") return monthViewLayout.linearIds;
+    if (taskViewMode === "year") return yearViewLayout.linearIds;
+    return orderedVisibleTaskIds;
+  }, [
+    taskViewMode,
+    weekViewLayout.linearIds,
+    monthViewLayout.linearIds,
+    yearViewLayout.linearIds,
+    orderedVisibleTaskIds,
+  ]);
 
   const handleTaskRowClick = useCallback(
     (taskId: number, e: React.MouseEvent<Element>) => {
@@ -1410,13 +1529,22 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     );
   }
 
-  function renderWeekTaskCard(task: TaskRow): ReactNode {
+  function renderWeekTaskCard(task: TaskRow, compact?: boolean): ReactNode {
     const done = task.status === "done";
     const prereqBlockers = !done ? blockingPrerequisiteTasks(task, tasksById) : [];
     const completionBlocked = prereqBlockers.length > 0;
     const completionBlockedTitle = completionBlocked
       ? `Complete first: ${prereqBlockers.map((x) => x.title || `#${x.id}`).join(", ")}`
       : undefined;
+    const boxPad = compact ? "px-1.5 py-1" : "px-2 py-1.5";
+    const titleCls = compact
+      ? `min-w-0 flex-1 truncate text-xs font-medium leading-tight ${
+          done ? "text-stone-500 line-through" : "text-stone-900"
+        }`
+      : `min-w-0 flex-1 font-medium leading-snug ${
+          done ? "text-stone-500 line-through" : "text-stone-900"
+        }`;
+    const chk = compact ? "h-4 w-4" : "h-5 w-5";
     return (
       <div
         role="button"
@@ -1428,20 +1556,20 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
             handleTaskRowClick(task.id, e as unknown as React.MouseEvent<Element>);
           }
         }}
-        className={`rounded-md border px-2 py-1.5 text-left text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-sky-400 ${
+        className={`rounded-md border ${boxPad} text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-sky-400 ${
           selectedTaskIds.includes(task.id)
             ? "border-sky-400 bg-sky-50"
             : "border-stone-200 bg-white hover:border-stone-300"
-        } ${done ? "opacity-80" : ""}`}
+        } ${done ? "opacity-80" : ""} ${compact ? "" : "text-sm"}`}
       >
-        <div className="flex items-start gap-1.5">
-          <span onClick={(e) => e.stopPropagation()} className="shrink-0 pt-0.5">
+        <div className="flex items-start gap-1">
+          <span onClick={(e) => e.stopPropagation()} className={`shrink-0 ${compact ? "pt-px" : "pt-0.5"}`}>
             <button
               type="button"
               disabled={!done && completionBlocked}
               title={completionBlockedTitle}
               onClick={() => void patchTask(task.id, { status: done ? "todo" : "done" })}
-              className={`flex h-5 w-5 items-center justify-center rounded border text-xs ${
+              className={`flex ${chk} items-center justify-center rounded border text-[10px] ${
                 done
                   ? "border-sky-600 bg-sky-600 text-white"
                   : "border-stone-300 bg-white"
@@ -1451,23 +1579,27 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               {done ? "✓" : ""}
             </button>
           </span>
-          <span
-            className={`min-w-0 flex-1 font-medium leading-snug ${
-              done ? "text-stone-500 line-through" : "text-stone-900"
-            }`}
-          >
+          <span className={titleCls} title={task.title}>
             {task.title}
           </span>
         </div>
-        <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[0.65rem] text-stone-500">
-          <span
-            className={`inline-block h-1.5 w-1.5 shrink-0 rounded-full ${priorityDotClass(task.priority)}`}
-          />
-          <span className="min-w-0 truncate">{task.section_name}</span>
-          {task.due_date ? (
-            <span className="shrink-0 text-stone-400">· {formatShortDate(task.due_date)}</span>
-          ) : null}
-        </div>
+        {!compact ? (
+          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[0.65rem] text-stone-500">
+            <span
+              className={`inline-block h-1.5 w-1.5 shrink-0 rounded-full ${priorityDotClass(task.priority)}`}
+            />
+            <span className="min-w-0 truncate">{task.section_name}</span>
+            {task.due_date ? (
+              <span className="shrink-0 text-stone-400">· {formatShortDate(task.due_date)}</span>
+            ) : null}
+          </div>
+        ) : (
+          <div className="mt-0.5 flex items-center gap-1 pl-5">
+            <span
+              className={`inline-block h-1.5 w-1.5 shrink-0 rounded-full ${priorityDotClass(task.priority)}`}
+            />
+          </div>
+        )}
       </div>
     );
   }
@@ -1497,11 +1629,17 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 {taskViewMode === "week" ? (
                   <span className="font-medium text-stone-700">{weekViewLayout.weekLabel}</span>
                 ) : null}
-                {taskViewMode === "week" ? " · " : null}
+                {taskViewMode === "month" ? (
+                  <span className="font-medium text-stone-700">{monthViewLayout.monthTitle}</span>
+                ) : null}
+                {taskViewMode === "year" ? (
+                  <span className="font-medium text-stone-700">{yearViewLayout.yearTitle}</span>
+                ) : null}
+                {taskViewMode !== "list" ? " · " : null}
                 <span className="hidden text-stone-400 md:inline">
-                  {taskViewMode === "week" ? (
+                  {taskViewMode !== "list" ? (
                     <>
-                      Monday–Sunday week · overdue above · Ctrl/⌘+click or Shift+click to select
+                      Monday-start weeks · overdue above · Ctrl/⌘+click or Shift+click to select
                     </>
                   ) : (
                     <>
@@ -1526,14 +1664,14 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 </button>
               )}
               <div
-                className="inline-flex items-center gap-1 rounded-md border border-stone-200 bg-stone-50 p-0.5"
+                className="inline-flex flex-wrap items-center gap-0.5 rounded-md border border-stone-200 bg-stone-50 p-0.5"
                 role="group"
                 aria-label="Task layout"
               >
                 <button
                   type="button"
                   onClick={() => setTaskViewMode("list")}
-                  className={`rounded px-2.5 py-1 text-xs font-medium ${
+                  className={`rounded px-2 py-1 text-[0.7rem] font-medium sm:px-2.5 sm:text-xs ${
                     taskViewMode === "list"
                       ? "bg-white text-stone-900 shadow-sm"
                       : "text-stone-600 hover:text-stone-900"
@@ -1544,13 +1682,35 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 <button
                   type="button"
                   onClick={() => setTaskViewMode("week")}
-                  className={`rounded px-2.5 py-1 text-xs font-medium ${
+                  className={`rounded px-2 py-1 text-[0.7rem] font-medium sm:px-2.5 sm:text-xs ${
                     taskViewMode === "week"
                       ? "bg-white text-stone-900 shadow-sm"
                       : "text-stone-600 hover:text-stone-900"
                   }`}
                 >
                   Week
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTaskViewMode("month")}
+                  className={`rounded px-2 py-1 text-[0.7rem] font-medium sm:px-2.5 sm:text-xs ${
+                    taskViewMode === "month"
+                      ? "bg-white text-stone-900 shadow-sm"
+                      : "text-stone-600 hover:text-stone-900"
+                  }`}
+                >
+                  Month
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTaskViewMode("year")}
+                  className={`rounded px-2 py-1 text-[0.7rem] font-medium sm:px-2.5 sm:text-xs ${
+                    taskViewMode === "year"
+                      ? "bg-white text-stone-900 shadow-sm"
+                      : "text-stone-600 hover:text-stone-900"
+                  }`}
+                >
+                  Year
                 </button>
               </div>
               {taskViewMode === "week" ? (
@@ -1577,6 +1737,66 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     title="Next week"
                     aria-label="Next week"
                     onClick={() => setWeekOffset((o) => o + 1)}
+                    className="rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100"
+                  >
+                    →
+                  </button>
+                </div>
+              ) : null}
+              {taskViewMode === "month" ? (
+                <div className="flex items-center gap-0.5 rounded-md border border-stone-200 bg-white px-0.5 py-0.5 shadow-sm">
+                  <button
+                    type="button"
+                    title="Previous month"
+                    aria-label="Previous month"
+                    onClick={() => setMonthOffset((o) => o - 1)}
+                    className="rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100"
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    title="Jump to this month"
+                    onClick={() => setMonthOffset(0)}
+                    className="rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100"
+                  >
+                    This month
+                  </button>
+                  <button
+                    type="button"
+                    title="Next month"
+                    aria-label="Next month"
+                    onClick={() => setMonthOffset((o) => o + 1)}
+                    className="rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100"
+                  >
+                    →
+                  </button>
+                </div>
+              ) : null}
+              {taskViewMode === "year" ? (
+                <div className="flex items-center gap-0.5 rounded-md border border-stone-200 bg-white px-0.5 py-0.5 shadow-sm">
+                  <button
+                    type="button"
+                    title="Previous year"
+                    aria-label="Previous year"
+                    onClick={() => setYearOffset((o) => o - 1)}
+                    className="rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100"
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    title="Jump to this year"
+                    onClick={() => setYearOffset(0)}
+                    className="rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100"
+                  >
+                    This year
+                  </button>
+                  <button
+                    type="button"
+                    title="Next year"
+                    aria-label="Next year"
+                    onClick={() => setYearOffset((o) => o + 1)}
                     className="rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100"
                   >
                     →
@@ -2217,15 +2437,21 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 </table>
               </div>
             </div>
-            ) : (
+            ) : calendarBuckets != null ? (
             <div
               className="border-y border-stone-200 bg-white px-4 pb-4 sm:px-6 lg:px-8"
               role="region"
-              aria-label={`Tasks week ${weekViewLayout.weekLabel}`}
+              aria-label={
+                taskViewMode === "week"
+                  ? `Tasks week ${weekViewLayout.weekLabel}`
+                  : taskViewMode === "month"
+                    ? `Tasks month ${monthViewLayout.monthTitle}`
+                    : `Tasks year ${yearViewLayout.yearTitle}`
+              }
             >
               <div
                 className={`mb-3 rounded-lg border px-3 py-2.5 sm:px-4 ${
-                  weekViewLayout.overdue.length > 0
+                  calendarBuckets.overdue.length > 0
                     ? "border-red-200 bg-red-50/90"
                     : "border-stone-100 bg-stone-50/90"
                 }`}
@@ -2238,79 +2464,187 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     Open tasks due before today (or stale with no due date)
                   </span>
                 </div>
-                {weekViewLayout.overdue.length === 0 ? (
+                {calendarBuckets.overdue.length === 0 ? (
                   <p className="mt-2 text-xs text-stone-500">None in the current filters.</p>
                 ) : (
                   <ul className="mt-2 grid list-none gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {weekViewLayout.overdue.map((task) => (
+                    {calendarBuckets.overdue.map((task) => (
                       <li key={task.id}>{renderWeekTaskCard(task)}</li>
                     ))}
                   </ul>
                 )}
               </div>
 
-              <div className="overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch]">
-                <div className="grid min-w-[52rem] grid-cols-7 gap-px rounded-lg border border-stone-200 bg-stone-200 shadow-sm">
-                  {weekViewLayout.days.map((day) => {
-                    const isToday = day.iso === weekViewLayout.todayIso;
-                    const colTasks = weekViewLayout.byDay.get(day.iso) ?? [];
-                    return (
-                      <div
-                        key={day.iso}
-                        className={`flex min-h-[14rem] flex-col bg-white sm:min-h-[16rem] ${
-                          isToday ? "ring-2 ring-inset ring-sky-300" : ""
-                        }`}
-                      >
+              {taskViewMode === "week" ? (
+                <div className="overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch]">
+                  <div className="grid min-w-[52rem] grid-cols-7 gap-px rounded-lg border border-stone-200 bg-stone-200 shadow-sm">
+                    {weekViewLayout.days.map((day) => {
+                      const isToday = day.iso === weekViewLayout.todayIso;
+                      const colTasks = weekViewLayout.byDay.get(day.iso) ?? [];
+                      return (
                         <div
-                          className={`shrink-0 border-b border-stone-100 px-2 py-2 text-center ${
-                            isToday ? "bg-sky-50/80" : "bg-stone-50/90"
+                          key={day.iso}
+                          className={`flex min-h-[14rem] flex-col bg-white sm:min-h-[16rem] ${
+                            isToday ? "ring-2 ring-inset ring-sky-300" : ""
                           }`}
                         >
-                          <div className="text-[0.65rem] font-semibold uppercase tracking-wide text-stone-500">
-                            {day.weekday}
+                          <div
+                            className={`shrink-0 border-b border-stone-100 px-2 py-2 text-center ${
+                              isToday ? "bg-sky-50/80" : "bg-stone-50/90"
+                            }`}
+                          >
+                            <div className="text-[0.65rem] font-semibold uppercase tracking-wide text-stone-500">
+                              {day.weekday}
+                            </div>
+                            <div className="text-sm font-semibold text-stone-800">{day.dateLabel}</div>
+                            {isToday ? (
+                              <div className="mt-0.5 text-[0.6rem] font-medium text-sky-700">Today</div>
+                            ) : null}
                           </div>
-                          <div className="text-sm font-semibold text-stone-800">{day.dateLabel}</div>
-                          {isToday ? (
-                            <div className="mt-0.5 text-[0.6rem] font-medium text-sky-700">Today</div>
-                          ) : null}
+                          <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-2">
+                            {colTasks.length === 0 ? (
+                              <p className="text-center text-[0.65rem] text-stone-400">—</p>
+                            ) : (
+                              colTasks.map((task) => (
+                                <div key={task.id}>{renderWeekTaskCard(task)}</div>
+                              ))
+                            )}
+                          </div>
                         </div>
-                        <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-2">
-                          {colTasks.length === 0 ? (
-                            <p className="text-center text-[0.65rem] text-stone-400">—</p>
-                          ) : (
-                            colTasks.map((task) => (
-                              <div key={task.id}>{renderWeekTaskCard(task)}</div>
-                            ))
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              ) : null}
 
-              {weekViewLayout.noDue.length > 0 ? (
+              {taskViewMode === "month" ? (
+                <div className="overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch]">
+                  <div className="inline-block min-w-full rounded-lg border border-stone-200 bg-stone-200 p-px shadow-sm">
+                    <div className="grid grid-cols-7 gap-px bg-stone-200">
+                      {CALENDAR_WEEKDAY_HEADERS.map((h) => (
+                        <div
+                          key={h}
+                          className="bg-stone-50 py-1.5 text-center text-[0.65rem] font-semibold uppercase tracking-wide text-stone-500"
+                        >
+                          {h}
+                        </div>
+                      ))}
+                      {monthViewLayout.cells.map((cell) => {
+                        const colTasks = monthViewLayout.byDay.get(cell.iso) ?? [];
+                        const isToday = cell.iso === monthViewLayout.todayIso;
+                        const dayNum = parseInt(cell.iso.slice(8), 10);
+                        return (
+                          <div
+                            key={cell.iso}
+                            className={`flex min-h-[5.5rem] flex-col bg-white p-1 sm:min-h-[6.5rem] ${
+                              !cell.inMonth ? "opacity-[0.45]" : ""
+                            } ${isToday ? "ring-2 ring-inset ring-sky-300" : ""}`}
+                          >
+                            <div className="flex justify-end">
+                              <span
+                                className={`text-[0.65rem] font-semibold tabular-nums ${
+                                  cell.inMonth ? "text-stone-700" : "text-stone-400"
+                                }`}
+                              >
+                                {cell.inMonth ? dayNum : ""}
+                              </span>
+                            </div>
+                            <div className="mt-0.5 min-h-0 flex-1 space-y-0.5 overflow-y-auto">
+                              {colTasks.slice(0, 2).map((task) => (
+                                <div key={task.id}>{renderWeekTaskCard(task, true)}</div>
+                              ))}
+                              {colTasks.length > 2 ? (
+                                <div className="text-center text-[0.6rem] font-medium text-stone-400">
+                                  +{colTasks.length - 2} more
+                                </div>
+                              ) : null}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              {taskViewMode === "year" ? (
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {yearViewLayout.months.map((mo) => (
+                    <div
+                      key={mo.month0}
+                      className="rounded-lg border border-stone-200 bg-white p-1.5 shadow-sm"
+                    >
+                      <div className="text-center text-xs font-semibold text-stone-800">{mo.label}</div>
+                      <div className="mt-1 grid grid-cols-7 gap-px rounded bg-stone-100 p-px text-[0.5rem] leading-tight">
+                        {CALENDAR_WEEKDAY_HEADERS.map((h) => (
+                          <div
+                            key={`${mo.month0}-${h}`}
+                            className="bg-stone-50 py-0.5 text-center font-medium text-stone-400"
+                          >
+                            {h}
+                          </div>
+                        ))}
+                        {mo.cells.map((cell) => {
+                          const list = yearViewLayout.byDay.get(cell.iso) ?? [];
+                          const openN = list.filter(
+                            (t) => t.status !== "done" && t.status !== "cancelled"
+                          ).length;
+                          const isToday = cell.iso === yearViewLayout.todayIso;
+                          const dayNum = parseInt(cell.iso.slice(8), 10);
+                          const titles = list.map((t) => t.title).join("\n");
+                          return (
+                            <div
+                              key={cell.iso}
+                              title={titles || undefined}
+                              className={`min-h-[1.45rem] bg-white p-0.5 ${
+                                !cell.inMonth ? "opacity-[0.35]" : ""
+                              } ${isToday ? "ring-1 ring-inset ring-sky-400" : ""}`}
+                            >
+                              <div className="flex items-start justify-between gap-0.5">
+                                <span
+                                  className={`tabular-nums ${
+                                    cell.inMonth ? "text-stone-700" : "text-stone-400"
+                                  }`}
+                                >
+                                  {cell.inMonth ? dayNum : ""}
+                                </span>
+                                {openN > 0 ? (
+                                  <span className="shrink-0 rounded-sm bg-sky-600 px-0.5 text-[0.45rem] font-bold leading-none text-white">
+                                    {openN}
+                                  </span>
+                                ) : null}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              {calendarBuckets.noDue.length > 0 ? (
                 <div className="mt-3 rounded-lg border border-amber-100 bg-amber-50/50 px-3 py-2.5 sm:px-4">
                   <h2 className="text-xs font-semibold uppercase tracking-wide text-amber-900">
                     No due date
                   </h2>
                   <ul className="mt-2 grid list-none gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {weekViewLayout.noDue.map((task) => (
+                    {calendarBuckets.noDue.map((task) => (
                       <li key={task.id}>{renderWeekTaskCard(task)}</li>
                     ))}
                   </ul>
                 </div>
               ) : null}
 
-              {weekViewLayout.laterOpenCount > 0 ? (
+              {calendarBuckets.laterOpenCount > 0 ? (
                 <p className="mt-3 text-center text-[0.65rem] text-stone-500">
-                  {weekViewLayout.laterOpenCount} open task
-                  {weekViewLayout.laterOpenCount === 1 ? "" : "s"} due after this week — switch to List
-                  view to see them in section order.
+                  {calendarBuckets.laterOpenCount} open task
+                  {calendarBuckets.laterOpenCount === 1 ? "" : "s"} {calendarBuckets.laterHint} — use
+                  List view for full section order.
                 </p>
               ) : null}
             </div>
-            )}
+            ) : null}
 
             <form
               onSubmit={handleAddSection}
