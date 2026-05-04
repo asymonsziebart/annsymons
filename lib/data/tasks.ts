@@ -17,7 +17,7 @@ import {
 import {
   advanceYearlyRecurringDueAfterComplete,
   isValidRecurrenceMonth,
-  nextYearlyFirstOfMonthDue,
+  yearlyMonthFirstInCurrentYear,
 } from "./taskRecurrence";
 
 export type { CreateTaskInput, TaskPatch, TaskRow } from "./taskClientTypes";
@@ -247,7 +247,7 @@ export async function createTask(input: CreateTaskInput): Promise<TaskRow> {
       ? null
       : input.due_date;
   if (recurrenceMonth != null && dueDate == null) {
-    dueDate = nextYearlyFirstOfMonthDue(recurrenceMonth);
+    dueDate = yearlyMonthFirstInCurrentYear(recurrenceMonth);
   }
 
   const depIds = normalizeDependsOnIds(input.depends_on_task_ids);
@@ -260,7 +260,8 @@ export async function createTask(input: CreateTaskInput): Promise<TaskRow> {
     const blocking: number[] = [];
     for (const depId of depIds) {
       const dep = all.find((t) => t.id === depId);
-      if (!dep || (dep.status !== "done" && dep.status !== "cancelled")) {
+      if (!dep) continue;
+      if (dep.status !== "done" && dep.status !== "cancelled") {
         blocking.push(depId);
       }
     }
@@ -355,8 +356,10 @@ export async function updateTask(id: number, patch: TaskPatch): Promise<TaskRow 
   if (status === "done") {
     const blocking: number[] = [];
     for (const depId of depends_on_task_ids) {
+      if (depId === id) continue;
       const dep = allTasks.find((t) => t.id === depId);
-      if (!dep || (dep.status !== "done" && dep.status !== "cancelled")) {
+      if (!dep) continue;
+      if (dep.status !== "done" && dep.status !== "cancelled") {
         blocking.push(depId);
       }
     }

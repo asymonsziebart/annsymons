@@ -33,13 +33,7 @@ INSERT INTO tasks (
 SELECT
   v.title,
   'Yearly home maintenance checklist',
-  (
-    CASE
-      WHEN make_date(EXTRACT(YEAR FROM CURRENT_DATE)::int, v.rec_m, 1) < CURRENT_DATE
-      THEN make_date(EXTRACT(YEAR FROM CURRENT_DATE)::int + 1, v.rec_m, 1)
-      ELSE make_date(EXTRACT(YEAR FROM CURRENT_DATE)::int, v.rec_m, 1)
-    END
-  )::date,
+  make_date(EXTRACT(YEAR FROM CURRENT_DATE)::int, v.rec_m, 1)::date,
   'todo',
   (SELECT id FROM task_sections WHERE name = 'Home maintenance' LIMIT 1),
   v.sort_order,

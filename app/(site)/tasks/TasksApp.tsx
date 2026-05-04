@@ -149,6 +149,38 @@ const TASK_TABLE_LABELS: Record<keyof TaskRow, string> = {
 
 const TASK_TABLE_HIDDEN_STORAGE_KEY = "annsymons.tasks.tableHiddenColumns.v1";
 const TASK_FILTERS_COLLAPSED_STORAGE_KEY = "annsymons.tasks.filtersCollapsed.v1";
+const TASK_LIST_SORT_STORAGE_KEY = "annsymons.tasks.listSort.v1";
+
+/** Read saved list sort (browser only; call from useLayoutEffect after mount). */
+function readTaskTableSortFromStorage(): {
+  key: keyof TaskRow;
+  dir: "asc" | "desc";
+} | null {
+  try {
+    const raw = localStorage.getItem(TASK_LIST_SORT_STORAGE_KEY);
+    if (raw === null) return { key: "due_date", dir: "asc" };
+    const parsed = JSON.parse(raw) as unknown;
+    if (parsed === null) return null;
+    if (
+      typeof parsed === "object" &&
+      parsed !== null &&
+      "key" in parsed &&
+      "dir" in parsed
+    ) {
+      const key = (parsed as { key: string }).key;
+      const dir = (parsed as { dir: string }).dir;
+      if (
+        (dir === "asc" || dir === "desc") &&
+        (TASK_TABLE_KEYS as readonly string[]).includes(key)
+      ) {
+        return { key: key as keyof TaskRow, dir };
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  return { key: "due_date", dir: "asc" };
+}
 
 const RECURRENCE_MONTH_OPTIONS = [
   "",
@@ -222,6 +254,16 @@ function compareTaskColumn(a: TaskRow, b: TaskRow, key: keyof TaskRow): number {
       TASK_PRIORITIES.indexOf(va as TaskPriority) -
       TASK_PRIORITIES.indexOf(vb as TaskPriority)
     );
+  }
+  if (key === "due_date") {
+    const cmp = String(va).localeCompare(String(vb), undefined, {
+      numeric: true,
+      sensitivity: "base",
+    });
+    if (cmp !== 0) return cmp;
+    const o = a.sort_order - b.sort_order;
+    if (o !== 0) return o;
+    return a.id - b.id;
   }
   return String(va).localeCompare(String(vb), undefined, {
     numeric: true,
@@ -449,11 +491,11 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   const [filterPriority, setFilterPriority] = useState<"all" | TaskPriority>("all");
   const [filterSectionId, setFilterSectionId] = useState<"all" | number>("all");
   const [filterOverdueOnly, setFilterOverdueOnly] = useState(false);
-  /** Per-section list sort: click column header to sort, again to reverse. */
+  /** Per-section list sort: click column header to sort, again to reverse. Hydrates from localStorage (default soonest due). */
   const [taskTableSort, setTaskTableSort] = useState<{
     key: keyof TaskRow;
     dir: "asc" | "desc";
-  } | null>(null);
+  } | null>(() => ({ key: "due_date", dir: "asc" }));
   const [inlineSubExpanded, setInlineSubExpanded] = useState<Record<number, boolean>>({});
   const [inlineSubtasksByTask, setInlineSubtasksByTask] = useState<Record<number, SubtaskRow[]>>({});
   const [inlineSubLoading, setInlineSubLoading] = useState<Record<number, boolean>>({});
@@ -493,6 +535,13 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     () => (selectedId == null ? null : tasks.find((t) => t.id === selectedId) ?? null),
     [tasks, selectedId]
   );
+
+  const listOrderSelectValue = useMemo(() => {
+    if (taskTableSort == null) return "section";
+    if (taskTableSort.key === "due_date" && taskTableSort.dir === "asc") return "due_asc";
+    if (taskTableSort.key === "due_date" && taskTableSort.dir === "desc") return "due_desc";
+    return "other";
+  }, [taskTableSort]);
 
   const multiSelectCount = selectedTaskIds.length;
   const showBulkBar = multiSelectCount > 1;
@@ -572,6 +621,10 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     setTaskColumnsHydrated(true);
   }, []);
 
+  useLayoutEffect(() => {
+    setTaskTableSort(readTaskTableSortFromStorage());
+  }, []);
+
   useEffect(() => {
     setFiltersBarCollapsed(readFiltersCollapsedPreference());
     setFiltersBarHydrated(true);
@@ -597,6 +650,14 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
       /* storage full or disabled */
     }
   }, [hiddenTaskColumns, taskColumnsHydrated]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(TASK_LIST_SORT_STORAGE_KEY, JSON.stringify(taskTableSort));
+    } catch {
+      /* storage full or disabled */
+    }
+  }, [taskTableSort]);
 
   useEffect(() => {
     if (!columnsPanelOpen) return;
@@ -1194,8 +1255,9 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 ) : null}
                 {openCount} open ·{" "}
                 <span className="hidden text-stone-400 md:inline">
-                  Ctrl/⌘+click or Shift+click to select multiple · drag{" "}
-                  <span className="whitespace-nowrap">⋮⋮</span> between sections
+                  Order tasks with the list control or by clicking column headers · Ctrl/⌘+click or
+                  Shift+click to select · drag <span className="whitespace-nowrap">⋮⋮</span> between
+                  sections
                 </span>
                 <span className="text-stone-400 md:hidden">Tap a task for details</span>
               </p>
@@ -1214,6 +1276,32 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               <span className="hidden rounded-md bg-stone-100 px-2 py-1 text-xs text-stone-600 sm:inline">
                 List
               </span>
+              <label className="flex min-w-0 flex-col gap-0.5">
+                <span className="text-[0.65rem] font-medium uppercase tracking-wide text-stone-500">
+                  Order within section
+                </span>
+                <select
+                  value={listOrderSelectValue === "other" ? "__other__" : listOrderSelectValue}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (v === "section") setTaskTableSort(null);
+                    else if (v === "due_asc") setTaskTableSort({ key: "due_date", dir: "asc" });
+                    else if (v === "due_desc") setTaskTableSort({ key: "due_date", dir: "desc" });
+                  }}
+                  className="max-w-[11rem] rounded-md border border-stone-200 bg-white px-2 py-1.5 text-xs text-stone-800 shadow-sm"
+                  aria-label="Sort tasks within each section"
+                >
+                  <option value="due_asc">Due date (soonest first)</option>
+                  <option value="due_desc">Due date (latest first)</option>
+                  <option value="section">Section order (saved layout)</option>
+                  {listOrderSelectValue === "other" && taskTableSort ? (
+                    <option value="__other__" disabled>
+                      {TASK_TABLE_LABELS[taskTableSort.key]} (
+                      {taskTableSort.dir === "asc" ? "↑" : "↓"})
+                    </option>
+                  ) : null}
+                </select>
+              </label>
               <button
                 type="button"
                 onClick={() => setShowCompleted((v) => !v)}

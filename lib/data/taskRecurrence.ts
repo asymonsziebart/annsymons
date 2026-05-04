@@ -21,6 +21,13 @@ export function nextYearlyFirstOfMonthDue(month: number, ref = new Date()): stri
   return toIsoDateLocal(new Date(y + 1, month - 1, 1));
 }
 
+/** 1st of `month` in the same calendar year as `ref` (local). Used for yearly checklist-style dues. */
+export function yearlyMonthFirstInCurrentYear(month: number, ref = new Date()): string {
+  const y = ref.getFullYear();
+  const mm = String(month).padStart(2, "0");
+  return `${y}-${mm}-01`;
+}
+
 /** After completing a yearly month-1st task: next due is same month, following year, on the 1st. */
 export function advanceYearlyRecurringDueAfterComplete(
   dueDate: string | null,
