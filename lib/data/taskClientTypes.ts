@@ -31,6 +31,9 @@ export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   cancelled: "Cancelled",
 };
 
+export const TASK_RECURRENCE_INTERVALS = ["daily", "weekly", "monthly", "yearly"] as const;
+export type TaskRecurrenceInterval = (typeof TASK_RECURRENCE_INTERVALS)[number];
+
 export const TASK_PRIORITIES = ["none", "high", "medium", "low"] as const;
 export type TaskPriority = (typeof TASK_PRIORITIES)[number];
 
@@ -102,7 +105,9 @@ export type TaskRow = {
   dependencies: string | null;
   /** Task IDs that must be done (or cancelled) before this task can be completed. */
   depends_on_task_ids: number[];
-  /** If set (1–12), task is due on the 1st of that month each year; completing rolls due forward one year. */
+  /** daily | weekly | monthly | yearly — completing rolls due_date forward. */
+  recurrence_interval: string | null;
+  /** For yearly: 1–12 = due on the 1st of that month each year. Null for other intervals. */
   recurrence_month: number | null;
   requester: string | null;
   quarter: string | null;
@@ -124,6 +129,7 @@ export type TaskPatch = Partial<
     | "actual_minutes"
     | "dependencies"
     | "depends_on_task_ids"
+    | "recurrence_interval"
     | "recurrence_month"
     | "requester"
     | "quarter"
@@ -143,7 +149,8 @@ export type CreateTaskInput = {
   actual_minutes?: number | null;
   dependencies?: string | null;
   depends_on_task_ids?: number[];
-  /** 1–12 = yearly on the 1st of that month; omit or null for one-off tasks. */
+  recurrence_interval?: string | null;
+  /** Required when recurrence_interval is yearly. */
   recurrence_month?: number | null;
   requester?: string | null;
   quarter?: string | null;

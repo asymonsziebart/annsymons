@@ -11,7 +11,10 @@ import {
   TaskCompletionBlockedError,
   TaskDependsInvalidError,
 } from "@/lib/data/taskDependencies";
-import { isValidRecurrenceMonth } from "@/lib/data/taskRecurrence";
+import {
+  isRecurrenceIntervalString,
+  isValidRecurrenceMonth,
+} from "@/lib/data/taskRecurrence";
 
 function parsePatch(body: Record<string, unknown>): TaskPatch | null {
   const patch: TaskPatch = {};
@@ -68,6 +71,14 @@ function parsePatch(body: Record<string, unknown>): TaskPatch | null {
   } else if (typeof body.recurrence_month === "string") {
     const n = parseInt(body.recurrence_month, 10);
     if (isValidRecurrenceMonth(n)) patch.recurrence_month = n;
+  }
+  if (body.recurrence_interval === null || body.recurrence_interval === "") {
+    patch.recurrence_interval = null;
+  } else if (
+    typeof body.recurrence_interval === "string" &&
+    isRecurrenceIntervalString(body.recurrence_interval)
+  ) {
+    patch.recurrence_interval = body.recurrence_interval.trim();
   }
   return Object.keys(patch).length ? patch : null;
 }

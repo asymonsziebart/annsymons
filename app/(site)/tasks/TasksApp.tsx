@@ -25,7 +25,10 @@ import {
   isTaskOverdue,
 } from "@/lib/data/taskClientTypes";
 import { blockingPrerequisiteTasks } from "@/lib/data/taskDependencies";
-import { isYearlyRecurringSuppressedUntilDueYear } from "@/lib/data/taskRecurrence";
+import {
+  effectiveRecurrenceInterval,
+  isYearlyRecurringSuppressedUntilDueYear,
+} from "@/lib/data/taskRecurrence";
 
 type Props = { initialTasks: TaskRow[]; initialSections: TaskSectionRow[] };
 
@@ -90,6 +93,23 @@ function formatShortDate(iso: string | null): string {
   return "—";
 }
 
+/** Local calendar YYYY-MM-DD from a Date (no UTC shift). */
+function toIsoDateLocalFromDate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+/** Monday 00:00 of the week containing `d` (local calendar). */
+function startOfWeekMonday(d: Date): Date {
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const day = x.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  x.setDate(x.getDate() + diff);
+  return x;
+}
+
 function formatCellDateTime(iso: string | null | undefined): string {
   if (iso == null || iso === "") return "—";
   const trimmed = iso.trim();
@@ -117,6 +137,7 @@ const TASK_TABLE_KEYS: (keyof TaskRow)[] = [
   "actual_minutes",
   "dependencies",
   "depends_on_task_ids",
+  "recurrence_interval",
   "recurrence_month",
   "requester",
   "quarter",
@@ -141,7 +162,8 @@ const TASK_TABLE_LABELS: Record<keyof TaskRow, string> = {
   actual_minutes: "Act. min",
   dependencies: "Dependencies",
   depends_on_task_ids: "Prereq IDs",
-  recurrence_month: "Yearly (1st)",
+  recurrence_interval: "Repeat",
+  recurrence_month: "Yearly month",
   requester: "Requester",
   quarter: "Quarter",
   project_label: "Project",
@@ -151,6 +173,8 @@ const TASK_TABLE_LABELS: Record<keyof TaskRow, string> = {
 const TASK_TABLE_HIDDEN_STORAGE_KEY = "annsymons.tasks.tableHiddenColumns.v1";
 const TASK_FILTERS_COLLAPSED_STORAGE_KEY = "annsymons.tasks.filtersCollapsed.v1";
 const TASK_LIST_SORT_STORAGE_KEY = "annsymons.tasks.listSort.v1";
+const TASK_VIEW_MODE_STORAGE_KEY = "annsymons.tasks.viewMode.v1";
+const TASK_VIEW_WEEK_OFFSET_STORAGE_KEY = "annsymons.tasks.weekViewOffset.v1";
 
 /** Read saved list sort (browser only; call from useLayoutEffect after mount). */
 function readTaskTableSortFromStorage(): {
@@ -181,6 +205,18 @@ function readTaskTableSortFromStorage(): {
     /* ignore */
   }
   return { key: "due_date", dir: "asc" };
+}
+
+const RECURRENCE_INTERVAL_LABELS: Record<string, string> = {
+  daily: "Daily",
+  weekly: "Weekly",
+  monthly: "Monthly",
+  yearly: "Yearly",
+};
+
+function recurrenceIntervalLabel(iv: string | null | undefined): string {
+  if (iv == null || iv === "") return "—";
+  return RECURRENCE_INTERVAL_LABELS[iv] ?? String(iv);
 }
 
 const RECURRENCE_MONTH_OPTIONS = [
@@ -250,6 +286,15 @@ function compareTaskColumn(a: TaskRow, b: TaskRow, key: keyof TaskRow): number {
   if (emptyA) return 1;
   if (emptyB) return -1;
   if (typeof va === "number" && typeof vb === "number") return va - vb;
+  if (key === "recurrence_interval") {
+    const ORDER = ["daily", "weekly", "monthly", "yearly"];
+    const ia = ORDER.indexOf(String(va));
+    const ib = ORDER.indexOf(String(vb));
+    const na = ia === -1 ? 999 : ia;
+    const nb = ib === -1 ? 999 : ib;
+    if (na !== nb) return na - nb;
+    return 0;
+  }
   if (key === "priority") {
     return (
       TASK_PRIORITIES.indexOf(va as TaskPriority) -
@@ -296,6 +341,8 @@ function taskTableDataCell(task: TaskRow, key: keyof TaskRow): ReactNode {
         </span>
       );
     }
+    case "recurrence_interval":
+      return recurrenceIntervalLabel(v as string | null);
     case "recurrence_month":
       return recurrenceMonthLabel(v as number | null);
     case "priority":
@@ -332,6 +379,8 @@ function taskFieldPlainTextForMeasure(task: TaskRow, key: keyof TaskRow): string
       const ids = v as number[];
       return ids.length ? ids.map((id) => `#${id}`).join(", ") : "—";
     }
+    case "recurrence_interval":
+      return recurrenceIntervalLabel(v as string | null);
     case "recurrence_month":
       return recurrenceMonthLabel(v as number | null);
     case "priority":
@@ -390,6 +439,7 @@ function taskMatchesSearchQuery(task: TaskRow, raw: string): boolean {
     task.depends_on_task_ids.length
       ? task.depends_on_task_ids.map((id) => `#${id}`).join(" ")
       : "",
+    recurrenceIntervalLabel(task.recurrence_interval),
     task.recurrence_month != null ? recurrenceMonthLabel(task.recurrence_month) : "",
     task.section_name,
     String(task.id),
@@ -486,6 +536,9 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   const draggingTaskIdRef = useRef<number | null>(null);
   /** When false, tasks with status "done" are omitted from the list (still in data). */
   const [showCompleted, setShowCompleted] = useState(false);
+  const [taskViewMode, setTaskViewMode] = useState<"list" | "week">("list");
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [taskViewHydrated, setTaskViewHydrated] = useState(false);
   const [taskSearchQuery, setTaskSearchQuery] = useState("");
   const [saveNotice, setSaveNotice] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<"all" | TaskStatus>("all");
@@ -625,6 +678,31 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   useLayoutEffect(() => {
     setTaskTableSort(readTaskTableSortFromStorage());
   }, []);
+
+  useLayoutEffect(() => {
+    try {
+      const m = localStorage.getItem(TASK_VIEW_MODE_STORAGE_KEY);
+      if (m === "week" || m === "list") setTaskViewMode(m);
+      const o = localStorage.getItem(TASK_VIEW_WEEK_OFFSET_STORAGE_KEY);
+      if (o != null) {
+        const n = parseInt(o, 10);
+        if (Number.isFinite(n) && n >= -104 && n <= 104) setWeekOffset(n);
+      }
+    } catch {
+      /* ignore */
+    }
+    setTaskViewHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!taskViewHydrated) return;
+    try {
+      localStorage.setItem(TASK_VIEW_MODE_STORAGE_KEY, taskViewMode);
+      localStorage.setItem(TASK_VIEW_WEEK_OFFSET_STORAGE_KEY, String(weekOffset));
+    } catch {
+      /* ignore */
+    }
+  }, [taskViewMode, weekOffset, taskViewHydrated]);
 
   useEffect(() => {
     setFiltersBarCollapsed(readFiltersCollapsedPreference());
@@ -1049,6 +1127,92 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     taskSearchQuery,
   ]);
 
+  const weekViewLayout = useMemo(() => {
+    const todayIso = toIsoDateLocalFromDate(new Date());
+    const ref = new Date();
+    ref.setDate(ref.getDate() + weekOffset * 7);
+    const weekStart = startOfWeekMonday(ref);
+    const days: { iso: string; weekday: string; dateLabel: string }[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(weekStart);
+      d.setDate(weekStart.getDate() + i);
+      const iso = toIsoDateLocalFromDate(d);
+      days.push({
+        iso,
+        weekday: d.toLocaleDateString(undefined, { weekday: "short" }),
+        dateLabel: d.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+      });
+    }
+    const weekStartIso = days[0]!.iso;
+    const weekEndIso = days[6]!.iso;
+
+    const passes = (t: TaskRow) => {
+      if (!showCompleted && (t.status === "done" || t.status === "cancelled")) return false;
+      return true;
+    };
+    const open = (t: TaskRow) => t.status !== "done" && t.status !== "cancelled";
+    const byDay = new Map<string, TaskRow[]>();
+    for (const day of days) byDay.set(day.iso, []);
+    const overdue: TaskRow[] = [];
+    const noDue: TaskRow[] = [];
+
+    for (const t of filteredTasks) {
+      if (!passes(t)) continue;
+      const duRaw = t.due_date?.trim() ?? "";
+      const validDue = Boolean(duRaw && /^\d{4}-\d{2}-\d{2}$/.test(duRaw));
+      if (validDue) {
+        const du = duRaw;
+        if (open(t) && du < todayIso) {
+          overdue.push(t);
+          continue;
+        }
+        if (du >= weekStartIso && du <= weekEndIso) {
+          byDay.get(du)!.push(t);
+        }
+        continue;
+      }
+      if (open(t) && isTaskOverdue(t)) overdue.push(t);
+      else noDue.push(t);
+    }
+
+    const cmp = (a: TaskRow, b: TaskRow) => {
+      const pa = TASK_PRIORITIES.indexOf(a.priority);
+      const pb = TASK_PRIORITIES.indexOf(b.priority);
+      if (pa !== pb) return pa - pb;
+      return (a.title || "").localeCompare(b.title || "", undefined, { sensitivity: "base" });
+    };
+    overdue.sort(cmp);
+    noDue.sort(cmp);
+    for (const day of days) byDay.get(day.iso)!.sort(cmp);
+
+    const linearIds: number[] = [
+      ...overdue.map((x) => x.id),
+      ...days.flatMap((day) => byDay.get(day.iso)!.map((x) => x.id)),
+      ...noDue.map((x) => x.id),
+    ];
+
+    let laterOpenCount = 0;
+    for (const t of filteredTasks) {
+      if (!passes(t)) continue;
+      if (!open(t)) continue;
+      const du = t.due_date?.trim() ?? "";
+      if (du && /^\d{4}-\d{2}-\d{2}$/.test(du) && du > weekEndIso) laterOpenCount += 1;
+    }
+
+    return {
+      days,
+      overdue,
+      byDay,
+      noDue,
+      todayIso,
+      weekStartIso,
+      weekEndIso,
+      weekLabel: `${formatShortDate(weekStartIso)} – ${formatShortDate(weekEndIso)}`,
+      linearIds,
+      laterOpenCount,
+    };
+  }, [filteredTasks, showCompleted, weekOffset]);
+
   const tasksById = useMemo(() => new Map(tasks.map((t) => [t.id, t])), [tasks]);
 
   const filtersCollapsedSummary = useMemo(() => {
@@ -1172,11 +1336,16 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     return ids;
   }, [sections, tasksBySectionSorted]);
 
+  const taskSelectionOrderIds = useMemo(
+    () => (taskViewMode === "week" ? weekViewLayout.linearIds : orderedVisibleTaskIds),
+    [taskViewMode, weekViewLayout.linearIds, orderedVisibleTaskIds]
+  );
+
   const handleTaskRowClick = useCallback(
-    (taskId: number, e: React.MouseEvent<HTMLTableRowElement>) => {
+    (taskId: number, e: React.MouseEvent<Element>) => {
       if (e.shiftKey) {
         const anchor = selectionAnchorRef.current;
-        const order = orderedVisibleTaskIds;
+        const order = taskSelectionOrderIds;
         const iCur = order.indexOf(taskId);
         if (iCur < 0) return;
         const iAnchor = anchor != null ? order.indexOf(anchor) : iCur;
@@ -1197,7 +1366,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
       selectionAnchorRef.current = taskId;
       setSelectedTaskIds([taskId]);
     },
-    [orderedVisibleTaskIds]
+    [taskSelectionOrderIds]
   );
 
   const openCount = tasks.filter(
@@ -1241,6 +1410,68 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     );
   }
 
+  function renderWeekTaskCard(task: TaskRow): ReactNode {
+    const done = task.status === "done";
+    const prereqBlockers = !done ? blockingPrerequisiteTasks(task, tasksById) : [];
+    const completionBlocked = prereqBlockers.length > 0;
+    const completionBlockedTitle = completionBlocked
+      ? `Complete first: ${prereqBlockers.map((x) => x.title || `#${x.id}`).join(", ")}`
+      : undefined;
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={(e) => handleTaskRowClick(task.id, e)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleTaskRowClick(task.id, e as unknown as React.MouseEvent<Element>);
+          }
+        }}
+        className={`rounded-md border px-2 py-1.5 text-left text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-sky-400 ${
+          selectedTaskIds.includes(task.id)
+            ? "border-sky-400 bg-sky-50"
+            : "border-stone-200 bg-white hover:border-stone-300"
+        } ${done ? "opacity-80" : ""}`}
+      >
+        <div className="flex items-start gap-1.5">
+          <span onClick={(e) => e.stopPropagation()} className="shrink-0 pt-0.5">
+            <button
+              type="button"
+              disabled={!done && completionBlocked}
+              title={completionBlockedTitle}
+              onClick={() => void patchTask(task.id, { status: done ? "todo" : "done" })}
+              className={`flex h-5 w-5 items-center justify-center rounded border text-xs ${
+                done
+                  ? "border-sky-600 bg-sky-600 text-white"
+                  : "border-stone-300 bg-white"
+              } ${!done && completionBlocked ? "cursor-not-allowed opacity-50" : ""}`}
+              aria-label={done ? "Mark incomplete" : "Complete"}
+            >
+              {done ? "✓" : ""}
+            </button>
+          </span>
+          <span
+            className={`min-w-0 flex-1 font-medium leading-snug ${
+              done ? "text-stone-500 line-through" : "text-stone-900"
+            }`}
+          >
+            {task.title}
+          </span>
+        </div>
+        <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[0.65rem] text-stone-500">
+          <span
+            className={`inline-block h-1.5 w-1.5 shrink-0 rounded-full ${priorityDotClass(task.priority)}`}
+          />
+          <span className="min-w-0 truncate">{task.section_name}</span>
+          {task.due_date ? (
+            <span className="shrink-0 text-stone-400">· {formatShortDate(task.due_date)}</span>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
   const showDetailPane =
     Boolean(selected) && selectedTaskIds.length === 1 && !detailsMinimized;
 
@@ -1263,10 +1494,22 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                   </>
                 ) : null}
                 {openCount} open ·{" "}
+                {taskViewMode === "week" ? (
+                  <span className="font-medium text-stone-700">{weekViewLayout.weekLabel}</span>
+                ) : null}
+                {taskViewMode === "week" ? " · " : null}
                 <span className="hidden text-stone-400 md:inline">
-                  Order tasks with the list control or by clicking column headers · Ctrl/⌘+click or
-                  Shift+click to select · drag <span className="whitespace-nowrap">⋮⋮</span> between
-                  sections
+                  {taskViewMode === "week" ? (
+                    <>
+                      Monday–Sunday week · overdue above · Ctrl/⌘+click or Shift+click to select
+                    </>
+                  ) : (
+                    <>
+                      Order tasks with the list control or by clicking column headers · Ctrl/⌘+click
+                      or Shift+click to select · drag{" "}
+                      <span className="whitespace-nowrap">⋮⋮</span> between sections
+                    </>
+                  )}
                 </span>
                 <span className="text-stone-400 md:hidden">Tap a task for details</span>
               </p>
@@ -1282,35 +1525,92 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                   <span className="hidden lg:inline">Show details</span>
                 </button>
               )}
-              <span className="hidden rounded-md bg-stone-100 px-2 py-1 text-xs text-stone-600 sm:inline">
-                List
-              </span>
-              <label className="flex min-w-0 flex-col gap-0.5">
-                <span className="text-[0.65rem] font-medium uppercase tracking-wide text-stone-500">
-                  Order within section
-                </span>
-                <select
-                  value={listOrderSelectValue === "other" ? "__other__" : listOrderSelectValue}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    if (v === "section") setTaskTableSort(null);
-                    else if (v === "due_asc") setTaskTableSort({ key: "due_date", dir: "asc" });
-                    else if (v === "due_desc") setTaskTableSort({ key: "due_date", dir: "desc" });
-                  }}
-                  className="max-w-[11rem] rounded-md border border-stone-200 bg-white px-2 py-1.5 text-xs text-stone-800 shadow-sm"
-                  aria-label="Sort tasks within each section"
+              <div
+                className="inline-flex items-center gap-1 rounded-md border border-stone-200 bg-stone-50 p-0.5"
+                role="group"
+                aria-label="Task layout"
+              >
+                <button
+                  type="button"
+                  onClick={() => setTaskViewMode("list")}
+                  className={`rounded px-2.5 py-1 text-xs font-medium ${
+                    taskViewMode === "list"
+                      ? "bg-white text-stone-900 shadow-sm"
+                      : "text-stone-600 hover:text-stone-900"
+                  }`}
                 >
-                  <option value="due_asc">Due date (soonest first)</option>
-                  <option value="due_desc">Due date (latest first)</option>
-                  <option value="section">Section order (saved layout)</option>
-                  {listOrderSelectValue === "other" && taskTableSort ? (
-                    <option value="__other__" disabled>
-                      {TASK_TABLE_LABELS[taskTableSort.key]} (
-                      {taskTableSort.dir === "asc" ? "↑" : "↓"})
-                    </option>
-                  ) : null}
-                </select>
-              </label>
+                  List
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTaskViewMode("week")}
+                  className={`rounded px-2.5 py-1 text-xs font-medium ${
+                    taskViewMode === "week"
+                      ? "bg-white text-stone-900 shadow-sm"
+                      : "text-stone-600 hover:text-stone-900"
+                  }`}
+                >
+                  Week
+                </button>
+              </div>
+              {taskViewMode === "week" ? (
+                <div className="flex items-center gap-0.5 rounded-md border border-stone-200 bg-white px-0.5 py-0.5 shadow-sm">
+                  <button
+                    type="button"
+                    title="Previous week"
+                    aria-label="Previous week"
+                    onClick={() => setWeekOffset((o) => o - 1)}
+                    className="rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100"
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    title="Jump to this week"
+                    onClick={() => setWeekOffset(0)}
+                    className="rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100"
+                  >
+                    This week
+                  </button>
+                  <button
+                    type="button"
+                    title="Next week"
+                    aria-label="Next week"
+                    onClick={() => setWeekOffset((o) => o + 1)}
+                    className="rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100"
+                  >
+                    →
+                  </button>
+                </div>
+              ) : null}
+              {taskViewMode === "list" ? (
+                <label className="flex min-w-0 flex-col gap-0.5">
+                  <span className="text-[0.65rem] font-medium uppercase tracking-wide text-stone-500">
+                    Order within section
+                  </span>
+                  <select
+                    value={listOrderSelectValue === "other" ? "__other__" : listOrderSelectValue}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "section") setTaskTableSort(null);
+                      else if (v === "due_asc") setTaskTableSort({ key: "due_date", dir: "asc" });
+                      else if (v === "due_desc") setTaskTableSort({ key: "due_date", dir: "desc" });
+                    }}
+                    className="max-w-[11rem] rounded-md border border-stone-200 bg-white px-2 py-1.5 text-xs text-stone-800 shadow-sm"
+                    aria-label="Sort tasks within each section"
+                  >
+                    <option value="due_asc">Due date (soonest first)</option>
+                    <option value="due_desc">Due date (latest first)</option>
+                    <option value="section">Section order (saved layout)</option>
+                    {listOrderSelectValue === "other" && taskTableSort ? (
+                      <option value="__other__" disabled>
+                        {TASK_TABLE_LABELS[taskTableSort.key]} (
+                        {taskTableSort.dir === "asc" ? "↑" : "↓"})
+                      </option>
+                    ) : null}
+                  </select>
+                </label>
+              ) : null}
               <button
                 type="button"
                 onClick={() => setShowCompleted((v) => !v)}
@@ -1318,6 +1618,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               >
                 {showCompleted ? "Hide completed" : "Show completed"}
               </button>
+              {taskViewMode === "list" ? (
               <div className="relative" ref={columnsPanelRef}>
                 <button
                   type="button"
@@ -1391,6 +1692,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                   </div>
                 ) : null}
               </div>
+              ) : null}
               <button
                 type="button"
                 onClick={() => void refresh()}
@@ -1581,6 +1883,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
           <div
             className={`min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain py-4 [-webkit-overflow-scrolling:touch] ${showBulkBar ? "pb-28" : ""}`}
           >
+            {taskViewMode === "list" ? (
             <div className="border-y border-stone-200 bg-white">
               <div className="overflow-x-auto">
                 <table className="w-max min-w-full border-separate border-spacing-0 text-left text-sm">
@@ -1914,6 +2217,100 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 </table>
               </div>
             </div>
+            ) : (
+            <div
+              className="border-y border-stone-200 bg-white px-4 pb-4 sm:px-6 lg:px-8"
+              role="region"
+              aria-label={`Tasks week ${weekViewLayout.weekLabel}`}
+            >
+              <div
+                className={`mb-3 rounded-lg border px-3 py-2.5 sm:px-4 ${
+                  weekViewLayout.overdue.length > 0
+                    ? "border-red-200 bg-red-50/90"
+                    : "border-stone-100 bg-stone-50/90"
+                }`}
+              >
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <h2 className="text-xs font-semibold uppercase tracking-wide text-red-900">
+                    Overdue
+                  </h2>
+                  <span className="text-[0.65rem] text-stone-500">
+                    Open tasks due before today (or stale with no due date)
+                  </span>
+                </div>
+                {weekViewLayout.overdue.length === 0 ? (
+                  <p className="mt-2 text-xs text-stone-500">None in the current filters.</p>
+                ) : (
+                  <ul className="mt-2 grid list-none gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {weekViewLayout.overdue.map((task) => (
+                      <li key={task.id}>{renderWeekTaskCard(task)}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              <div className="overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch]">
+                <div className="grid min-w-[52rem] grid-cols-7 gap-px rounded-lg border border-stone-200 bg-stone-200 shadow-sm">
+                  {weekViewLayout.days.map((day) => {
+                    const isToday = day.iso === weekViewLayout.todayIso;
+                    const colTasks = weekViewLayout.byDay.get(day.iso) ?? [];
+                    return (
+                      <div
+                        key={day.iso}
+                        className={`flex min-h-[14rem] flex-col bg-white sm:min-h-[16rem] ${
+                          isToday ? "ring-2 ring-inset ring-sky-300" : ""
+                        }`}
+                      >
+                        <div
+                          className={`shrink-0 border-b border-stone-100 px-2 py-2 text-center ${
+                            isToday ? "bg-sky-50/80" : "bg-stone-50/90"
+                          }`}
+                        >
+                          <div className="text-[0.65rem] font-semibold uppercase tracking-wide text-stone-500">
+                            {day.weekday}
+                          </div>
+                          <div className="text-sm font-semibold text-stone-800">{day.dateLabel}</div>
+                          {isToday ? (
+                            <div className="mt-0.5 text-[0.6rem] font-medium text-sky-700">Today</div>
+                          ) : null}
+                        </div>
+                        <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-2">
+                          {colTasks.length === 0 ? (
+                            <p className="text-center text-[0.65rem] text-stone-400">—</p>
+                          ) : (
+                            colTasks.map((task) => (
+                              <div key={task.id}>{renderWeekTaskCard(task)}</div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {weekViewLayout.noDue.length > 0 ? (
+                <div className="mt-3 rounded-lg border border-amber-100 bg-amber-50/50 px-3 py-2.5 sm:px-4">
+                  <h2 className="text-xs font-semibold uppercase tracking-wide text-amber-900">
+                    No due date
+                  </h2>
+                  <ul className="mt-2 grid list-none gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {weekViewLayout.noDue.map((task) => (
+                      <li key={task.id}>{renderWeekTaskCard(task)}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {weekViewLayout.laterOpenCount > 0 ? (
+                <p className="mt-3 text-center text-[0.65rem] text-stone-500">
+                  {weekViewLayout.laterOpenCount} open task
+                  {weekViewLayout.laterOpenCount === 1 ? "" : "s"} due after this week — switch to List
+                  view to see them in section order.
+                </p>
+              ) : null}
+            </div>
+            )}
 
             <form
               onSubmit={handleAddSection}
@@ -2526,30 +2923,56 @@ function TaskDetail({
               className={inputClass}
             />
           </Field>
-          <Field label="Repeats yearly" className={labelClass}>
+          <Field label="Repeat" className={labelClass}>
             <select
-              value={task.recurrence_month ?? ""}
+              value={effectiveRecurrenceInterval(task) ?? ""}
               onChange={(e) => {
-                const raw = e.target.value;
-                onPatch({
-                  recurrence_month: raw === "" ? null : Number(raw),
-                });
+                const v = e.target.value;
+                if (v === "") {
+                  onPatch({ recurrence_interval: null, recurrence_month: null });
+                } else if (v === "yearly") {
+                  const m =
+                    task.recurrence_month != null &&
+                    task.recurrence_month >= 1 &&
+                    task.recurrence_month <= 12
+                      ? task.recurrence_month
+                      : 1;
+                  onPatch({ recurrence_interval: "yearly", recurrence_month: m });
+                } else {
+                  onPatch({ recurrence_interval: v, recurrence_month: null });
+                }
               }}
               className={inputClass}
             >
-              <option value="">No</option>
-              {RECURRENCE_MONTH_OPTIONS.slice(1).map((label, i) => (
-                <option key={label} value={i + 1}>
-                  1st of {label}
-                </option>
-              ))}
+              <option value="">Does not repeat</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
             </select>
-            {task.recurrence_month != null ? (
+            {effectiveRecurrenceInterval(task) != null ? (
               <p className="mt-1 text-[0.65rem] text-stone-500">
-                Marking complete moves the due date to the next year and keeps the task open.
+                Marking complete advances the due date and reopens the task.
               </p>
             ) : null}
           </Field>
+          {effectiveRecurrenceInterval(task) === "yearly" ? (
+            <Field label="Yearly — 1st of month" className={labelClass}>
+              <select
+                value={String(task.recurrence_month ?? 1)}
+                onChange={(e) => {
+                  onPatch({ recurrence_month: Number(e.target.value) });
+                }}
+                className={inputClass}
+              >
+                {RECURRENCE_MONTH_OPTIONS.slice(1).map((label, i) => (
+                  <option key={label} value={i + 1}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          ) : null}
           <Field label="Prerequisites" className={labelClass}>
             <TaskPrerequisiteDeps
               key={task.id}

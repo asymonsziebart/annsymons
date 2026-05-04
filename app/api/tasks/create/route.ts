@@ -11,7 +11,10 @@ import {
   TaskCompletionBlockedError,
   TaskDependsInvalidError,
 } from "@/lib/data/taskDependencies";
-import { isValidRecurrenceMonth } from "@/lib/data/taskRecurrence";
+import {
+  isRecurrenceIntervalString,
+  isValidRecurrenceMonth,
+} from "@/lib/data/taskRecurrence";
 
 export async function POST(request: Request) {
   const ok = await isTasksAuth();
@@ -81,6 +84,16 @@ export async function POST(request: Request) {
       depends_on_task_ids = [...new Set(ids)].sort((a, b) => a - b);
     }
 
+    let recurrence_interval: string | null | undefined;
+    if (body?.recurrence_interval === null || body?.recurrence_interval === "") {
+      recurrence_interval = null;
+    } else if (
+      typeof body?.recurrence_interval === "string" &&
+      isRecurrenceIntervalString(body.recurrence_interval)
+    ) {
+      recurrence_interval = body.recurrence_interval.trim();
+    }
+
     let recurrence_month: number | null | undefined;
     if (body?.recurrence_month === null || body?.recurrence_month === "") {
       recurrence_month = null;
@@ -112,6 +125,7 @@ export async function POST(request: Request) {
       quarter,
       project_label,
       depends_on_task_ids,
+      recurrence_interval,
       recurrence_month,
     });
 
