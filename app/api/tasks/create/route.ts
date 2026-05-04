@@ -11,6 +11,7 @@ import {
   TaskCompletionBlockedError,
   TaskDependsInvalidError,
 } from "@/lib/data/taskDependencies";
+import { isValidRecurrenceMonth } from "@/lib/data/taskRecurrence";
 
 export async function POST(request: Request) {
   const ok = await isTasksAuth();
@@ -80,6 +81,16 @@ export async function POST(request: Request) {
       depends_on_task_ids = [...new Set(ids)].sort((a, b) => a - b);
     }
 
+    let recurrence_month: number | null | undefined;
+    if (body?.recurrence_month === null || body?.recurrence_month === "") {
+      recurrence_month = null;
+    } else if (typeof body?.recurrence_month === "number" && isValidRecurrenceMonth(body.recurrence_month)) {
+      recurrence_month = body.recurrence_month;
+    } else if (typeof body?.recurrence_month === "string") {
+      const n = parseInt(body.recurrence_month, 10);
+      if (isValidRecurrenceMonth(n)) recurrence_month = n;
+    }
+
     const task = await createTask({
       title,
       section_id,
@@ -101,6 +112,7 @@ export async function POST(request: Request) {
       quarter,
       project_label,
       depends_on_task_ids,
+      recurrence_month,
     });
 
     if (!task) {

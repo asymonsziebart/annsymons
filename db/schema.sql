@@ -69,6 +69,9 @@ CREATE TABLE IF NOT EXISTS tasks (
   requester               TEXT,
   quarter                 TEXT,
   project_label           TEXT,
+  recurrence_month        SMALLINT CHECK (
+    recurrence_month IS NULL OR (recurrence_month >= 1 AND recurrence_month <= 12)
+  ),
   CONSTRAINT tasks_status_check CHECK (
     status IN ('todo', 'in_progress', 'blocked', 'done', 'cancelled')
   ),

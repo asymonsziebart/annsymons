@@ -116,6 +116,7 @@ const TASK_TABLE_KEYS: (keyof TaskRow)[] = [
   "actual_minutes",
   "dependencies",
   "depends_on_task_ids",
+  "recurrence_month",
   "requester",
   "quarter",
   "project_label",
@@ -139,6 +140,7 @@ const TASK_TABLE_LABELS: Record<keyof TaskRow, string> = {
   actual_minutes: "Act. min",
   dependencies: "Dependencies",
   depends_on_task_ids: "Prereq IDs",
+  recurrence_month: "Yearly (1st)",
   requester: "Requester",
   quarter: "Quarter",
   project_label: "Project",
@@ -147,6 +149,27 @@ const TASK_TABLE_LABELS: Record<keyof TaskRow, string> = {
 
 const TASK_TABLE_HIDDEN_STORAGE_KEY = "annsymons.tasks.tableHiddenColumns.v1";
 const TASK_FILTERS_COLLAPSED_STORAGE_KEY = "annsymons.tasks.filtersCollapsed.v1";
+
+const RECURRENCE_MONTH_OPTIONS = [
+  "",
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+] as const;
+
+function recurrenceMonthLabel(m: number | null): string {
+  if (m == null || m < 1 || m > 12) return "—";
+  return `${RECURRENCE_MONTH_OPTIONS[m]} 1`;
+}
 
 /** Respects saved preference; if unset, default collapsed on small viewports so the list stays visible. */
 function readFiltersCollapsedPreference(): boolean {
@@ -230,6 +253,8 @@ function taskTableDataCell(task: TaskRow, key: keyof TaskRow): ReactNode {
         </span>
       );
     }
+    case "recurrence_month":
+      return recurrenceMonthLabel(v as number | null);
     case "priority":
       return (
         <span className="flex items-center gap-1.5 whitespace-nowrap">
@@ -264,6 +289,8 @@ function taskFieldPlainTextForMeasure(task: TaskRow, key: keyof TaskRow): string
       const ids = v as number[];
       return ids.length ? ids.map((id) => `#${id}`).join(", ") : "—";
     }
+    case "recurrence_month":
+      return recurrenceMonthLabel(v as number | null);
     case "priority":
       return TASK_PRIORITY_LABELS[v as TaskPriority];
     case "status":
@@ -320,6 +347,7 @@ function taskMatchesSearchQuery(task: TaskRow, raw: string): boolean {
     task.depends_on_task_ids.length
       ? task.depends_on_task_ids.map((id) => `#${id}`).join(" ")
       : "",
+    task.recurrence_month != null ? recurrenceMonthLabel(task.recurrence_month) : "",
     task.section_name,
     String(task.id),
     TASK_STATUS_LABELS[task.status],
@@ -2383,6 +2411,30 @@ function TaskDetail({
               onChange={(e) => onPatch({ due_date: e.target.value || null })}
               className={inputClass}
             />
+          </Field>
+          <Field label="Repeats yearly" className={labelClass}>
+            <select
+              value={task.recurrence_month ?? ""}
+              onChange={(e) => {
+                const raw = e.target.value;
+                onPatch({
+                  recurrence_month: raw === "" ? null : Number(raw),
+                });
+              }}
+              className={inputClass}
+            >
+              <option value="">No</option>
+              {RECURRENCE_MONTH_OPTIONS.slice(1).map((label, i) => (
+                <option key={label} value={i + 1}>
+                  1st of {label}
+                </option>
+              ))}
+            </select>
+            {task.recurrence_month != null ? (
+              <p className="mt-1 text-[0.65rem] text-stone-500">
+                Marking complete moves the due date to the next year and keeps the task open.
+              </p>
+            ) : null}
           </Field>
           <Field label="Prerequisites" className={labelClass}>
             <TaskPrerequisiteDeps

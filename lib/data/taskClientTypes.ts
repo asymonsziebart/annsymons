@@ -102,6 +102,8 @@ export type TaskRow = {
   dependencies: string | null;
   /** Task IDs that must be done (or cancelled) before this task can be completed. */
   depends_on_task_ids: number[];
+  /** If set (1–12), task is due on the 1st of that month each year; completing rolls due forward one year. */
+  recurrence_month: number | null;
   requester: string | null;
   quarter: string | null;
   project_label: string | null;
@@ -122,6 +124,7 @@ export type TaskPatch = Partial<
     | "actual_minutes"
     | "dependencies"
     | "depends_on_task_ids"
+    | "recurrence_month"
     | "requester"
     | "quarter"
     | "project_label"
@@ -140,6 +143,8 @@ export type CreateTaskInput = {
   actual_minutes?: number | null;
   dependencies?: string | null;
   depends_on_task_ids?: number[];
+  /** 1–12 = yearly on the 1st of that month; omit or null for one-off tasks. */
+  recurrence_month?: number | null;
   requester?: string | null;
   quarter?: string | null;
   project_label?: string | null;

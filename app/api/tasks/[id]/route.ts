@@ -11,6 +11,7 @@ import {
   TaskCompletionBlockedError,
   TaskDependsInvalidError,
 } from "@/lib/data/taskDependencies";
+import { isValidRecurrenceMonth } from "@/lib/data/taskRecurrence";
 
 function parsePatch(body: Record<string, unknown>): TaskPatch | null {
   const patch: TaskPatch = {};
@@ -59,6 +60,14 @@ function parsePatch(body: Record<string, unknown>): TaskPatch | null {
       if (Number.isInteger(n) && n > 0) ids.push(n);
     }
     patch.depends_on_task_ids = [...new Set(ids)].sort((a, b) => a - b);
+  }
+  if (body.recurrence_month === null || body.recurrence_month === "") {
+    patch.recurrence_month = null;
+  } else if (typeof body.recurrence_month === "number" && isValidRecurrenceMonth(body.recurrence_month)) {
+    patch.recurrence_month = body.recurrence_month;
+  } else if (typeof body.recurrence_month === "string") {
+    const n = parseInt(body.recurrence_month, 10);
+    if (isValidRecurrenceMonth(n)) patch.recurrence_month = n;
   }
   return Object.keys(patch).length ? patch : null;
 }

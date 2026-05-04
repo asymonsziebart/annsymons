@@ -14,6 +14,11 @@ import {
   TaskCompletionBlockedError,
   TaskDependsInvalidError,
 } from "./taskDependencies";
+import {
+  advanceYearlyRecurringDueAfterComplete,
+  isValidRecurrenceMonth,
+  nextYearlyFirstOfMonthDue,
+} from "./taskRecurrence";
 
 export type { CreateTaskInput, TaskPatch, TaskRow } from "./taskClientTypes";
 
@@ -77,6 +82,12 @@ function mapPgDateOnly(value: unknown): string | null {
   return null;
 }
 
+function mapRecurrenceMonth(value: unknown): number | null {
+  if (value == null || value === "") return null;
+  const n = Number(value);
+  return isValidRecurrenceMonth(n) ? n : null;
+}
+
 function mapRow(r: Record<string, unknown>): TaskRow {
   return {
     id: Number(r.id),
@@ -97,6 +108,7 @@ function mapRow(r: Record<string, unknown>): TaskRow {
     actual_minutes: r.actual_minutes != null ? Number(r.actual_minutes) : null,
     dependencies: r.dependencies != null ? String(r.dependencies) : null,
     depends_on_task_ids: parseDependsOnTaskIds(r.depends_on_task_ids),
+    recurrence_month: mapRecurrenceMonth(r.recurrence_month),
     requester: r.requester != null ? String(r.requester) : null,
     quarter: r.quarter != null ? String(r.quarter) : null,
     project_label: r.project_label != null ? String(r.project_label) : null,
@@ -112,7 +124,7 @@ export async function getTasks(): Promise<TaskRow[]> {
            t.last_overdue_email_at::text AS last_overdue_email_at,
            t.section_id, s.name AS section_name,
            t.assignee, t.priority, t.estimated_minutes, t.actual_minutes,
-           t.dependencies, t.depends_on_task_ids, t.requester, t.quarter, t.project_label,
+           t.dependencies, t.depends_on_task_ids, t.recurrence_month, t.requester, t.quarter, t.project_label,
            (SELECT COUNT(*)::int FROM task_subtasks st WHERE st.task_id = t.id) AS subtask_count
     FROM tasks t
     JOIN task_sections s ON s.id = t.section_id
@@ -129,7 +141,7 @@ export async function getTaskById(id: number): Promise<TaskRow | null> {
            t.last_overdue_email_at::text AS last_overdue_email_at,
            t.section_id, s.name AS section_name,
            t.assignee, t.priority, t.estimated_minutes, t.actual_minutes,
-           t.dependencies, t.depends_on_task_ids, t.requester, t.quarter, t.project_label,
+           t.dependencies, t.depends_on_task_ids, t.recurrence_month, t.requester, t.quarter, t.project_label,
            (SELECT COUNT(*)::int FROM task_subtasks st WHERE st.task_id = t.id) AS subtask_count
     FROM tasks t
     JOIN task_sections s ON s.id = t.section_id
@@ -226,6 +238,18 @@ export async function createTask(input: CreateTaskInput): Promise<TaskRow> {
       existing as Record<string, unknown>[]
     );
   }
+  const recurrenceMonth =
+    input.recurrence_month != null && isValidRecurrenceMonth(input.recurrence_month)
+      ? input.recurrence_month
+      : null;
+  let dueDate =
+    input.due_date === undefined || input.due_date === "" || input.due_date === null
+      ? null
+      : input.due_date;
+  if (recurrenceMonth != null && dueDate == null) {
+    dueDate = nextYearlyFirstOfMonthDue(recurrenceMonth);
+  }
+
   const depIds = normalizeDependsOnIds(input.depends_on_task_ids);
   const all = depIds.length > 0 ? await getTasks() : [];
   if (depIds.length > 0) {
@@ -249,12 +273,12 @@ export async function createTask(input: CreateTaskInput): Promise<TaskRow> {
     INSERT INTO tasks (
       title, description, due_date, status, section_id, sort_order,
       assignee, priority, estimated_minutes, actual_minutes,
-      dependencies, depends_on_task_ids, requester, quarter, project_label
+      dependencies, depends_on_task_ids, recurrence_month, requester, quarter, project_label
     )
     VALUES (
       ${input.title},
       ${input.description ?? null},
-      ${input.due_date ?? null},
+      ${dueDate},
       ${status},
       ${input.section_id},
       (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM tasks WHERE section_id = ${input.section_id}),
@@ -264,6 +288,7 @@ export async function createTask(input: CreateTaskInput): Promise<TaskRow> {
       ${input.actual_minutes ?? null},
       ${input.dependencies ?? null},
       ${serializeDependsOnTaskIds(depIds)},
+      ${recurrenceMonth},
       ${input.requester ?? null},
       ${input.quarter ?? null},
       ${input.project_label ?? null}
@@ -307,8 +332,16 @@ export async function updateTask(id: number, patch: TaskPatch): Promise<TaskRow 
   const quarter = patch.quarter !== undefined ? patch.quarter : existing.quarter;
   const project_label =
     patch.project_label !== undefined ? patch.project_label : existing.project_label;
-  const status =
+  let status =
     patch.status !== undefined ? normalizeTaskStatus(patch.status) : existing.status;
+  const recurrence_month =
+    patch.recurrence_month !== undefined
+      ? patch.recurrence_month === null
+        ? null
+        : isValidRecurrenceMonth(patch.recurrence_month)
+          ? patch.recurrence_month
+          : existing.recurrence_month
+      : existing.recurrence_month;
 
   const allTasks = await getTasks();
   const sectionChanged =
@@ -332,12 +365,23 @@ export async function updateTask(id: number, patch: TaskPatch): Promise<TaskRow 
     }
   }
 
+  let finalDue = due_date;
+  let finalStatus = status;
+  if (
+    status === "done" &&
+    recurrence_month != null &&
+    isValidRecurrenceMonth(recurrence_month)
+  ) {
+    finalStatus = "todo";
+    finalDue = advanceYearlyRecurringDueAfterComplete(due_date, recurrence_month);
+  }
+
   await sql`
     UPDATE tasks SET
       title = ${title},
       description = ${description},
-      due_date = ${due_date},
-      status = ${status},
+      due_date = ${finalDue},
+      status = ${finalStatus},
       section_id = ${section_id},
       assignee = ${assignee},
       priority = ${priority},
@@ -345,6 +389,7 @@ export async function updateTask(id: number, patch: TaskPatch): Promise<TaskRow 
       actual_minutes = ${actual_minutes},
       dependencies = ${dependencies},
       depends_on_task_ids = ${serializeDependsOnTaskIds(depends_on_task_ids)},
+      recurrence_month = ${recurrence_month},
       requester = ${requester},
       quarter = ${quarter},
       project_label = ${project_label}
@@ -393,7 +438,7 @@ export async function getTasksNeedingOverdueReminder(): Promise<TaskRow[]> {
            t.last_overdue_email_at::text AS last_overdue_email_at,
            t.section_id, s.name AS section_name,
            t.assignee, t.priority, t.estimated_minutes, t.actual_minutes,
-           t.dependencies, t.depends_on_task_ids, t.requester, t.quarter, t.project_label,
+           t.dependencies, t.depends_on_task_ids, t.recurrence_month, t.requester, t.quarter, t.project_label,
            (SELECT COUNT(*)::int FROM task_subtasks st WHERE st.task_id = t.id) AS subtask_count
     FROM tasks t
     JOIN task_sections s ON s.id = t.section_id
