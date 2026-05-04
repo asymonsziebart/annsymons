@@ -3,6 +3,8 @@
  * Safe for client and server.
  */
 
+import type { TaskRow } from "./taskClientTypes";
+
 function toIsoDateLocal(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -43,4 +45,24 @@ export function advanceYearlyRecurringDueAfterComplete(
 
 export function isValidRecurrenceMonth(n: unknown): n is number {
   return typeof n === "number" && Number.isInteger(n) && n >= 1 && n <= 12;
+}
+
+/**
+ * Open yearly recurring tasks whose due date falls in a later calendar year than `ref`
+ * are omitted from the main list (e.g. after completing May 2026, the May 2027 row stays
+ * hidden until the calendar year of that due date). Search can still surface them by title.
+ */
+export function isYearlyRecurringSuppressedUntilDueYear(
+  task: Pick<TaskRow, "recurrence_month" | "status" | "due_date">,
+  ref = new Date()
+): boolean {
+  if (task.recurrence_month == null || !isValidRecurrenceMonth(task.recurrence_month)) {
+    return false;
+  }
+  if (task.status === "done" || task.status === "cancelled") return false;
+  const d = task.due_date?.trim() ?? "";
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) return false;
+  const dueYear = parseInt(d.slice(0, 4), 10);
+  if (!Number.isFinite(dueYear)) return false;
+  return dueYear > ref.getFullYear();
 }

@@ -25,6 +25,7 @@ import {
   isTaskOverdue,
 } from "@/lib/data/taskClientTypes";
 import { blockingPrerequisiteTasks } from "@/lib/data/taskDependencies";
+import { isYearlyRecurringSuppressedUntilDueYear } from "@/lib/data/taskRecurrence";
 
 type Props = { initialTasks: TaskRow[]; initialSections: TaskSectionRow[] };
 
@@ -1014,9 +1015,12 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   }
 
   const visibleTasks = useMemo(() => {
-    if (showCompleted) return tasks;
-    return tasks.filter((t) => t.status !== "done");
-  }, [tasks, showCompleted]);
+    let list = showCompleted ? tasks : tasks.filter((t) => t.status !== "done");
+    if (taskSearchQuery.trim() === "") {
+      list = list.filter((t) => !isYearlyRecurringSuppressedUntilDueYear(t));
+    }
+    return list;
+  }, [tasks, showCompleted, taskSearchQuery]);
 
   const hasActiveTaskFilters = useMemo(
     () =>
@@ -1196,7 +1200,12 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     [orderedVisibleTaskIds]
   );
 
-  const openCount = tasks.filter((t) => t.status !== "done" && t.status !== "cancelled").length;
+  const openCount = tasks.filter(
+    (t) =>
+      t.status !== "done" &&
+      t.status !== "cancelled" &&
+      !isYearlyRecurringSuppressedUntilDueYear(t)
+  ).length;
 
   const shell =
     "flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden bg-stone-50 text-stone-900 antialiased";
