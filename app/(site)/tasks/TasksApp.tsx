@@ -1572,41 +1572,49 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
           <div
             className={`min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain py-4 [-webkit-overflow-scrolling:touch] ${showBulkBar ? "pb-28" : ""}`}
           >
-            {sections.map((sec) => {
-              const list = tasksBySectionSorted.get(sec.id) ?? [];
-              const isCollapsed = collapsed[sec.id];
-              return (
-                <section
-                  key={sec.id}
-                  className={`mb-6 rounded-lg transition-colors ${
-                    dragOverSectionId === sec.id ? "bg-sky-50 ring-2 ring-sky-300 ring-inset" : ""
-                  }`}
-                  onDragOver={(e) => {
-                    if (draggingTaskIdRef.current == null) return;
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = "move";
-                    setDragOverSectionId(sec.id);
-                  }}
-                  onDragLeave={(e) => sectionDragLeave(e, sec.id)}
-                  onDrop={(e) => void dropTaskOnSection(e, sec.id)}
-                >
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setCollapsed((c) => ({ ...c, [sec.id]: !c[sec.id] }))
-                    }
-                    className="flex w-full items-center gap-2 px-4 py-2 text-left hover:bg-stone-100/80 sm:px-6 lg:px-8"
-                  >
-                    <span className="text-stone-400">{isCollapsed ? "▸" : "▾"}</span>
-                    <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${sectionDotClass(sec.color_key)}`} />
-                    <span className="font-medium text-stone-800">{sec.name}</span>
-                    <span className="text-xs text-stone-500">({list.length})</span>
-                  </button>
-
-                  {!isCollapsed && (
-                    <>
-                      <div
-                        className="mt-1 w-full overflow-x-auto border-y border-stone-200 bg-white"
+            <div className="border-y border-stone-200 bg-white">
+              <div className="overflow-x-auto">
+                <table className="w-max min-w-full border-separate border-spacing-0 text-left text-sm">
+                  <thead className="sticky top-0 z-20 border-b border-stone-200 bg-stone-50 text-stone-500 shadow-[0_1px_0_0_rgb(231_229_228)]">
+                    <tr>
+                      <th
+                        className="w-9 border-r border-stone-200 px-2 py-2.5 pl-4 sm:pl-6 lg:pl-8"
+                        aria-label="Drag"
+                      />
+                      <th
+                        className="w-12 border-r border-stone-200 whitespace-nowrap px-0 py-2.5"
+                        aria-label="Mark done"
+                      />
+                      <th
+                        className="w-8 border-r border-stone-200 px-0 py-2.5"
+                        aria-label="Expand subtasks"
+                      />
+                      {visibleTaskTableKeys.map((k) => (
+                        <SortableTaskTh
+                          key={k}
+                          colKey={k}
+                          label={TASK_TABLE_LABELS[k]}
+                          sort={taskTableSort}
+                          onSort={toggleTaskColumnSort}
+                          widthPx={taskColumnWidths[k]}
+                          onResizePointerDown={onTaskColumnResizePointerDown}
+                          onColumnAutoFit={onTaskColumnAutoFit}
+                          className="min-w-[4.5rem] overflow-visible px-2 py-1 pl-1.5 pr-0 align-bottom"
+                        />
+                      ))}
+                    </tr>
+                  </thead>
+                  {sections.map((sec, secIdx) => {
+                    const list = tasksBySectionSorted.get(sec.id) ?? [];
+                    const isCollapsed = collapsed[sec.id];
+                    return (
+                      <tbody
+                        key={sec.id}
+                        className={`transition-colors ${
+                          dragOverSectionId === sec.id
+                            ? "bg-sky-50 ring-1 ring-inset ring-sky-300"
+                            : ""
+                        }`}
                         onDragOver={(e) => {
                           if (draggingTaskIdRef.current == null) return;
                           e.preventDefault();
@@ -1616,37 +1624,30 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                         onDragLeave={(e) => sectionDragLeave(e, sec.id)}
                         onDrop={(e) => void dropTaskOnSection(e, sec.id)}
                       >
-                        <table className="w-max min-w-full border-separate border-spacing-0 text-left text-sm">
-                          <thead>
-                            <tr className="border-b border-stone-200 bg-stone-50 text-stone-500">
-                              <th
-                                className="w-9 border-r border-stone-200 px-2 py-2.5 pl-4 sm:pl-6 lg:pl-8"
-                                aria-label="Drag"
+                        <tr
+                          className={`bg-stone-50/95 hover:bg-stone-100/80 ${
+                            secIdx > 0 ? "border-t-2 border-stone-200" : ""
+                          }`}
+                        >
+                          <td colSpan={taskTableColspan} className="p-0">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setCollapsed((c) => ({ ...c, [sec.id]: !c[sec.id] }))
+                              }
+                              className="flex w-full items-center gap-2 px-4 py-2 text-left sm:px-6 lg:px-8"
+                            >
+                              <span className="text-stone-400">{isCollapsed ? "▸" : "▾"}</span>
+                              <span
+                                className={`h-2.5 w-2.5 shrink-0 rounded-full ${sectionDotClass(sec.color_key)}`}
                               />
-                              <th
-                                className="w-12 border-r border-stone-200 whitespace-nowrap px-0 py-2.5"
-                                aria-label="Mark done"
-                              />
-                              <th
-                                className="w-8 border-r border-stone-200 px-0 py-2.5"
-                                aria-label="Expand subtasks"
-                              />
-                              {visibleTaskTableKeys.map((k) => (
-                                <SortableTaskTh
-                                  key={k}
-                                  colKey={k}
-                                  label={TASK_TABLE_LABELS[k]}
-                                  sort={taskTableSort}
-                                  onSort={toggleTaskColumnSort}
-                                  widthPx={taskColumnWidths[k]}
-                                  onResizePointerDown={onTaskColumnResizePointerDown}
-                                  onColumnAutoFit={onTaskColumnAutoFit}
-                                  className="min-w-[4.5rem] overflow-visible px-2 py-1 pl-1.5 pr-0 align-bottom"
-                                />
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody>
+                              <span className="font-medium text-stone-800">{sec.name}</span>
+                              <span className="text-xs text-stone-500">({list.length})</span>
+                            </button>
+                          </td>
+                        </tr>
+                        {!isCollapsed && (
+                          <>
                             {list.map((task) => {
                               const done = task.status === "done";
                               const prereqBlockers = !done
@@ -1868,35 +1869,42 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                 </td>
                               </tr>
                             )}
-                          </tbody>
-                        </table>
-                      </div>
-                      <div className="mt-2 flex gap-2 px-4 sm:px-6 lg:px-8">
-                        <input
-                          type="text"
-                          placeholder="Add task…"
-                          value={quickAdds[sec.id] ?? ""}
-                          onChange={(e) =>
-                            setQuickAdds((q) => ({ ...q, [sec.id]: e.target.value }))
-                          }
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") void quickAddTask(sec.id);
-                          }}
-                          className={input}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => void quickAddTask(sec.id)}
-                          className="shrink-0 rounded-md bg-sky-600 px-3 py-2 text-sm font-medium text-white hover:bg-sky-500"
-                        >
-                          Add
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </section>
-              );
-            })}
+                            <tr className="border-t border-stone-100 bg-white">
+                              <td
+                                colSpan={taskTableColspan}
+                                className="px-4 py-2 sm:px-6 lg:px-8"
+                              >
+                                <div className="flex gap-2">
+                                  <input
+                                    type="text"
+                                    placeholder="Add task…"
+                                    value={quickAdds[sec.id] ?? ""}
+                                    onChange={(e) =>
+                                      setQuickAdds((q) => ({ ...q, [sec.id]: e.target.value }))
+                                    }
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") void quickAddTask(sec.id);
+                                    }}
+                                    className={input}
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => void quickAddTask(sec.id)}
+                                    className="shrink-0 rounded-md bg-sky-600 px-3 py-2 text-sm font-medium text-white hover:bg-sky-500"
+                                  >
+                                    Add
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          </>
+                        )}
+                      </tbody>
+                    );
+                  })}
+                </table>
+              </div>
+            </div>
 
             <form
               onSubmit={handleAddSection}
