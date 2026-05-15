@@ -8,6 +8,7 @@ const privatePages = [
   { href: "/tasks", label: "Tasks", description: "Private task board" },
   { href: "/statephotos", label: "State Photos", description: "Map photo manager" },
   { href: "/archery", label: "Archery", description: "Hidden practice page" },
+  { href: "/admin/voices", label: "Voices", description: "Things he is not allowed to do" },
 ] as const;
 
 export const metadata = {
@@ -49,7 +50,7 @@ export default async function AdminDashboardPage() {
               Admin-only tools and hidden pages.
             </p>
           </div>
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {privatePages.map((page) => (
               <Link
                 key={page.href}
