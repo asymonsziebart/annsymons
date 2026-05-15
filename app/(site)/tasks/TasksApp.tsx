@@ -10,7 +10,7 @@ import {
   useRef,
   type ReactNode,
 } from "react";
-import type { PointerEvent as ReactPointerEvent } from "react";
+import type { DragEvent as ReactDragEvent, PointerEvent as ReactPointerEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   type SubtaskRow,
@@ -108,6 +108,41 @@ function startOfWeekMonday(d: Date): Date {
   const diff = day === 0 ? -6 : 1 - day;
   x.setDate(x.getDate() + diff);
   return x;
+}
+
+/** Months from “today’s month” to `targetYear` / `targetMonth0` (0–11). */
+function monthOffsetToReachCalendarMonth(targetYear: number, targetMonth0: number): number {
+  const now = new Date();
+  const cur = now.getFullYear() * 12 + now.getMonth();
+  const tar = targetYear * 12 + targetMonth0;
+  return tar - cur;
+}
+
+/** Week offset from this week’s Monday so the week containing `iso` (YYYY-MM-DD) is shown. */
+function weekOffsetForIsoDate(iso: string): number {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso.trim());
+  if (!m) return 0;
+  const y = Number(m[1]);
+  const mo = Number(m[2]);
+  const da = Number(m[3]);
+  if (!Number.isFinite(y) || !Number.isFinite(mo) || !Number.isFinite(da)) return 0;
+  const target = new Date(y, mo - 1, da);
+  const today = new Date();
+  const s0 = startOfWeekMonday(today);
+  const s1 = startOfWeekMonday(target);
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const dayDiff = Math.round((s1.getTime() - s0.getTime()) / msPerDay);
+  return Math.round(dayDiff / 7);
+}
+
+function isLikelyTaskDrag(e: ReactDragEvent): boolean {
+  return [...e.dataTransfer.types].some(
+    (t) => t === "application/json" || t === "text/plain"
+  );
+}
+
+function calendarDueIsoValid(iso: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(iso.trim());
 }
 
 /** 42 cells (6×7), Monday-first week rows for a calendar month. */
@@ -639,6 +674,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   /** When true, detail pane is hidden on large screens; task stays selected. */
   const [detailsMinimized, setDetailsMinimized] = useState(false);
   const [draggingTaskId, setDraggingTaskId] = useState<number | null>(null);
+  const [calendarDueDropTargetIso, setCalendarDueDropTargetIso] = useState<string | null>(null);
+  const lastCalendarDueDropAtRef = useRef(0);
   const [dragOverSectionId, setDragOverSectionId] = useState<number | null>(null);
   const draggingTaskIdRef = useRef<number | null>(null);
   /** When false, tasks with status "done" are omitted from the list (still in data). */
@@ -824,6 +861,10 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
       /* ignore */
     }
   }, [taskViewMode, weekOffset, monthOffset, yearOffset, taskViewHydrated]);
+
+  useEffect(() => {
+    if (taskViewMode === "list") setCalendarDueDropTargetIso(null);
+  }, [taskViewMode]);
 
   useEffect(() => {
     setFiltersBarCollapsed(readFiltersCollapsedPreference());
@@ -1213,6 +1254,37 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     await patchTask(taskId, { section_id: targetSectionId });
   }
 
+  async function dropTaskOnCalendarDay(e: React.DragEvent, dueIso: string) {
+    e.preventDefault();
+    e.stopPropagation();
+    lastCalendarDueDropAtRef.current = Date.now();
+    setCalendarDueDropTargetIso(null);
+    draggingTaskIdRef.current = null;
+    setDraggingTaskId(null);
+    setDragOverSectionId(null);
+    const taskId = parseDragTaskId(e);
+    if (taskId == null || !calendarDueIsoValid(dueIso)) return;
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) return;
+    const cur = task.due_date?.trim() ?? "";
+    if (cur === dueIso) return;
+    await patchTask(taskId, { due_date: dueIso });
+  }
+
+  function calendarDayDragOver(e: React.DragEvent, iso: string) {
+    if (!isLikelyTaskDrag(e)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = "move";
+    setCalendarDueDropTargetIso(iso);
+  }
+
+  function calendarDayDragLeave(e: React.DragEvent, iso: string) {
+    const related = e.relatedTarget as Node | null;
+    if (related && e.currentTarget.contains(related)) return;
+    setCalendarDueDropTargetIso((prev) => (prev === iso ? null : prev));
+  }
+
   const visibleTasks = useMemo(() => {
     let list = showCompleted ? tasks : tasks.filter((t) => t.status !== "done");
     if (taskSearchQuery.trim() === "") {
@@ -1529,7 +1601,11 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     );
   }
 
-  function renderWeekTaskCard(task: TaskRow, compact?: boolean): ReactNode {
+  function renderWeekTaskCard(
+    task: TaskRow,
+    compact?: boolean,
+    draggableForDue?: boolean
+  ): ReactNode {
     const done = task.status === "done";
     const prereqBlockers = !done ? blockingPrerequisiteTasks(task, tasksById) : [];
     const completionBlocked = prereqBlockers.length > 0;
@@ -1545,8 +1621,28 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
           done ? "text-stone-500 line-through" : "text-stone-900"
         }`;
     const chk = compact ? "h-4 w-4" : "h-5 w-5";
+    const dragProps = draggableForDue
+      ? {
+          draggable: true as const,
+          onDragStart: (e: ReactDragEvent) => {
+            e.stopPropagation();
+            const payload = JSON.stringify({ taskId: task.id });
+            e.dataTransfer.setData("application/json", payload);
+            e.dataTransfer.setData("text/plain", String(task.id));
+            e.dataTransfer.effectAllowed = "move";
+            draggingTaskIdRef.current = task.id;
+            setDraggingTaskId(task.id);
+          },
+          onDragEnd: () => {
+            draggingTaskIdRef.current = null;
+            setDraggingTaskId(null);
+            setCalendarDueDropTargetIso(null);
+          },
+        }
+      : {};
     return (
       <div
+        {...dragProps}
         role="button"
         tabIndex={0}
         onClick={(e) => handleTaskRowClick(task.id, e)}
@@ -1560,7 +1656,9 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
           selectedTaskIds.includes(task.id)
             ? "border-sky-400 bg-sky-50"
             : "border-stone-200 bg-white hover:border-stone-300"
-        } ${done ? "opacity-80" : ""} ${compact ? "" : "text-sm"}`}
+        } ${done ? "opacity-80" : ""} ${compact ? "" : "text-sm"} ${
+          draggableForDue ? "cursor-grab active:cursor-grabbing" : ""
+        } ${draggingTaskId === task.id ? "opacity-60" : ""}`}
       >
         <div className="flex items-start gap-1">
           <span onClick={(e) => e.stopPropagation()} className={`shrink-0 ${compact ? "pt-px" : "pt-0.5"}`}>
@@ -1639,7 +1737,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 <span className="hidden text-stone-400 md:inline">
                   {taskViewMode !== "list" ? (
                     <>
-                      Monday-start weeks · overdue above · Ctrl/⌘+click or Shift+click to select
+                      Drag a task onto any day to set its due date · Monday-start weeks · Ctrl/⌘+click
+                      or Shift+click to select
                     </>
                   ) : (
                     <>
@@ -2469,7 +2568,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 ) : (
                   <ul className="mt-2 grid list-none gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {calendarBuckets.overdue.map((task) => (
-                      <li key={task.id}>{renderWeekTaskCard(task)}</li>
+                      <li key={task.id}>{renderWeekTaskCard(task, undefined, true)}</li>
                     ))}
                   </ul>
                 )}
@@ -2481,11 +2580,19 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     {weekViewLayout.days.map((day) => {
                       const isToday = day.iso === weekViewLayout.todayIso;
                       const colTasks = weekViewLayout.byDay.get(day.iso) ?? [];
+                      const dropHi = calendarDueDropTargetIso === day.iso;
                       return (
                         <div
                           key={day.iso}
+                          onDragOver={(e) => calendarDayDragOver(e, day.iso)}
+                          onDragLeave={(e) => calendarDayDragLeave(e, day.iso)}
+                          onDrop={(e) => void dropTaskOnCalendarDay(e, day.iso)}
                           className={`flex min-h-[14rem] flex-col bg-white sm:min-h-[16rem] ${
-                            isToday ? "ring-2 ring-inset ring-sky-300" : ""
+                            dropHi
+                              ? "z-[1] ring-2 ring-inset ring-emerald-500 bg-emerald-50/50"
+                              : isToday
+                                ? "ring-2 ring-inset ring-sky-300"
+                                : ""
                           }`}
                         >
                           <div
@@ -2506,7 +2613,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                               <p className="text-center text-[0.65rem] text-stone-400">—</p>
                             ) : (
                               colTasks.map((task) => (
-                                <div key={task.id}>{renderWeekTaskCard(task)}</div>
+                                <div key={task.id}>{renderWeekTaskCard(task, undefined, true)}</div>
                               ))
                             )}
                           </div>
@@ -2519,6 +2626,10 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
 
               {taskViewMode === "month" ? (
                 <div className="overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch]">
+                  <p className="mb-2 text-[0.65rem] text-stone-500">
+                    Drag tasks onto a day to change the due date. Click the day number or “+more →
+                    week” to open that week.
+                  </p>
                   <div className="inline-block min-w-full rounded-lg border border-stone-200 bg-stone-200 p-px shadow-sm">
                     <div className="grid grid-cols-7 gap-px bg-stone-200">
                       {CALENDAR_WEEKDAY_HEADERS.map((h) => (
@@ -2533,30 +2644,57 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                         const colTasks = monthViewLayout.byDay.get(cell.iso) ?? [];
                         const isToday = cell.iso === monthViewLayout.todayIso;
                         const dayNum = parseInt(cell.iso.slice(8), 10);
+                        const dropHi = calendarDueDropTargetIso === cell.iso;
                         return (
                           <div
                             key={cell.iso}
+                            onDragOver={(e) => calendarDayDragOver(e, cell.iso)}
+                            onDragLeave={(e) => calendarDayDragLeave(e, cell.iso)}
+                            onDrop={(e) => void dropTaskOnCalendarDay(e, cell.iso)}
                             className={`flex min-h-[5.5rem] flex-col bg-white p-1 sm:min-h-[6.5rem] ${
                               !cell.inMonth ? "opacity-[0.45]" : ""
-                            } ${isToday ? "ring-2 ring-inset ring-sky-300" : ""}`}
+                            } ${
+                              dropHi
+                                ? "z-[1] ring-2 ring-inset ring-emerald-500 bg-emerald-50/50"
+                                : isToday
+                                  ? "ring-2 ring-inset ring-sky-300"
+                                  : ""
+                            }`}
                           >
                             <div className="flex justify-end">
-                              <span
-                                className={`text-[0.65rem] font-semibold tabular-nums ${
+                              <button
+                                type="button"
+                                title="Open week view for this day"
+                                aria-label={`Open week containing ${cell.iso}`}
+                                onClick={() => {
+                                  if (Date.now() - lastCalendarDueDropAtRef.current < 450) return;
+                                  setWeekOffset(weekOffsetForIsoDate(cell.iso));
+                                  setTaskViewMode("week");
+                                }}
+                                className={`min-h-6 w-full rounded px-0.5 text-right text-[0.65rem] font-semibold tabular-nums hover:bg-stone-100 ${
                                   cell.inMonth ? "text-stone-700" : "text-stone-400"
                                 }`}
                               >
                                 {cell.inMonth ? dayNum : ""}
-                              </span>
+                              </button>
                             </div>
                             <div className="mt-0.5 min-h-0 flex-1 space-y-0.5 overflow-y-auto">
                               {colTasks.slice(0, 2).map((task) => (
-                                <div key={task.id}>{renderWeekTaskCard(task, true)}</div>
+                                <div key={task.id}>{renderWeekTaskCard(task, true, true)}</div>
                               ))}
                               {colTasks.length > 2 ? (
-                                <div className="text-center text-[0.6rem] font-medium text-stone-400">
-                                  +{colTasks.length - 2} more
-                                </div>
+                                <button
+                                  type="button"
+                                  title="Open week view for this day"
+                                  onClick={() => {
+                                    if (Date.now() - lastCalendarDueDropAtRef.current < 450) return;
+                                    setWeekOffset(weekOffsetForIsoDate(cell.iso));
+                                    setTaskViewMode("week");
+                                  }}
+                                  className="w-full rounded py-0.5 text-center text-[0.6rem] font-medium text-sky-700 hover:bg-sky-50 hover:underline"
+                                >
+                                  +{colTasks.length - 2} more → week
+                                </button>
                               ) : null}
                             </div>
                           </div>
@@ -2568,13 +2706,31 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               ) : null}
 
               {taskViewMode === "year" ? (
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div>
+                  <p className="mb-2 text-[0.65rem] text-stone-500">
+                    Drag tasks onto a day to set the due date. Click a day or month title to open month
+                    view. Badge counts are open tasks only.
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {yearViewLayout.months.map((mo) => (
                     <div
                       key={mo.month0}
                       className="rounded-lg border border-stone-200 bg-white p-1.5 shadow-sm"
                     >
-                      <div className="text-center text-xs font-semibold text-stone-800">{mo.label}</div>
+                      <button
+                        type="button"
+                        title="Open this month in month view"
+                        onClick={() => {
+                          if (Date.now() - lastCalendarDueDropAtRef.current < 450) return;
+                          setMonthOffset(
+                            monthOffsetToReachCalendarMonth(yearViewLayout.viewYear, mo.month0)
+                          );
+                          setTaskViewMode("month");
+                        }}
+                        className="w-full rounded py-0.5 text-center text-xs font-semibold text-stone-800 hover:bg-stone-50 hover:text-sky-800"
+                      >
+                        {mo.label}
+                      </button>
                       <div className="mt-1 grid grid-cols-7 gap-px rounded bg-stone-100 p-px text-[0.5rem] leading-tight">
                         {CALENDAR_WEEKDAY_HEADERS.map((h) => (
                           <div
@@ -2592,13 +2748,44 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                           const isToday = cell.iso === yearViewLayout.todayIso;
                           const dayNum = parseInt(cell.iso.slice(8), 10);
                           const titles = list.map((t) => t.title).join("\n");
+                          const p = cell.iso.split("-");
+                          const cy = parseInt(p[0]!, 10);
+                          const cm0 = parseInt(p[1]!, 10) - 1;
+                          const tip =
+                            (titles ? `${titles}\n` : "") +
+                            "Click: month view · Drop task: set due date.";
+                          const dropHi = calendarDueDropTargetIso === cell.iso;
                           return (
                             <div
                               key={cell.iso}
-                              title={titles || undefined}
-                              className={`min-h-[1.45rem] bg-white p-0.5 ${
+                              role="button"
+                              tabIndex={0}
+                              title={tip.trim() || "Open month view — or drop task to set due date"}
+                              aria-label={`Open month of ${cell.iso}`}
+                              onClick={() => {
+                                if (Date.now() - lastCalendarDueDropAtRef.current < 450) return;
+                                setMonthOffset(monthOffsetToReachCalendarMonth(cy, cm0));
+                                setTaskViewMode("month");
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key !== "Enter" && e.key !== " ") return;
+                                e.preventDefault();
+                                if (Date.now() - lastCalendarDueDropAtRef.current < 450) return;
+                                setMonthOffset(monthOffsetToReachCalendarMonth(cy, cm0));
+                                setTaskViewMode("month");
+                              }}
+                              onDragOver={(e) => calendarDayDragOver(e, cell.iso)}
+                              onDragLeave={(e) => calendarDayDragLeave(e, cell.iso)}
+                              onDrop={(e) => void dropTaskOnCalendarDay(e, cell.iso)}
+                              className={`min-h-[1.45rem] w-full cursor-pointer bg-white p-0.5 text-left outline-none ring-offset-1 hover:bg-stone-50 focus-visible:ring-2 focus-visible:ring-sky-400 ${
                                 !cell.inMonth ? "opacity-[0.35]" : ""
-                              } ${isToday ? "ring-1 ring-inset ring-sky-400" : ""}`}
+                              } ${
+                                dropHi
+                                  ? "z-[1] ring-2 ring-inset ring-emerald-500 bg-emerald-50/50"
+                                  : isToday
+                                    ? "ring-1 ring-inset ring-sky-400"
+                                    : ""
+                              }`}
                             >
                               <div className="flex items-start justify-between gap-0.5">
                                 <span
@@ -2620,6 +2807,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                       </div>
                     </div>
                   ))}
+                  </div>
                 </div>
               ) : null}
 
@@ -2630,7 +2818,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                   </h2>
                   <ul className="mt-2 grid list-none gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {calendarBuckets.noDue.map((task) => (
-                      <li key={task.id}>{renderWeekTaskCard(task)}</li>
+                      <li key={task.id}>{renderWeekTaskCard(task, undefined, true)}</li>
                     ))}
                   </ul>
                 </div>

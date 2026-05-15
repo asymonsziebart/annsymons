@@ -1,0 +1,154 @@
+import Link from "next/link";
+import {
+  getSterlingHeightsPollen,
+  STERLING_HEIGHTS_MI,
+} from "@/lib/pollen/sterlingHeightsPollen";
+
+export const metadata = {
+  title: "Pollen | Ann Symons",
+  description: `Pollen forecast for ${STERLING_HEIGHTS_MI.name}.`,
+  robots: { index: false, follow: false },
+};
+
+function categoryTint(category: string | null): string {
+  if (!category) return "bg-stone-100 text-stone-700 ring-stone-200";
+  const t = category.toLowerCase();
+  if (t.includes("very low") || t.includes("low")) {
+    return "bg-emerald-50 text-emerald-900 ring-emerald-200";
+  }
+  if (t.includes("moderate")) {
+    return "bg-amber-50 text-amber-950 ring-amber-200";
+  }
+  if (t.includes("high") || t.includes("very high")) {
+    return "bg-red-50 text-red-950 ring-red-200";
+  }
+  return "bg-stone-100 text-stone-800 ring-stone-200";
+}
+
+export default async function PollenPage() {
+  const result = await getSterlingHeightsPollen(5);
+
+  return (
+    <main className="mx-auto max-w-3xl px-4 py-12 sm:px-8 sm:py-16">
+      <p className="text-center text-xs text-[var(--color-ink-muted)]">
+        <Link href="/" className="link-accent hover:text-[var(--color-ink)]">
+          Home
+        </Link>
+      </p>
+      <h1 className="mt-4 text-center font-heading text-3xl font-semibold tracking-tight text-[var(--color-ink)] sm:text-4xl">
+        Pollen
+      </h1>
+      <p className="mx-auto mt-3 max-w-lg text-center text-sm text-[var(--color-ink-muted)]">
+        Forecast for <span className="font-medium text-[var(--color-ink)]">{STERLING_HEIGHTS_MI.name}</span>
+        {result.ok && result.regionCode ? (
+          <span className="text-[var(--color-ink-muted)]"> ({result.regionCode})</span>
+        ) : null}
+        . Source:{" "}
+        <a
+          href="https://developers.google.com/maps/documentation/pollen"
+          className="link-accent underline-offset-2 hover:underline"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Google Pollen API
+        </a>
+        , updated about every 30 minutes on this site.
+      </p>
+
+      {!result.ok ? (
+        <div
+          className="mx-auto mt-10 max-w-lg rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-5 text-sm text-amber-950 shadow-sm"
+          role="status"
+        >
+          {result.reason === "missing_key" ? (
+            <>
+              <p className="font-medium">API key not configured</p>
+              <p className="mt-2 leading-relaxed text-amber-900/90">
+                Add <code className="rounded bg-amber-100/80 px-1.5 py-0.5 text-xs">GOOGLE_POLLEN_API_KEY</code>{" "}
+                (or reuse <code className="rounded bg-amber-100/80 px-1.5 py-0.5 text-xs">GOOGLE_MAPS_API_KEY</code> with
+                the{" "}
+                <a
+                  href="https://console.cloud.google.com/apis/library/pollen.googleapis.com"
+                  className="font-medium underline underline-offset-2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Pollen API
+                </a>{" "}
+                enabled) in your environment, then redeploy.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="font-medium">Could not load pollen data</p>
+              <p className="mt-2 text-amber-900/90">
+                {result.reason === "http_error" && result.status != null
+                  ? `HTTP ${result.status}${result.detail ? `: ${result.detail}` : ""}`
+                  : result.detail ?? "Unexpected error"}
+              </p>
+            </>
+          )}
+        </div>
+      ) : (
+        <div className="mt-10 space-y-8">
+          {result.daily.map((day, i) => (
+            <section
+              key={day.iso || i}
+              className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]/90 p-5 shadow-sm ring-1 ring-black/5"
+            >
+              <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
+                {i === 0 ? "Today · " : ""}
+                {day.dateLabel}
+              </h2>
+              {day.types.length === 0 ? (
+                <p className="mt-3 text-sm text-[var(--color-ink-muted)]">No pollen type data for this day.</p>
+              ) : (
+                <ul className="mt-4 space-y-4">
+                  {day.types.map((t) => (
+                    <li
+                      key={`${day.iso}-${t.code}`}
+                      className="rounded-lg border border-[var(--color-border)] bg-[var(--color-cream)]/40 px-4 py-3"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="font-medium text-[var(--color-ink)]">{t.displayName}</span>
+                        <div className="flex flex-wrap items-center gap-2">
+                          {t.category ? (
+                            <span
+                              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ${categoryTint(t.category)}`}
+                            >
+                              {t.category}
+                            </span>
+                          ) : null}
+                          {t.value != null ? (
+                            <span className="text-xs text-[var(--color-ink-muted)]">UPI {t.value}</span>
+                          ) : null}
+                          <span className="text-xs text-[var(--color-ink-muted)]">
+                            {t.inSeason ? "In season" : "Out of season"}
+                          </span>
+                        </div>
+                      </div>
+                      {t.description ? (
+                        <p className="mt-2 text-sm leading-relaxed text-[var(--color-ink-muted)]">{t.description}</p>
+                      ) : null}
+                      {t.recommendations.length > 0 ? (
+                        <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-[var(--color-ink)]">
+                          {t.recommendations.map((r, j) => (
+                            <li key={j}>{r}</li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          ))}
+        </div>
+      )}
+
+      <p className="mx-auto mt-12 max-w-md text-center text-[0.65rem] leading-relaxed text-[var(--color-ink-muted)]">
+        This page is not linked in the site navigation. Pollen levels are forecasts, not medical advice.
+      </p>
+    </main>
+  );
+}
