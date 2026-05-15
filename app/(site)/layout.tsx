@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import SiteFooter from "@/components/SiteFooter";
 import PaintSplashes from "@/components/PaintSplashes";
+import MobileAdminSettings from "@/components/MobileAdminSettings";
 
 export default function SiteChromeLayout({
   children,
@@ -17,6 +18,7 @@ export default function SiteChromeLayout({
           <SiteFooter />
         </div>
       </div>
+      <MobileAdminSettings />
     </>
   );
 }

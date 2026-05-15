@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 const adminLinks = [
@@ -11,10 +12,18 @@ const adminLinks = [
 ] as const;
 
 export default function MobileAdminSettings() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
+  const isHome = pathname === "/";
+
   useEffect(() => {
+    if (!isHome) setOpen(false);
+  }, [isHome]);
+
+  useEffect(() => {
+    if (!isHome) return;
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
@@ -32,12 +41,14 @@ export default function MobileAdminSettings() {
       document.removeEventListener("mousedown", onPointerDown);
       document.removeEventListener("touchstart", onPointerDown);
     };
-  }, [open]);
+  }, [isHome, open]);
+
+  if (!isHome) return null;
 
   return (
     <div
       ref={rootRef}
-      className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] z-40 md:hidden"
+      className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] z-[100] lg:hidden"
     >
       {open ? (
         <div
@@ -74,7 +85,7 @@ export default function MobileAdminSettings() {
 
       <button
         type="button"
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-ink)] text-white shadow-xl ring-1 ring-black/10 transition-transform active:scale-95"
+        className="flex min-h-14 items-center gap-2 rounded-full bg-[var(--color-accent)] px-4 py-3 text-white shadow-2xl ring-2 ring-white/80 transition-transform active:scale-95"
         aria-label={open ? "Close admin pages menu" : "Open admin pages menu"}
         aria-expanded={open}
         aria-controls="mobile-admin-settings-menu"
@@ -99,6 +110,7 @@ export default function MobileAdminSettings() {
             strokeLinejoin="round"
           />
         </svg>
+        <span className="text-sm font-semibold">Settings</span>
       </button>
     </div>
   );
