@@ -18,7 +18,7 @@ export default function ArcheryPage() {
         </p>
       </section>
 
-      <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 sm:p-8">
+      <section className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 sm:p-8">
         <h2 className="text-lg font-semibold text-[#a5d6a7]">Planned loop</h2>
         <ol className="mt-4 list-decimal space-y-3 pl-5 text-white/80">
           <li>Calibrate projector image and camera view to the same wall region.</li>
@@ -28,7 +28,7 @@ export default function ArcheryPage() {
         </ol>
       </section>
 
-      <section className="rounded-2xl border border-dashed border-white/20 bg-black/20 p-8 text-center">
+      <section className="rounded-2xl border border-dashed border-white/20 bg-black/20 p-5 text-center sm:p-8">
         <p className="text-sm font-medium uppercase tracking-wider text-white/45">Session</p>
         <p className="mt-2 text-lg text-white/70">Hardware not connected</p>
         <p className="mx-auto mt-2 max-w-md text-sm text-white/50">

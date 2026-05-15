@@ -52,7 +52,7 @@ export default function ImageUploadField({ folder, value, onChange, label, input
           placeholder={folder === "blog" ? "/blog/photo.jpg" : folder === "recipes" ? "/recipes/photo.webp" : "/gallery/photo.jpg"}
           required={required}
         />
-        <label className="cursor-pointer whitespace-nowrap rounded-lg border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]">
+        <label className="inline-flex min-h-11 cursor-pointer items-center justify-center whitespace-nowrap rounded-lg border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]">
           <input
             ref={inputRef}
             type="file"

@@ -120,3 +120,41 @@
   transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+@keyframes hero-headshot-fly-in-mobile {
+  0% {
+    transform: translateY(140px) scale(1.9);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 639px) {
+  .card-hover:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .hero-headshot-fly-in {
+    animation-name: hero-headshot-fly-in-mobile;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+
+  .hero-headshot-fly-in {
+    animation: none;
+  }
+
+  .hero-headshot-circle {
+    transition: none;
+  }
+}

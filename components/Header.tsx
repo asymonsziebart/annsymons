@@ -50,7 +50,7 @@ export default function Header() {
         className={
           isTasksApp
             ? "mx-auto flex h-12 max-w-5xl items-center justify-between gap-2 px-2.5 sm:px-3 md:h-[3.75rem] md:gap-3 md:px-6 lg:h-20 lg:gap-4 lg:px-8"
-            : "mx-auto flex h-[3.75rem] max-w-5xl items-center justify-between gap-3 px-4 sm:h-20 sm:gap-4 sm:px-8"
+            : "mx-auto flex h-16 max-w-5xl items-center justify-between gap-3 px-4 sm:h-20 sm:gap-4 sm:px-8"
         }
       >
         <Link
@@ -58,7 +58,7 @@ export default function Header() {
           className={
             isTasksApp
               ? "font-heading min-h-0 min-w-0 shrink text-base font-semibold leading-tight text-[var(--color-ink)] transition-colors hover:text-[var(--color-accent)] md:min-h-11 md:text-lg md:leading-normal lg:text-xl"
-              : "font-heading min-h-11 min-w-0 shrink text-lg font-semibold text-[var(--color-ink)] transition-colors hover:text-[var(--color-accent)] sm:text-xl"
+              : "font-heading min-h-11 min-w-0 shrink text-lg font-semibold leading-tight text-[var(--color-ink)] transition-colors hover:text-[var(--color-accent)] sm:text-xl"
           }
         >
           Ann Symons
@@ -82,7 +82,7 @@ export default function Header() {
           className={
             isTasksApp
               ? "touch-manipulation rounded-md p-1.5 text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)] hover:text-[var(--color-ink)] md:hidden"
-              : "touch-manipulation rounded-lg p-2 text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)] hover:text-[var(--color-ink)] md:hidden"
+              : "min-h-11 min-w-11 touch-manipulation rounded-full p-2 text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)] hover:text-[var(--color-ink)] md:hidden"
           }
           aria-expanded={menuOpen}
           aria-controls="mobile-main-nav"
@@ -127,7 +127,7 @@ export default function Header() {
             className={
               isTasksApp
                 ? "mx-auto flex max-w-5xl flex-col px-3 py-2 sm:px-6"
-                : "mx-auto flex max-w-5xl flex-col px-4 py-3 sm:px-8"
+                : "mx-auto flex max-w-5xl flex-col gap-1 px-4 py-3 sm:px-8"
             }
             aria-label="Main"
           >
@@ -138,7 +138,7 @@ export default function Header() {
                 className={
                   isTasksApp
                     ? "link-accent touch-manipulation rounded-lg px-2 py-2.5 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]/60 hover:text-[var(--color-ink)]"
-                    : "link-accent touch-manipulation rounded-lg px-2 py-3 text-base font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]/60 hover:text-[var(--color-ink)]"
+                    : "link-accent flex min-h-12 touch-manipulation items-center rounded-xl px-3 py-3 text-base font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]/60 hover:text-[var(--color-ink)]"
                 }
               >
                 {label}

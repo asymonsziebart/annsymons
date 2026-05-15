@@ -55,7 +55,7 @@ export default function RecipeForm(initial: Props) {
   }
 
   const inputClass =
-    "w-full rounded-lg border border-[var(--color-border)] bg-white px-4 py-2 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]";
+    "w-full rounded-lg border border-[var(--color-border)] bg-white px-4 py-2.5 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]";
 
   return (
     <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -73,7 +73,7 @@ export default function RecipeForm(initial: Props) {
         <label className="mb-1 block text-sm font-medium text-[var(--color-ink-muted)]">Description</label>
         <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} className={inputClass} />
       </div>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
           <label className="mb-1 block text-sm font-medium text-[var(--color-ink-muted)]">Prep time</label>
           <input type="text" value={prepTime} onChange={(e) => setPrepTime(e.target.value)} className={inputClass} placeholder="e.g. 15 min" />
@@ -97,11 +97,11 @@ export default function RecipeForm(initial: Props) {
       </div>
       <ImageUploadField folder="recipes" value={image} onChange={setImage} label="Recipe image" inputClass={inputClass} />
       {error && <p className="text-sm text-red-600">{error}</p>}
-      <div className="flex gap-3">
-        <button type="submit" disabled={loading} className="rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)] disabled:opacity-50">
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <button type="submit" disabled={loading} className="min-h-11 rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)] disabled:opacity-50">
           {loading ? "Saving…" : isEdit ? "Update recipe" : "Create recipe"}
         </button>
-        <Link href="/admin" className="rounded-xl border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]">Cancel</Link>
+        <Link href="/admin" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]">Cancel</Link>
       </div>
     </form>
   );

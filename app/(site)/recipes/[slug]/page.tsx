@@ -22,22 +22,22 @@ export default async function RecipePage({ params }: Props) {
   if (!recipe) notFound();
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-14 sm:px-8 sm:py-20">
+    <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-8 sm:py-20">
       <Link
         href="/recipes"
-        className="text-sm font-medium text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors link-accent inline-block"
+        className="link-accent inline-flex min-h-11 items-center text-sm font-medium text-[var(--color-accent)] transition-colors hover:text-[var(--color-accent-hover)]"
       >
         ← Back to Recipes
       </Link>
-      <article className="mt-8 overflow-hidden rounded-2xl bg-[var(--color-surface)] shadow-[0_4px_24px_-4px_rgba(28,25,23,0.08)] ring-1 ring-[var(--color-border)]">
-        <div className="p-8 sm:p-12">
-          <h1 className="font-heading text-3xl font-semibold tracking-tight text-[var(--color-ink)] sm:text-4xl">
+      <article className="mt-4 overflow-hidden rounded-2xl bg-[var(--color-surface)] shadow-[0_18px_50px_-34px_rgba(28,25,23,0.5)] ring-1 ring-[var(--color-border)] sm:mt-8">
+        <div className="p-5 sm:p-12">
+          <h1 className="font-heading text-balance text-3xl font-semibold tracking-tight text-[var(--color-ink)] sm:text-4xl">
             {recipe.title}
           </h1>
           <p className="mt-3 text-[var(--color-ink-muted)] leading-relaxed">
             {recipe.description}
           </p>
-          <div className="mt-4 flex flex-wrap gap-4 text-sm text-[var(--color-accent)]">
+          <div className="mt-4 flex flex-wrap gap-2 text-sm text-[var(--color-accent)] sm:gap-4">
             {recipe.prepTime && <span>Prep: {recipe.prepTime}</span>}
             {recipe.cookTime && <span>Cook: {recipe.cookTime}</span>}
             {recipe.servings && <span>Serves: {recipe.servings}</span>}
@@ -55,12 +55,12 @@ export default async function RecipePage({ params }: Props) {
           </div>
         )}
 
-        <div className="grid gap-8 border-t border-[var(--color-border)] p-8 sm:grid-cols-2 sm:p-12">
+        <div className="grid gap-8 border-t border-[var(--color-border)] p-5 sm:grid-cols-2 sm:p-12">
           <div>
             <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
               Ingredients
             </h2>
-            <ul className="mt-4 list-inside list-disc space-y-2 text-[var(--color-ink-muted)]">
+            <ul className="mt-4 list-outside list-disc space-y-2 pl-5 text-[var(--color-ink-muted)]">
               {recipe.ingredients.map((ing, i) => (
                 <li key={i}>{ing}</li>
               ))}
@@ -70,7 +70,7 @@ export default async function RecipePage({ params }: Props) {
             <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
               Steps
             </h2>
-            <ol className="mt-4 list-inside list-decimal space-y-3 text-[var(--color-ink-muted)]">
+            <ol className="mt-4 list-outside list-decimal space-y-3 pl-5 text-[var(--color-ink-muted)]">
               {recipe.steps.map((step, i) => (
                 <li key={i}>{step}</li>
               ))}

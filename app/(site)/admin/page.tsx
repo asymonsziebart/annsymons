@@ -16,12 +16,12 @@ export default async function AdminDashboardPage() {
   ]);
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-8">
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+    <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-8 sm:py-12">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <h1 className="font-heading text-2xl font-semibold text-[var(--color-ink)]">
           Admin
         </h1>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <AdminSeedButton />
           <AdminLogoutButton />
           <Link
@@ -33,9 +33,9 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="space-y-10">
-        <section className="rounded-2xl bg-[var(--color-surface)] p-6 ring-1 ring-[var(--color-border)]">
-          <div className="flex items-center justify-between">
+      <div className="space-y-6 sm:space-y-10">
+        <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
+          <div className="flex items-center justify-between gap-3">
             <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
               Blog posts
             </h2>
@@ -51,10 +51,10 @@ export default async function AdminDashboardPage() {
               <li className="text-sm text-[var(--color-muted)]">No posts yet.</li>
             ) : (
               posts.map((post) => (
-                <li key={post.slug} className="flex items-center justify-between gap-4">
+                <li key={post.slug} className="flex items-start justify-between gap-4 rounded-xl bg-[var(--color-cream)]/60 px-3 py-2 sm:bg-transparent sm:px-0 sm:py-0">
                   <Link
                     href={`/blog/${post.slug}`}
-                    className="text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
+                    className="min-w-0 text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
                   >
                     {post.title}
                   </Link>
@@ -70,8 +70,8 @@ export default async function AdminDashboardPage() {
           </ul>
         </section>
 
-        <section className="rounded-2xl bg-[var(--color-surface)] p-6 ring-1 ring-[var(--color-border)]">
-          <div className="flex items-center justify-between">
+        <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
+          <div className="flex items-center justify-between gap-3">
             <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
               Recipes
             </h2>
@@ -87,10 +87,10 @@ export default async function AdminDashboardPage() {
               <li className="text-sm text-[var(--color-muted)]">No recipes yet.</li>
             ) : (
               recipes.map((recipe) => (
-                <li key={recipe.slug} className="flex items-center justify-between gap-4">
+                <li key={recipe.slug} className="flex items-start justify-between gap-4 rounded-xl bg-[var(--color-cream)]/60 px-3 py-2 sm:bg-transparent sm:px-0 sm:py-0">
                   <Link
                     href={`/recipes/${recipe.slug}`}
-                    className="text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
+                    className="min-w-0 text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
                   >
                     {recipe.title}
                   </Link>

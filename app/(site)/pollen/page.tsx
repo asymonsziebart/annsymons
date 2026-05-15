@@ -29,7 +29,7 @@ export default async function PollenPage() {
   const result = await getSterlingHeightsPollen(5);
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12 sm:px-8 sm:py-16">
+    <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-8 sm:py-16">
       <p className="text-center text-xs text-[var(--color-ink-muted)]">
         <Link href="/" className="link-accent hover:text-[var(--color-ink)]">
           Home
@@ -38,7 +38,7 @@ export default async function PollenPage() {
       <h1 className="mt-4 text-center font-heading text-3xl font-semibold tracking-tight text-[var(--color-ink)] sm:text-4xl">
         Pollen
       </h1>
-      <p className="mx-auto mt-3 max-w-lg text-center text-sm text-[var(--color-ink-muted)]">
+      <p className="mx-auto mt-3 max-w-lg text-pretty text-center text-sm leading-relaxed text-[var(--color-ink-muted)]">
         Forecast for <span className="font-medium text-[var(--color-ink)]">{STERLING_HEIGHTS_MI.name}</span>
         {result.ok && result.regionCode ? (
           <span className="text-[var(--color-ink-muted)]"> ({result.regionCode})</span>
@@ -90,11 +90,11 @@ export default async function PollenPage() {
           )}
         </div>
       ) : (
-        <div className="mt-10 space-y-8">
+        <div className="mt-8 space-y-5 sm:mt-10 sm:space-y-8">
           {result.daily.map((day, i) => (
             <section
               key={day.iso || i}
-              className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]/90 p-5 shadow-sm ring-1 ring-black/5"
+              className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]/90 p-4 shadow-sm ring-1 ring-black/5 sm:p-5"
             >
               <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
                 {i === 0 ? "Today · " : ""}
@@ -109,7 +109,7 @@ export default async function PollenPage() {
                       key={`${day.iso}-${t.code}`}
                       className="rounded-lg border border-[var(--color-border)] bg-[var(--color-cream)]/40 px-4 py-3"
                     >
-                      <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                         <span className="font-medium text-[var(--color-ink)]">{t.displayName}</span>
                         <div className="flex flex-wrap items-center gap-2">
                           {t.category ? (

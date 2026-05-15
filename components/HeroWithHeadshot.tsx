@@ -44,25 +44,25 @@ export default function HeroWithHeadshot({ name, tagline, website }: HeroProps) 
 
   return (
     <>
-      <header className="text-center">
-        <h1 className="font-heading text-3xl font-semibold tracking-tight text-[var(--color-ink)] sm:text-4xl">
+      <header className="mx-auto max-w-2xl text-center">
+        <h1 className="font-heading text-balance text-4xl font-semibold tracking-tight text-[var(--color-ink)] sm:text-5xl">
           {name}
         </h1>
         {tagline && (
-          <p className="mt-2 text-lg text-[var(--color-muted)]">
+          <p className="mx-auto mt-3 max-w-xl text-pretty text-base leading-relaxed text-[var(--color-muted)] sm:text-lg">
             {tagline}
           </p>
         )}
         {website && (
-          <p className="mt-1 text-sm text-[var(--color-ink-muted)]">
+          <p className="mt-2 text-sm text-[var(--color-ink-muted)]">
             {website}
           </p>
         )}
       </header>
 
-      <div className="mx-auto mt-10 flex justify-center overflow-visible">
+      <div className="mx-auto mt-8 flex justify-center overflow-visible sm:mt-10">
         <div
-          className="hero-headshot-circle hero-headshot-fly-in relative h-64 w-64 overflow-hidden rounded-full ring-4 ring-[var(--color-surface)] shadow-xl sm:h-80 sm:w-80"
+          className="hero-headshot-circle hero-headshot-fly-in relative h-52 w-52 overflow-hidden rounded-full ring-4 ring-[var(--color-surface)] shadow-xl sm:h-72 sm:w-72 md:h-80 md:w-80"
           style={entranceDone ? scrollStyle : undefined}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}

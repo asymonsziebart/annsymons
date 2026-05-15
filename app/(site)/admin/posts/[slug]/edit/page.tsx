@@ -16,7 +16,7 @@ export default async function EditPostPage({ params }: Props) {
   if (!post) notFound();
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12 sm:px-8">
+    <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-8 sm:py-12">
       <Link
         href="/admin"
         className="text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-ink)]"
