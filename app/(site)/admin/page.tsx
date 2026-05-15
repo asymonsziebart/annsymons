@@ -4,6 +4,12 @@ import { getAllRecipes } from "@/lib/data/recipes";
 import AdminLogoutButton from "./AdminLogoutButton";
 import AdminSeedButton from "./AdminSeedButton";
 
+const privatePages = [
+  { href: "/tasks", label: "Tasks", description: "Private task board" },
+  { href: "/statephotos", label: "State Photos", description: "Map photo manager" },
+  { href: "/archery", label: "Archery", description: "Hidden practice page" },
+] as const;
+
 export const metadata = {
   title: "Admin | Ann Symons",
   robots: "noindex, nofollow",
@@ -34,6 +40,33 @@ export default async function AdminDashboardPage() {
       </div>
 
       <div className="space-y-6 sm:space-y-10">
+        <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
+          <div>
+            <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
+              Private pages
+            </h2>
+            <p className="mt-1 text-sm text-[var(--color-muted)]">
+              Admin-only tools and hidden pages.
+            </p>
+          </div>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {privatePages.map((page) => (
+              <Link
+                key={page.href}
+                href={page.href}
+                className="rounded-xl border border-[var(--color-border)] bg-[var(--color-cream)]/60 px-4 py-3 transition-colors hover:bg-[var(--color-cream-dark)]/70"
+              >
+                <span className="block text-sm font-semibold text-[var(--color-ink)]">
+                  {page.label}
+                </span>
+                <span className="mt-1 block text-xs leading-relaxed text-[var(--color-muted)]">
+                  {page.description}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+
         <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
           <div className="flex items-center justify-between gap-3">
             <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">

@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { createHash } from "crypto";
+import { isAdmin } from "@/lib/auth";
 import { getAllTasksPasswords, getTasksPassword } from "@/lib/tasksPassword";
 
 const COOKIE_NAME = "tasks_session";
@@ -38,6 +39,7 @@ export async function clearTasksSession(): Promise<void> {
 }
 
 export async function isTasksAuth(): Promise<boolean> {
+  if (await isAdmin()) return true;
   const c = await cookies();
   const cookie = c.get(COOKIE_NAME)?.value;
   if (!cookie) return false;
