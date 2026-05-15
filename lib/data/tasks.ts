@@ -216,6 +216,34 @@ function resolvePriorityForTaskInSection(task: TaskRow, allInSection: TaskRow[])
   return "medium";
 }
 
+async function prioritySectionId(priority: TaskPriority): Promise<number | null> {
+  if (priority === "none") return null;
+  const sql = getSqlOrThrow();
+  const rows = await sql`
+    SELECT id, name
+    FROM task_sections
+    ORDER BY sort_order ASC, id ASC
+  `;
+  for (const row of rows as Record<string, unknown>[]) {
+    const inferred = priorityInferredFromSectionName(String(row.name ?? ""));
+    if (inferred === priority) return Number(row.id);
+  }
+  return null;
+}
+
+async function priorityForSectionId(sectionId: number): Promise<TaskPriority | null> {
+  const sql = getSqlOrThrow();
+  const rows = await sql`
+    SELECT name
+    FROM task_sections
+    WHERE id = ${sectionId}
+    LIMIT 1
+  `;
+  const row = (rows as Record<string, unknown>[])[0];
+  if (!row) return null;
+  return priorityInferredFromSectionName(String(row.name ?? ""));
+}
+
 /**
  * Set priority for tasks that are still "none" using the section name and/or other tasks in that section; persists to the DB.
  */
@@ -235,6 +263,49 @@ export async function backfillTaskPrioritiesFromSection(): Promise<number> {
     if (next === "none") continue;
     const row = await updateTask(t.id, { priority: next });
     if (row) n += 1;
+  }
+  return n;
+}
+
+/**
+ * For boards that use priority-named sections, keep already-prioritized tasks in the matching section.
+ * This repairs older rows where priority changed but section_id did not follow.
+ */
+export async function syncTaskSectionsFromPriority(): Promise<number> {
+  const sql = getSqlOrThrow();
+  const tasks = await getTasks();
+  const prioritySections = new Map<TaskPriority, number>();
+  const sectionRows = await sql`
+    SELECT id, name
+    FROM task_sections
+    ORDER BY sort_order ASC, id ASC
+  `;
+  for (const row of sectionRows as Record<string, unknown>[]) {
+    const inferred = priorityInferredFromSectionName(String(row.name ?? ""));
+    if (inferred && !prioritySections.has(inferred)) {
+      prioritySections.set(inferred, Number(row.id));
+    }
+  }
+
+  let n = 0;
+  for (const task of tasks) {
+    if (task.priority === "none") continue;
+    const currentSectionPriority = priorityInferredFromSectionName(task.section_name);
+    if (!currentSectionPriority || currentSectionPriority === task.priority) continue;
+    const targetSectionId = prioritySections.get(task.priority);
+    if (!targetSectionId || targetSectionId === task.section_id) continue;
+    await sql`
+      UPDATE tasks
+      SET
+        section_id = ${targetSectionId},
+        sort_order = (
+          SELECT COALESCE(MAX(sort_order), 0) + 1
+          FROM tasks
+          WHERE section_id = ${targetSectionId}
+        )
+      WHERE id = ${task.id}
+    `;
+    n += 1;
   }
   return n;
 }
@@ -334,12 +405,19 @@ export async function updateTask(id: number, patch: TaskPatch): Promise<TaskRow 
   const description =
     patch.description !== undefined ? patch.description : existing.description;
   const due_date = patch.due_date !== undefined ? patch.due_date : existing.due_date;
-  const section_id = patch.section_id ?? existing.section_id;
+  let section_id = patch.section_id ?? existing.section_id;
   const assignee = patch.assignee !== undefined ? patch.assignee : existing.assignee;
-  const priority =
+  let priority =
     patch.priority !== undefined
       ? normalizeTaskPriority(patch.priority)
       : existing.priority;
+  if (patch.priority !== undefined && patch.section_id === undefined) {
+    const matchingSectionId = await prioritySectionId(priority);
+    if (matchingSectionId != null) section_id = matchingSectionId;
+  } else if (patch.section_id !== undefined && patch.priority === undefined) {
+    const inferredPriority = await priorityForSectionId(section_id);
+    if (inferredPriority != null) priority = inferredPriority;
+  }
   const estimated_minutes =
     patch.estimated_minutes !== undefined
       ? patch.estimated_minutes
@@ -482,8 +560,19 @@ export async function moveTaskToSection(
   newSortOrder: number
 ): Promise<void> {
   const sql = getSqlOrThrow();
+  const inferredPriority = await priorityForSectionId(newSectionId);
+  if (inferredPriority != null) {
+    await sql`
+      UPDATE tasks
+      SET section_id = ${newSectionId}, sort_order = ${newSortOrder}, priority = ${inferredPriority}
+      WHERE id = ${taskId}
+    `;
+    return;
+  }
   await sql`
-    UPDATE tasks SET section_id = ${newSectionId}, sort_order = ${newSortOrder} WHERE id = ${taskId}
+    UPDATE tasks
+    SET section_id = ${newSectionId}, sort_order = ${newSortOrder}
+    WHERE id = ${taskId}
   `;
 }
 
