@@ -309,7 +309,7 @@ const TASK_TABLE_LABELS: Record<keyof TaskRow, string> = {
 const TASK_TABLE_HIDDEN_STORAGE_KEY = "annsymons.tasks.tableHiddenColumns.v1";
 const TASK_FILTERS_COLLAPSED_STORAGE_KEY = "annsymons.tasks.filtersCollapsed.v1";
 const TASK_TOP_CONTROLS_COLLAPSED_STORAGE_KEY =
-  "annsymons.tasks.topControlsCollapsed.v1";
+  "annsymons.tasks.topControlsCollapsed.v2";
 const TASK_LIST_SORT_STORAGE_KEY = "annsymons.tasks.listSort.v1";
 const TASK_VIEW_MODE_STORAGE_KEY = "annsymons.tasks.viewMode.v1";
 const TASK_VIEW_WEEK_OFFSET_STORAGE_KEY = "annsymons.tasks.weekViewOffset.v1";
@@ -397,14 +397,14 @@ function readFiltersCollapsedPreference(): boolean {
   }
 }
 
-/** Default the dense toolbar closed on phones, but respect the user's last choice. */
+/** Default the dense toolbar closed on mobile/tablet, but respect the user's last choice. */
 function readTopControlsCollapsedPreference(): boolean {
   if (typeof window === "undefined") return false;
   try {
     const raw = localStorage.getItem(TASK_TOP_CONTROLS_COLLAPSED_STORAGE_KEY);
     if (raw === "1") return true;
     if (raw === "0") return false;
-    return window.matchMedia("(max-width: 639px)").matches;
+    return window.matchMedia("(max-width: 1023px)").matches;
   } catch {
     return false;
   }
@@ -1606,7 +1606,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     "flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden bg-stone-50 text-stone-900 antialiased";
   const input =
     "w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-base text-stone-900 placeholder:text-stone-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm";
-  const filterSelect = `${input} w-full min-w-0 sm:w-auto sm:min-w-[7.5rem] sm:max-w-[11rem]`;
+  const filterSelect = `${input} w-full min-w-0 sm:w-auto sm:min-w-[7.5rem] lg:max-w-[11rem]`;
   const label = "text-xs font-medium text-stone-500";
 
   if (sections.length === 0) {
@@ -1745,7 +1745,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
       <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden border-t border-stone-200">
         {/* List pane — grows to full width when detail pane is minimized */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <header className="flex shrink-0 flex-col gap-3 border-b border-stone-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-6 lg:px-8">
+          <header className="flex shrink-0 flex-col gap-3 border-b border-stone-200 bg-white px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-4 lg:px-8">
             <div className="flex min-w-0 items-start justify-between gap-3">
               <div className="min-w-0">
                 <h1 className="font-heading text-lg font-semibold text-stone-900">My tasks</h1>
@@ -1789,7 +1789,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               </div>
               <button
                 type="button"
-                className="inline-flex min-h-10 shrink-0 items-center rounded-md border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-sm hover:bg-stone-50 sm:hidden"
+                className="inline-flex min-h-10 shrink-0 items-center rounded-md border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-sm hover:bg-stone-50 lg:hidden"
                 aria-expanded={!topControlsCollapsed}
                 aria-controls="task-top-controls"
                 onClick={() => {
@@ -1804,27 +1804,27 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               id="task-top-controls"
               className={`${
                 topControlsCollapsed ? "hidden" : "grid"
-              } w-full grid-cols-2 items-stretch gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center`}
+              } w-full grid-cols-2 items-stretch gap-2 lg:flex lg:w-auto lg:flex-wrap lg:items-center`}
             >
               {selected && selectedTaskIds.length === 1 && detailsMinimized && (
                 <button
                   type="button"
                   onClick={() => setDetailsMinimized(false)}
-                  className="col-span-2 min-h-10 rounded-md border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-medium text-sky-800 shadow-sm hover:bg-sky-100 sm:col-span-1 sm:py-1.5"
+                  className="col-span-2 min-h-10 rounded-md border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-medium text-sky-800 shadow-sm hover:bg-sky-100 lg:col-span-1 lg:py-1.5"
                 >
                   <span className="lg:hidden">Task details</span>
                   <span className="hidden lg:inline">Show details</span>
                 </button>
               )}
               <div
-                className="col-span-2 inline-flex min-h-10 items-center gap-0.5 rounded-md border border-stone-200 bg-stone-50 p-0.5 sm:col-span-1"
+                className="col-span-2 inline-flex min-h-10 items-center gap-0.5 rounded-md border border-stone-200 bg-stone-50 p-0.5 lg:col-span-1"
                 role="group"
                 aria-label="Task layout"
               >
                 <button
                   type="button"
                   onClick={() => setTaskViewMode("list")}
-                  className={`min-h-9 flex-1 rounded px-2 py-1 text-[0.7rem] font-medium sm:min-h-0 sm:flex-none sm:px-2.5 sm:text-xs ${
+                  className={`min-h-9 flex-1 rounded px-2 py-1 text-[0.7rem] font-medium lg:min-h-0 lg:flex-none lg:px-2.5 lg:text-xs ${
                     taskViewMode === "list"
                       ? "bg-white text-stone-900 shadow-sm"
                       : "text-stone-600 hover:text-stone-900"
@@ -1835,7 +1835,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 <button
                   type="button"
                   onClick={() => setTaskViewMode("week")}
-                  className={`min-h-9 flex-1 rounded px-2 py-1 text-[0.7rem] font-medium sm:min-h-0 sm:flex-none sm:px-2.5 sm:text-xs ${
+                  className={`min-h-9 flex-1 rounded px-2 py-1 text-[0.7rem] font-medium lg:min-h-0 lg:flex-none lg:px-2.5 lg:text-xs ${
                     taskViewMode === "week"
                       ? "bg-white text-stone-900 shadow-sm"
                       : "text-stone-600 hover:text-stone-900"
@@ -1846,7 +1846,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 <button
                   type="button"
                   onClick={() => setTaskViewMode("month")}
-                  className={`min-h-9 flex-1 rounded px-2 py-1 text-[0.7rem] font-medium sm:min-h-0 sm:flex-none sm:px-2.5 sm:text-xs ${
+                  className={`min-h-9 flex-1 rounded px-2 py-1 text-[0.7rem] font-medium lg:min-h-0 lg:flex-none lg:px-2.5 lg:text-xs ${
                     taskViewMode === "month"
                       ? "bg-white text-stone-900 shadow-sm"
                       : "text-stone-600 hover:text-stone-900"
@@ -1857,7 +1857,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 <button
                   type="button"
                   onClick={() => setTaskViewMode("year")}
-                  className={`min-h-9 flex-1 rounded px-2 py-1 text-[0.7rem] font-medium sm:min-h-0 sm:flex-none sm:px-2.5 sm:text-xs ${
+                  className={`min-h-9 flex-1 rounded px-2 py-1 text-[0.7rem] font-medium lg:min-h-0 lg:flex-none lg:px-2.5 lg:text-xs ${
                     taskViewMode === "year"
                       ? "bg-white text-stone-900 shadow-sm"
                       : "text-stone-600 hover:text-stone-900"
@@ -1867,13 +1867,13 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 </button>
               </div>
               {taskViewMode === "week" ? (
-                <div className="col-span-2 flex min-h-10 items-center gap-0.5 rounded-md border border-stone-200 bg-white px-0.5 py-0.5 shadow-sm sm:col-span-1">
+                <div className="col-span-2 flex min-h-10 items-center gap-0.5 rounded-md border border-stone-200 bg-white px-0.5 py-0.5 shadow-sm lg:col-span-1">
                   <button
                     type="button"
                     title="Previous week"
                     aria-label="Previous week"
                     onClick={() => setWeekOffset((o) => o - 1)}
-                    className="min-h-9 flex-1 rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 sm:min-h-0 sm:flex-none"
+                    className="min-h-9 flex-1 rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 lg:min-h-0 lg:flex-none"
                   >
                     ←
                   </button>
@@ -1881,7 +1881,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     type="button"
                     title="Jump to this week"
                     onClick={() => setWeekOffset(0)}
-                    className="min-h-9 flex-[2] rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 sm:min-h-0 sm:flex-none"
+                    className="min-h-9 flex-[2] rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 lg:min-h-0 lg:flex-none"
                   >
                     This week
                   </button>
@@ -1890,20 +1890,20 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     title="Next week"
                     aria-label="Next week"
                     onClick={() => setWeekOffset((o) => o + 1)}
-                    className="min-h-9 flex-1 rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 sm:min-h-0 sm:flex-none"
+                    className="min-h-9 flex-1 rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 lg:min-h-0 lg:flex-none"
                   >
                     →
                   </button>
                 </div>
               ) : null}
               {taskViewMode === "month" ? (
-                <div className="col-span-2 flex min-h-10 items-center gap-0.5 rounded-md border border-stone-200 bg-white px-0.5 py-0.5 shadow-sm sm:col-span-1">
+                <div className="col-span-2 flex min-h-10 items-center gap-0.5 rounded-md border border-stone-200 bg-white px-0.5 py-0.5 shadow-sm lg:col-span-1">
                   <button
                     type="button"
                     title="Previous month"
                     aria-label="Previous month"
                     onClick={() => setMonthOffset((o) => o - 1)}
-                    className="min-h-9 flex-1 rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 sm:min-h-0 sm:flex-none"
+                    className="min-h-9 flex-1 rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 lg:min-h-0 lg:flex-none"
                   >
                     ←
                   </button>
@@ -1911,7 +1911,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     type="button"
                     title="Jump to this month"
                     onClick={() => setMonthOffset(0)}
-                    className="min-h-9 flex-[2] rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 sm:min-h-0 sm:flex-none"
+                    className="min-h-9 flex-[2] rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 lg:min-h-0 lg:flex-none"
                   >
                     This month
                   </button>
@@ -1920,20 +1920,20 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     title="Next month"
                     aria-label="Next month"
                     onClick={() => setMonthOffset((o) => o + 1)}
-                    className="min-h-9 flex-1 rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 sm:min-h-0 sm:flex-none"
+                    className="min-h-9 flex-1 rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 lg:min-h-0 lg:flex-none"
                   >
                     →
                   </button>
                 </div>
               ) : null}
               {taskViewMode === "year" ? (
-                <div className="col-span-2 flex min-h-10 items-center gap-0.5 rounded-md border border-stone-200 bg-white px-0.5 py-0.5 shadow-sm sm:col-span-1">
+                <div className="col-span-2 flex min-h-10 items-center gap-0.5 rounded-md border border-stone-200 bg-white px-0.5 py-0.5 shadow-sm lg:col-span-1">
                   <button
                     type="button"
                     title="Previous year"
                     aria-label="Previous year"
                     onClick={() => setYearOffset((o) => o - 1)}
-                    className="min-h-9 flex-1 rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 sm:min-h-0 sm:flex-none"
+                    className="min-h-9 flex-1 rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 lg:min-h-0 lg:flex-none"
                   >
                     ←
                   </button>
@@ -1941,7 +1941,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     type="button"
                     title="Jump to this year"
                     onClick={() => setYearOffset(0)}
-                    className="min-h-9 flex-[2] rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 sm:min-h-0 sm:flex-none"
+                    className="min-h-9 flex-[2] rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 lg:min-h-0 lg:flex-none"
                   >
                     This year
                   </button>
@@ -1950,14 +1950,14 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     title="Next year"
                     aria-label="Next year"
                     onClick={() => setYearOffset((o) => o + 1)}
-                    className="min-h-9 flex-1 rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 sm:min-h-0 sm:flex-none"
+                    className="min-h-9 flex-1 rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 lg:min-h-0 lg:flex-none"
                   >
                     →
                   </button>
                 </div>
               ) : null}
               {taskViewMode === "list" ? (
-                <label className="col-span-2 flex min-w-0 flex-col gap-0.5 sm:col-span-1">
+                <label className="col-span-2 flex min-w-0 flex-col gap-0.5 lg:col-span-1">
                   <span className="text-[0.65rem] font-medium uppercase tracking-wide text-stone-500">
                     Order within section
                   </span>
@@ -1969,7 +1969,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                       else if (v === "due_asc") setTaskTableSort({ key: "due_date", dir: "asc" });
                       else if (v === "due_desc") setTaskTableSort({ key: "due_date", dir: "desc" });
                     }}
-                    className="min-h-10 w-full rounded-md border border-stone-200 bg-white px-2 py-2 text-xs text-stone-800 shadow-sm sm:min-h-0 sm:max-w-[11rem] sm:py-1.5"
+                    className="min-h-10 w-full rounded-md border border-stone-200 bg-white px-2 py-2 text-xs text-stone-800 shadow-sm lg:min-h-0 lg:max-w-[11rem] lg:py-1.5"
                     aria-label="Sort tasks within each section"
                   >
                     <option value="due_asc">Due date (soonest first)</option>
@@ -1987,7 +1987,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               <button
                 type="button"
                 onClick={() => setShowCompleted((v) => !v)}
-                className="min-h-10 rounded-md border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-sm hover:bg-stone-50 sm:min-h-0 sm:py-1.5"
+                className="min-h-10 rounded-md border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-sm hover:bg-stone-50 lg:min-h-0 lg:py-1.5"
               >
                 {showCompleted ? "Hide completed" : "Show completed"}
               </button>
@@ -1997,7 +1997,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                   type="button"
                   onClick={() => setColumnsPanelOpen((o) => !o)}
                   title="Choose which columns appear in the list. Your selection is saved in this browser."
-                  className={`min-h-10 rounded-md border px-3 py-2 text-xs font-medium shadow-sm sm:min-h-0 sm:py-1.5 ${
+                  className={`min-h-10 rounded-md border px-3 py-2 text-xs font-medium shadow-sm lg:min-h-0 lg:py-1.5 ${
                     columnsPanelOpen
                       ? "border-sky-300 bg-sky-50 text-sky-900"
                       : "border-stone-200 bg-white text-stone-700 hover:bg-stone-50"
@@ -2069,7 +2069,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               <button
                 type="button"
                 onClick={() => void refresh()}
-                className="min-h-10 rounded-md border border-stone-200 bg-white px-3 py-2 text-xs text-stone-700 shadow-sm hover:bg-stone-50 sm:min-h-0 sm:py-1.5"
+                className="min-h-10 rounded-md border border-stone-200 bg-white px-3 py-2 text-xs text-stone-700 shadow-sm hover:bg-stone-50 lg:min-h-0 lg:py-1.5"
               >
                 Refresh
               </button>
@@ -2078,14 +2078,14 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Suburban Library Cooperative Vega portal (Sterling Heights card) — checkouts & due dates (new tab)"
-                className="inline-flex min-h-10 items-center justify-center rounded-md border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-sky-800 shadow-sm hover:bg-sky-50 sm:min-h-0 sm:py-1.5"
+                className="inline-flex min-h-10 items-center justify-center rounded-md border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-sky-800 shadow-sm hover:bg-sky-50 lg:min-h-0 lg:py-1.5"
               >
                 Library account
               </a>
               <button
                 type="button"
                 onClick={() => void logout()}
-                className="min-h-10 rounded-md border border-stone-200 bg-white px-3 py-2 text-xs text-stone-700 shadow-sm hover:bg-stone-50 sm:min-h-0 sm:py-1.5"
+                className="min-h-10 rounded-md border border-stone-200 bg-white px-3 py-2 text-xs text-stone-700 shadow-sm hover:bg-stone-50 lg:min-h-0 lg:py-1.5"
               >
                 Sign out
               </button>
