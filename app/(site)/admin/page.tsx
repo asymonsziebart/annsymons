@@ -5,10 +5,10 @@ import AdminLogoutButton from "./AdminLogoutButton";
 import AdminSeedButton from "./AdminSeedButton";
 
 const privatePages = [
+  { href: "/admin/voices", label: "Voices", description: "Things he is not allowed to do" },
   { href: "/tasks", label: "Tasks", description: "Private task board" },
   { href: "/statephotos", label: "State Photos", description: "Map photo manager" },
   { href: "/archery", label: "Archery", description: "Hidden practice page" },
-  { href: "/admin/voices", label: "Voices", description: "Things he is not allowed to do" },
 ] as const;
 
 export const metadata = {
@@ -29,6 +29,12 @@ export default async function AdminDashboardPage() {
           Admin
         </h1>
         <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href="/admin/voices"
+            className="rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)]"
+          >
+            Voices
+          </Link>
           <AdminSeedButton />
           <AdminLogoutButton />
           <Link
@@ -55,7 +61,11 @@ export default async function AdminDashboardPage() {
               <Link
                 key={page.href}
                 href={page.href}
-                className="rounded-xl border border-[var(--color-border)] bg-[var(--color-cream)]/60 px-4 py-3 transition-colors hover:bg-[var(--color-cream-dark)]/70"
+                className={
+                  page.href === "/admin/voices"
+                    ? "rounded-xl border border-[var(--color-accent)] bg-orange-50 px-4 py-3 shadow-sm transition-colors hover:bg-orange-100"
+                    : "rounded-xl border border-[var(--color-border)] bg-[var(--color-cream)]/60 px-4 py-3 transition-colors hover:bg-[var(--color-cream-dark)]/70"
+                }
               >
                 <span className="block text-sm font-semibold text-[var(--color-ink)]">
                   {page.label}
