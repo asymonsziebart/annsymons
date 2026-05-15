@@ -308,6 +308,8 @@ const TASK_TABLE_LABELS: Record<keyof TaskRow, string> = {
 
 const TASK_TABLE_HIDDEN_STORAGE_KEY = "annsymons.tasks.tableHiddenColumns.v1";
 const TASK_FILTERS_COLLAPSED_STORAGE_KEY = "annsymons.tasks.filtersCollapsed.v1";
+const TASK_TOP_CONTROLS_COLLAPSED_STORAGE_KEY =
+  "annsymons.tasks.topControlsCollapsed.v1";
 const TASK_LIST_SORT_STORAGE_KEY = "annsymons.tasks.listSort.v1";
 const TASK_VIEW_MODE_STORAGE_KEY = "annsymons.tasks.viewMode.v1";
 const TASK_VIEW_WEEK_OFFSET_STORAGE_KEY = "annsymons.tasks.weekViewOffset.v1";
@@ -390,6 +392,19 @@ function readFiltersCollapsedPreference(): boolean {
     if (raw === "1") return true;
     if (raw === "0") return false;
     return window.matchMedia("(max-width: 1023px)").matches;
+  } catch {
+    return false;
+  }
+}
+
+/** Default the dense toolbar closed on phones, but respect the user's last choice. */
+function readTopControlsCollapsedPreference(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const raw = localStorage.getItem(TASK_TOP_CONTROLS_COLLAPSED_STORAGE_KEY);
+    if (raw === "1") return true;
+    if (raw === "0") return false;
+    return window.matchMedia("(max-width: 639px)").matches;
   } catch {
     return false;
   }
@@ -705,6 +720,9 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   /** Hidden data columns (drag / done / sub stay always visible). New fields default to visible. */
   const [hiddenTaskColumns, setHiddenTaskColumns] = useState<(keyof TaskRow)[]>([]);
   const [taskColumnsHydrated, setTaskColumnsHydrated] = useState(false);
+  /** When true on phones, the dense view/action toolbar is tucked away. */
+  const [topControlsCollapsed, setTopControlsCollapsed] = useState(false);
+  const [topControlsHydrated, setTopControlsHydrated] = useState(false);
   /** When true, search + filter row is collapsed so the task list uses more vertical space. */
   const [filtersBarCollapsed, setFiltersBarCollapsed] = useState(false);
   const [filtersBarHydrated, setFiltersBarHydrated] = useState(false);
@@ -865,6 +883,23 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   useEffect(() => {
     if (taskViewMode === "list") setCalendarDueDropTargetIso(null);
   }, [taskViewMode]);
+
+  useEffect(() => {
+    setTopControlsCollapsed(readTopControlsCollapsedPreference());
+    setTopControlsHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!topControlsHydrated) return;
+    try {
+      localStorage.setItem(
+        TASK_TOP_CONTROLS_COLLAPSED_STORAGE_KEY,
+        topControlsCollapsed ? "1" : "0"
+      );
+    } catch {
+      /* storage full or disabled */
+    }
+  }, [topControlsCollapsed, topControlsHydrated]);
 
   useEffect(() => {
     setFiltersBarCollapsed(readFiltersCollapsedPreference());
@@ -1711,47 +1746,66 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
         {/* List pane — grows to full width when detail pane is minimized */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <header className="flex shrink-0 flex-col gap-3 border-b border-stone-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-6 lg:px-8">
-            <div className="min-w-0">
-              <h1 className="font-heading text-lg font-semibold text-stone-900">My tasks</h1>
-              <p className="text-xs text-stone-500">
-                {hasActiveTaskFilters ? (
-                  <>
-                    <span className="font-medium text-stone-700">
-                      {filteredTasks.length} matching
-                    </span>
-                    {" · "}
-                    {visibleTasks.length} in list ·{" "}
-                  </>
-                ) : null}
-                {openCount} open ·{" "}
-                {taskViewMode === "week" ? (
-                  <span className="font-medium text-stone-700">{weekViewLayout.weekLabel}</span>
-                ) : null}
-                {taskViewMode === "month" ? (
-                  <span className="font-medium text-stone-700">{monthViewLayout.monthTitle}</span>
-                ) : null}
-                {taskViewMode === "year" ? (
-                  <span className="font-medium text-stone-700">{yearViewLayout.yearTitle}</span>
-                ) : null}
-                {taskViewMode !== "list" ? " · " : null}
-                <span className="hidden text-stone-400 md:inline">
-                  {taskViewMode !== "list" ? (
+            <div className="flex min-w-0 items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h1 className="font-heading text-lg font-semibold text-stone-900">My tasks</h1>
+                <p className="text-xs text-stone-500">
+                  {hasActiveTaskFilters ? (
                     <>
-                      Drag a task onto any day to set its due date · Monday-start weeks · Ctrl/⌘+click
-                      or Shift+click to select
+                      <span className="font-medium text-stone-700">
+                        {filteredTasks.length} matching
+                      </span>
+                      {" · "}
+                      {visibleTasks.length} in list ·{" "}
                     </>
-                  ) : (
-                    <>
-                      Order tasks with the list control or by clicking column headers · Ctrl/⌘+click
-                      or Shift+click to select · drag{" "}
-                      <span className="whitespace-nowrap">⋮⋮</span> between sections
-                    </>
-                  )}
-                </span>
-                <span className="text-stone-400 md:hidden">Tap a task for details</span>
-              </p>
+                  ) : null}
+                  {openCount} open ·{" "}
+                  {taskViewMode === "week" ? (
+                    <span className="font-medium text-stone-700">{weekViewLayout.weekLabel}</span>
+                  ) : null}
+                  {taskViewMode === "month" ? (
+                    <span className="font-medium text-stone-700">{monthViewLayout.monthTitle}</span>
+                  ) : null}
+                  {taskViewMode === "year" ? (
+                    <span className="font-medium text-stone-700">{yearViewLayout.yearTitle}</span>
+                  ) : null}
+                  {taskViewMode !== "list" ? " · " : null}
+                  <span className="hidden text-stone-400 md:inline">
+                    {taskViewMode !== "list" ? (
+                      <>
+                        Drag a task onto any day to set its due date · Monday-start weeks · Ctrl/⌘+click
+                        or Shift+click to select
+                      </>
+                    ) : (
+                      <>
+                        Order tasks with the list control or by clicking column headers · Ctrl/⌘+click
+                        or Shift+click to select · drag{" "}
+                        <span className="whitespace-nowrap">⋮⋮</span> between sections
+                      </>
+                    )}
+                  </span>
+                  <span className="text-stone-400 md:hidden">Tap a task for details</span>
+                </p>
+              </div>
+              <button
+                type="button"
+                className="inline-flex min-h-10 shrink-0 items-center rounded-md border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-sm hover:bg-stone-50 sm:hidden"
+                aria-expanded={!topControlsCollapsed}
+                aria-controls="task-top-controls"
+                onClick={() => {
+                  if (!topControlsCollapsed) setColumnsPanelOpen(false);
+                  setTopControlsCollapsed((collapsed) => !collapsed);
+                }}
+              >
+                {topControlsCollapsed ? "Show controls" : "Hide controls"}
+              </button>
             </div>
-            <div className="grid w-full grid-cols-2 items-stretch gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center">
+            <div
+              id="task-top-controls"
+              className={`${
+                topControlsCollapsed ? "hidden" : "grid"
+              } w-full grid-cols-2 items-stretch gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center`}
+            >
               {selected && selectedTaskIds.length === 1 && detailsMinimized && (
                 <button
                   type="button"
