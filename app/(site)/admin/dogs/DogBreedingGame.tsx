@@ -498,6 +498,11 @@ export default function DogBreedingGame() {
     setMessage("Started a new ranch.");
   }
 
+  const parentSlotLabels = [
+    selectedParents[0]?.name ?? "Pick first adult",
+    selectedParents[1]?.name ?? "Pick second adult",
+  ];
+
   return (
     <div className="mt-6 space-y-6">
       <section className="grid gap-3 sm:grid-cols-4">
@@ -524,6 +529,53 @@ export default function DogBreedingGame() {
       <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-950">
         {message}
       </div>
+
+      <section className="rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-lime-50 to-amber-50 p-4 shadow-[0_18px_50px_-36px_rgba(21,128,61,0.5)] sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
+              Breeding pen
+            </p>
+            <h2 className="mt-1 font-heading text-2xl font-semibold text-stone-950">
+              Breed two selected dogs
+            </h2>
+            <p className="mt-1 text-sm leading-relaxed text-stone-600">
+              Tap <span className="font-semibold text-stone-800">Pick parent</span> on two adult dogs in the kennel,
+              then press this button. Breeding costs {BREED_COST} coins.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={breedSelected}
+            className="min-h-14 rounded-2xl bg-emerald-700 px-6 py-3 text-base font-bold text-white shadow-sm hover:bg-emerald-800"
+          >
+            Breed selected dogs
+          </button>
+        </div>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {parentSlotLabels.map((label, index) => (
+            <div
+              key={index}
+              className={`rounded-2xl border px-4 py-3 ${
+                selectedParents[index]
+                  ? "border-emerald-300 bg-white text-stone-950"
+                  : "border-dashed border-emerald-300 bg-white/60 text-stone-500"
+              }`}
+            >
+              <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">
+                Parent {index + 1}
+              </p>
+              <p className="mt-1 font-heading text-xl font-semibold">{label}</p>
+              {selectedParents[index] ? (
+                <p className="mt-1 text-xs text-stone-600">
+                  {selectedParents[index]!.color} {selectedParents[index]!.breed} · Cute{" "}
+                  {selectedParents[index]!.cuteness}
+                </p>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      </section>
 
       <section className="rounded-3xl bg-white p-4 shadow-[0_18px_50px_-36px_rgba(120,53,15,0.55)] ring-1 ring-amber-200 sm:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -566,14 +618,6 @@ export default function DogBreedingGame() {
               Pick two adult dogs, then breed them for {BREED_COST} coins.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={breedSelected}
-            className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={selectedParents.length !== 2 || game.coins < BREED_COST || kennelFull}
-          >
-            Breed selected
-          </button>
         </div>
 
         {game.dogs.length === 0 ? (
