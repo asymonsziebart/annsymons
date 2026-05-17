@@ -30,9 +30,9 @@ type GameState = {
   sold: number;
 };
 
-const STORAGE_KEY = "annsymons.puppyRanch.v1";
-const STARTING_COINS = 500;
-const BREED_COST = 60;
+const STORAGE_KEY = "annsymons.puppyRanch.v2";
+const STARTING_COINS = 1000;
+const BREED_COST = 40;
 const KENNEL_LIMIT = 12;
 
 const dogNames = [
@@ -82,8 +82,8 @@ function randomItem<T>(items: readonly T[]): T {
 }
 
 function dogValue(cuteness: number, age: Age): number {
-  const ageBonus = age === "puppy" ? 35 : 10;
-  return Math.round(40 + ageBonus + cuteness * 9);
+  const ageBonus = age === "puppy" ? 50 : 15;
+  return Math.round(60 + ageBonus + cuteness * 8);
 }
 
 function calculateCuteness(
@@ -178,7 +178,7 @@ function makePuppy(parentA: Dog, parentB: Dog): Dog {
 }
 
 function purchasePrice(dog: Dog): number {
-  return Math.max(110, Math.round(dog.value * 0.82));
+  return Math.max(120, Math.round(85 + dog.cuteness * 2.4));
 }
 
 const dogPalettes = {
@@ -199,6 +199,7 @@ function DogPortrait({ dog }: { dog: Dog }) {
   const sparkle = dog.personality === "Sparkly";
   const bgA = dog.age === "puppy" ? "#fff7ed" : "#ecfdf5";
   const bgB = dog.age === "puppy" ? "#ffe4e6" : "#d1fae5";
+  const scale = dog.age === "puppy" ? 0.92 : 1;
 
   return (
     <div className="mx-auto overflow-hidden rounded-2xl bg-white p-2 shadow-inner ring-1 ring-amber-100">
@@ -223,72 +224,81 @@ function DogPortrait({ dog }: { dog: Dog }) {
         <rect width="260" height="190" rx="22" fill={`url(#dog-bg-${id})`} />
         <circle cx="40" cy="34" r="10" fill="#fff" opacity="0.6" />
         <circle cx="225" cy="42" r="16" fill="#fff" opacity="0.45" />
-        <path d="M0 154 C48 134 72 146 112 132 C158 116 201 128 260 108 V190 H0 Z" fill="#bbf7d0" />
-        <path d="M24 166 C68 154 117 156 157 144 C198 132 226 139 252 130" fill="none" stroke="#86efac" strokeWidth="5" strokeLinecap="round" opacity="0.7" />
+        <path d="M0 157 C44 139 78 148 118 134 C163 118 204 130 260 111 V190 H0 Z" fill="#bbf7d0" />
+        <path d="M24 168 C68 155 116 158 158 145 C198 133 226 140 252 131" fill="none" stroke="#86efac" strokeWidth="5" strokeLinecap="round" opacity="0.7" />
 
-        <ellipse cx="130" cy="142" rx="68" ry="34" fill={`url(#dog-fur-${id})`} />
-        <ellipse cx="89" cy="151" rx="11" ry="23" fill={palette.shade} />
-        <ellipse cx="169" cy="151" rx="11" ry="23" fill={palette.shade} />
-        <path d="M190 133 C214 121 222 126 226 139 C215 145 202 145 188 139" fill={palette.shade} />
+        <g transform={`translate(130 99) scale(${scale}) translate(-130 -99)`}>
+          <path d="M197 131 C222 116 238 126 236 145 C218 149 202 143 190 133" fill={palette.shade} />
+          <ellipse cx="130" cy="132" rx="54" ry="43" fill={`url(#dog-fur-${id})`} />
+          <ellipse cx="88" cy="143" rx="19" ry="31" fill={palette.shade} />
+          <ellipse cx="172" cy="143" rx="19" ry="31" fill={palette.shade} />
+          <ellipse cx="104" cy="166" rx="24" ry="12" fill={palette.muzzle} />
+          <ellipse cx="156" cy="166" rx="24" ry="12" fill={palette.muzzle} />
 
-        {dog.ears === "Floppy" ? (
-          <>
-            <path d="M77 63 C36 66 30 120 63 137 C81 128 89 96 88 69 Z" fill={palette.shade} />
-            <path d="M183 63 C224 66 230 120 197 137 C179 128 171 96 172 69 Z" fill={palette.shade} />
-          </>
-        ) : dog.ears === "Pointy" ? (
-          <>
-            <path d="M80 70 L101 19 L116 82 Z" fill={palette.shade} />
-            <path d="M180 70 L159 19 L144 82 Z" fill={palette.shade} />
-            <path d="M94 62 L103 39 L109 70 Z" fill="#f7b6a6" opacity="0.72" />
-            <path d="M166 62 L157 39 L151 70 Z" fill="#f7b6a6" opacity="0.72" />
-          </>
-        ) : dog.ears === "Button" ? (
-          <>
-            <ellipse cx="82" cy="73" rx="27" ry="23" fill={palette.shade} />
-            <ellipse cx="178" cy="73" rx="27" ry="23" fill={palette.shade} />
-          </>
-        ) : (
-          <>
-            <ellipse cx="72" cy="78" rx="25" ry="43" fill={palette.shade} transform="rotate(-18 72 78)" />
-            <ellipse cx="188" cy="78" rx="25" ry="43" fill={palette.shade} transform="rotate(18 188 78)" />
-          </>
-        )}
+          {dog.ears === "Floppy" ? (
+            <>
+              <path d="M76 62 C38 66 31 123 61 142 C84 132 91 94 88 67 Z" fill={palette.shade} />
+              <path d="M184 62 C222 66 229 123 199 142 C176 132 169 94 172 67 Z" fill={palette.shade} />
+            </>
+          ) : dog.ears === "Pointy" ? (
+            <>
+              <path d="M82 70 L101 20 L116 83 Z" fill={palette.shade} />
+              <path d="M178 70 L159 20 L144 83 Z" fill={palette.shade} />
+              <path d="M96 61 L103 39 L110 70 Z" fill="#f7b6a6" opacity="0.72" />
+              <path d="M164 61 L157 39 L150 70 Z" fill="#f7b6a6" opacity="0.72" />
+            </>
+          ) : dog.ears === "Button" ? (
+            <>
+              <ellipse cx="80" cy="77" rx="28" ry="24" fill={palette.shade} />
+              <ellipse cx="180" cy="77" rx="28" ry="24" fill={palette.shade} />
+            </>
+          ) : (
+            <>
+              <ellipse cx="70" cy="83" rx="26" ry="45" fill={palette.shade} transform="rotate(-18 70 83)" />
+              <ellipse cx="190" cy="83" rx="26" ry="45" fill={palette.shade} transform="rotate(18 190 83)" />
+            </>
+          )}
 
-        <ellipse cx="130" cy="88" rx="68" ry="58" fill={`url(#dog-fur-${id})`} />
-        {hasFluff ? (
-          <>
-            <circle cx="83" cy="82" r="16" fill={palette.fur} />
-            <circle cx="103" cy="45" r="17" fill={palette.light} opacity="0.9" />
-            <circle cx="130" cy="36" r="19" fill={palette.light} opacity="0.92" />
-            <circle cx="157" cy="45" r="17" fill={palette.light} opacity="0.9" />
-            <circle cx="177" cy="82" r="16" fill={palette.fur} />
-          </>
-        ) : null}
-        {hasSpots ? (
-          <>
-            <ellipse cx="102" cy="72" rx="21" ry="16" fill={palette.shade} opacity="0.9" transform="rotate(-18 102 72)" />
-            <circle cx="162" cy="101" r="14" fill={palette.shade} opacity="0.9" />
-            <ellipse cx="121" cy="135" rx="22" ry="11" fill={palette.shade} opacity="0.75" />
-          </>
-        ) : null}
-        {hasCurls ? (
-          <>
-            <path d="M96 51 q12 -17 24 0 q12 -17 24 0 q12 -17 24 0" fill="none" stroke={palette.light} strokeWidth="8" strokeLinecap="round" opacity="0.85" />
-            <path d="M87 124 q11 13 22 0 q11 13 22 0 q11 13 22 0 q11 13 22 0" fill="none" stroke={palette.light} strokeWidth="7" strokeLinecap="round" opacity="0.62" />
-          </>
-        ) : null}
+          <ellipse cx="130" cy="88" rx="62" ry="56" fill={`url(#dog-fur-${id})`} />
+          {hasFluff ? (
+            <>
+              <circle cx="87" cy="78" r="15" fill={palette.fur} />
+              <circle cx="103" cy="48" r="16" fill={palette.light} opacity="0.9" />
+              <circle cx="130" cy="39" r="18" fill={palette.light} opacity="0.92" />
+              <circle cx="157" cy="48" r="16" fill={palette.light} opacity="0.9" />
+              <circle cx="173" cy="78" r="15" fill={palette.fur} />
+            </>
+          ) : null}
+          {hasSpots ? (
+            <>
+              <ellipse cx="101" cy="72" rx="20" ry="16" fill={palette.shade} opacity="0.88" transform="rotate(-18 101 72)" />
+              <circle cx="162" cy="101" r="13" fill={palette.shade} opacity="0.88" />
+              <ellipse cx="121" cy="135" rx="20" ry="10" fill={palette.shade} opacity="0.72" />
+            </>
+          ) : null}
+          {hasCurls ? (
+            <>
+              <path d="M98 52 q11 -16 22 0 q11 -16 22 0 q11 -16 22 0" fill="none" stroke={palette.light} strokeWidth="8" strokeLinecap="round" opacity="0.85" />
+              <path d="M95 126 q10 12 20 0 q10 12 20 0 q10 12 20 0 q10 12 20 0" fill="none" stroke={palette.light} strokeWidth="7" strokeLinecap="round" opacity="0.62" />
+            </>
+          ) : null}
 
-        <ellipse cx="130" cy="112" rx="35" ry="27" fill={palette.muzzle} />
-        <circle cx="106" cy="89" r="7" fill="#171717" />
-        <circle cx="154" cy="89" r="7" fill="#171717" />
-        <circle cx="108" cy="86" r="2.5" fill="#fff" />
-        <circle cx="156" cy="86" r="2.5" fill="#fff" />
-        <path d="M119 107 C123 100 137 100 141 107 C137 114 123 114 119 107 Z" fill="#1f1713" />
-        <path d="M130 113 V123" stroke="#1f1713" strokeWidth="3" strokeLinecap="round" />
-        <path d="M113 126 C123 136 137 136 147 126" fill="none" stroke="#1f1713" strokeWidth="3" strokeLinecap="round" />
-        <circle cx="72" cy="111" r="8" fill="#fb7185" opacity="0.24" />
-        <circle cx="188" cy="111" r="8" fill="#fb7185" opacity="0.24" />
+          <ellipse cx="130" cy="111" rx="34" ry="27" fill={palette.muzzle} />
+          <circle cx="107" cy="89" r="7" fill="#171717" />
+          <circle cx="153" cy="89" r="7" fill="#171717" />
+          <circle cx="109" cy="86" r="2.5" fill="#fff" />
+          <circle cx="155" cy="86" r="2.5" fill="#fff" />
+          <path d="M119 106 C124 100 136 100 141 106 C137 114 123 114 119 106 Z" fill="#1f1713" />
+          <path d="M130 113 V122" stroke="#1f1713" strokeWidth="3" strokeLinecap="round" />
+          <path d="M114 126 C124 136 136 136 146 126" fill="none" stroke="#1f1713" strokeWidth="3" strokeLinecap="round" />
+          <path d="M130 129 C135 129 139 132 139 137 C139 144 130 146 130 146 C130 146 121 144 121 137 C121 132 125 129 130 129 Z" fill="#fb7185" opacity="0.88" />
+          <circle cx="75" cy="111" r="8" fill="#fb7185" opacity="0.24" />
+          <circle cx="185" cy="111" r="8" fill="#fb7185" opacity="0.24" />
+
+          <rect x="108" y="132" width="44" height="10" rx="5" fill="#ef4444" />
+          <circle cx="130" cy="143" r="7" fill="#fbbf24" stroke="#b45309" strokeWidth="1.5" />
+          <path d="M83 166 C111 181 149 181 177 166" fill="none" stroke={palette.shade} strokeWidth="9" strokeLinecap="round" opacity="0.45" />
+        </g>
 
         {sparkle ? (
           <>
