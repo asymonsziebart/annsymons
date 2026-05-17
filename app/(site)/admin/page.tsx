@@ -5,6 +5,7 @@ import AdminLogoutButton from "./AdminLogoutButton";
 import AdminSeedButton from "./AdminSeedButton";
 
 const privatePages = [
+  { href: "/admin/dogs", label: "Puppy Ranch", description: "Cozy dog breeding game" },
   { href: "/admin/voices", label: "Voices", description: "Things he is not allowed to do" },
   { href: "/tasks", label: "Tasks", description: "Private task board" },
   { href: "/statephotos", label: "State Photos", description: "Map photo manager" },
@@ -29,6 +30,12 @@ export default async function AdminDashboardPage() {
           Admin
         </h1>
         <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href="/admin/dogs"
+            className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
+          >
+            Puppy Ranch
+          </Link>
           <Link
             href="/admin/voices"
             className="rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)]"
@@ -56,13 +63,15 @@ export default async function AdminDashboardPage() {
               Admin-only tools and hidden pages.
             </p>
           </div>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             {privatePages.map((page) => (
               <Link
                 key={page.href}
                 href={page.href}
                 className={
-                  page.href === "/admin/voices"
+                  page.href === "/admin/dogs"
+                    ? "rounded-xl border border-emerald-600 bg-emerald-50 px-4 py-3 shadow-sm transition-colors hover:bg-emerald-100"
+                    : page.href === "/admin/voices"
                     ? "rounded-xl border border-[var(--color-accent)] bg-orange-50 px-4 py-3 shadow-sm transition-colors hover:bg-orange-100"
                     : "rounded-xl border border-[var(--color-border)] bg-[var(--color-cream)]/60 px-4 py-3 transition-colors hover:bg-[var(--color-cream-dark)]/70"
                 }
