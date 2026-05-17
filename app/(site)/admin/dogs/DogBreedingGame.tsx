@@ -181,28 +181,135 @@ function purchasePrice(dog: Dog): number {
   return Math.max(110, Math.round(dog.value * 0.82));
 }
 
-function DogPixel({ dog }: { dog: Dog }) {
-  const base =
-    dog.color === "Black"
-      ? "bg-stone-800"
-      : dog.color === "Cream"
-        ? "bg-amber-100"
-        : dog.color === "Golden"
-          ? "bg-yellow-300"
-          : dog.color === "Spotted"
-            ? "bg-orange-200"
-            : dog.color === "Silver"
-              ? "bg-slate-300"
-              : "bg-amber-700";
+const dogPalettes = {
+  Brown: { fur: "#9a5a2f", shade: "#6f3c1f", light: "#c78a55", muzzle: "#f3d6b8" },
+  Cream: { fur: "#f2dfbd", shade: "#caa86e", light: "#fff4d8", muzzle: "#fff7e6" },
+  Black: { fur: "#2b2a2a", shade: "#121212", light: "#5c5750", muzzle: "#d8c4a8" },
+  Golden: { fur: "#e4aa3d", shade: "#aa6f1d", light: "#ffd77a", muzzle: "#ffe7b4" },
+  Spotted: { fur: "#f1d0a3", shade: "#75401d", light: "#ffe2b9", muzzle: "#fff0da" },
+  Silver: { fur: "#c8d0d8", shade: "#77818c", light: "#eef3f7", muzzle: "#f6f2ea" },
+} satisfies Record<Color, { fur: string; shade: string; light: string; muzzle: string }>;
+
+function DogPortrait({ dog }: { dog: Dog }) {
+  const palette = dogPalettes[dog.color];
+  const id = dog.id.replace(/[^a-zA-Z0-9_-]/g, "");
+  const hasSpots = dog.color === "Spotted";
+  const hasCurls = dog.coat === "Curly" || dog.breed === "Poodle";
+  const hasFluff = dog.coat === "Fluffy" || dog.coat === "Scruffy";
+  const sparkle = dog.personality === "Sparkly";
+  const bgA = dog.age === "puppy" ? "#fff7ed" : "#ecfdf5";
+  const bgB = dog.age === "puppy" ? "#ffe4e6" : "#d1fae5";
+
   return (
-    <div className="mx-auto grid h-20 w-24 grid-cols-6 grid-rows-5 gap-0.5 rounded-xl bg-emerald-100/70 p-2 shadow-inner ring-1 ring-emerald-200">
-      <span className={`col-start-2 row-start-2 h-4 w-4 rounded-sm ${base}`} />
-      <span className={`col-start-5 row-start-2 h-4 w-4 rounded-sm ${base}`} />
-      <span className={`col-span-4 col-start-2 row-span-2 row-start-2 rounded-md ${base}`} />
-      <span className={`col-span-5 col-start-1 row-span-2 row-start-4 rounded-md ${base}`} />
-      <span className="col-start-3 row-start-3 h-1.5 w-1.5 rounded-full bg-stone-950" />
-      <span className="col-start-4 row-start-3 h-1.5 w-1.5 rounded-full bg-stone-950" />
-      <span className="col-start-6 row-start-4 h-2 w-4 rounded-full bg-amber-200" />
+    <div className="mx-auto overflow-hidden rounded-2xl bg-white p-2 shadow-inner ring-1 ring-amber-100">
+      <svg
+        className="h-40 w-full rounded-xl"
+        viewBox="0 0 260 190"
+        role="img"
+        aria-label={`${dog.name}, a cartoon ${dog.color.toLowerCase()} ${dog.breed.toLowerCase()}`}
+      >
+        <defs>
+          <linearGradient id={`dog-bg-${id}`} x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stopColor={bgA} />
+            <stop offset="100%" stopColor={bgB} />
+          </linearGradient>
+          <radialGradient id={`dog-fur-${id}`} cx="42%" cy="28%" r="72%">
+            <stop offset="0%" stopColor={palette.light} />
+            <stop offset="58%" stopColor={palette.fur} />
+            <stop offset="100%" stopColor={palette.shade} />
+          </radialGradient>
+        </defs>
+
+        <rect width="260" height="190" rx="22" fill={`url(#dog-bg-${id})`} />
+        <circle cx="40" cy="34" r="10" fill="#fff" opacity="0.6" />
+        <circle cx="225" cy="42" r="16" fill="#fff" opacity="0.45" />
+        <path d="M0 154 C48 134 72 146 112 132 C158 116 201 128 260 108 V190 H0 Z" fill="#bbf7d0" />
+        <path d="M24 166 C68 154 117 156 157 144 C198 132 226 139 252 130" fill="none" stroke="#86efac" strokeWidth="5" strokeLinecap="round" opacity="0.7" />
+
+        <ellipse cx="130" cy="142" rx="68" ry="34" fill={`url(#dog-fur-${id})`} />
+        <ellipse cx="89" cy="151" rx="11" ry="23" fill={palette.shade} />
+        <ellipse cx="169" cy="151" rx="11" ry="23" fill={palette.shade} />
+        <path d="M190 133 C214 121 222 126 226 139 C215 145 202 145 188 139" fill={palette.shade} />
+
+        {dog.ears === "Floppy" ? (
+          <>
+            <path d="M77 63 C36 66 30 120 63 137 C81 128 89 96 88 69 Z" fill={palette.shade} />
+            <path d="M183 63 C224 66 230 120 197 137 C179 128 171 96 172 69 Z" fill={palette.shade} />
+          </>
+        ) : dog.ears === "Pointy" ? (
+          <>
+            <path d="M80 70 L101 19 L116 82 Z" fill={palette.shade} />
+            <path d="M180 70 L159 19 L144 82 Z" fill={palette.shade} />
+            <path d="M94 62 L103 39 L109 70 Z" fill="#f7b6a6" opacity="0.72" />
+            <path d="M166 62 L157 39 L151 70 Z" fill="#f7b6a6" opacity="0.72" />
+          </>
+        ) : dog.ears === "Button" ? (
+          <>
+            <ellipse cx="82" cy="73" rx="27" ry="23" fill={palette.shade} />
+            <ellipse cx="178" cy="73" rx="27" ry="23" fill={palette.shade} />
+          </>
+        ) : (
+          <>
+            <ellipse cx="72" cy="78" rx="25" ry="43" fill={palette.shade} transform="rotate(-18 72 78)" />
+            <ellipse cx="188" cy="78" rx="25" ry="43" fill={palette.shade} transform="rotate(18 188 78)" />
+          </>
+        )}
+
+        <ellipse cx="130" cy="88" rx="68" ry="58" fill={`url(#dog-fur-${id})`} />
+        {hasFluff ? (
+          <>
+            <circle cx="83" cy="82" r="16" fill={palette.fur} />
+            <circle cx="103" cy="45" r="17" fill={palette.light} opacity="0.9" />
+            <circle cx="130" cy="36" r="19" fill={palette.light} opacity="0.92" />
+            <circle cx="157" cy="45" r="17" fill={palette.light} opacity="0.9" />
+            <circle cx="177" cy="82" r="16" fill={palette.fur} />
+          </>
+        ) : null}
+        {hasSpots ? (
+          <>
+            <ellipse cx="102" cy="72" rx="21" ry="16" fill={palette.shade} opacity="0.9" transform="rotate(-18 102 72)" />
+            <circle cx="162" cy="101" r="14" fill={palette.shade} opacity="0.9" />
+            <ellipse cx="121" cy="135" rx="22" ry="11" fill={palette.shade} opacity="0.75" />
+          </>
+        ) : null}
+        {hasCurls ? (
+          <>
+            <path d="M96 51 q12 -17 24 0 q12 -17 24 0 q12 -17 24 0" fill="none" stroke={palette.light} strokeWidth="8" strokeLinecap="round" opacity="0.85" />
+            <path d="M87 124 q11 13 22 0 q11 13 22 0 q11 13 22 0 q11 13 22 0" fill="none" stroke={palette.light} strokeWidth="7" strokeLinecap="round" opacity="0.62" />
+          </>
+        ) : null}
+
+        <ellipse cx="130" cy="112" rx="35" ry="27" fill={palette.muzzle} />
+        <circle cx="106" cy="89" r="7" fill="#171717" />
+        <circle cx="154" cy="89" r="7" fill="#171717" />
+        <circle cx="108" cy="86" r="2.5" fill="#fff" />
+        <circle cx="156" cy="86" r="2.5" fill="#fff" />
+        <path d="M119 107 C123 100 137 100 141 107 C137 114 123 114 119 107 Z" fill="#1f1713" />
+        <path d="M130 113 V123" stroke="#1f1713" strokeWidth="3" strokeLinecap="round" />
+        <path d="M113 126 C123 136 137 136 147 126" fill="none" stroke="#1f1713" strokeWidth="3" strokeLinecap="round" />
+        <circle cx="72" cy="111" r="8" fill="#fb7185" opacity="0.24" />
+        <circle cx="188" cy="111" r="8" fill="#fb7185" opacity="0.24" />
+
+        {sparkle ? (
+          <>
+            <path d="M203 65 l4 9 9 4 -9 4 -4 9 -4 -9 -9 -4 9 -4Z" fill="#fbbf24" />
+            <path d="M57 52 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3Z" fill="#fde68a" />
+          </>
+        ) : null}
+
+        <rect x="76" y="153" width="108" height="23" rx="11.5" fill="#ffffff" opacity="0.9" />
+        <text
+          x="130"
+          y="169"
+          textAnchor="middle"
+          fontFamily="ui-rounded, system-ui, sans-serif"
+          fontSize="12"
+          fontWeight="800"
+          fill="#3f2c1d"
+        >
+          {dog.personality} {dog.breed}
+        </text>
+      </svg>
     </div>
   );
 }
@@ -224,7 +331,7 @@ function DogCard({
         selected ? "border-emerald-500 ring-2 ring-emerald-100" : "border-amber-200"
       }`}
     >
-      <DogPixel dog={dog} />
+      <DogPortrait dog={dog} />
       <div className="mt-3 flex items-start justify-between gap-3">
         <div>
           <h3 className="font-heading text-lg font-semibold text-stone-950">{dog.name}</h3>
