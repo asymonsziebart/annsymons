@@ -54,6 +54,28 @@ export default async function AdminDashboardPage() {
       </div>
 
       <div className="space-y-6 sm:space-y-10">
+        <section className="overflow-hidden rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-amber-50 to-orange-50 p-5 shadow-[0_20px_60px_-38px_rgba(21,128,61,0.45)] sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
+                Game
+              </p>
+              <h2 className="mt-1 font-heading text-2xl font-semibold text-[var(--color-ink)]">
+                Puppy Ranch
+              </h2>
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-[var(--color-ink-muted)]">
+                Buy starter dogs, breed puppies, and sell them for coins based on cuteness.
+              </p>
+            </div>
+            <Link
+              href="/admin/dogs"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800"
+            >
+              Play Puppy Ranch
+            </Link>
+          </div>
+        </section>
+
         <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
           <div>
             <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
