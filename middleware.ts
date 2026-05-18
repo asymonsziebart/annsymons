@@ -64,7 +64,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   if (!(await hasAdminSession(request))) {
-    return NextResponse.redirect(new URL("/admin/login", request.url));
+    const loginUrl = new URL("/admin/login", request.url);
+    loginUrl.searchParams.set("next", `${request.nextUrl.pathname}${request.nextUrl.search}`);
+    return NextResponse.redirect(loginUrl);
   }
   return NextResponse.next();
 }

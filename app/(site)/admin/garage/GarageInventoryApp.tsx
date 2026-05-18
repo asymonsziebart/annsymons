@@ -25,6 +25,12 @@ type SavePayload = {
 type QrLabel = {
   code: string;
   label: string;
+  url: string;
+};
+
+type Props = {
+  initialBins: GarageBin[];
+  initialBinCode?: string;
 };
 
 function formatDate(value: string): string {
@@ -66,6 +72,12 @@ function makeSuggestedBinCode(existingBins: GarageBin[]): string {
   return `GAR-${Date.now().toString(36).toUpperCase()}`;
 }
 
+function garageUrlForBin(code: string): string {
+  const origin =
+    typeof window === "undefined" ? "https://annsymons.com" : window.location.origin;
+  return `${origin}/admin/garage?bin=${encodeURIComponent(code)}`;
+}
+
 async function scanQrFromImageUrl(url: string): Promise<string | null> {
   const Detector = (window as WindowWithBarcodeDetector).BarcodeDetector;
   if (!Detector) return null;
@@ -77,18 +89,29 @@ async function scanQrFromImageUrl(url: string): Promise<string | null> {
 
   const detector = new Detector({ formats: ["qr_code"] });
   const results = await detector.detect(image);
-  return results[0]?.rawValue?.trim() || null;
+  const raw = results[0]?.rawValue?.trim();
+  if (!raw) return null;
+  try {
+    const parsed = new URL(raw);
+    const bin = parsed.searchParams.get("bin")?.trim();
+    if (bin) return bin;
+  } catch {
+    /* plain bin code */
+  }
+  return raw;
 }
 
-export default function GarageInventoryApp({ initialBins }: { initialBins: GarageBin[] }) {
+export default function GarageInventoryApp({ initialBins, initialBinCode = "" }: Props) {
   const [bins, setBins] = useState(initialBins);
-  const [query, setQuery] = useState("");
-  const [binCode, setBinCode] = useState("");
+  const [query, setQuery] = useState(initialBinCode);
+  const [binCode, setBinCode] = useState(initialBinCode);
   const [label, setLabel] = useState("");
   const [photoPath, setPhotoPath] = useState("");
   const [inventoryText, setInventoryText] = useState("");
   const [notes, setNotes] = useState("");
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState(
+    initialBinCode ? `Opened QR link for bin ${initialBinCode}.` : ""
+  );
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
@@ -254,10 +277,15 @@ export default function GarageInventoryApp({ initialBins }: { initialBins: Garag
     const labels: QrLabel[] = bins.map((bin) => ({
       code: bin.bin_code,
       label: bin.label || bin.bin_code,
+      url: garageUrlForBin(bin.bin_code),
     }));
     const draftCode = binCode.trim();
     if (draftCode && !labels.some((labelItem) => labelItem.code === draftCode)) {
-      labels.unshift({ code: draftCode, label: label.trim() || draftCode });
+      labels.unshift({
+        code: draftCode,
+        label: label.trim() || draftCode,
+        url: garageUrlForBin(draftCode),
+      });
     }
     if (labels.length === 0) {
       setStatus("Create or type a bin code before exporting QR labels.");
@@ -269,7 +297,7 @@ export default function GarageInventoryApp({ initialBins }: { initialBins: Garag
     try {
       const labelHtml = await Promise.all(
         labels.map(async (labelItem) => {
-          const dataUrl = await QRCode.toDataURL(labelItem.code, {
+          const dataUrl = await QRCode.toDataURL(labelItem.url, {
             errorCorrectionLevel: "M",
             margin: 1,
             width: 260,
@@ -280,6 +308,7 @@ export default function GarageInventoryApp({ initialBins }: { initialBins: Garag
               <div class="label-text">
                 <strong>${escapeHtml(labelItem.code)}</strong>
                 <span>${escapeHtml(labelItem.label)}</span>
+                <small>${escapeHtml(labelItem.url)}</small>
               </div>
             </section>
           `;
@@ -330,6 +359,11 @@ export default function GarageInventoryApp({ initialBins }: { initialBins: Garag
       .label span {
         font-size: 9pt;
       }
+      .label small {
+        font-size: 6pt;
+        color: #4b5563;
+        overflow-wrap: anywhere;
+      }
       @media print {
         .no-print { display: none; }
       }
@@ -351,7 +385,7 @@ export default function GarageInventoryApp({ initialBins }: { initialBins: Garag
       link.click();
       link.remove();
       URL.revokeObjectURL(url);
-      setStatus("QR label file exported. Open the HTML file and print it.");
+      setStatus("QR label file exported. Scanning a label opens this bin on annsymons.com after login.");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Failed to export QR labels");
     } finally {

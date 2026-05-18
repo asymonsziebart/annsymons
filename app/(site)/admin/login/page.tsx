@@ -6,7 +6,14 @@ export const metadata = {
   robots: "noindex, nofollow",
 };
 
-export default function AdminLoginPage() {
+export default async function AdminLoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const sp = await searchParams;
+  const nextPath =
+    typeof sp.next === "string" && sp.next.startsWith("/") ? sp.next : "/admin";
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
       <div className="w-full max-w-sm rounded-2xl bg-[var(--color-surface)] p-8 shadow-lg ring-1 ring-[var(--color-border)]">
@@ -16,7 +23,7 @@ export default function AdminLoginPage() {
         <p className="mt-2 text-sm text-[var(--color-muted)]">
           Enter the admin password to continue.
         </p>
-        <AdminLoginForm />
+        <AdminLoginForm nextPath={nextPath} />
       </div>
     </div>
   );

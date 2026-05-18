@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function AdminLoginForm() {
+export default function AdminLoginForm({ nextPath = "/admin" }: { nextPath?: string }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,7 +24,7 @@ export default function AdminLoginForm() {
         setError(data.error || "Invalid password");
         return;
       }
-      router.push("/admin");
+      router.push(nextPath);
       router.refresh();
     } catch {
       setError("Something went wrong");

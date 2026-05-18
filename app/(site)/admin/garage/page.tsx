@@ -7,8 +7,14 @@ export const metadata = {
   robots: "noindex, nofollow",
 };
 
-export default async function GarageInventoryPage() {
+export default async function GarageInventoryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ bin?: string }>;
+}) {
+  const sp = await searchParams;
   const bins = await getGarageBins();
+  const initialBinCode = typeof sp.bin === "string" ? sp.bin : "";
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-8 sm:py-12">
@@ -32,7 +38,7 @@ export default async function GarageInventoryPage() {
         </p>
       </header>
 
-      <GarageInventoryApp initialBins={bins} />
+      <GarageInventoryApp initialBins={bins} initialBinCode={initialBinCode} />
     </div>
   );
 }
