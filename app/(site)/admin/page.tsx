@@ -5,6 +5,7 @@ import AdminLogoutButton from "./AdminLogoutButton";
 import AdminSeedButton from "./AdminSeedButton";
 
 const privatePages = [
+  { href: "/admin/garage", label: "Garage Inventory", description: "Search bins and stored items" },
   { href: "/admin/dogs", label: "Puppy Ranch", description: "Cozy dog breeding game" },
   { href: "/admin/voices", label: "Voices", description: "Things he is not allowed to do" },
   { href: "/tasks", label: "Tasks", description: "Private task board" },
@@ -30,6 +31,12 @@ export default async function AdminDashboardPage() {
           Admin
         </h1>
         <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href="/admin/garage"
+            className="rounded-xl bg-sky-700 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-800"
+          >
+            Garage
+          </Link>
           <Link
             href="/admin/dogs"
             className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
@@ -85,13 +92,15 @@ export default async function AdminDashboardPage() {
               Admin-only tools and hidden pages.
             </p>
           </div>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {privatePages.map((page) => (
               <Link
                 key={page.href}
                 href={page.href}
                 className={
-                  page.href === "/admin/dogs"
+                  page.href === "/admin/garage"
+                    ? "rounded-xl border border-sky-600 bg-sky-50 px-4 py-3 shadow-sm transition-colors hover:bg-sky-100"
+                    : page.href === "/admin/dogs"
                     ? "rounded-xl border border-emerald-600 bg-emerald-50 px-4 py-3 shadow-sm transition-colors hover:bg-emerald-100"
                     : page.href === "/admin/voices"
                     ? "rounded-xl border border-[var(--color-accent)] bg-orange-50 px-4 py-3 shadow-sm transition-colors hover:bg-orange-100"
