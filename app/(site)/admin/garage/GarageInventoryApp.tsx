@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import QRCode from "qrcode";
 import type { GarageBin } from "@/lib/data/garage";
 
 type BarcodeDetectorLike = {
@@ -19,6 +20,11 @@ type SavePayload = {
   photo_path: string;
   inventory_text: string;
   notes: string;
+};
+
+type QrLabel = {
+  code: string;
+  label: string;
 };
 
 function formatDate(value: string): string {
@@ -40,6 +46,24 @@ function searchableText(bin: GarageBin): string {
   ]
     .join("\n")
     .toLowerCase();
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function makeSuggestedBinCode(existingBins: GarageBin[]): string {
+  const used = new Set(existingBins.map((bin) => bin.bin_code.toUpperCase()));
+  for (let i = existingBins.length + 1; i < existingBins.length + 500; i++) {
+    const code = `GAR-${String(i).padStart(3, "0")}`;
+    if (!used.has(code)) return code;
+  }
+  return `GAR-${Date.now().toString(36).toUpperCase()}`;
 }
 
 async function scanQrFromImageUrl(url: string): Promise<string | null> {
@@ -68,6 +92,7 @@ export default function GarageInventoryApp({ initialBins }: { initialBins: Garag
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [exportingQr, setExportingQr] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const filteredBins = useMemo(() => {
@@ -225,6 +250,115 @@ export default function GarageInventoryApp({ initialBins }: { initialBins: Garag
     }
   }
 
+  async function exportQrLabels() {
+    const labels: QrLabel[] = bins.map((bin) => ({
+      code: bin.bin_code,
+      label: bin.label || bin.bin_code,
+    }));
+    const draftCode = binCode.trim();
+    if (draftCode && !labels.some((labelItem) => labelItem.code === draftCode)) {
+      labels.unshift({ code: draftCode, label: label.trim() || draftCode });
+    }
+    if (labels.length === 0) {
+      setStatus("Create or type a bin code before exporting QR labels.");
+      return;
+    }
+
+    setExportingQr(true);
+    setStatus("Generating printable QR labels...");
+    try {
+      const labelHtml = await Promise.all(
+        labels.map(async (labelItem) => {
+          const dataUrl = await QRCode.toDataURL(labelItem.code, {
+            errorCorrectionLevel: "M",
+            margin: 1,
+            width: 260,
+          });
+          return `
+            <section class="label">
+              <img src="${dataUrl}" alt="QR code for ${escapeHtml(labelItem.code)}" />
+              <div class="label-text">
+                <strong>${escapeHtml(labelItem.code)}</strong>
+                <span>${escapeHtml(labelItem.label)}</span>
+              </div>
+            </section>
+          `;
+        })
+      );
+      const html = `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Garage QR Labels</title>
+    <style>
+      @page { size: letter; margin: 0.35in; }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        color: #111827;
+      }
+      .sheet {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.18in;
+      }
+      .label {
+        break-inside: avoid;
+        border: 2px solid #111827;
+        border-radius: 0.12in;
+        min-height: 2.25in;
+        padding: 0.12in;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .label img {
+        width: 1.45in;
+        height: 1.45in;
+      }
+      .label-text {
+        margin-top: 0.08in;
+        display: grid;
+        gap: 0.03in;
+      }
+      .label strong {
+        font-size: 17pt;
+        letter-spacing: 0.03em;
+      }
+      .label span {
+        font-size: 9pt;
+      }
+      @media print {
+        .no-print { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <p class="no-print">Print this page and cut out the labels for your garage bins.</p>
+    <main class="sheet">
+      ${labelHtml.join("\n")}
+    </main>
+  </body>
+</html>`;
+      const blob = new Blob([html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "garage-qr-labels.html";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      setStatus("QR label file exported. Open the HTML file and print it.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Failed to export QR labels");
+    } finally {
+      setExportingQr(false);
+    }
+  }
+
   return (
     <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.25fr)]">
       <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
@@ -260,9 +394,22 @@ export default function GarageInventoryApp({ initialBins }: { initialBins: Garag
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="bin-code" className="mb-1 block text-sm font-medium text-[var(--color-ink-muted)]">
-                QR / bin code
-              </label>
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <label htmlFor="bin-code" className="block text-sm font-medium text-[var(--color-ink-muted)]">
+                  QR / bin code
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextCode = makeSuggestedBinCode(bins);
+                    setBinCode(nextCode);
+                    setStatus(`Created new bin code ${nextCode}. Export QR labels to print it.`);
+                  }}
+                  className="text-xs font-semibold text-[var(--color-accent)] hover:underline"
+                >
+                  New code
+                </button>
+              </div>
               <input
                 id="bin-code"
                 value={binCode}
@@ -271,6 +418,14 @@ export default function GarageInventoryApp({ initialBins }: { initialBins: Garag
                 className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
                 required
               />
+              <button
+                type="button"
+                onClick={() => void exportQrLabels()}
+                disabled={exportingQr}
+                className="mt-2 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm font-semibold text-sky-800 hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {exportingQr ? "Exporting..." : "Print/export QR labels"}
+              </button>
             </div>
             <div>
               <label htmlFor="bin-label" className="mb-1 block text-sm font-medium text-[var(--color-ink-muted)]">
@@ -363,6 +518,15 @@ export default function GarageInventoryApp({ initialBins }: { initialBins: Garag
             {filteredBins.length} / {bins.length}
           </span>
         </div>
+
+        <button
+          type="button"
+          onClick={() => void exportQrLabels()}
+          disabled={exportingQr}
+          className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-sky-700 px-4 py-3 text-sm font-semibold text-white hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {exportingQr ? "Exporting QR labels..." : "Print/export all QR labels"}
+        </button>
 
         <input
           type="search"
