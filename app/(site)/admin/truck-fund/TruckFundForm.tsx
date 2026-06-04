@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import type { TruckFundSettings } from "@/lib/data/truckFund";
 import { loanPrincipal, monthlyLoanPayment } from "@/lib/truckLoan";
 
-const TRUCK_IMAGE = "/truck-fund/fordmaverickphoto.jpg";
+const TRUCK_IMAGE = "/truck-fund/fordmaverickphoto.png";
 
 const currency = new Intl.NumberFormat("en-US", {
   style: "currency",

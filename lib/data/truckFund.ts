@@ -13,7 +13,7 @@ const DEFAULTS: TruckFundSettings = {
   interestRatePercent: 5,
   vehiclePrice: 28000,
   loanTermMonths: 60,
-  imagePath: "/truck-fund/fordmaverickphoto.jpg",
+  imagePath: "/truck-fund/fordmaverickphoto.png",
 };
 
 function rowToSettings(row: Record<string, unknown>): TruckFundSettings {
