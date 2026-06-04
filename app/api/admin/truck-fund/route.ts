@@ -37,7 +37,8 @@ export async function PUT(request: Request) {
       !Number.isFinite(vehiclePrice) ||
       vehiclePrice <= 0 ||
       !Number.isFinite(loanTermMonths) ||
-      loanTermMonths < 1
+      loanTermMonths < 12 ||
+      loanTermMonths > 360
     ) {
       return NextResponse.json({ error: "Invalid values" }, { status: 400 });
     }

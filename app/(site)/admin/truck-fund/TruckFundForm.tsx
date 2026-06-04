@@ -30,6 +30,7 @@ export default function TruckFundForm(initial: Props) {
     String(initial.interestRatePercent)
   );
   const [vehiclePrice, setVehiclePrice] = useState(String(initial.vehiclePrice));
+  const [loanYears, setLoanYears] = useState(String(initial.loanTermMonths / 12));
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [error, setError] = useState("");
   const router = useRouter();
@@ -37,14 +38,15 @@ export default function TruckFundForm(initial: Props) {
     down: String(initial.downPaymentSaved),
     rate: String(initial.interestRatePercent),
     price: String(initial.vehiclePrice),
+    years: String(initial.loanTermMonths / 12),
   });
 
   const heroImage = initial.imagePath || TRUCK_IMAGE;
   const down = parseFloat(downPaymentSaved) || 0;
   const rate = parseFloat(interestRatePercent) || 0;
   const price = parseFloat(vehiclePrice) || 0;
-  const termMonths = initial.loanTermMonths;
-  const termYears = termMonths / 12;
+  const termYears = Math.min(30, Math.max(1, parseFloat(loanYears) || 5));
+  const termMonths = Math.round(termYears * 12);
 
   const { principal, monthlyPayment, amountFinancedLabel } = useMemo(() => {
     const principalAmount = loanPrincipal(price, down);
@@ -85,6 +87,7 @@ export default function TruckFundForm(initial: Props) {
         down: downPaymentSaved,
         rate: interestRatePercent,
         price: vehiclePrice,
+        years: loanYears,
       };
       setStatus("saved");
       router.refresh();
@@ -104,6 +107,7 @@ export default function TruckFundForm(initial: Props) {
     downPaymentSaved,
     interestRatePercent,
     vehiclePrice,
+    loanYears,
     router,
   ]);
 
@@ -112,8 +116,9 @@ export default function TruckFundForm(initial: Props) {
     const unchanged =
       downPaymentSaved === savedSnapshot.current.down &&
       interestRatePercent === savedSnapshot.current.rate &&
-      vehiclePrice === savedSnapshot.current.price;
-    if (unchanged || price <= 0) return;
+      vehiclePrice === savedSnapshot.current.price &&
+      loanYears === savedSnapshot.current.years;
+    if (unchanged || price <= 0 || termMonths < 12) return;
 
     const timer = window.setTimeout(() => {
       void persist();
@@ -124,7 +129,9 @@ export default function TruckFundForm(initial: Props) {
     downPaymentSaved,
     interestRatePercent,
     vehiclePrice,
+    loanYears,
     price,
+    termMonths,
     persist,
   ]);
 
@@ -202,7 +209,7 @@ export default function TruckFundForm(initial: Props) {
             </p>
           </div>
 
-          <div className="mt-4 grid shrink-0 grid-cols-1 gap-3 rounded-xl border border-white/15 bg-black/35 p-3 backdrop-blur-md sm:grid-cols-3 sm:gap-2 sm:p-3">
+          <div className="mt-4 grid shrink-0 grid-cols-2 gap-3 rounded-xl border border-white/15 bg-black/35 p-3 backdrop-blur-md sm:grid-cols-4 sm:gap-2 sm:p-3">
             <div>
               <label className="mb-1 block text-xs font-medium text-white/70">
                 Price
@@ -242,6 +249,21 @@ export default function TruckFundForm(initial: Props) {
                 step={0.1}
                 value={interestRatePercent}
                 onChange={(e) => setInterestRatePercent(e.target.value)}
+                className={inputClass}
+                required
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-medium text-white/70">
+                Loan years
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={30}
+                step={1}
+                value={loanYears}
+                onChange={(e) => setLoanYears(e.target.value)}
                 className={inputClass}
                 required
               />

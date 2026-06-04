@@ -14,7 +14,11 @@ const sourceSans = Source_Sans_3({
   display: "swap",
 });
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://www.annsymons.com";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Ann Symons",
   description: "Resume, blog, recipes, and more.",
 };

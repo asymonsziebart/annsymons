@@ -1,11 +1,32 @@
+import type { Metadata } from "next";
 import { getSql } from "@/lib/db";
 import { getTruckFundSettings } from "@/lib/data/truckFund";
 import TruckFundForm from "./TruckFundForm";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
-  title: "Truck Fund | Admin | Ann Symons",
+const TRUCK_OG_IMAGE = "/truck-fund/fordmaverickphoto.png";
+
+export const metadata: Metadata = {
+  title: "Truck Fund · Ford Maverick",
+  description: "Track savings toward a Ford Maverick and estimated 5-year loan payment.",
+  openGraph: {
+    title: "Truck Fund · Ford Maverick",
+    description: "Track savings toward a Ford Maverick and estimated 5-year loan payment.",
+    type: "website",
+    images: [
+      {
+        url: TRUCK_OG_IMAGE,
+        alt: "Ford Maverick",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Truck Fund · Ford Maverick",
+    description: "Track savings toward a Ford Maverick and estimated 5-year loan payment.",
+    images: [TRUCK_OG_IMAGE],
+  },
   robots: "noindex, nofollow",
 };
 

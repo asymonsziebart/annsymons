@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { isLinkPreviewBot } from "@/lib/linkPreviewBots";
 import { getAllTasksPasswords } from "@/lib/tasksPassword";
 
 const ADMIN_COOKIE = "admin_session";
@@ -61,6 +62,12 @@ export async function middleware(request: NextRequest) {
   }
 
   if (!path.startsWith("/admin") || path === "/admin/login") {
+    return NextResponse.next();
+  }
+  if (
+    path === "/admin/truck-fund" &&
+    isLinkPreviewBot(request.headers.get("user-agent"))
+  ) {
     return NextResponse.next();
   }
   if (!(await hasAdminSession(request))) {
