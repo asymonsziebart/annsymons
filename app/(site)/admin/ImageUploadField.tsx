@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 
 type Props = {
-  folder: "recipes" | "blog" | "gallery";
+  folder: "recipes" | "blog" | "gallery" | "garage" | "truck-fund";
   value: string;
   onChange: (path: string) => void;
   label: string;
@@ -49,7 +49,15 @@ export default function ImageUploadField({ folder, value, onChange, label, input
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={inputClass}
-          placeholder={folder === "blog" ? "/blog/photo.jpg" : folder === "recipes" ? "/recipes/photo.webp" : "/gallery/photo.jpg"}
+          placeholder={
+            folder === "blog"
+              ? "/blog/photo.jpg"
+              : folder === "recipes"
+                ? "/recipes/photo.webp"
+                : folder === "truck-fund"
+                  ? "/truck-fund/maverick.jpg"
+                  : "/gallery/photo.jpg"
+          }
           required={required}
         />
         <label className="inline-flex min-h-11 cursor-pointer items-center justify-center whitespace-nowrap rounded-lg border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]">

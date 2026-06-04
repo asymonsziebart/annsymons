@@ -121,6 +121,23 @@ export default async function AdminDashboardPage() {
         <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
           <div className="flex items-center justify-between gap-3">
             <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
+              Truck Fund
+            </h2>
+            <Link
+              href="/admin/truck-fund"
+              className="text-sm font-medium text-[var(--color-accent)] hover:underline"
+            >
+              Open →
+            </Link>
+          </div>
+          <p className="mt-2 text-sm text-[var(--color-muted)]">
+            Ford Maverick down payment savings, loan estimate, and truck photo.
+          </p>
+        </section>
+
+        <section className="rounded-2xl bg-[var(--color-surface)] p-6 ring-1 ring-[var(--color-border)]">
+          <div className="flex items-center justify-between">
+            <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
               Blog posts
             </h2>
             <Link

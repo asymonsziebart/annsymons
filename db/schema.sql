@@ -108,6 +108,21 @@ FROM (
 ) AS v(name, color_key, sort_order)
 WHERE NOT EXISTS (SELECT 1 FROM task_sections LIMIT 1);
 
+-- Truck Fund (/admin/truck-fund) — singleton savings + loan settings
+CREATE TABLE IF NOT EXISTS truck_fund (
+  id                      INT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  down_payment_saved      NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  interest_rate_percent   NUMERIC(5, 2) NOT NULL DEFAULT 5,
+  vehicle_price           NUMERIC(12, 2) NOT NULL DEFAULT 28000,
+  loan_term_months        INT NOT NULL DEFAULT 60,
+  image_path              TEXT,
+  updated_at              TIMESTAMPTZ DEFAULT NOW()
+);
+
+INSERT INTO truck_fund (id)
+VALUES (1)
+ON CONFLICT (id) DO NOTHING;
+
 -- Optional: index for lookups by slug
 CREATE INDEX IF NOT EXISTS idx_posts_slug ON posts(slug);
 CREATE INDEX IF NOT EXISTS idx_recipes_slug ON recipes(slug);
