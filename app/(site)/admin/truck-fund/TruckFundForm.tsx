@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { TruckFundSettings } from "@/lib/data/truckFund";
@@ -21,18 +21,23 @@ const currencyCents = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 2,
 });
 
-type Props = TruckFundSettings;
+type Props = TruckFundSettings & { dbReady?: boolean };
 
 export default function TruckFundForm(initial: Props) {
+  const dbReady = initial.dbReady !== false;
   const [downPaymentSaved, setDownPaymentSaved] = useState(String(initial.downPaymentSaved));
   const [interestRatePercent, setInterestRatePercent] = useState(
     String(initial.interestRatePercent)
   );
   const [vehiclePrice, setVehiclePrice] = useState(String(initial.vehiclePrice));
-  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [error, setError] = useState("");
-  const [saved, setSaved] = useState(false);
   const router = useRouter();
+  const savedSnapshot = useRef({
+    down: String(initial.downPaymentSaved),
+    rate: String(initial.interestRatePercent),
+    price: String(initial.vehiclePrice),
+  });
 
   const heroImage = initial.imagePath || TRUCK_IMAGE;
   const down = parseFloat(downPaymentSaved) || 0;
@@ -54,11 +59,10 @@ export default function TruckFundForm(initial: Props) {
   const monthlyLabel =
     principal <= 0 ? currency.format(0) : currencyCents.format(monthlyPayment);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const persist = useCallback(async () => {
+    if (!dbReady || price <= 0) return false;
+    setStatus("saving");
     setError("");
-    setSaved(false);
-    setLoading(true);
     try {
       const res = await fetch("/api/admin/truck-fund", {
         method: "PUT",
@@ -74,22 +78,77 @@ export default function TruckFundForm(initial: Props) {
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || "Failed to save");
-        return;
+        setStatus("error");
+        return false;
       }
-      setSaved(true);
+      savedSnapshot.current = {
+        down: downPaymentSaved,
+        rate: interestRatePercent,
+        price: vehiclePrice,
+      };
+      setStatus("saved");
       router.refresh();
+      return true;
     } catch {
       setError("Something went wrong");
-    } finally {
-      setLoading(false);
+      setStatus("error");
+      return false;
     }
+  }, [
+    dbReady,
+    down,
+    rate,
+    price,
+    termMonths,
+    heroImage,
+    downPaymentSaved,
+    interestRatePercent,
+    vehiclePrice,
+    router,
+  ]);
+
+  useEffect(() => {
+    if (!dbReady) return;
+    const unchanged =
+      downPaymentSaved === savedSnapshot.current.down &&
+      interestRatePercent === savedSnapshot.current.rate &&
+      vehiclePrice === savedSnapshot.current.price;
+    if (unchanged || price <= 0) return;
+
+    const timer = window.setTimeout(() => {
+      void persist();
+    }, 700);
+    return () => window.clearTimeout(timer);
+  }, [
+    dbReady,
+    downPaymentSaved,
+    interestRatePercent,
+    vehiclePrice,
+    price,
+    persist,
+  ]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    await persist();
   }
+
+  const statusLabel =
+    status === "saving"
+      ? "Saving…"
+      : status === "saved"
+        ? "Saved"
+        : status === "error"
+          ? error || "Could not save"
+          : dbReady
+            ? ""
+            : "Not connected to database";
 
   const inputClass =
     "w-full rounded-lg border border-white/25 bg-white/15 px-3 py-2 text-sm text-white placeholder:text-white/50 backdrop-blur-sm focus:border-white/50 focus:outline-none focus:ring-1 focus:ring-white/40";
 
   return (
-    <form onSubmit={handleSubmit} className="min-h-[calc(100dvh-4rem)]">
+    <form onSubmit={handleSubmit} className="min-h-[calc(100dvh-4rem)]" noValidate>
       <section
         className="relative flex min-h-[calc(100dvh-4rem)] flex-col overflow-hidden rounded-2xl ring-1 ring-black/10"
         aria-label="Truck Fund"
@@ -110,11 +169,13 @@ export default function TruckFundForm(initial: Props) {
             >
               ← Admin
             </Link>
-            {(saved || error) && (
+            {statusLabel && (
               <p
-                className={`text-xs font-medium ${error ? "text-red-300" : "text-emerald-300"}`}
+                className={`text-xs font-medium ${
+                  status === "error" ? "text-red-300" : "text-emerald-300"
+                }`}
               >
-                {error || "Saved"}
+                {statusLabel}
               </p>
             )}
           </div>
@@ -187,15 +248,11 @@ export default function TruckFundForm(initial: Props) {
             </div>
           </div>
 
-          <div className="mt-3 flex shrink-0 gap-2">
-            <button
-              type="submit"
-              disabled={loading}
-              className="rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)] disabled:opacity-50"
-            >
-              {loading ? "Saving…" : "Save"}
-            </button>
-          </div>
+          {dbReady && (
+            <p className="mt-2 shrink-0 text-xs text-white/50">
+              Changes auto-save to the database.
+            </p>
+          )}
         </div>
       </section>
     </form>

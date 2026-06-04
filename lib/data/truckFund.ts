@@ -22,7 +22,10 @@ function rowToSettings(row: Record<string, unknown>): TruckFundSettings {
     interestRatePercent: Number(row.interest_rate_percent ?? 5),
     vehiclePrice: Number(row.vehicle_price ?? 28000),
     loanTermMonths: Number(row.loan_term_months ?? 60),
-    imagePath: typeof row.image_path === "string" ? row.image_path : "",
+    imagePath:
+      typeof row.image_path === "string" && row.image_path
+        ? row.image_path
+        : DEFAULTS.imagePath,
   };
 }
 

@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/auth";
 import { getTruckFundSettings, upsertTruckFundSettings } from "@/lib/data/truckFund";
@@ -48,6 +49,7 @@ export async function PUT(request: Request) {
       loanTermMonths,
       imagePath,
     });
+    revalidatePath("/admin/truck-fund");
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error(e);
