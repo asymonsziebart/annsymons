@@ -807,15 +807,6 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     };
   }, [selectedId]);
 
-  /** Desktop: show detail pane when a single task is selected. Mobile/tablet: keep the list visible until "Task details" is used. */
-  useEffect(() => {
-    if (selectedId == null) return;
-    const wide =
-      typeof window !== "undefined" &&
-      window.matchMedia("(min-width: 1024px)").matches;
-    setDetailsMinimized(!wide);
-  }, [selectedId]);
-
   useEffect(() => {
     if (!showCompleted && selectedId != null) {
       const t = tasks.find((x) => x.id === selectedId);
@@ -1591,6 +1582,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
       }
       selectionAnchorRef.current = taskId;
       setSelectedTaskIds([taskId]);
+      setDetailsMinimized(false);
     },
     [taskSelectionOrderIds]
   );
