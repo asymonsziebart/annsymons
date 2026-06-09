@@ -5,6 +5,7 @@ import AdminLogoutButton from "./AdminLogoutButton";
 import AdminSeedButton from "./AdminSeedButton";
 
 const privatePages = [
+  { href: "/admin/backyard", label: "Backyard Plants", description: "Map plants on a yard photo" },
   { href: "/admin/garage", label: "Garage Inventory", description: "Search bins and stored items" },
   { href: "/admin/dogs", label: "Puppy Ranch", description: "Cozy dog breeding game" },
   { href: "/admin/voices", label: "Voices", description: "Things he is not allowed to do" },
@@ -98,7 +99,9 @@ export default async function AdminDashboardPage() {
                 key={page.href}
                 href={page.href}
                 className={
-                  page.href === "/admin/garage"
+                  page.href === "/admin/backyard"
+                    ? "rounded-xl border border-emerald-600 bg-emerald-50 px-4 py-3 shadow-sm transition-colors hover:bg-emerald-100"
+                    : page.href === "/admin/garage"
                     ? "rounded-xl border border-sky-600 bg-sky-50 px-4 py-3 shadow-sm transition-colors hover:bg-sky-100"
                     : page.href === "/admin/dogs"
                     ? "rounded-xl border border-emerald-600 bg-emerald-50 px-4 py-3 shadow-sm transition-colors hover:bg-emerald-100"

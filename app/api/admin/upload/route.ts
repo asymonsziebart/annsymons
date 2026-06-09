@@ -3,7 +3,7 @@ import { isAdmin } from "@/lib/auth";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
-const ALLOWED_FOLDERS = ["recipes", "blog", "gallery", "garage", "truck-fund"] as const;
+const ALLOWED_FOLDERS = ["recipes", "blog", "gallery", "garage", "truck-fund", "backyard"] as const;
 const MAX_SIZE = 10 * 1024 * 1024; // 10 MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
 
     if (!file || !folder || !ALLOWED_FOLDERS.includes(folder as (typeof ALLOWED_FOLDERS)[number])) {
       return NextResponse.json(
-        { error: "Missing file or invalid folder. Use folder: recipes, blog, gallery, garage, or truck-fund." },
+        { error: "Missing file or invalid folder. Use folder: recipes, blog, gallery, garage, truck-fund, or backyard." },
         { status: 400 }
       );
     }
