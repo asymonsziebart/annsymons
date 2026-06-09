@@ -141,7 +141,7 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
   }
 
   async function refreshData() {
-    const res = await fetch("/api/admin/backyard");
+    const res = await fetch("/api/admin/backyard", { cache: "no-store" });
     const data = await readJsonResponse<{
       photos?: BackyardPhoto[];
       pins?: PlantPin[];
@@ -197,6 +197,14 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
     }
     return uploadData.path;
   }
+
+  useEffect(() => {
+    void refreshData().catch((error) => {
+      setStatus(error instanceof Error ? error.message : "Failed to load backyard data");
+    });
+    // Load saved photos/pins from the database on every visit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function uploadPhoto(file: File) {
     if (file.size > BACKYARD_MAX_UPLOAD_BYTES) {

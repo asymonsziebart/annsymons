@@ -1,11 +1,14 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { isAdmin } from "@/lib/auth";
 import {
   createBackyardPhoto,
   createPlantPin,
   getBackyardData,
 } from "@/lib/data/backyard";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   const ok = await isAdmin();

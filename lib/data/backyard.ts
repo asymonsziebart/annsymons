@@ -1,5 +1,6 @@
 import { getSql, getSqlOrThrow } from "@/lib/db";
 import { clampFocus } from "@/lib/statePhotos/framing";
+import { unstable_noStore as noStore } from "next/cache";
 
 type SqlClient = ReturnType<typeof getSqlOrThrow>;
 
@@ -121,6 +122,7 @@ export async function getBackyardData(): Promise<{
   photos: BackyardPhoto[];
   pins: PlantPin[];
 }> {
+  noStore();
   const sql = getSql();
   if (!sql) return { photos: [], pins: [] };
   await ensureBackyardTables(sql);

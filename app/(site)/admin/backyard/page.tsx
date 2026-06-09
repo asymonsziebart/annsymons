@@ -10,6 +10,8 @@ export const metadata = {
   robots: "noindex, nofollow",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function BackyardPlantsPage() {
   const { photos, pins } = await getBackyardData();
   const dbReady = getSql() !== null;
