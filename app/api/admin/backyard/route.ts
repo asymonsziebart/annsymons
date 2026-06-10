@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/auth";
 import {
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
         title: typeof body.title === "string" ? body.title : null,
         photo_path: typeof body.photo_path === "string" ? body.photo_path : "",
       });
+      revalidatePath("/admin/backyard");
       return NextResponse.json({ ok: true, photo });
     }
 
@@ -49,6 +51,7 @@ export async function POST(request: Request) {
             : Number(body.planted_year),
         notes: typeof body.notes === "string" ? body.notes : null,
       });
+      revalidatePath("/admin/backyard");
       return NextResponse.json({ ok: true, pin });
     }
 

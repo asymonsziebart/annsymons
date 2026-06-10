@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/auth";
 import {
@@ -33,6 +34,7 @@ export async function PATCH(
       x_pct: body.x_pct !== undefined ? Number(body.x_pct) : undefined,
       y_pct: body.y_pct !== undefined ? Number(body.y_pct) : undefined,
     });
+    revalidatePath("/admin/backyard");
     return NextResponse.json({ ok: true, pin });
   } catch (error) {
     return NextResponse.json(
@@ -63,6 +65,7 @@ export async function DELETE(
     } else {
       await deletePlantPin(id);
     }
+    revalidatePath("/admin/backyard");
     return NextResponse.json({ ok: true });
   } catch (error) {
     return NextResponse.json(

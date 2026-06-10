@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { BackyardPhoto, PlantPin } from "@/lib/data/backyard";
 
 type Props = {
@@ -113,6 +113,12 @@ export default function BackyardApp({ initialPhotos, initialPins }: Props) {
       setActivePhotoId(data.photos?.[0]?.id ?? null);
     }
   }
+
+  useEffect(() => {
+    void refreshData().catch((error) => {
+      setStatus(error instanceof Error ? error.message : "Failed to load backyard data");
+    });
+  }, []);
 
   async function uploadPhoto(file: File) {
     setUploading(true);

@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { getBackyardData } from "@/lib/data/backyard";
+import { getSql } from "@/lib/db";
 import BackyardApp from "./BackyardApp";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Backyard Plants | Admin",
@@ -9,6 +12,7 @@ export const metadata = {
 
 export default async function BackyardPlantsPage() {
   const { photos, pins } = await getBackyardData();
+  const dbReady = getSql() !== null;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-8 sm:py-12">
@@ -31,6 +35,13 @@ export default async function BackyardPlantsPage() {
           catalog whenever you forget what went where.
         </p>
       </header>
+
+      {!dbReady && (
+        <p className="mt-6 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900 ring-1 ring-amber-200">
+          DATABASE_URL is not set — photos and pins will not persist. Add your Neon connection
+          string in Vercel (or .env locally), then redeploy.
+        </p>
+      )}
 
       <BackyardApp initialPhotos={photos} initialPins={pins} />
     </div>
