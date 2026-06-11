@@ -10,6 +10,7 @@ export function getBotTaskNotifyEmail(): string {
 
 /**
  * Email when a task is newly assigned to Bot (create or assignee change).
+ * Requires RESEND_API_KEY and TASKS_BOT_NOTIFY_EMAIL (or TASKS_NOTIFY_EMAIL).
  * Fire-and-forget from API routes; failures are logged only.
  */
 export async function sendBotTaskAssignedEmail(
