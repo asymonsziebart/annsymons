@@ -29,7 +29,7 @@ import {
   effectiveRecurrenceInterval,
   isYearlyRecurringSuppressedUntilDueYear,
 } from "@/lib/data/taskRecurrence";
-import { BOT_ASSIGNEE, TASK_ASSIGNEES, normalizeTaskAssignee } from "@/lib/tasksAssignees";
+import { TASK_ASSIGNEES, normalizeTaskAssignee } from "@/lib/tasksAssignees";
 import AssigneeSelect, { AssigneeBadge } from "./AssigneeSelect";
 
 type Props = { initialTasks: TaskRow[]; initialSections: TaskSectionRow[] };
@@ -1066,12 +1066,9 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(patch),
       });
-      const data = await parseJson<{ task?: TaskRow; error?: string; emailWarning?: string }>(res);
+      const data = await parseJson<{ task?: TaskRow; error?: string }>(res);
       if (res.ok && data?.task) {
         replaceTask(data.task);
-        if (data.emailWarning) {
-          setSaveNotice(`Task saved, but Bot email failed: ${data.emailWarning}`);
-        }
         return;
       }
       const msg =
@@ -1136,13 +1133,10 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
           ...(assignee ? { assignee } : {}),
         }),
       });
-      const data = await parseJson<{ task?: TaskRow; emailWarning?: string }>(res);
+      const data = await parseJson<{ task?: TaskRow }>(res);
       if (res.ok && data?.task) {
         setTasks((prev) => [...prev, data.task!]);
         setQuickAdds((q) => ({ ...q, [sectionId]: "" }));
-        if (data.emailWarning) {
-          setSaveNotice(`Task added, but Bot email failed: ${data.emailWarning}`);
-        }
       }
     } catch {
       /* ignore */
@@ -3641,11 +3635,6 @@ function TaskDetail({
               onChange={(v) => onPatch({ assignee: normalizeTaskAssignee(v) })}
               className={inputClass}
             />
-            {normalizeTaskAssignee(task.assignee)?.toLowerCase() === BOT_ASSIGNEE.toLowerCase() ? (
-              <p className="mt-1.5 text-xs text-violet-700">
-                New Bot assignments send an email with task details you can paste into Cursor.
-              </p>
-            ) : null}
           </Field>
           <Field label="Priority" className={labelClass}>
             <select

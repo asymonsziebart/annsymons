@@ -75,7 +75,7 @@ export function AssigneeBadge({ assignee }: { assignee: string | null }) {
       {isBot ? (
         <span
           className="rounded bg-violet-100 px-1.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-violet-800"
-          title="Assigned to Bot — you'll get an email when a task is newly assigned"
+          title="Assigned to Bot"
         >
           Bot
         </span>

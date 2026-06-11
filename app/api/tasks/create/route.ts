@@ -16,7 +16,6 @@ import {
   isValidRecurrenceMonth,
 } from "@/lib/data/taskRecurrence";
 import { normalizeTaskAssignee } from "@/lib/tasksAssignees";
-import { notifyBotTaskAssignedIfNeeded } from "@/lib/email/notifyBotTaskAssigned";
 
 export async function POST(request: Request) {
   const ok = await isTasksAuth();
@@ -145,11 +144,7 @@ export async function POST(request: Request) {
         { status: 503 }
       );
     }
-    const email = await notifyBotTaskAssignedIfNeeded(task);
-    return NextResponse.json({
-      task,
-      ...(email.error ? { emailWarning: email.error } : {}),
-    });
+    return NextResponse.json({ task });
   } catch (e) {
     if (e instanceof TaskCompletionBlockedError) {
       return NextResponse.json(

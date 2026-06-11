@@ -17,7 +17,6 @@ import {
   isValidRecurrenceMonth,
 } from "@/lib/data/taskRecurrence";
 import { normalizeTaskAssignee } from "@/lib/tasksAssignees";
-import { notifyBotTaskAssignedIfNeeded } from "@/lib/email/notifyBotTaskAssigned";
 
 function parsePatch(body: Record<string, unknown>): TaskPatch | null {
   const patch: TaskPatch = {};
@@ -114,12 +113,7 @@ export async function PATCH(
     if (!task) {
       return NextResponse.json({ error: "Task not found or update failed" }, { status: 404 });
     }
-    const email = await notifyBotTaskAssignedIfNeeded(task, existing.assignee);
-    return NextResponse.json({
-      ok: true,
-      task,
-      ...(email.error ? { emailWarning: email.error } : {}),
-    });
+    return NextResponse.json({ ok: true, task });
   } catch (e) {
     if (e instanceof TaskCompletionBlockedError) {
       return NextResponse.json(
