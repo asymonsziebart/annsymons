@@ -3,6 +3,7 @@ import { isTasksAuth } from "@/lib/tasksAuth";
 import {
   updateTask,
   deleteTask,
+  getTaskById,
   isTaskStatus,
   isTaskPriority,
   type TaskPatch,
@@ -15,6 +16,8 @@ import {
   isRecurrenceIntervalString,
   isValidRecurrenceMonth,
 } from "@/lib/data/taskRecurrence";
+import { normalizeTaskAssignee } from "@/lib/tasksAssignees";
+import { notifyBotTaskAssignedIfNeeded } from "@/lib/email/notifyBotTaskAssigned";
 
 function parsePatch(body: Record<string, unknown>): TaskPatch | null {
   const patch: TaskPatch = {};
@@ -32,7 +35,10 @@ function parsePatch(body: Record<string, unknown>): TaskPatch | null {
     patch.section_id = Number(body.section_id);
   }
   if (body.assignee === null || typeof body.assignee === "string") {
-    patch.assignee = body.assignee === "" ? null : body.assignee;
+    patch.assignee =
+      body.assignee === "" || body.assignee === null
+        ? null
+        : normalizeTaskAssignee(body.assignee);
   }
   if (typeof body.priority === "string" && isTaskPriority(body.priority)) {
     patch.priority = body.priority;
@@ -100,10 +106,15 @@ export async function PATCH(
     if (!patch) {
       return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
     }
+    const existing = await getTaskById(id);
+    if (!existing) {
+      return NextResponse.json({ error: "Task not found" }, { status: 404 });
+    }
     const task = await updateTask(id, patch);
     if (!task) {
       return NextResponse.json({ error: "Task not found or update failed" }, { status: 404 });
     }
+    notifyBotTaskAssignedIfNeeded(task, existing.assignee);
     return NextResponse.json({ ok: true, task });
   } catch (e) {
     if (e instanceof TaskCompletionBlockedError) {

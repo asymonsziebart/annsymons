@@ -29,6 +29,8 @@ import {
   effectiveRecurrenceInterval,
   isYearlyRecurringSuppressedUntilDueYear,
 } from "@/lib/data/taskRecurrence";
+import { BOT_ASSIGNEE, TASK_ASSIGNEES, normalizeTaskAssignee } from "@/lib/tasksAssignees";
+import AssigneeSelect, { AssigneeBadge } from "./AssigneeSelect";
 
 type Props = { initialTasks: TaskRow[]; initialSections: TaskSectionRow[] };
 
@@ -315,8 +317,10 @@ const TASK_VIEW_MODE_STORAGE_KEY = "annsymons.tasks.viewMode.v1";
 const TASK_VIEW_WEEK_OFFSET_STORAGE_KEY = "annsymons.tasks.weekViewOffset.v1";
 const TASK_VIEW_MONTH_OFFSET_STORAGE_KEY = "annsymons.tasks.monthViewOffset.v1";
 const TASK_VIEW_YEAR_OFFSET_STORAGE_KEY = "annsymons.tasks.yearViewOffset.v1";
+const TASK_DEFAULT_ASSIGNEE_STORAGE_KEY = "annsymons.tasks.defaultAssignee.v1";
 
 type TaskViewMode = "list" | "week" | "month" | "year";
+type TaskAssigneeFilter = "all" | "unassigned" | (typeof TASK_ASSIGNEES)[number];
 
 const CALENDAR_WEEKDAY_HEADERS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 
@@ -515,6 +519,8 @@ function taskTableDataCell(task: TaskRow, key: keyof TaskRow): ReactNode {
       return TASK_STATUS_LABELS[v as TaskStatus] ?? String(v);
     case "subtask_count":
       return String(v ?? 0);
+    case "assignee":
+      return <AssigneeBadge assignee={v as string | null} />;
     default:
       return String(v);
   }
@@ -706,6 +712,9 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   const [filterPriority, setFilterPriority] = useState<"all" | TaskPriority>("all");
   const [filterSectionId, setFilterSectionId] = useState<"all" | number>("all");
   const [filterOverdueOnly, setFilterOverdueOnly] = useState(false);
+  const [filterAssignee, setFilterAssignee] = useState<TaskAssigneeFilter>("all");
+  const [defaultQuickAssignee, setDefaultQuickAssignee] = useState<string | null>(null);
+  const [defaultAssigneeHydrated, setDefaultAssigneeHydrated] = useState(false);
   /** Per-section list sort: click column header to sort, again to reverse. Hydrates from localStorage (default soonest due). */
   const [taskTableSort, setTaskTableSort] = useState<{
     key: keyof TaskRow;
@@ -919,6 +928,31 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   }, [filtersBarCollapsed, filtersBarHydrated]);
 
   useEffect(() => {
+    try {
+      const raw = localStorage.getItem(TASK_DEFAULT_ASSIGNEE_STORAGE_KEY);
+      if (raw != null && raw !== "") {
+        setDefaultQuickAssignee(normalizeTaskAssignee(raw));
+      }
+    } catch {
+      /* ignore */
+    }
+    setDefaultAssigneeHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!defaultAssigneeHydrated) return;
+    try {
+      if (defaultQuickAssignee) {
+        localStorage.setItem(TASK_DEFAULT_ASSIGNEE_STORAGE_KEY, defaultQuickAssignee);
+      } else {
+        localStorage.removeItem(TASK_DEFAULT_ASSIGNEE_STORAGE_KEY);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [defaultQuickAssignee, defaultAssigneeHydrated]);
+
+  useEffect(() => {
     if (!taskColumnsHydrated) return;
     try {
       localStorage.setItem(TASK_TABLE_HIDDEN_STORAGE_KEY, JSON.stringify(hiddenTaskColumns));
@@ -977,6 +1011,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     setFilterPriority("all");
     setFilterSectionId("all");
     setFilterOverdueOnly(false);
+    setFilterAssignee("all");
   }, []);
 
   const deselectAllTaskTableColumns = useCallback(() => {
@@ -1086,11 +1121,17 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   async function quickAddTask(sectionId: number) {
     const title = (quickAdds[sectionId] ?? "").trim();
     if (!title) return;
+    const assignee = normalizeTaskAssignee(defaultQuickAssignee);
     try {
       const res = await fetch("/api/tasks/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, section_id: sectionId, status: "todo" }),
+        body: JSON.stringify({
+          title,
+          section_id: sectionId,
+          status: "todo",
+          ...(assignee ? { assignee } : {}),
+        }),
       });
       const data = await parseJson<{ task?: TaskRow }>(res);
       if (res.ok && data?.task) {
@@ -1334,8 +1375,16 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
       filterStatus !== "all" ||
       filterPriority !== "all" ||
       filterSectionId !== "all" ||
+      filterOverdueOnly ||
+      filterAssignee !== "all",
+    [
+      taskSearchQuery,
+      filterStatus,
+      filterPriority,
+      filterSectionId,
       filterOverdueOnly,
-    [taskSearchQuery, filterStatus, filterPriority, filterSectionId, filterOverdueOnly]
+      filterAssignee,
+    ]
   );
 
   const filteredTasks = useMemo(() => {
@@ -1343,6 +1392,13 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     if (filterStatus !== "all") list = list.filter((t) => t.status === filterStatus);
     if (filterPriority !== "all") list = list.filter((t) => t.priority === filterPriority);
     if (filterSectionId !== "all") list = list.filter((t) => t.section_id === filterSectionId);
+    if (filterAssignee !== "all") {
+      list = list.filter((t) => {
+        const a = normalizeTaskAssignee(t.assignee);
+        if (filterAssignee === "unassigned") return a == null;
+        return a?.toLowerCase() === filterAssignee.toLowerCase();
+      });
+    }
     if (filterOverdueOnly) list = list.filter((t) => isTaskOverdue(t));
     list = list.filter((t) => taskMatchesSearchQuery(t, taskSearchQuery));
     return list;
@@ -1351,6 +1407,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     filterStatus,
     filterPriority,
     filterSectionId,
+    filterAssignee,
     filterOverdueOnly,
     taskSearchQuery,
   ]);
@@ -1447,6 +1504,9 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
       if (sec) parts.push(sec.name);
     }
     if (filterOverdueOnly) parts.push("Overdue only");
+    if (filterAssignee !== "all") {
+      parts.push(filterAssignee === "unassigned" ? "Unassigned" : filterAssignee);
+    }
     if (parts.length === 0) return "No filters";
     return parts.join(" · ");
   }, [
@@ -1455,6 +1515,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     filterPriority,
     filterSectionId,
     filterOverdueOnly,
+    filterAssignee,
     sections,
   ]);
 
@@ -2230,6 +2291,37 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                         </option>
                       ))}
                     </select>
+                  </div>
+                  <div>
+                    <label htmlFor="task-filter-assignee" className={`${label} mb-0.5 block`}>
+                      Assignee
+                    </label>
+                    <select
+                      id="task-filter-assignee"
+                      value={filterAssignee}
+                      onChange={(e) => setFilterAssignee(e.target.value as TaskAssigneeFilter)}
+                      className={filterSelect}
+                    >
+                      <option value="all">All</option>
+                      <option value="unassigned">Unassigned</option>
+                      {TASK_ASSIGNEES.map((name) => (
+                        <option key={name} value={name}>
+                          {name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="task-default-assignee" className={`${label} mb-0.5 block`}>
+                      New tasks assign to
+                    </label>
+                    <AssigneeSelect
+                      id="task-default-assignee"
+                      value={defaultQuickAssignee}
+                      onChange={setDefaultQuickAssignee}
+                      className={filterSelect}
+                      allowCustom={false}
+                    />
                   </div>
                   <label className="flex cursor-pointer items-center gap-2 pb-0.5 text-sm text-stone-700 sm:pb-2">
                     <input
@@ -3086,11 +3178,9 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
           {bulkPanel === "assignee" && (
             <div className="w-[min(100vw-1.5rem,20rem)] rounded-xl border border-stone-200 bg-white p-4 shadow-lg">
               <p className="mb-2 text-xs font-medium text-stone-500">Assignee (all selected)</p>
-              <input
-                type="text"
-                value={bulkAssigneeDraft}
-                onChange={(e) => setBulkAssigneeDraft(e.target.value)}
-                placeholder="Name"
+              <AssigneeSelect
+                value={bulkAssigneeDraft || null}
+                onChange={(v) => setBulkAssigneeDraft(v ?? "")}
                 className={input}
               />
               <div className="mt-3 flex gap-2">
@@ -3099,7 +3189,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                   className="flex-1 rounded-md bg-sky-600 py-2 text-sm font-medium text-white hover:bg-sky-500"
                   onClick={() =>
                     void bulkPatchSelected({
-                      assignee: bulkAssigneeDraft.trim() || null,
+                      assignee: normalizeTaskAssignee(bulkAssigneeDraft.trim()) || null,
                     })
                   }
                 >
@@ -3540,18 +3630,16 @@ function TaskDetail({
 
         <div className="mt-6 space-y-0 divide-y divide-stone-200">
           <Field label="Assignee" className={labelClass}>
-            <input
-              type="text"
-              defaultValue={task.assignee ?? ""}
-              key={task.id + "-a"}
-              onBlur={(e) => {
-                const v = e.target.value.trim();
-                const p = task.assignee ?? "";
-                if (v !== p) onPatch({ assignee: v || null });
-              }}
-              placeholder="Name"
+            <AssigneeSelect
+              value={task.assignee}
+              onChange={(v) => onPatch({ assignee: normalizeTaskAssignee(v) })}
               className={inputClass}
             />
+            {normalizeTaskAssignee(task.assignee)?.toLowerCase() === BOT_ASSIGNEE.toLowerCase() ? (
+              <p className="mt-1.5 text-xs text-violet-700">
+                New Bot assignments send an email with task details you can paste into Cursor.
+              </p>
+            ) : null}
           </Field>
           <Field label="Priority" className={labelClass}>
             <select

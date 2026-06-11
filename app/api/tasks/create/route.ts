@@ -15,6 +15,8 @@ import {
   isRecurrenceIntervalString,
   isValidRecurrenceMonth,
 } from "@/lib/data/taskRecurrence";
+import { normalizeTaskAssignee } from "@/lib/tasksAssignees";
+import { notifyBotTaskAssignedIfNeeded } from "@/lib/email/notifyBotTaskAssigned";
 
 export async function POST(request: Request) {
   const ok = await isTasksAuth();
@@ -110,7 +112,12 @@ export async function POST(request: Request) {
       description,
       due_date,
       status,
-      assignee: assignee === undefined ? undefined : assignee,
+      assignee:
+        assignee === undefined
+          ? undefined
+          : assignee === null
+            ? null
+            : normalizeTaskAssignee(assignee),
       priority,
       estimated_minutes:
         estimated_minutes === undefined || Number.isNaN(estimated_minutes)
@@ -138,6 +145,7 @@ export async function POST(request: Request) {
         { status: 503 }
       );
     }
+    notifyBotTaskAssignedIfNeeded(task);
     return NextResponse.json({ task });
   } catch (e) {
     if (e instanceof TaskCompletionBlockedError) {
