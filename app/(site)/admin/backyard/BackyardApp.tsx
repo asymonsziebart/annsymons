@@ -106,6 +106,17 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
     [pins, activePhotoId]
   );
 
+  const selectedPin = useMemo(
+    () => (selectedPinId == null ? null : pins.find((pin) => pin.id === selectedPinId) ?? null),
+    [pins, selectedPinId]
+  );
+
+  const selectedPinPhoto = useMemo(
+    () =>
+      selectedPin ? photos.find((photo) => photo.id === selectedPin.photo_id) ?? null : null,
+    [photos, selectedPin]
+  );
+
   const filteredPins = useMemo(() => {
     const terms = query
       .trim()
@@ -141,6 +152,9 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
     setPins(data.pins ?? []);
     if (!data.photos?.some((p) => p.id === activePhotoId)) {
       setActivePhotoId(data.photos?.[0]?.id ?? null);
+    }
+    if (selectedPinId != null && !data.pins?.some((pin) => pin.id === selectedPinId)) {
+      setSelectedPinId(null);
     }
   }
 
@@ -255,6 +269,25 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
     setPlantedYear("");
     setNotes("");
     setStatus("New pin placed. Fill in the plant details and save.");
+  }
+
+  function selectPin(pin: PlantPin, options?: { scrollToMap?: boolean }) {
+    setSelectedPinId(pin.id);
+    setAddMode(false);
+    resetPinForm();
+    if (pin.photo_id !== activePhotoId) {
+      setActivePhotoId(pin.photo_id);
+    }
+    setStatus(`Viewing ${pin.plant_name}.`);
+    if (options?.scrollToMap && mapRef.current) {
+      mapRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }
+
+  function clearSelectedPin() {
+    setSelectedPinId(null);
+    resetPinForm();
+    setStatus("");
   }
 
   function startEditPin(pin: PlantPin) {
@@ -438,6 +471,7 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
                   onChange={(event) => {
                     setActivePhotoId(Number(event.target.value));
                     resetPinForm();
+                    setSelectedPinId(null);
                   }}
                   className="min-w-0 flex-1 rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
                 >
@@ -513,8 +547,7 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
                       title={pin.plant_name}
                       onClick={(event) => {
                         event.stopPropagation();
-                        setSelectedPinId(pin.id);
-                        startEditPin(pin);
+                        selectPin(pin);
                       }}
                       className={
                         isSelected || isPending
@@ -650,86 +683,172 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
       </section>
 
       <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="font-heading text-xl font-semibold text-[var(--color-ink)]">
-              Search plants
-            </h2>
-            <p className="mt-1 text-sm text-[var(--color-muted)]">
-              Search by name, species, notes, or year planted.
-            </p>
-          </div>
-          <span className="rounded-full bg-[var(--color-cream-dark)] px-3 py-1 text-sm font-semibold text-[var(--color-ink-muted)]">
-            {filteredPins.length} / {pins.length}
-          </span>
-        </div>
-
-        <input
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search tomato, hydrangea, north bed..."
-          className="mt-4 w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
-        />
-
-        {filteredPins.length === 0 ? (
-          <p className="mt-4 rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-cream)]/60 px-4 py-8 text-center text-sm text-[var(--color-muted)]">
-            {pins.length === 0 ? "No plant pins yet." : "No plants match your search."}
-          </p>
-        ) : (
-          <ul className="mt-4 space-y-3">
-            {filteredPins.map((pin) => (
-              <li
-                key={pin.id}
-                className={
-                  selectedPinId === pin.id
-                    ? "rounded-2xl border border-emerald-300 bg-emerald-50/80 p-4"
-                    : "rounded-2xl border border-[var(--color-border)] bg-[var(--color-cream)]/50 p-4"
-                }
-              >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <button
-                    type="button"
-                    onClick={() => startEditPin(pin)}
-                    className="text-left"
-                  >
-                    <h3 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
-                      {pin.plant_name}
-                    </h3>
-                    {pin.common_name ? (
-                      <p className="mt-1 text-sm text-[var(--color-muted)]">{pin.common_name}</p>
-                    ) : null}
-                    {pin.species ? (
-                      <p className="mt-1 text-xs italic text-[var(--color-muted)]">{pin.species}</p>
-                    ) : null}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => startEditPin(pin)}
-                    className="rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]"
-                  >
-                    View on map
-                  </button>
-                </div>
-                <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
-                  {photoTitleById.get(pin.photo_id) ?? "Backyard photo"}
+        {selectedPin && selectedPinPhoto ? (
+          <>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h2 className="font-heading text-xl font-semibold text-[var(--color-ink)]">
+                  {selectedPin.plant_name}
+                </h2>
+                <p className="mt-1 text-sm text-[var(--color-muted)]">
+                  {photoTitleById.get(selectedPin.photo_id) ?? "Backyard photo"}
                 </p>
-                {pin.planted_year ? (
-                  <p className="mt-1 text-sm text-[var(--color-ink-muted)]">
-                    Planted {pin.planted_year}
-                  </p>
-                ) : null}
-                {pin.notes ? (
-                  <p className="mt-2 text-sm text-[var(--color-muted)]">{pin.notes}</p>
-                ) : null}
-                {pin.created_at ? (
-                  <p className="mt-2 text-xs text-[var(--color-muted)]">
-                    Added {formatDate(pin.created_at)}
-                  </p>
-                ) : null}
-              </li>
-            ))}
-          </ul>
+              </div>
+              <button
+                type="button"
+                onClick={clearSelectedPin}
+                className="rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]"
+              >
+                All plants
+              </button>
+            </div>
+
+            <div className="relative mt-4 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-cream)]/60">
+              <img
+                src={selectedPinPhoto.photo_path}
+                alt={selectedPinPhoto.title || "Backyard photo"}
+                className="block w-full select-none"
+                draggable={false}
+              />
+              <span
+                className="absolute z-10 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-amber-500 shadow-lg ring-2 ring-amber-300"
+                style={{ left: `${selectedPin.x_pct}%`, top: `${selectedPin.y_pct}%` }}
+                aria-hidden
+              />
+            </div>
+
+            <div className="mt-4 space-y-3 rounded-2xl border border-emerald-300 bg-emerald-50/80 p-4">
+              {selectedPin.common_name ? (
+                <p className="text-sm text-[var(--color-muted)]">{selectedPin.common_name}</p>
+              ) : null}
+              {selectedPin.species ? (
+                <p className="text-sm italic text-[var(--color-muted)]">{selectedPin.species}</p>
+              ) : null}
+              {selectedPin.planted_year ? (
+                <p className="text-sm text-[var(--color-ink-muted)]">
+                  Planted {selectedPin.planted_year}
+                </p>
+              ) : null}
+              {selectedPin.notes ? (
+                <p className="text-sm leading-relaxed text-[var(--color-muted)]">{selectedPin.notes}</p>
+              ) : null}
+              {selectedPin.created_at ? (
+                <p className="text-xs text-[var(--color-muted)]">
+                  Added {formatDate(selectedPin.created_at)}
+                </p>
+              ) : null}
+              {!selectedPin.common_name &&
+              !selectedPin.species &&
+              !selectedPin.planted_year &&
+              !selectedPin.notes ? (
+                <p className="text-sm text-[var(--color-muted)]">No extra details yet.</p>
+              ) : null}
+            </div>
+
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => selectPin(selectedPin, { scrollToMap: true })}
+                className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800 hover:bg-emerald-100"
+              >
+                View on map
+              </button>
+              <button
+                type="button"
+                onClick={() => startEditPin(selectedPin)}
+                className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)]"
+              >
+                Edit plant
+              </button>
+              <button
+                type="button"
+                onClick={() => void deletePin(selectedPin.id)}
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+              >
+                Delete
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="font-heading text-xl font-semibold text-[var(--color-ink)]">
+                  Search plants
+                </h2>
+                <p className="mt-1 text-sm text-[var(--color-muted)]">
+                  Search by name, species, notes, or year planted.
+                </p>
+              </div>
+              <span className="rounded-full bg-[var(--color-cream-dark)] px-3 py-1 text-sm font-semibold text-[var(--color-ink-muted)]">
+                {filteredPins.length} / {pins.length}
+              </span>
+            </div>
+
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search tomato, hydrangea, north bed..."
+              className="mt-4 w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+            />
+
+            {filteredPins.length === 0 ? (
+              <p className="mt-4 rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-cream)]/60 px-4 py-8 text-center text-sm text-[var(--color-muted)]">
+                {pins.length === 0 ? "No plant pins yet." : "No plants match your search."}
+              </p>
+            ) : (
+              <ul className="mt-4 space-y-3">
+                {filteredPins.map((pin) => (
+                  <li
+                    key={pin.id}
+                    className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-cream)]/50 p-4"
+                  >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <button
+                        type="button"
+                        onClick={() => selectPin(pin)}
+                        className="text-left"
+                      >
+                        <h3 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
+                          {pin.plant_name}
+                        </h3>
+                        {pin.common_name ? (
+                          <p className="mt-1 text-sm text-[var(--color-muted)]">{pin.common_name}</p>
+                        ) : null}
+                        {pin.species ? (
+                          <p className="mt-1 text-xs italic text-[var(--color-muted)]">{pin.species}</p>
+                        ) : null}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => selectPin(pin, { scrollToMap: true })}
+                        className="rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]"
+                      >
+                        View on map
+                      </button>
+                    </div>
+                    <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                      {photoTitleById.get(pin.photo_id) ?? "Backyard photo"}
+                    </p>
+                    {pin.planted_year ? (
+                      <p className="mt-1 text-sm text-[var(--color-ink-muted)]">
+                        Planted {pin.planted_year}
+                      </p>
+                    ) : null}
+                    {pin.notes ? (
+                      <p className="mt-2 text-sm text-[var(--color-muted)]">{pin.notes}</p>
+                    ) : null}
+                    {pin.created_at ? (
+                      <p className="mt-2 text-xs text-[var(--color-muted)]">
+                        Added {formatDate(pin.created_at)}
+                      </p>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
         )}
       </section>
     </div>
