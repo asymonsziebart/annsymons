@@ -1,6 +1,7 @@
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/auth";
+import { BACKYARD_MAX_UPLOAD_BYTES } from "@/lib/admin/uploadLimits";
 
 /**
  * Token exchange for @vercel/blob/client uploads. File bytes go browser → Blob,
@@ -37,7 +38,7 @@ export async function POST(request: Request): Promise<NextResponse> {
             "image/webp",
             "image/gif",
           ],
-          maximumSizeInBytes: 10 * 1024 * 1024,
+          maximumSizeInBytes: BACKYARD_MAX_UPLOAD_BYTES,
           addRandomSuffix: true,
         };
       },

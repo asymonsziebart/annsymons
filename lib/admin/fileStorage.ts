@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { put } from "@vercel/blob";
+import { BACKYARD_MAX_UPLOAD_BYTES } from "@/lib/admin/uploadLimits";
 
 export const ADMIN_UPLOAD_FOLDERS = [
   "recipes",
@@ -15,7 +16,15 @@ export const ADMIN_UPLOAD_FOLDERS = [
 export type AdminUploadFolder = (typeof ADMIN_UPLOAD_FOLDERS)[number];
 
 const ALLOWED_EXT = new Set(["png", "jpg", "jpeg", "webp", "gif"]);
-const MAX_BYTES = 10 * 1024 * 1024;
+const DEFAULT_MAX_BYTES = 10 * 1024 * 1024;
+
+const MAX_BYTES_BY_FOLDER: Partial<Record<AdminUploadFolder, number>> = {
+  backyard: BACKYARD_MAX_UPLOAD_BYTES,
+};
+
+function maxBytesFor(folder: AdminUploadFolder): number {
+  return MAX_BYTES_BY_FOLDER[folder] ?? DEFAULT_MAX_BYTES;
+}
 
 function extensionFor(file: File): string {
   const fromName = path.extname(file.name || "").slice(1).toLowerCase();
@@ -31,8 +40,10 @@ export async function storeAdminImageFile(
   file: File,
   folder: AdminUploadFolder
 ): Promise<string> {
-  if (!file.size || file.size > MAX_BYTES) {
-    throw new Error("File too large (max 10 MB).");
+  const maxBytes = maxBytesFor(folder);
+  if (!file.size || file.size > maxBytes) {
+    const maxMb = Math.round(maxBytes / (1024 * 1024));
+    throw new Error(`File too large (max ${maxMb} MB).`);
   }
 
   const ext = extensionFor(file);

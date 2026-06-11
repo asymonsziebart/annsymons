@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { upload } from "@vercel/blob/client";
 import type { BackyardPhoto, PlantPin } from "@/lib/data/backyard";
+import { BACKYARD_MAX_UPLOAD_BYTES } from "@/lib/admin/uploadLimits";
 
 type Props = {
   initialPhotos: BackyardPhoto[];
@@ -184,6 +185,14 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
   }
 
   async function uploadPhoto(file: File) {
+    if (file.size > BACKYARD_MAX_UPLOAD_BYTES) {
+      const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+      setStatus(
+        `That photo is ${sizeMb} MB. Backyard photos can be up to 20 MB — try a slightly smaller export from your phone if needed.`
+      );
+      return;
+    }
+
     setUploading(true);
     setStatus("Uploading backyard photo...");
     try {
@@ -409,7 +418,7 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
               <p className="text-sm text-[var(--color-ink-muted)]">Selected: {selectedFile.name}</p>
             ) : (
               <p className="text-sm text-[var(--color-muted)]">
-                JPEG, PNG, GIF, or WebP up to 10 MB
+                JPEG, PNG, GIF, or WebP up to 20 MB
                 {blobUploadEnabled
                   ? " · uploads go directly to Blob storage"
                   : " · keep under 4 MB until Blob storage is detected"}
