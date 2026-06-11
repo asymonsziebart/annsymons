@@ -1,17 +1,44 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { upload } from "@vercel/blob/client";
 import type { BackyardPhoto, PlantPin } from "@/lib/data/backyard";
 
 type Props = {
   initialPhotos: BackyardPhoto[];
   initialPins: PlantPin[];
+  useClientBlobUpload: boolean;
 };
 
 type PendingPin = {
   x_pct: number;
   y_pct: number;
 };
+
+async function readJsonResponse<T extends Record<string, unknown>>(res: Response): Promise<T> {
+  const text = await res.text();
+  if (!text) return {} as T;
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    if (res.status === 413 || /request entity too large/i.test(text)) {
+      throw new Error(
+        "That photo is too large for a server upload. Use a smaller image (under 4 MB), or ensure BLOB_READ_WRITE_TOKEN is set on Vercel."
+      );
+    }
+    throw new Error(text.slice(0, 200) || `Request failed (${res.status})`);
+  }
+}
+
+function extFromFileName(name: string): string {
+  const i = name.lastIndexOf(".");
+  if (i === -1) return "jpg";
+  const ext = name
+    .slice(i + 1)
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+  return ext || "jpg";
+}
 
 function searchableText(pin: PlantPin, photoTitle: string): string {
   return [
@@ -36,7 +63,7 @@ function formatDate(value: string): string {
   });
 }
 
-export default function BackyardApp({ initialPhotos, initialPins }: Props) {
+export default function BackyardApp({ initialPhotos, initialPins, useClientBlobUpload }: Props) {
   const [photos, setPhotos] = useState(initialPhotos);
   const [pins, setPins] = useState(initialPins);
   const [activePhotoId, setActivePhotoId] = useState<number | null>(
@@ -102,11 +129,11 @@ export default function BackyardApp({ initialPhotos, initialPins }: Props) {
 
   async function refreshData() {
     const res = await fetch("/api/admin/backyard");
-    const data = (await res.json()) as {
+    const data = await readJsonResponse<{
       photos?: BackyardPhoto[];
       pins?: PlantPin[];
       error?: string;
-    };
+    }>(res);
     if (!res.ok) throw new Error(data.error || "Failed to refresh backyard data");
     setPhotos(data.photos ?? []);
     setPins(data.pins ?? []);
@@ -121,18 +148,34 @@ export default function BackyardApp({ initialPhotos, initialPins }: Props) {
     });
   }, []);
 
+  async function uploadFileToStorage(file: File): Promise<string> {
+    if (useClientBlobUpload) {
+      const ext = extFromFileName(file.name);
+      const pathname = `backyard/${crypto.randomUUID()}.${ext}`;
+      const result = await upload(pathname, file, {
+        access: "public",
+        handleUploadUrl: "/api/admin/backyard/blob-upload",
+        multipart: file.size > 4 * 1024 * 1024,
+      });
+      return result.url;
+    }
+
+    const form = new FormData();
+    form.set("file", file);
+    form.set("folder", "backyard");
+    const uploadRes = await fetch("/api/admin/upload", { method: "POST", body: form });
+    const uploadData = await readJsonResponse<{ path?: string; error?: string }>(uploadRes);
+    if (!uploadRes.ok || !uploadData.path) {
+      throw new Error(uploadData.error || "Upload failed");
+    }
+    return uploadData.path;
+  }
+
   async function uploadPhoto(file: File) {
     setUploading(true);
     setStatus("Uploading backyard photo...");
     try {
-      const form = new FormData();
-      form.set("file", file);
-      form.set("folder", "backyard");
-      const uploadRes = await fetch("/api/admin/upload", { method: "POST", body: form });
-      const uploadData = (await uploadRes.json()) as { path?: string; error?: string };
-      if (!uploadRes.ok || !uploadData.path) {
-        throw new Error(uploadData.error || "Upload failed");
-      }
+      const photoPath = await uploadFileToStorage(file);
 
       const saveRes = await fetch("/api/admin/backyard", {
         method: "POST",
@@ -140,10 +183,10 @@ export default function BackyardApp({ initialPhotos, initialPins }: Props) {
         body: JSON.stringify({
           action: "photo",
           title: photoTitle.trim() || null,
-          photo_path: uploadData.path,
+          photo_path: photoPath,
         }),
       });
-      const saveData = (await saveRes.json()) as { photo?: BackyardPhoto; error?: string };
+      const saveData = await readJsonResponse<{ photo?: BackyardPhoto; error?: string }>(saveRes);
       if (!saveRes.ok || !saveData.photo) {
         throw new Error(saveData.error || "Failed to save photo");
       }
@@ -237,7 +280,7 @@ export default function BackyardApp({ initialPhotos, initialPins }: Props) {
             y_pct: pendingPin.y_pct,
           }),
         });
-        const data = (await res.json()) as { pin?: PlantPin; error?: string };
+        const data = await readJsonResponse<{ pin?: PlantPin; error?: string }>(res);
         if (!res.ok || !data.pin) throw new Error(data.error || "Failed to update pin");
       } else {
         const res = await fetch("/api/admin/backyard", {
@@ -255,7 +298,7 @@ export default function BackyardApp({ initialPhotos, initialPins }: Props) {
             notes: notes.trim() || null,
           }),
         });
-        const data = (await res.json()) as { pin?: PlantPin; error?: string };
+        const data = await readJsonResponse<{ pin?: PlantPin; error?: string }>(res);
         if (!res.ok || !data.pin) throw new Error(data.error || "Failed to save pin");
       }
 
@@ -275,7 +318,7 @@ export default function BackyardApp({ initialPhotos, initialPins }: Props) {
     setStatus("Deleting plant pin...");
     try {
       const res = await fetch(`/api/admin/backyard/${id}`, { method: "DELETE" });
-      const data = (await res.json()) as { error?: string };
+      const data = await readJsonResponse<{ error?: string }>(res);
       if (!res.ok) throw new Error(data.error || "Failed to delete pin");
       if (selectedPinId === id) setSelectedPinId(null);
       if (editingPinId === id) resetPinForm();
@@ -291,7 +334,7 @@ export default function BackyardApp({ initialPhotos, initialPins }: Props) {
     setStatus("Deleting backyard photo...");
     try {
       const res = await fetch(`/api/admin/backyard/${id}?kind=photo`, { method: "DELETE" });
-      const data = (await res.json()) as { error?: string };
+      const data = await readJsonResponse<{ error?: string }>(res);
       if (!res.ok) throw new Error(data.error || "Failed to delete photo");
       resetPinForm();
       await refreshData();
@@ -353,7 +396,12 @@ export default function BackyardApp({ initialPhotos, initialPins }: Props) {
             {selectedFile ? (
               <p className="text-sm text-[var(--color-ink-muted)]">Selected: {selectedFile.name}</p>
             ) : (
-              <p className="text-sm text-[var(--color-muted)]">JPEG, PNG, GIF, or WebP up to 10 MB</p>
+              <p className="text-sm text-[var(--color-muted)]">
+                JPEG, PNG, GIF, or WebP up to 10 MB
+                {useClientBlobUpload
+                  ? " (uploads go directly to Blob storage)"
+                  : " (keep under 4 MB on deployed sites without Blob storage)"}
+              </p>
             )}
           </form>
 

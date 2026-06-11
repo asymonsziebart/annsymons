@@ -43,7 +43,11 @@ export default async function BackyardPlantsPage() {
         </p>
       )}
 
-      <BackyardApp initialPhotos={photos} initialPins={pins} />
+      <BackyardApp
+        initialPhotos={photos}
+        initialPins={pins}
+        useClientBlobUpload={!!process.env.BLOB_READ_WRITE_TOKEN}
+      />
     </div>
   );
 }
