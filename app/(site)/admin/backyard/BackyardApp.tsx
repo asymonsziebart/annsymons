@@ -66,6 +66,7 @@ function formatDate(value: string): string {
 export default function BackyardApp({ initialPhotos, initialPins, useClientBlobUpload }: Props) {
   const [photos, setPhotos] = useState(initialPhotos);
   const [pins, setPins] = useState(initialPins);
+  const [blobUploadEnabled, setBlobUploadEnabled] = useState(useClientBlobUpload);
   const [activePhotoId, setActivePhotoId] = useState<number | null>(
     initialPhotos[0]?.id ?? null
   );
@@ -148,8 +149,19 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
     });
   }, []);
 
+  useEffect(() => {
+    void fetch("/api/admin/backyard/upload-config")
+      .then((res) => readJsonResponse<{ useClientBlobUpload?: boolean }>(res))
+      .then((data) => {
+        if (typeof data.useClientBlobUpload === "boolean") {
+          setBlobUploadEnabled(data.useClientBlobUpload);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   async function uploadFileToStorage(file: File): Promise<string> {
-    if (useClientBlobUpload) {
+    if (blobUploadEnabled) {
       const ext = extFromFileName(file.name);
       const pathname = `backyard/${crypto.randomUUID()}.${ext}`;
       const result = await upload(pathname, file, {
@@ -398,9 +410,9 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
             ) : (
               <p className="text-sm text-[var(--color-muted)]">
                 JPEG, PNG, GIF, or WebP up to 10 MB
-                {useClientBlobUpload
-                  ? " (uploads go directly to Blob storage)"
-                  : " (keep under 4 MB on deployed sites without Blob storage)"}
+                {blobUploadEnabled
+                  ? " · uploads go directly to Blob storage"
+                  : " · keep under 4 MB until Blob storage is detected"}
               </p>
             )}
           </form>
