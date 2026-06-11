@@ -23,6 +23,7 @@ function extensionFor(file: File): string {
   if (file.type === "image/webp") return "webp";
   if (file.type === "image/png") return "png";
   if (file.type === "image/gif") return "gif";
+  if (file.type === "image/jpeg" || file.type === "image/jpg") return "jpg";
   return "jpg";
 }
 

@@ -52,6 +52,7 @@ export default function BackyardApp({ initialPhotos, initialPins }: Props) {
   const [editingPinId, setEditingPinId] = useState<number | null>(null);
 
   const [photoTitle, setPhotoTitle] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [plantName, setPlantName] = useState("");
   const [commonName, setCommonName] = useState("");
   const [species, setSpecies] = useState("");
@@ -150,6 +151,7 @@ export default function BackyardApp({ initialPhotos, initialPins }: Props) {
       await refreshData();
       setActivePhotoId(saveData.photo.id);
       setPhotoTitle("");
+      setSelectedFile(null);
       if (fileRef.current) fileRef.current.value = "";
       setStatus("Backyard photo uploaded. Click Add pin mode, then tap where you planted something.");
     } catch (error) {
@@ -159,10 +161,21 @@ export default function BackyardApp({ initialPhotos, initialPins }: Props) {
     }
   }
 
-  async function onFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    await uploadPhoto(file);
+  function onFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+    setSelectedFile(file);
+    if (file) {
+      setStatus(`Selected ${file.name}. Click Upload to add it to your backyard map.`);
+    }
+  }
+
+  async function onUploadSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!selectedFile) {
+      setStatus("Choose a photo first.");
+      return;
+    }
+    await uploadPhoto(selectedFile);
   }
 
   function onMapClick(event: React.MouseEvent<HTMLDivElement>) {
@@ -312,20 +325,37 @@ export default function BackyardApp({ initialPhotos, initialPins }: Props) {
             />
           </div>
 
-          <div>
+          <form onSubmit={onUploadSubmit} className="space-y-3">
             <label htmlFor="backyard-photo" className="mb-1 block text-sm font-medium text-[var(--color-ink-muted)]">
               Upload backyard photo
             </label>
-            <input
-              ref={fileRef}
-              id="backyard-photo"
-              type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
-              onChange={onFileChange}
-              disabled={uploading}
-              className="w-full rounded-xl border border-dashed border-[var(--color-border)] bg-white px-4 py-3 text-sm text-[var(--color-ink-muted)]"
-            />
-          </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <label className="inline-flex min-h-11 cursor-pointer items-center justify-center whitespace-nowrap rounded-xl border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]">
+                <input
+                  ref={fileRef}
+                  id="backyard-photo"
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,.jpg,.jpeg"
+                  className="sr-only"
+                  disabled={uploading}
+                  onChange={onFileChange}
+                />
+                Choose photo
+              </label>
+              <button
+                type="submit"
+                disabled={uploading || !selectedFile}
+                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {uploading ? "Uploading…" : "Upload"}
+              </button>
+            </div>
+            {selectedFile ? (
+              <p className="text-sm text-[var(--color-ink-muted)]">Selected: {selectedFile.name}</p>
+            ) : (
+              <p className="text-sm text-[var(--color-muted)]">JPEG, PNG, GIF, or WebP up to 10 MB</p>
+            )}
+          </form>
 
           {photos.length > 0 ? (
             <div>
