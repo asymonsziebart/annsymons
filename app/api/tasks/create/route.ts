@@ -145,8 +145,11 @@ export async function POST(request: Request) {
         { status: 503 }
       );
     }
-    notifyBotTaskAssignedIfNeeded(task);
-    return NextResponse.json({ task });
+    const email = await notifyBotTaskAssignedIfNeeded(task);
+    return NextResponse.json({
+      task,
+      ...(email.error ? { emailWarning: email.error } : {}),
+    });
   } catch (e) {
     if (e instanceof TaskCompletionBlockedError) {
       return NextResponse.json(

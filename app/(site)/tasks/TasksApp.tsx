@@ -1066,9 +1066,12 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(patch),
       });
-      const data = await parseJson<{ task?: TaskRow; error?: string }>(res);
+      const data = await parseJson<{ task?: TaskRow; error?: string; emailWarning?: string }>(res);
       if (res.ok && data?.task) {
         replaceTask(data.task);
+        if (data.emailWarning) {
+          setSaveNotice(`Task saved, but Bot email failed: ${data.emailWarning}`);
+        }
         return;
       }
       const msg =
@@ -1133,10 +1136,13 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
           ...(assignee ? { assignee } : {}),
         }),
       });
-      const data = await parseJson<{ task?: TaskRow }>(res);
+      const data = await parseJson<{ task?: TaskRow; emailWarning?: string }>(res);
       if (res.ok && data?.task) {
         setTasks((prev) => [...prev, data.task!]);
         setQuickAdds((q) => ({ ...q, [sectionId]: "" }));
+        if (data.emailWarning) {
+          setSaveNotice(`Task added, but Bot email failed: ${data.emailWarning}`);
+        }
       }
     } catch {
       /* ignore */

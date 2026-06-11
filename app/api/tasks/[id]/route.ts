@@ -114,8 +114,12 @@ export async function PATCH(
     if (!task) {
       return NextResponse.json({ error: "Task not found or update failed" }, { status: 404 });
     }
-    notifyBotTaskAssignedIfNeeded(task, existing.assignee);
-    return NextResponse.json({ ok: true, task });
+    const email = await notifyBotTaskAssignedIfNeeded(task, existing.assignee);
+    return NextResponse.json({
+      ok: true,
+      task,
+      ...(email.error ? { emailWarning: email.error } : {}),
+    });
   } catch (e) {
     if (e instanceof TaskCompletionBlockedError) {
       return NextResponse.json(

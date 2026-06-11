@@ -5,27 +5,29 @@ import {
   sendBotTaskAssignedEmail,
 } from "./sendBotTaskAssignedEmail";
 
-/** Non-blocking: logs Resend errors to console. */
-export function notifyBotTaskAssignedIfNeeded(
+/** Await in API routes — fire-and-forget is dropped when Vercel freezes the function. */
+export async function notifyBotTaskAssignedIfNeeded(
   task: TaskRow,
   previousAssignee?: string | null
-): void {
+): Promise<{ sent: boolean; error?: string }> {
   const shouldNotify =
     previousAssignee === undefined
       ? task.assignee != null && isNewlyAssignedToBot(null, task.assignee)
       : isNewlyAssignedToBot(previousAssignee, task.assignee);
 
-  if (!shouldNotify) return;
+  if (!shouldNotify) return { sent: false };
 
-  void (async () => {
-    try {
-      const subtasks = await getSubtasksForTask(task.id);
-      const result = await sendBotTaskAssignedEmail(task, subtasks);
-      if (!result.ok) {
-        console.error("[bot-task-email]", result.error);
-      }
-    } catch (e) {
-      console.error("[bot-task-email]", e);
+  try {
+    const subtasks = await getSubtasksForTask(task.id);
+    const result = await sendBotTaskAssignedEmail(task, subtasks);
+    if (!result.ok) {
+      console.error("[bot-task-email]", result.error);
+      return { sent: false, error: result.error };
     }
-  })();
+    return { sent: true };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Failed to send Bot task email";
+    console.error("[bot-task-email]", e);
+    return { sent: false, error: message };
+  }
 }
