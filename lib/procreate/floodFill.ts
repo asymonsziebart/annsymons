@@ -128,6 +128,10 @@ export function buildFillReference(
   referenceAllLayers: boolean,
   activeLayerId: string,
 ): HTMLCanvasElement {
+  const referenceLayer = layers.find((l) => l.referenceLayer);
+  if (referenceLayer) {
+    return compositeLayers([referenceLayer], width, height, backgroundColor);
+  }
   if (referenceAllLayers) {
     return compositeLayers(layers, width, height, backgroundColor);
   }

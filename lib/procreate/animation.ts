@@ -13,6 +13,8 @@ export function captureFrameLayers(layers: Layer[]): SerializedLayer[] {
     alphaLock: l.alphaLock,
     clipToLayerId: l.clipToLayerId,
     groupId: l.groupId,
+    maskData: l.maskCanvas ? canvasToDataUrl(l.maskCanvas) : null,
+    referenceLayer: l.referenceLayer,
     imageData: canvasToDataUrl(l.canvas),
   }));
 }
@@ -25,7 +27,13 @@ export async function loadFrameLayers(
 ): Promise<Layer[]> {
   return Promise.all(
     frame.layers.map(async (sl) => {
-      const layer = createRuntimeLayer(sl, width, height);
+      let maskCanvas: HTMLCanvasElement | null = null;
+      if (sl.maskData) {
+        maskCanvas = createLayerCanvas(width, height);
+        const maskImg = await dataUrlToImage(sl.maskData);
+        maskCanvas.getContext("2d")?.drawImage(maskImg, 0, 0);
+      }
+      const layer = createRuntimeLayer(sl, width, height, undefined, maskCanvas);
       if (sl.imageData) {
         const img = await dataUrlToImage(sl.imageData);
         const ctx = layer.canvas.getContext("2d");

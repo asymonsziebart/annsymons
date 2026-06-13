@@ -44,6 +44,19 @@ import {
 } from "@/lib/procreate/floodFill";
 import { sampleColorFromCanvas } from "@/lib/procreate/colorUtils";
 import { loadStudioPrefs, saveStudioPrefs } from "@/lib/procreate/prefsStorage";
+import {
+  bakeLayerMask,
+  captureCanvasState,
+  clearLayerContents,
+  cloneMaskCanvas,
+  copyLayerToClipboard,
+  createLayerMaskCanvas,
+  fillLayerWithColor,
+  invertLayerColors,
+  maskFromLayerContents,
+  maskStrokeColor,
+  restoreCanvasState,
+} from "@/lib/procreate/layerMask";
 import { exportCompositeJpeg, exportCompositePng, exportProjectJson } from "@/lib/procreate/exportFormats";
 import { createAnimationFrame, loadFrameLayers } from "@/lib/procreate/animation";
 import { drawSelectionOverlay } from "@/lib/procreate/selection";
@@ -95,6 +108,7 @@ import {
 import {
   ColorPanel,
   LayersPanel,
+  type LayerMenuAction,
 } from "./panels";
 import {
   IconActions,
@@ -121,6 +135,7 @@ type Panel = "brush" | "layers" | "color" | "actions" | "select" | "adjust" | "b
 type HistoryState = {
   layerId: string;
   before: ImageData;
+  target: "layer" | "mask";
 };
 
 const MAX_UNDO = 100;
@@ -164,6 +179,9 @@ export default function Studio({ artworkId, onBack }: Props) {
   const [brushSize, setBrushSize] = useState(1);
   const [brushOpacity, setBrushOpacity] = useState(1);
   const [panel, setPanel] = useState<Panel>(null);
+  const [optionsLayerId, setOptionsLayerId] = useState<string | null>(null);
+  const [editingMaskLayerId, setEditingMaskLayerId] = useState<string | null>(null);
+  const editingMaskLayerIdRef = useRef<string | null>(null);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const panRef = useRef(pan);
@@ -214,6 +232,10 @@ export default function Studio({ artworkId, onBack }: Props) {
   const [modifyMenuOpen, setModifyMenuOpen] = useState(false);
   const onionSkinRef = useRef<HTMLCanvasElement | null>(null);
   const [overlayVersion, setOverlayVersion] = useState(0);
+
+  useEffect(() => {
+    editingMaskLayerIdRef.current = editingMaskLayerId;
+  }, [editingMaskLayerId]);
 
   useEffect(() => {
     panRef.current = pan;
@@ -319,7 +341,13 @@ export default function Studio({ artworkId, onBack }: Props) {
           const img = await dataUrlToImage(norm.imageData);
           ctx.drawImage(img, 0, 0);
         }
-        return createRuntimeLayer(norm, saved.width, saved.height, canvas);
+        let maskCanvas: HTMLCanvasElement | null = null;
+        if (norm.maskData) {
+          maskCanvas = createLayerCanvas(saved.width, saved.height);
+          const maskImg = await dataUrlToImage(norm.maskData);
+          maskCanvas.getContext("2d")?.drawImage(maskImg, 0, 0);
+        }
+        return createRuntimeLayer(norm, saved.width, saved.height, canvas, maskCanvas);
       }),
     );
 
@@ -335,7 +363,9 @@ export default function Studio({ artworkId, onBack }: Props) {
         alphaLock: false,
         clipToLayerId: null,
         groupId: null,
+        referenceLayer: false,
         canvas,
+        maskCanvas: null,
       });
     }
 
@@ -571,7 +601,7 @@ export default function Studio({ artworkId, onBack }: Props) {
   }
 
   function applyQuickShapePreview(perfect = false) {
-    if (!prefsRef.current.quickShape || tool === "smudge") return;
+    if (!prefsRef.current.quickShape || tool === "smudge" || editingMaskLayerIdRef.current) return;
     if (strokePoints.current.length < 3) return;
 
     let shape = detectQuickShape(strokePoints.current);
@@ -581,7 +611,7 @@ export default function Studio({ artworkId, onBack }: Props) {
     const drawLayer = getActiveDrawingLayer();
     if (!drawLayer || !strokeStart.current) return;
 
-    restoreLayerState(drawLayer, strokeStart.current.before);
+    restoreStrokeSurface(drawLayer, strokeStart.current.target, strokeStart.current.before);
     const ctx = drawLayer.canvas.getContext("2d");
     if (!ctx) return;
 
@@ -604,7 +634,7 @@ export default function Studio({ artworkId, onBack }: Props) {
     const drawLayer = getActiveDrawingLayer();
     if (!drawLayer || !strokeStart.current) return;
 
-    restoreLayerState(drawLayer, strokeStart.current.before);
+    restoreStrokeSurface(drawLayer, strokeStart.current.target, strokeStart.current.before);
     const ctx = drawLayer.canvas.getContext("2d");
     if (!ctx) return;
 
@@ -619,7 +649,7 @@ export default function Studio({ artworkId, onBack }: Props) {
     const drawLayer = getActiveDrawingLayer();
     if (!drawLayer) return;
 
-    restoreLayerState(drawLayer, strokeStart.current.before);
+    restoreStrokeSurface(drawLayer, strokeStart.current.target, strokeStart.current.before);
     const ctx = drawLayer.canvas.getContext("2d");
     if (!ctx) return;
 
@@ -643,7 +673,7 @@ export default function Studio({ artworkId, onBack }: Props) {
     resetQuickShapeState();
     if (strokeStart.current) {
       const layer = getLayerById(strokeStart.current.layerId);
-      if (layer) restoreLayerState(layer, strokeStart.current.before);
+      if (layer) restoreStrokeSurface(layer, strokeStart.current.target, strokeStart.current.before);
     }
     setIsDrawing(false);
     isDrawingRef.current = false;
@@ -677,7 +707,7 @@ export default function Studio({ artworkId, onBack }: Props) {
 
     const result = floodFillAt(active, pt.x, pt.y, colorRef.current, reference, threshold);
     if (result.filled) {
-      pushUndo({ layerId: active.id, before: cloneImageData(before) });
+      pushUndo({ layerId: active.id, before: cloneImageData(before), target: "layer" });
       setLayers([...currentLayers]);
     }
   }
@@ -807,6 +837,8 @@ export default function Studio({ artworkId, onBack }: Props) {
       alphaLock: l.alphaLock,
       clipToLayerId: l.clipToLayerId,
       groupId: l.groupId,
+      maskData: l.maskCanvas ? canvasToDataUrl(l.maskCanvas) : null,
+      referenceLayer: l.referenceLayer,
       imageData: canvasToDataUrl(l.canvas),
     }));
     const frames = [...animationFrames];
@@ -851,14 +883,39 @@ export default function Studio({ artworkId, onBack }: Props) {
     redoStack.current = [];
   }
 
+  function getStrokeTarget(layer: Layer) {
+    if (editingMaskLayerIdRef.current === layer.id && layer.maskCanvas) {
+      return { canvas: layer.maskCanvas, target: "mask" as const, isMask: true };
+    }
+    return { canvas: layer.canvas, target: "layer" as const, isMask: false };
+  }
+
+  function captureStrokeSurface(layer: Layer, target: "layer" | "mask") {
+    const canvas = target === "mask" ? layer.maskCanvas : layer.canvas;
+    if (!canvas) return null;
+    return captureCanvasState(canvas);
+  }
+
+  function restoreStrokeSurface(layer: Layer, target: "layer" | "mask", data: ImageData) {
+    const canvas = target === "mask" ? layer.maskCanvas : layer.canvas;
+    if (!canvas) return;
+    restoreCanvasState(canvas, data);
+  }
+
   function undo() {
     const entry = undoStack.current.pop();
     if (!entry) return;
     const layer = getLayerById(entry.layerId);
     if (!layer) return;
-    const current = captureLayerState(layer);
-    if (current) redoStack.current.push({ layerId: entry.layerId, before: cloneImageData(current) });
-    restoreLayerState(layer, entry.before);
+    const current = captureStrokeSurface(layer, entry.target);
+    if (current) {
+      redoStack.current.push({
+        layerId: entry.layerId,
+        before: cloneImageData(current),
+        target: entry.target,
+      });
+    }
+    restoreStrokeSurface(layer, entry.target, entry.before);
     setLayers([...layersRef.current]);
   }
 
@@ -867,9 +924,15 @@ export default function Studio({ artworkId, onBack }: Props) {
     if (!entry) return;
     const layer = getLayerById(entry.layerId);
     if (!layer) return;
-    const current = captureLayerState(layer);
-    if (current) undoStack.current.push({ layerId: entry.layerId, before: cloneImageData(current) });
-    restoreLayerState(layer, entry.before);
+    const current = captureStrokeSurface(layer, entry.target);
+    if (current) {
+      undoStack.current.push({
+        layerId: entry.layerId,
+        before: cloneImageData(current),
+        target: entry.target,
+      });
+    }
+    restoreStrokeSurface(layer, entry.target, entry.before);
     setLayers([...layersRef.current]);
   }
 
@@ -887,7 +950,13 @@ export default function Studio({ artworkId, onBack }: Props) {
 
   const activeBrush = effectiveBrush(brush, brushOverrides);
 
-  function drawSegmentTo(ctx: CanvasRenderingContext2D, layer: Layer, to: Point) {
+  function drawSegmentTo(
+    ctx: CanvasRenderingContext2D,
+    layer: Layer,
+    to: Point,
+    strokeColor: string,
+    isMask: boolean,
+  ) {
     if (!lastPointer.current || !doc) return;
     strokePoints.current.push(to);
     strokeEngine.current.paintStroke(
@@ -895,14 +964,14 @@ export default function Studio({ artworkId, onBack }: Props) {
       lastPointer.current,
       to,
       activeBrush,
-      color,
-      tool,
+      strokeColor,
+      isMask ? (tool === "erase" ? "erase" : "paint") : tool,
       brushSize,
       brushOpacity,
-      strokeComposite(),
+      isMask ? undefined : strokeComposite(),
       {
-        alphaLock: layer.alphaLock,
-        symmetry: prefs.symmetry,
+        alphaLock: isMask ? false : layer.alphaLock,
+        symmetry: isMask ? "none" : prefs.symmetry,
         canvasWidth: doc.width,
         canvasHeight: doc.height,
       },
@@ -987,8 +1056,11 @@ export default function Studio({ artworkId, onBack }: Props) {
       return;
     }
 
-    const before = captureLayerState(activeLayerNow);
-    if (before) strokeStart.current = { layerId: activeLayerNow.id, before: cloneImageData(before) };
+    const { canvas: drawCanvas, target, isMask } = getStrokeTarget(activeLayerNow);
+    if (isMask && tool === "smudge") return;
+
+    const before = captureCanvasState(drawCanvas);
+    if (before) strokeStart.current = { layerId: activeLayerNow.id, before: cloneImageData(before), target };
 
     setIsDrawing(true);
     lastPointer.current = pt;
@@ -996,8 +1068,10 @@ export default function Studio({ artworkId, onBack }: Props) {
     resetQuickShapeState();
     strokeEngine.current.reset();
 
-    const ctx = activeLayerNow.canvas.getContext("2d");
+    const ctx = drawCanvas.getContext("2d");
     if (!ctx) return;
+
+    const strokeColor = isMask ? maskStrokeColor(tool) : color;
 
     if (tool === "smudge" && doc) {
       const idx = layersRef.current.findIndex((l) => l.id === activeLayerNow.id);
@@ -1018,14 +1092,14 @@ export default function Studio({ artworkId, onBack }: Props) {
       pt,
       pt,
       activeBrush,
-      color,
-      tool,
+      strokeColor,
+      isMask ? (tool === "erase" ? "erase" : "paint") : tool,
       brushSize,
       brushOpacity,
-      strokeComposite(),
+      isMask ? undefined : strokeComposite(),
       {
-        alphaLock: activeLayerNow.alphaLock,
-        symmetry: prefs.symmetry,
+        alphaLock: isMask ? false : activeLayerNow.alphaLock,
+        symmetry: isMask ? "none" : prefs.symmetry,
         canvasWidth: doc.width,
         canvasHeight: doc.height,
       },
@@ -1088,8 +1162,11 @@ export default function Studio({ artworkId, onBack }: Props) {
     const drawLayer = getActiveDrawingLayer();
     if (!drawLayer || drawLayer.id !== strokeStart.current?.layerId) return;
 
-    const ctx = drawLayer.canvas.getContext("2d");
+    const { canvas: drawCanvas, isMask } = getStrokeTarget(drawLayer);
+    const ctx = drawCanvas.getContext("2d");
     if (!ctx) return;
+
+    const strokeColor = isMask ? maskStrokeColor(tool) : color;
 
     const native = e.nativeEvent;
     const coalesced =
@@ -1103,11 +1180,11 @@ export default function Studio({ artworkId, onBack }: Props) {
         continue;
       }
 
-      drawSegmentTo(ctx, drawLayer, p);
-
-      if (prefsRef.current.quickShape && tool !== "smudge" && !quickShapeAppliedRef.current) {
+      if (prefsRef.current.quickShape && tool !== "smudge" && !isMask && !quickShapeAppliedRef.current) {
         scheduleQuickShapeHold(p);
       }
+
+      drawSegmentTo(ctx, drawLayer, p, strokeColor, isMask);
     }
 
     schedulePaintView();
@@ -1303,6 +1380,16 @@ export default function Studio({ artworkId, onBack }: Props) {
     setPanel((p) => (p === "brush" ? null : "brush"));
   }
 
+  function mergeLayerWithMaskBake(list: Layer[], id: string): Layer[] {
+    const next = [...list];
+    const idx = next.findIndex((l) => l.id === id);
+    if (idx >= 0 && next[idx].maskCanvas) {
+      bakeLayerMask(next[idx]);
+      next[idx] = { ...next[idx], maskCanvas: null };
+    }
+    return mergeLayerDown(next, id);
+  }
+
   function addLayer() {
     if (!doc) return;
     const canvas = createLayerCanvas(doc.width, doc.height);
@@ -1316,7 +1403,9 @@ export default function Studio({ artworkId, onBack }: Props) {
       alphaLock: false,
       clipToLayerId: null,
       groupId: null,
+      referenceLayer: false,
       canvas,
+      maskCanvas: null,
     };
     setLayers([...layers, layer]);
     setActiveLayerId(layer.id);
@@ -1327,6 +1416,8 @@ export default function Studio({ artworkId, onBack }: Props) {
     const next = layers.filter((l) => l.id !== id);
     setLayers(next);
     if (activeLayerId === id) setActiveLayerId(next[next.length - 1].id);
+    if (optionsLayerId === id) setOptionsLayerId(null);
+    if (editingMaskLayerId === id) setEditingMaskLayerId(null);
   }
 
   function duplicateLayer(id: string) {
@@ -1335,21 +1426,126 @@ export default function Studio({ artworkId, onBack }: Props) {
     const canvas = createLayerCanvas(doc.width, doc.height);
     const ctx = canvas.getContext("2d");
     if (ctx) ctx.drawImage(src.canvas, 0, 0);
+    const maskCanvas = src.maskCanvas
+      ? cloneMaskCanvas(src.maskCanvas, doc.width, doc.height)
+      : null;
     const layer: Layer = {
       ...src,
       id: generateId(),
       name: `${src.name} Copy`,
       canvas,
+      maskCanvas,
       locked: false,
       alphaLock: src.alphaLock,
       clipToLayerId: src.clipToLayerId,
       groupId: src.groupId,
+      referenceLayer: src.referenceLayer ?? false,
     };
     const idx = layers.findIndex((l) => l.id === id);
     const next = [...layers];
     next.splice(idx + 1, 0, layer);
     setLayers(next);
     setActiveLayerId(layer.id);
+  }
+
+  function handleLayerAction(action: LayerMenuAction, id: string) {
+    const layer = layers.find((l) => l.id === id);
+    if (!layer || !doc) return;
+
+    const idx = layers.findIndex((l) => l.id === id);
+
+    switch (action) {
+      case "select":
+        setSelection(maskFromLayerContents(layer));
+        setOptionsLayerId(null);
+        break;
+      case "copy":
+        void copyLayerToClipboard(layer);
+        setOptionsLayerId(null);
+        break;
+      case "fill": {
+        const before = captureLayerState(layer);
+        if (!before) break;
+        fillLayerWithColor(layer, color, layer.alphaLock);
+        pushUndo({ layerId: id, before: cloneImageData(before), target: "layer" });
+        setLayers([...layers]);
+        setOptionsLayerId(null);
+        break;
+      }
+      case "clear": {
+        const before = captureLayerState(layer);
+        if (!before) break;
+        clearLayerContents(layer);
+        pushUndo({ layerId: id, before: cloneImageData(before), target: "layer" });
+        setLayers(layers.map((l) => (l.id === id ? { ...l, opacity: 1 } : l)));
+        setOptionsLayerId(null);
+        break;
+      }
+      case "alphaLock":
+        setLayers(layers.map((l) => (l.id === id ? { ...l, alphaLock: !l.alphaLock } : l)));
+        break;
+      case "mask": {
+        if (!layer.maskCanvas) {
+          const mask = createLayerMaskCanvas(doc.width, doc.height);
+          setLayers(layers.map((l) => (l.id === id ? { ...l, maskCanvas: mask } : l)));
+          setEditingMaskLayerId(id);
+          setActiveLayerId(id);
+        }
+        setOptionsLayerId(null);
+        break;
+      }
+      case "editMask":
+        setActiveLayerId(id);
+        setEditingMaskLayerId(editingMaskLayerId === id ? null : id);
+        setOptionsLayerId(null);
+        break;
+      case "deleteMask":
+        setLayers(layers.map((l) => (l.id === id ? { ...l, maskCanvas: null } : l)));
+        if (editingMaskLayerId === id) setEditingMaskLayerId(null);
+        setOptionsLayerId(null);
+        break;
+      case "clip": {
+        const below = idx > 0 ? layers[idx - 1].id : null;
+        setLayers(
+          layers.map((l) =>
+            l.id === id ? { ...l, clipToLayerId: l.clipToLayerId ? null : below } : l,
+          ),
+        );
+        break;
+      }
+      case "lock":
+        setLayers(layers.map((l) => (l.id === id ? { ...l, locked: !l.locked } : l)));
+        break;
+      case "invert": {
+        const before = captureLayerState(layer);
+        if (!before) break;
+        invertLayerColors(layer);
+        pushUndo({ layerId: id, before: cloneImageData(before), target: "layer" });
+        setLayers([...layers]);
+        setOptionsLayerId(null);
+        break;
+      }
+      case "reference":
+        setLayers(
+          layers.map((l) => ({
+            ...l,
+            referenceLayer: l.id === id ? !l.referenceLayer : false,
+          })),
+        );
+        break;
+      case "mergeDown":
+        setLayers(mergeLayerWithMaskBake(layers, id));
+        if (editingMaskLayerId === id) setEditingMaskLayerId(null);
+        setOptionsLayerId(null);
+        break;
+      case "duplicate":
+        duplicateLayer(id);
+        setOptionsLayerId(null);
+        break;
+      case "delete":
+        deleteLayer(id);
+        break;
+    }
   }
 
   function moveLayer(id: string, direction: "up" | "down") {
@@ -1391,7 +1587,7 @@ export default function Studio({ artworkId, onBack }: Props) {
     if (!activeLayer) return;
     const before = captureLayerState(activeLayer);
     await importImageToLayer(activeLayer, file);
-    if (before) pushUndo({ layerId: activeLayer.id, before: cloneImageData(before) });
+    if (before) pushUndo({ layerId: activeLayer.id, before: cloneImageData(before), target: "layer" });
     setLayers([...layers]);
   }
 
@@ -1400,7 +1596,7 @@ export default function Studio({ artworkId, onBack }: Props) {
     const before = captureLayerState(activeLayer);
     if (!before) return;
     applyAdjustmentToTarget(activeLayer, type, amount, selection);
-    pushUndo({ layerId: activeLayer.id, before: cloneImageData(before) });
+    pushUndo({ layerId: activeLayer.id, before: cloneImageData(before), target: "layer" });
     setLayers([...layers]);
   }
 
@@ -1428,7 +1624,7 @@ export default function Studio({ artworkId, onBack }: Props) {
         setLayers(flipCanvasLayers(layers, false));
         break;
       case "merge":
-        setLayers(mergeLayerDown(layers, activeLayerId));
+        setLayers(mergeLayerWithMaskBake(layers, activeLayerId));
         break;
       case "sym-v":
         setPrefs({ ...prefs, symmetry: "vertical" });
@@ -1452,7 +1648,7 @@ export default function Studio({ artworkId, onBack }: Props) {
     if (!activeLayer) return;
     const before = captureLayerState(activeLayer);
     if (!before) return;
-    pushUndo({ layerId: activeLayer.id, before: cloneImageData(before) });
+    pushUndo({ layerId: activeLayer.id, before: cloneImageData(before), target: "layer" });
     fillLayer(activeLayer, "transparent");
     const ctx = activeLayer.canvas.getContext("2d");
     if (ctx) ctx.clearRect(0, 0, activeLayer.canvas.width, activeLayer.canvas.height);
@@ -1842,7 +2038,14 @@ export default function Studio({ artworkId, onBack }: Props) {
         <LayersPanel
           layers={layers}
           activeId={activeLayerId}
-          onSelect={setActiveLayerId}
+          optionsLayerId={optionsLayerId}
+          editingMaskLayerId={editingMaskLayerId}
+          onSelect={(id) => {
+            setActiveLayerId(id);
+            if (id !== editingMaskLayerId) setEditingMaskLayerId(null);
+          }}
+          onOptionsLayer={setOptionsLayerId}
+          onLayerAction={handleLayerAction}
           onToggleVisible={(id) => {
             setLayers(layers.map((l) => (l.id === id ? { ...l, visible: !l.visible } : l)));
           }}
@@ -1875,7 +2078,7 @@ export default function Studio({ artworkId, onBack }: Props) {
               ),
             );
           }}
-          onMergeDown={(id) => setLayers(mergeLayerDown(layers, id))}
+          onMergeDown={(id) => setLayers(mergeLayerWithMaskBake(layers, id))}
           onGroup={(id) => {
             const gid = generateId();
             setLayers(layers.map((l) => (l.id === id ? { ...l, groupId: gid } : l)));
@@ -1896,7 +2099,7 @@ export default function Studio({ artworkId, onBack }: Props) {
               const before = captureLayerState(activeLayer);
               if (before) {
                 applyMaskToLayer(activeLayer, selection, false);
-                pushUndo({ layerId: activeLayer.id, before: cloneImageData(before) });
+                pushUndo({ layerId: activeLayer.id, before: cloneImageData(before), target: "layer" });
                 setLayers([...layers]);
               }
             }
@@ -1951,7 +2154,7 @@ export default function Studio({ artworkId, onBack }: Props) {
             if (!activeLayer || !pendingText) return;
             const before = captureLayerState(activeLayer);
             renderTextToLayer(activeLayer, pendingText);
-            if (before) pushUndo({ layerId: activeLayer.id, before: cloneImageData(before) });
+            if (before) pushUndo({ layerId: activeLayer.id, before: cloneImageData(before), target: "layer" });
             setTextObjects([...textObjects, pendingText]);
             setPendingText(null);
             setPanel(null);

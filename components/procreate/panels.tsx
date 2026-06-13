@@ -725,7 +725,11 @@ function ValuePicker({
 type LayersPanelProps = {
   layers: Layer[];
   activeId: string;
+  optionsLayerId: string | null;
+  editingMaskLayerId: string | null;
   onSelect: (id: string) => void;
+  onOptionsLayer: (id: string | null) => void;
+  onLayerAction: (action: LayerMenuAction, id: string) => void;
   onToggleVisible: (id: string) => void;
   onOpacityChange: (id: string, opacity: number) => void;
   onBlendChange: (id: string, mode: BlendMode) => void;
@@ -743,10 +747,121 @@ type LayersPanelProps = {
   onClose: () => void;
 };
 
+export type LayerMenuAction =
+  | "select"
+  | "copy"
+  | "fill"
+  | "clear"
+  | "alphaLock"
+  | "mask"
+  | "editMask"
+  | "deleteMask"
+  | "clip"
+  | "lock"
+  | "invert"
+  | "reference"
+  | "mergeDown"
+  | "duplicate"
+  | "delete";
+
+function LayerOptionsMenu({
+  layer,
+  layerIndex,
+  layerCount,
+  editingMask,
+  onAction,
+  onClose,
+}: {
+  layer: Layer;
+  layerIndex: number;
+  layerCount: number;
+  editingMask: boolean;
+  onAction: (action: LayerMenuAction) => void;
+  onClose: () => void;
+}) {
+  const canClip = layerIndex > 0;
+  const hasMask = !!layer.maskCanvas;
+
+  return (
+    <div className="procreate-layer-options" onClick={(e) => e.stopPropagation()}>
+      <div className="procreate-layer-options-header">
+        <strong>{layer.name}</strong>
+        <button type="button" className="procreate-icon-btn" onClick={onClose} aria-label="Close">
+          <IconClose className="h-4 w-4" />
+        </button>
+      </div>
+      <div className="procreate-layer-options-list">
+        <button type="button" onClick={() => onAction("select")}>
+          Select
+        </button>
+        <button type="button" onClick={() => onAction("copy")}>
+          Copy
+        </button>
+        <button type="button" onClick={() => onAction("fill")}>
+          Fill Layer
+        </button>
+        <button type="button" onClick={() => onAction("clear")}>
+          Clear
+        </button>
+        <hr />
+        <button type="button" className={layer.alphaLock ? "active" : ""} onClick={() => onAction("alphaLock")}>
+          Alpha Lock{layer.alphaLock ? " ✓" : ""}
+        </button>
+        {!hasMask ? (
+          <button type="button" onClick={() => onAction("mask")}>
+            Mask
+          </button>
+        ) : (
+          <>
+            <button type="button" className={editingMask ? "active" : ""} onClick={() => onAction("editMask")}>
+              {editingMask ? "Edit Mask (active)" : "Edit Mask"}
+            </button>
+            <button type="button" onClick={() => onAction("deleteMask")}>
+              Delete Mask
+            </button>
+          </>
+        )}
+        <button
+          type="button"
+          className={layer.clipToLayerId ? "active" : ""}
+          disabled={!canClip}
+          onClick={() => onAction("clip")}
+        >
+          Clipping Mask{layer.clipToLayerId ? " ✓" : ""}
+        </button>
+        <button type="button" className={layer.locked ? "active" : ""} onClick={() => onAction("lock")}>
+          Lock{layer.locked ? " ✓" : ""}
+        </button>
+        <hr />
+        <button type="button" onClick={() => onAction("invert")}>
+          Invert
+        </button>
+        <button type="button" className={layer.referenceLayer ? "active" : ""} onClick={() => onAction("reference")}>
+          Reference{layer.referenceLayer ? " ✓" : ""}
+        </button>
+        <hr />
+        <button type="button" disabled={layerIndex === 0} onClick={() => onAction("mergeDown")}>
+          Merge Down
+        </button>
+        <button type="button" onClick={() => onAction("duplicate")}>
+          Duplicate
+        </button>
+        <button type="button" className="danger" onClick={() => onAction("delete")}>
+          Delete
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function LayersPanel({
   layers,
   activeId,
+  optionsLayerId,
+  editingMaskLayerId,
   onSelect,
+  onOptionsLayer,
+  onLayerAction,
   onToggleVisible,
   onOpacityChange,
   onBlendChange,
@@ -781,10 +896,12 @@ export function LayersPanel({
       </div>
 
       <div className="procreate-layers-list">
-        {[...layers].reverse().map((layer) => (
+        {[...layers].reverse().map((layer, revIdx) => {
+          const layerIndex = layers.length - 1 - revIdx;
+          return (
           <div
             key={layer.id}
-            className={`procreate-layer-row${layer.id === activeId ? " active" : ""}${layer.groupId ? " grouped" : ""}`}
+            className={`procreate-layer-row${layer.id === activeId ? " active" : ""}${layer.groupId ? " grouped" : ""}${optionsLayerId === layer.id ? " options-open" : ""}${editingMaskLayerId === layer.id ? " editing-mask" : ""}`}
             draggable
             onDragStart={() => setDragId(layer.id)}
             onDragOver={(e) => e.preventDefault()}
@@ -792,7 +909,14 @@ export function LayersPanel({
               if (dragId && dragId !== layer.id) onReorder(dragId, layer.id);
               setDragId(null);
             }}
-            onClick={() => onSelect(layer.id)}
+            onClick={() => {
+              if (layer.id === activeId) {
+                onOptionsLayer(optionsLayerId === layer.id ? null : layer.id);
+              } else {
+                onSelect(layer.id);
+                onOptionsLayer(null);
+              }
+            }}
           >
             <button
               type="button"
@@ -809,8 +933,12 @@ export function LayersPanel({
                 <IconEyeOff className="h-4 w-4" />
               )}
             </button>
-            <div className="procreate-layer-thumb">
+            <div
+              className={`procreate-layer-thumb${layer.alphaLock ? " alpha-lock" : ""}${layer.clipToLayerId ? " clipped" : ""}`}
+            >
               <LayerThumb canvas={layer.canvas} />
+              {layer.maskCanvas && <span className="procreate-layer-badge mask">M</span>}
+              {layer.referenceLayer && <span className="procreate-layer-badge ref">Ref</span>}
             </div>
             <input
               className="procreate-layer-name"
@@ -883,8 +1011,19 @@ export function LayersPanel({
                 </div>
               </div>
             )}
+            {optionsLayerId === layer.id && (
+              <LayerOptionsMenu
+                layer={layer}
+                layerIndex={layerIndex}
+                layerCount={layers.length}
+                editingMask={editingMaskLayerId === layer.id}
+                onAction={(action) => onLayerAction(action, layer.id)}
+                onClose={() => onOptionsLayer(null)}
+              />
+            )}
           </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="procreate-layers-actions">

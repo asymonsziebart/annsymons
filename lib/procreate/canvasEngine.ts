@@ -2,6 +2,7 @@ import type { BlendMode, BrushDef, Layer, Point, SymmetryMode, Tool } from "./ty
 import { renderBrushStamp } from "./brushStamps";
 import { getCachedTipImage } from "./brushLibrary";
 import { mirrorPoints } from "./symmetry";
+import { drawLayerWithMask } from "./layerMask";
 
 const BLEND_MAP: Record<BlendMode, GlobalCompositeOperation> = {
   normal: "source-over",
@@ -67,7 +68,7 @@ export function compositeLayersInto(
     ctx.save();
     ctx.globalAlpha = layer.opacity;
     ctx.globalCompositeOperation = BLEND_MAP[layer.blendMode] ?? "source-over";
-    ctx.drawImage(layer.canvas, 0, 0);
+    drawLayerWithMask(ctx, layer, width, height);
     ctx.restore();
   }
   return out;
@@ -110,7 +111,7 @@ export function compositeLayersSlice(
     ctx.save();
     ctx.globalAlpha = layer.opacity;
     ctx.globalCompositeOperation = BLEND_MAP[layer.blendMode] ?? "source-over";
-    ctx.drawImage(layer.canvas, 0, 0);
+    drawLayerWithMask(ctx, layer, width, height);
     ctx.restore();
   }
   return out;
@@ -128,7 +129,7 @@ function drawLayerClipped(
   temp.height = height;
   const tctx = temp.getContext("2d");
   if (!tctx) return;
-  tctx.drawImage(layer.canvas, 0, 0);
+  drawLayerWithMask(tctx, layer, width, height);
   tctx.globalCompositeOperation = "destination-in";
   tctx.drawImage(clipSource.canvas, 0, 0);
 

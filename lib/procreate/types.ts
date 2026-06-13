@@ -126,7 +126,10 @@ export type Layer = {
   alphaLock: boolean;
   clipToLayerId: string | null;
   groupId: string | null;
+  maskData?: string | null;
+  referenceLayer?: boolean;
   canvas: HTMLCanvasElement;
+  maskCanvas: HTMLCanvasElement | null;
 };
 
 export type SerializedLayer = {
@@ -139,6 +142,8 @@ export type SerializedLayer = {
   alphaLock?: boolean;
   clipToLayerId?: string | null;
   groupId?: string | null;
+  maskData?: string | null;
+  referenceLayer?: boolean;
   imageData: string;
 };
 
@@ -245,6 +250,8 @@ export function normalizeLayerFields(sl: SerializedLayer): SerializedLayer {
     alphaLock: sl.alphaLock ?? false,
     clipToLayerId: sl.clipToLayerId ?? null,
     groupId: sl.groupId ?? null,
+    maskData: sl.maskData ?? null,
+    referenceLayer: sl.referenceLayer ?? false,
   };
 }
 
@@ -253,6 +260,7 @@ export function createRuntimeLayer(
   width: number,
   height: number,
   canvas?: HTMLCanvasElement,
+  maskCanvas?: HTMLCanvasElement | null,
 ): Layer {
   const c = canvas ?? document.createElement("canvas");
   if (!canvas) {
@@ -270,6 +278,8 @@ export function createRuntimeLayer(
     alphaLock: norm.alphaLock ?? false,
     clipToLayerId: norm.clipToLayerId ?? null,
     groupId: norm.groupId ?? null,
+    referenceLayer: norm.referenceLayer ?? false,
     canvas: c,
+    maskCanvas: maskCanvas ?? null,
   };
 }
