@@ -2003,7 +2003,7 @@ export default function Studio({ artworkId, onBack }: Props) {
               />
               Show reference overlay
             </label>
-            <label className="procreate-toggle" {...tipProps("Draw a shape and hold to snap perfect")}>
+            <label className="procreate-toggle" {...tipProps("Draw and hold to snap: line, circle, oval, square, rectangle, triangle, star")}>
               <input
                 type="checkbox"
                 checked={prefs.quickShape}
