@@ -884,15 +884,26 @@
 }
 
 .procreate-layer-vis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
   background: transparent;
   border: none;
   color: #98989d;
   cursor: pointer;
-  font-size: 0.75rem;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.procreate-layer-vis:hover {
+  color: #f2f2f7;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .procreate-layer-vis.is-off {
-  opacity: 0.4;
+  opacity: 0.55;
 }
 
 .procreate-layer-thumb {

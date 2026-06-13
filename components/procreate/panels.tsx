@@ -13,7 +13,7 @@ import {
   rgbToHex,
   rgbToHsv,
 } from "@/lib/procreate/colorUtils";
-import { IconClose } from "./icons";
+import { IconClose, IconEye, IconEyeOff } from "./icons";
 import { tipProps } from "./tip";
 
 type ColorPanelProps = {

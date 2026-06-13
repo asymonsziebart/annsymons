@@ -147,3 +147,23 @@ export function IconCheck({ className = "" }: { className?: string }) {
     </svg>
   );
 }
+
+export function IconEye({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" strokeLinejoin="round" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+export function IconEyeOff({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+      <path d="M2 12s3.5-7 10-7c2.2 0 4.1.7 5.6 1.7" strokeLinecap="round" />
+      <path d="M22 12s-3.5 7-10 7c-2.2 0-4.1-.7-5.6-1.7" strokeLinecap="round" />
+      <path d="M9.5 9.5c.9-.9 2.1-1.5 3.5-1.5 2.8 0 5 2.2 5 5 0 1.4-.6 2.6-1.5 3.5" strokeLinecap="round" />
+      <path d="M3 3l18 18" strokeLinecap="round" />
+    </svg>
+  );
+}
