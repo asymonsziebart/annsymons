@@ -193,12 +193,13 @@ export default function Studio({ artworkId, onBack }: Props) {
   const activePointerIds = useRef(new Set<number>());
   const touchCountRef = useRef(0);
   const pinchDistRef = useRef<number | null>(null);
+  const pinchCenterRef = useRef<{ x: number; y: number } | null>(null);
   const multiTouchTap = useRef<{
     count: number;
     time: number;
     xs: number[];
     ys: number[];
-    pinched: boolean;
+    moved: boolean;
   } | null>(null);
   const smudgeCompositeRef = useRef<HTMLCanvasElement | null>(null);
   const docRef = useRef(doc);
@@ -1180,9 +1181,10 @@ export default function Studio({ artworkId, onBack }: Props) {
         time: Date.now(),
         xs: Array.from(e.touches).map((t) => t.clientX),
         ys: Array.from(e.touches).map((t) => t.clientY),
-        pinched: false,
+        moved: false,
       };
       pinchDistRef.current = null;
+      pinchCenterRef.current = null;
       e.preventDefault();
     }
   }
@@ -1201,7 +1203,7 @@ export default function Studio({ artworkId, onBack }: Props) {
       maxMove = Math.max(maxMove, Math.hypot(t.clientX - startX, t.clientY - startY));
     }
 
-    if (!gesture.pinched && elapsed < 400 && maxMove < 32) {
+    if (!gesture.moved && elapsed < 400 && maxMove < 32) {
       if (gesture.count === 2) undo();
       else if (gesture.count === 3) redo();
       else if (gesture.count >= 4) {
@@ -1212,6 +1214,7 @@ export default function Studio({ artworkId, onBack }: Props) {
     }
     multiTouchTap.current = null;
     pinchDistRef.current = null;
+    pinchCenterRef.current = null;
     e.preventDefault();
   }
 
@@ -1219,10 +1222,18 @@ export default function Studio({ artworkId, onBack }: Props) {
     touchCountRef.current = e.touches.length;
     if (e.touches.length !== 2) {
       pinchDistRef.current = null;
+      pinchCenterRef.current = null;
       return;
     }
 
     e.preventDefault();
+
+    const wrap = containerRef.current;
+    if (!wrap) return;
+
+    const rect = wrap.getBoundingClientRect();
+    const fx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+    const fy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
 
     const dx = e.touches[0].clientX - e.touches[1].clientX;
     const dy = e.touches[0].clientY - e.touches[1].clientY;
@@ -1234,37 +1245,43 @@ export default function Studio({ artworkId, onBack }: Props) {
         time: Date.now(),
         xs: Array.from(e.touches).map((t) => t.clientX),
         ys: Array.from(e.touches).map((t) => t.clientY),
-        pinched: false,
+        moved: false,
       };
     }
 
-    const last = pinchDistRef.current ?? dist;
+    const lastCenter = pinchCenterRef.current ?? { x: fx, y: fy };
+    const lastDist = pinchDistRef.current ?? dist;
+    pinchCenterRef.current = { x: fx, y: fy };
     pinchDistRef.current = dist;
-    const scale = dist / last;
 
-    if (Math.abs(dist - last) > 6) {
-      multiTouchTap.current.pinched = true;
+    const panDeltaX = fx - lastCenter.x;
+    const panDeltaY = fy - lastCenter.y;
+    const scale = dist / lastDist;
+
+    let newPanX = panRef.current.x;
+    let newPanY = panRef.current.y;
+    let newZoom = zoomRef.current;
+    let changed = false;
+
+    if (Math.hypot(panDeltaX, panDeltaY) > 0.4) {
+      newPanX += panDeltaX;
+      newPanY += panDeltaY;
+      changed = true;
     }
 
-    if (Math.abs(scale - 1) <= 0.008) return;
+    if (Math.abs(scale - 1) > 0.008) {
+      const clampedZoom = Math.max(0.1, Math.min(8, newZoom * scale));
+      const canvasX = (fx - newPanX) / newZoom;
+      const canvasY = (fy - newPanY) / newZoom;
+      newPanX = fx - canvasX * clampedZoom;
+      newPanY = fy - canvasY * clampedZoom;
+      newZoom = clampedZoom;
+      changed = true;
+    }
 
-    multiTouchTap.current.pinched = true;
+    if (!changed) return;
 
-    const wrap = containerRef.current;
-    if (!wrap) return;
-
-    const rect = wrap.getBoundingClientRect();
-    const fx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
-    const fy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
-
-    const panNow = panRef.current;
-    const zoomNow = zoomRef.current;
-    const newZoom = Math.max(0.1, Math.min(8, zoomNow * scale));
-    const canvasX = (fx - panNow.x) / zoomNow;
-    const canvasY = (fy - panNow.y) / zoomNow;
-    const newPanX = fx - canvasX * newZoom;
-    const newPanY = fy - canvasY * newZoom;
-
+    multiTouchTap.current.moved = true;
     panRef.current = { x: newPanX, y: newPanY };
     zoomRef.current = newZoom;
     setPan({ x: newPanX, y: newPanY });
@@ -1742,6 +1759,7 @@ export default function Studio({ artworkId, onBack }: Props) {
           if (e.touches.length === 0) {
             multiTouchTap.current = null;
             pinchDistRef.current = null;
+            pinchCenterRef.current = null;
           }
         }}
         onTouchMove={handleTouchPinch}
