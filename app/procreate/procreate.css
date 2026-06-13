@@ -560,6 +560,62 @@
   width: min(340px, calc(100vw - 24px));
 }
 
+.procreate-brush-import-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem 0;
+}
+
+.procreate-import-btn {
+  cursor: pointer;
+  font-size: 0.8125rem;
+  padding: 0.45rem 0.75rem;
+}
+
+.procreate-import-hint {
+  font-size: 0.7rem;
+  color: #98989d;
+}
+
+.procreate-import-error {
+  margin: 0.35rem 1rem 0;
+  font-size: 0.75rem;
+  color: #ff6b6b;
+}
+
+.procreate-imported-sets {
+  padding: 0.5rem 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.procreate-imported-set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #98989d;
+}
+
+.procreate-imported-set-row button {
+  background: transparent;
+  border: none;
+  color: #ff6b6b;
+  cursor: pointer;
+  font-size: 0.7rem;
+}
+
+.procreate-brush-preview.has-image {
+  background-size: cover;
+  background-position: center;
+  background-color: #3a3a3c;
+}
+
+
 .procreate-color-panel {
   top: 60px;
   right: 12px;

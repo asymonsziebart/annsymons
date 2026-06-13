@@ -13,6 +13,10 @@ import type {
 } from "@/lib/procreate/types";
 import { findBrush } from "@/lib/procreate/brushes";
 import {
+  getAllBrushes,
+  preloadBrushTip,
+} from "@/lib/procreate/brushLibrary";
+import {
   captureLayerState,
   cloneImageData,
   compositeLayers,
@@ -77,6 +81,7 @@ export default function Studio({ artworkId, onBack }: Props) {
   const [activeLayerId, setActiveLayerId] = useState("");
   const [tool, setTool] = useState<Tool>("paint");
   const [brush, setBrush] = useState<BrushDef>(findBrush("6b-pencil"));
+  const [allBrushes, setAllBrushes] = useState<BrushDef[]>([]);
   const [color, setColor] = useState("#1a1a1a");
   const [prevColor, setPrevColor] = useState("#ffffff");
   const [brushSize, setBrushSize] = useState(1);
@@ -153,6 +158,14 @@ export default function Studio({ artworkId, onBack }: Props) {
   useEffect(() => {
     void loadDocument();
   }, [loadDocument]);
+
+  useEffect(() => {
+    void getAllBrushes().then(setAllBrushes);
+  }, []);
+
+  useEffect(() => {
+    void preloadBrushTip(brush);
+  }, [brush]);
 
   const renderView = useCallback(() => {
     if (!doc || !viewCanvasRef.current || !containerRef.current) return;
@@ -711,6 +724,7 @@ export default function Studio({ artworkId, onBack }: Props) {
             setBrush(b);
             setPanel(null);
           }}
+          onBrushesChange={setAllBrushes}
           onClose={() => setPanel(null)}
         />
       )}

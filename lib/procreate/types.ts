@@ -35,7 +35,8 @@ export type BrushCategory =
   | "artistic"
   | "calligraphy"
   | "textures"
-  | "elements";
+  | "elements"
+  | "imported";
 
 export type BrushDef = {
   id: string;
@@ -52,6 +53,10 @@ export type BrushDef = {
   wetMix: number;
   texture: "smooth" | "grain" | "speckle" | "canvas";
   taper: number;
+  /** Data URL of Procreate shape/tip PNG when imported */
+  tipImage?: string;
+  setName?: string;
+  imported?: boolean;
 };
 
 export type Layer = {

@@ -19,6 +19,7 @@ export const CATEGORY_LABELS: Record<BrushCategory, string> = {
   calligraphy: "Calligraphy",
   textures: "Textures",
   elements: "Elements",
+  imported: "Imported",
 };
 
 export const BRUSHES: BrushDef[] = [

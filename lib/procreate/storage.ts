@@ -1,8 +1,10 @@
 import type { ArtworkDocument, ArtworkMeta } from "./types";
+import type { ImportedBrushSet } from "./brushImport";
 
 const DB_NAME = "annsymons-procreate";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE = "artworks";
+const BRUSH_STORE = "brushSets";
 
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -13,6 +15,9 @@ function openDb(): Promise<IDBDatabase> {
       const db = req.result;
       if (!db.objectStoreNames.contains(STORE)) {
         db.createObjectStore(STORE, { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains(BRUSH_STORE)) {
+        db.createObjectStore(BRUSH_STORE, { keyPath: "id" });
       }
     };
   });
@@ -117,4 +122,37 @@ export function createLayerCanvas(width: number, height: number): HTMLCanvasElem
 
 export function generateId(): string {
   return crypto.randomUUID();
+}
+
+export async function listImportedBrushSets(): Promise<ImportedBrushSet[]> {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(BRUSH_STORE, "readonly");
+    const req = tx.objectStore(BRUSH_STORE).getAll();
+    req.onerror = () => reject(req.error);
+    req.onsuccess = () => {
+      const sets = (req.result as ImportedBrushSet[]).sort((a, b) => b.importedAt - a.importedAt);
+      resolve(sets);
+    };
+  });
+}
+
+export async function saveImportedBrushSet(set: ImportedBrushSet): Promise<void> {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(BRUSH_STORE, "readwrite");
+    const req = tx.objectStore(BRUSH_STORE).put(set);
+    req.onerror = () => reject(req.error);
+    req.onsuccess = () => resolve();
+  });
+}
+
+export async function deleteImportedBrushSet(id: string): Promise<void> {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(BRUSH_STORE, "readwrite");
+    const req = tx.objectStore(BRUSH_STORE).delete(id);
+    req.onerror = () => reject(req.error);
+    req.onsuccess = () => resolve();
+  });
 }

@@ -1,5 +1,6 @@
 import type { BlendMode, BrushDef, Layer, Point, Tool } from "./types";
 import { hexToRgb } from "./colorUtils";
+import { getCachedTipImage } from "./brushLibrary";
 
 const BLEND_MAP: Record<BlendMode, GlobalCompositeOperation> = {
   normal: "source-over",
@@ -238,7 +239,17 @@ export class StrokeEngine {
     }
 
     const stampAlpha = erase ? alpha : alpha * (0.5 + p.pressure * 0.5);
-    stampBrush(ctx, sx, sy, stampSize, color, stampAlpha, brush.hardness, brush.texture);
+
+    const tip = getCachedTipImage(brush);
+    if (tip) {
+      ctx.save();
+      ctx.globalAlpha = stampAlpha;
+      const r = stampSize / 2;
+      ctx.drawImage(tip, sx - r, sy - r, stampSize, stampSize);
+      ctx.restore();
+    } else {
+      stampBrush(ctx, sx, sy, stampSize, color, stampAlpha, brush.hardness, brush.texture);
+    }
 
     if (brush.wetMix > 0 && !erase) {
       ctx.save();
