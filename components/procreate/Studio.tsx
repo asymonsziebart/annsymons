@@ -63,10 +63,10 @@ import {
   mergeLayerDown,
   previewTransform,
   QUICK_SHAPE_HOLD_MS,
-  QUICK_SHAPE_STILL_PX,
   renderTextToLayer,
   reorderLayers,
   sampleQuickShapePoints,
+  type QuickShapeResult,
 } from "@/lib/procreate/studioExtras";
 import {
   canvasToDataUrl,
@@ -153,6 +153,7 @@ export default function Studio({ artworkId, onBack }: Props) {
   const strokePoints = useRef<Point[]>([]);
   const quickShapeTimerRef = useRef<number | null>(null);
   const quickShapeAppliedRef = useRef(false);
+  const quickShapeResultRef = useRef<QuickShapeResult | null>(null);
   const lastStillPointRef = useRef<Point | null>(null);
   const quickShapeHintRef = useRef(false);
   const [brush, setBrush] = useState<BrushDef>(findBrush("6b-pencil"));
@@ -517,6 +518,7 @@ export default function Studio({ artworkId, onBack }: Props) {
   function resetQuickShapeState() {
     clearQuickShapeTimer();
     quickShapeAppliedRef.current = false;
+    quickShapeResultRef.current = null;
     lastStillPointRef.current = null;
     if (quickShapeHintRef.current) {
       quickShapeHintRef.current = false;
@@ -534,14 +536,19 @@ export default function Studio({ artworkId, onBack }: Props) {
     };
   }
 
-  function replayFreehandStroke(ctx: CanvasRenderingContext2D, layer: Layer, points: Point[]) {
-    if (points.length < 2) return;
+  function paintQuickShapeOnLayer(
+    ctx: CanvasRenderingContext2D,
+    layer: Layer,
+    shape: NonNullable<QuickShapeResult>,
+  ) {
+    const step = Math.max(2, activeBrush.size * brushSize * 0.35);
+    const samples = sampleQuickShapePoints(shape, step);
     strokeEngine.current.reset();
-    for (let i = 1; i < points.length; i++) {
+    for (let i = 1; i < samples.length; i++) {
       strokeEngine.current.paintStroke(
         ctx,
-        points[i - 1],
-        points[i],
+        samples[i - 1],
+        samples[i],
         activeBrush,
         color,
         tool,
@@ -567,27 +574,26 @@ export default function Studio({ artworkId, onBack }: Props) {
     const ctx = drawLayer.canvas.getContext("2d");
     if (!ctx) return;
 
-    const step = Math.max(2, activeBrush.size * brushSize * 0.35);
-    const samples = sampleQuickShapePoints(shape, step);
-    strokeEngine.current.reset();
-    for (let i = 1; i < samples.length; i++) {
-      strokeEngine.current.paintStroke(
-        ctx,
-        samples[i - 1],
-        samples[i],
-        activeBrush,
-        color,
-        tool,
-        brushSize,
-        brushOpacity,
-        strokeComposite(),
-        strokePaintOptions(drawLayer),
-      );
-    }
+    paintQuickShapeOnLayer(ctx, drawLayer, shape);
 
     quickShapeAppliedRef.current = true;
+    quickShapeResultRef.current = shape;
     quickShapeHintRef.current = true;
     schedulePaintView();
+  }
+
+  function commitQuickShapeIfSnapped() {
+    const shape = quickShapeResultRef.current;
+    if (!shape || !strokeStart.current) return;
+
+    const drawLayer = getActiveDrawingLayer();
+    if (!drawLayer) return;
+
+    restoreLayerState(drawLayer, strokeStart.current.before);
+    const ctx = drawLayer.canvas.getContext("2d");
+    if (!ctx) return;
+
+    paintQuickShapeOnLayer(ctx, drawLayer, shape);
   }
 
   function scheduleQuickShapeHold(stillPoint: Point) {
@@ -601,28 +607,6 @@ export default function Studio({ artworkId, onBack }: Props) {
       if (!isDrawingRef.current) return;
       applyQuickShapePreview();
     }, QUICK_SHAPE_HOLD_MS);
-  }
-
-  function revertQuickShapeIfMoved(currentPoint: Point): boolean {
-    if (!quickShapeAppliedRef.current) return false;
-
-    const still = lastStillPointRef.current;
-    if (!still) return false;
-
-    const dist = Math.hypot(currentPoint.x - still.x, currentPoint.y - still.y);
-    if (dist <= QUICK_SHAPE_STILL_PX) return true;
-
-    const drawLayer = getActiveDrawingLayer();
-    if (!drawLayer || !strokeStart.current) return false;
-
-    restoreLayerState(drawLayer, strokeStart.current.before);
-    const ctx = drawLayer.canvas.getContext("2d");
-    if (!ctx) return false;
-
-    replayFreehandStroke(ctx, drawLayer, strokePoints.current);
-    quickShapeAppliedRef.current = false;
-    quickShapeHintRef.current = false;
-    return false;
   }
 
   function cancelActiveStroke() {
@@ -1073,7 +1057,7 @@ export default function Studio({ artworkId, onBack }: Props) {
       if (!p || !lastPointer.current) continue;
 
       if (prefsRef.current.quickShape && tool !== "smudge" && quickShapeAppliedRef.current) {
-        if (revertQuickShapeIfMoved(p)) continue;
+        continue;
       }
 
       drawSegmentTo(ctx, drawLayer, p);
@@ -1119,6 +1103,8 @@ export default function Studio({ artworkId, onBack }: Props) {
     if (!isDrawing) return;
     setIsDrawing(false);
     isDrawingRef.current = false;
+
+    commitQuickShapeIfSnapped();
     resetQuickShapeState();
 
     lastPointer.current = null;
