@@ -28,6 +28,18 @@ export function compositeLayers(
   height: number,
   backgroundColor = "#ffffff",
 ): HTMLCanvasElement {
+  return compositeLayersSlice(layers, 0, layers.length - 1, width, height, backgroundColor);
+}
+
+/** Composite from `fromIndex` through `toIndex` (inclusive). Used for smudge isolation. */
+export function compositeLayersSlice(
+  layers: Layer[],
+  fromIndex: number,
+  toIndex: number,
+  width: number,
+  height: number,
+  backgroundColor = "#ffffff",
+): HTMLCanvasElement {
   const out = document.createElement("canvas");
   out.width = width;
   out.height = height;
@@ -37,7 +49,12 @@ export function compositeLayers(
   ctx.fillStyle = backgroundColor;
   ctx.fillRect(0, 0, width, height);
 
-  for (const layer of layers) {
+  const start = Math.max(0, fromIndex);
+  const end = Math.min(layers.length - 1, toIndex);
+  if (end < start) return out;
+
+  for (let i = start; i <= end; i++) {
+    const layer = layers[i];
     if (!layer.visible || layer.opacity <= 0) continue;
 
     if (layer.clipToLayerId) {

@@ -30,6 +30,7 @@ import {
   captureLayerState,
   cloneImageData,
   compositeLayers,
+  compositeLayersSlice,
   fillLayer,
   importImageToLayer,
   restoreLayerState,
@@ -177,6 +178,9 @@ export default function Studio({ artworkId, onBack }: Props) {
   const colorDropStart = useRef<{ x: number; y: number } | null>(null);
   const colorDropActiveRef = useRef(false);
   const fillThresholdLiveRef = useRef(0.18);
+  const activePointerIds = useRef(new Set<number>());
+  const multiTouchTap = useRef<{ count: number; time: number; xs: number[]; ys: number[] } | null>(null);
+  const smudgeCompositeRef = useRef<HTMLCanvasElement | null>(null);
   const docRef = useRef(doc);
   const layersRef = useRef(layers);
   const activeLayerIdRef = useRef(activeLayerId);
@@ -355,6 +359,11 @@ export default function Studio({ artworkId, onBack }: Props) {
     }
 
     compositeRef.current = compositeLayers(layers, doc.width, doc.height, doc.backgroundColor);
+    const activeIdx = layers.findIndex((l) => l.id === activeLayerId);
+    smudgeCompositeRef.current =
+      activeIdx >= 0
+        ? compositeLayersSlice(layers, 0, activeIdx, doc.width, doc.height, doc.backgroundColor)
+        : compositeRef.current;
     ctx.drawImage(compositeRef.current, 0, 0);
 
     drawSymmetryGuides(ctx, doc.width, doc.height, prefs.symmetry, zoom);
@@ -403,7 +412,26 @@ export default function Studio({ artworkId, onBack }: Props) {
         ctx.stroke();
       }
     }
-  }, [doc, layers, zoom, pan, prefs, cursor, brush, brushSize, studioMode, transform, activeLayer, eyedropper, colorDropActive, colorDropPos, fillThresholdLive, color, selection, overlayVersion]);
+  }, [doc, layers, zoom, pan, prefs, cursor, brush, brushSize, studioMode, transform, activeLayer, activeLayerId, eyedropper, colorDropActive, colorDropPos, fillThresholdLive, color, selection, overlayVersion]);
+
+  function getLayerById(id: string) {
+    return layersRef.current.find((l) => l.id === id) ?? null;
+  }
+
+  function getActiveDrawingLayer() {
+    return getLayerById(activeLayerIdRef.current);
+  }
+
+  function cancelActiveStroke() {
+    if (strokeStart.current) {
+      const layer = getLayerById(strokeStart.current.layerId);
+      if (layer) restoreLayerState(layer, strokeStart.current.before);
+    }
+    setIsDrawing(false);
+    lastPointer.current = null;
+    strokeStart.current = null;
+    strokePoints.current = [];
+  }
 
   function performColorDrop(clientX: number, clientY: number, threshold: number) {
     const currentDoc = docRef.current;
@@ -584,23 +612,28 @@ export default function Studio({ artworkId, onBack }: Props) {
   function undo() {
     const entry = undoStack.current.pop();
     if (!entry) return;
-    const layer = layers.find((l) => l.id === entry.layerId);
+    const layer = getLayerById(entry.layerId);
     if (!layer) return;
     const current = captureLayerState(layer);
     if (current) redoStack.current.push({ layerId: entry.layerId, before: cloneImageData(current) });
     restoreLayerState(layer, entry.before);
-    setLayers([...layers]);
+    setLayers([...layersRef.current]);
   }
 
   function redo() {
     const entry = redoStack.current.pop();
     if (!entry) return;
-    const layer = layers.find((l) => l.id === entry.layerId);
+    const layer = getLayerById(entry.layerId);
     if (!layer) return;
     const current = captureLayerState(layer);
     if (current) undoStack.current.push({ layerId: entry.layerId, before: cloneImageData(current) });
     restoreLayerState(layer, entry.before);
-    setLayers([...layers]);
+    setLayers([...layersRef.current]);
+  }
+
+  function strokeComposite() {
+    if (tool === "smudge") return smudgeCompositeRef.current ?? undefined;
+    return undefined;
   }
 
   function pointerToPoint(e: PointerEvent): Point | null {
@@ -612,8 +645,8 @@ export default function Studio({ artworkId, onBack }: Props) {
 
   const activeBrush = effectiveBrush(brush, brushOverrides);
 
-  function drawSegmentTo(ctx: CanvasRenderingContext2D, to: Point) {
-    if (!lastPointer.current || !activeLayer || !doc) return;
+  function drawSegmentTo(ctx: CanvasRenderingContext2D, layer: Layer, to: Point) {
+    if (!lastPointer.current || !doc) return;
     strokePoints.current.push(to);
     strokeEngine.current.paintStroke(
       ctx,
@@ -624,9 +657,9 @@ export default function Studio({ artworkId, onBack }: Props) {
       tool,
       brushSize,
       brushOpacity,
-      compositeRef.current ?? undefined,
+      strokeComposite(),
       {
-        alphaLock: activeLayer.alphaLock,
+        alphaLock: layer.alphaLock,
         symmetry: prefs.symmetry,
         canvasWidth: doc.width,
         canvasHeight: doc.height,
@@ -636,7 +669,14 @@ export default function Studio({ artworkId, onBack }: Props) {
   }
 
   function handlePointerDown(e: React.PointerEvent) {
-    if (!doc || !activeLayer || activeLayer.locked) return;
+    activePointerIds.current.add(e.pointerId);
+    if (activePointerIds.current.size > 1) {
+      cancelActiveStroke();
+      return;
+    }
+
+    const activeLayerNow = getActiveDrawingLayer();
+    if (!doc || !activeLayerNow || activeLayerNow.locked) return;
     if (colorDropActiveRef.current) return;
 
     if (e.button === 1 || (e.button === 0 && e.altKey)) {
@@ -670,7 +710,7 @@ export default function Studio({ artworkId, onBack }: Props) {
 
     if (studioMode === "transform") {
       if (!transform) {
-        const t = beginTransform(activeLayer);
+        const t = beginTransform(activeLayerNow);
         if (t) setTransform(t);
       } else {
         const handle = hitTransformHandle(transform, pt.x, pt.y, zoom);
@@ -688,14 +728,14 @@ export default function Studio({ artworkId, onBack }: Props) {
         fontSize: 48,
         color,
         fontFamily: "system-ui",
-        layerId: activeLayer.id,
+        layerId: activeLayerNow.id,
       });
       setPanel("text");
       return;
     }
 
-    const before = captureLayerState(activeLayer);
-    if (before) strokeStart.current = { layerId: activeLayer.id, before: cloneImageData(before) };
+    const before = captureLayerState(activeLayerNow);
+    if (before) strokeStart.current = { layerId: activeLayerNow.id, before: cloneImageData(before) };
 
     setIsDrawing(true);
     lastPointer.current = pt;
@@ -703,8 +743,23 @@ export default function Studio({ artworkId, onBack }: Props) {
     strokeStartTime.current = Date.now();
     strokeEngine.current.reset();
 
-    const ctx = activeLayer.canvas.getContext("2d");
+    const ctx = activeLayerNow.canvas.getContext("2d");
     if (!ctx) return;
+
+    if (tool === "smudge" && doc) {
+      const idx = layersRef.current.findIndex((l) => l.id === activeLayerNow.id);
+      if (idx >= 0) {
+        smudgeCompositeRef.current = compositeLayersSlice(
+          layersRef.current,
+          0,
+          idx,
+          doc.width,
+          doc.height,
+          doc.backgroundColor,
+        );
+      }
+    }
+
     strokeEngine.current.paintStroke(
       ctx,
       pt,
@@ -714,15 +769,15 @@ export default function Studio({ artworkId, onBack }: Props) {
       tool,
       brushSize,
       brushOpacity,
-      compositeRef.current ?? undefined,
+      strokeComposite(),
       {
-        alphaLock: activeLayer.alphaLock,
+        alphaLock: activeLayerNow.alphaLock,
         symmetry: prefs.symmetry,
         canvasWidth: doc.width,
         canvasHeight: doc.height,
       },
     );
-    setLayers([...layers]);
+    setLayers([...layersRef.current]);
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
   }
 
@@ -769,9 +824,12 @@ export default function Studio({ artworkId, onBack }: Props) {
       return;
     }
 
-    if (!isDrawing || !activeLayer || studioMode !== "draw") return;
+    if (!isDrawing || studioMode !== "draw") return;
 
-    const ctx = activeLayer.canvas.getContext("2d");
+    const drawLayer = getActiveDrawingLayer();
+    if (!drawLayer || drawLayer.id !== strokeStart.current?.layerId) return;
+
+    const ctx = drawLayer.canvas.getContext("2d");
     if (!ctx) return;
 
     const native = e.nativeEvent;
@@ -781,13 +839,15 @@ export default function Studio({ artworkId, onBack }: Props) {
     for (const ev of coalesced) {
       const p = pointerToPoint(ev);
       if (!p || !lastPointer.current) continue;
-      drawSegmentTo(ctx, p);
+      drawSegmentTo(ctx, drawLayer, p);
     }
 
-    setLayers([...layers]);
+    setLayers([...layersRef.current]);
   }
 
   function handlePointerUp(e: React.PointerEvent) {
+    activePointerIds.current.delete(e.pointerId);
+
     if (panStart.current) {
       panStart.current = null;
       return;
@@ -818,14 +878,15 @@ export default function Studio({ artworkId, onBack }: Props) {
     if (!isDrawing) return;
     setIsDrawing(false);
 
-    if (studioMode === "draw" && activeLayer && prefs.quickShape && strokePoints.current.length > 2) {
+    if (studioMode === "draw" && prefs.quickShape && strokePoints.current.length > 2) {
+      const drawLayer = getActiveDrawingLayer();
       const holdMs = Date.now() - strokeStartTime.current;
       const shape = detectQuickShape(strokePoints.current, holdMs);
-      if (shape && strokeStart.current) {
-        restoreLayerState(activeLayer, strokeStart.current.before);
-        const ctx = activeLayer.canvas.getContext("2d");
+      if (shape && strokeStart.current && drawLayer) {
+        restoreLayerState(drawLayer, strokeStart.current.before);
+        const ctx = drawLayer.canvas.getContext("2d");
         if (ctx) drawQuickShape(ctx, shape, color, activeBrush.size * brushSize);
-        setLayers([...layers]);
+        setLayers([...layersRef.current]);
       }
     }
 
@@ -848,7 +909,44 @@ export default function Studio({ artworkId, onBack }: Props) {
     setZoom((z) => Math.max(0.1, Math.min(8, z * delta)));
   }
 
+  function handleTouchStart(e: React.TouchEvent) {
+    const count = e.touches.length;
+    if (count >= 2) {
+      cancelActiveStroke();
+      multiTouchTap.current = {
+        count,
+        time: Date.now(),
+        xs: Array.from(e.touches).map((t) => t.clientX),
+        ys: Array.from(e.touches).map((t) => t.clientY),
+      };
+      (handleTouchPinch as unknown as { last?: number }).last = undefined;
+      e.preventDefault();
+    }
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    const gesture = multiTouchTap.current;
+    if (!gesture || e.touches.length > 0) return;
+
+    const elapsed = Date.now() - gesture.time;
+    let maxMove = 0;
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const t = e.changedTouches[i];
+      const startX = gesture.xs[i] ?? t.clientX;
+      const startY = gesture.ys[i] ?? t.clientY;
+      maxMove = Math.max(maxMove, Math.hypot(t.clientX - startX, t.clientY - startY));
+    }
+
+    if (elapsed < 400 && maxMove < 32) {
+      if (gesture.count === 2) undo();
+      else if (gesture.count >= 3) redo();
+    }
+    multiTouchTap.current = null;
+    e.preventDefault();
+  }
+
   function handleTouchPinch(e: React.TouchEvent) {
+    if (multiTouchTap.current) return;
     if (e.touches.length !== 2) return;
     const dx = e.touches[0].clientX - e.touches[1].clientX;
     const dy = e.touches[0].clientY - e.touches[1].clientY;
@@ -1270,6 +1368,9 @@ export default function Studio({ artworkId, onBack }: Props) {
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
         onWheel={handleWheel}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
         onTouchMove={handleTouchPinch}
         onDoubleClick={() => setPrefs((p) => ({ ...p, showInterface: !p.showInterface }))}
       >
