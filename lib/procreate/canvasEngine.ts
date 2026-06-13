@@ -28,10 +28,52 @@ export function compositeLayers(
   height: number,
   backgroundColor = "#ffffff",
 ): HTMLCanvasElement {
-  return compositeLayersSlice(layers, 0, layers.length - 1, width, height, backgroundColor);
+  const out = document.createElement("canvas");
+  out.width = width;
+  out.height = height;
+  compositeLayersInto(out, layers, width, height, backgroundColor);
+  return out;
 }
 
-/** Composite from `fromIndex` through `toIndex` (inclusive). Used for smudge isolation. */
+export function compositeLayersInto(
+  out: HTMLCanvasElement,
+  layers: Layer[],
+  width: number,
+  height: number,
+  backgroundColor = "#ffffff",
+): HTMLCanvasElement {
+  if (out.width !== width) out.width = width;
+  if (out.height !== height) out.height = height;
+
+  const ctx = out.getContext("2d");
+  if (!ctx) return out;
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = backgroundColor;
+  ctx.fillRect(0, 0, width, height);
+
+  for (let i = 0; i < layers.length; i++) {
+    const layer = layers[i];
+    if (!layer.visible || layer.opacity <= 0) continue;
+
+    if (layer.clipToLayerId) {
+      const clipSource = layers.find((l) => l.id === layer.clipToLayerId);
+      if (clipSource) {
+        drawLayerClipped(ctx, layer, clipSource, width, height);
+        continue;
+      }
+    }
+
+    ctx.save();
+    ctx.globalAlpha = layer.opacity;
+    ctx.globalCompositeOperation = BLEND_MAP[layer.blendMode] ?? "source-over";
+    ctx.drawImage(layer.canvas, 0, 0);
+    ctx.restore();
+  }
+  return out;
+}
+
+/** @deprecated use compositeLayersInto for zero-allocation compositing */
 export function compositeLayersSlice(
   layers: Layer[],
   fromIndex: number,
@@ -212,7 +254,7 @@ export class StrokeEngine {
 
     // Keep stamps overlapping so fast strokes stay solid (spacing alone can gap on soft brushes).
     const step = Math.max(0.5, Math.min(size * brush.spacing, size * 0.12));
-    const steps = Math.max(1, Math.ceil(d / step));
+    const steps = Math.min(Math.max(1, Math.ceil(d / step)), 24);
 
     for (let i = 0; i <= steps; i++) {
       const t = i / steps;
@@ -298,7 +340,7 @@ export class StrokeEngine {
 
     const d = dist(from, to);
     const step = Math.max(0.5, Math.min(size * brush.spacing * 0.5, size * 0.12));
-    const steps = Math.max(1, Math.ceil(d / step));
+    const steps = Math.min(Math.max(1, Math.ceil(d / step)), 12);
 
     for (let i = 0; i <= steps; i++) {
       const t = i / steps;

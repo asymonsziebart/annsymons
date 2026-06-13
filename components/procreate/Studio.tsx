@@ -29,6 +29,7 @@ import {
   captureLayerState,
   cloneImageData,
   compositeLayers,
+  compositeLayersInto,
   compositeLayersSlice,
   fillLayer,
   importImageToLayer,
@@ -166,7 +167,11 @@ export default function Studio({ artworkId, onBack }: Props) {
   const [colorDropActive, setColorDropActive] = useState(false);
   const [colorDropPos, setColorDropPos] = useState<{ x: number; y: number } | null>(null);
   const [fillThresholdLive, setFillThresholdLive] = useState(0.18);
-  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+  const cursorRef = useRef<{ x: number; y: number } | null>(null);
+  const isDrawingRef = useRef(false);
+  const paintScheduledRef = useRef(false);
+  const viewLayoutRef = useRef({ w: 0, h: 0, dpr: 1 });
+  const isTouchDeviceRef = useRef(false);
   const [saveLabel, setSaveLabel] = useState("Saved");
 
   const undoStack = useRef<HistoryState[]>([]);
@@ -213,9 +218,14 @@ export default function Studio({ artworkId, onBack }: Props) {
   }, []);
 
   useEffect(() => {
+    isDrawingRef.current = isDrawing;
+  }, [isDrawing]);
+
+  useEffect(() => {
     const updateDeviceUi = () => {
       const touch = window.matchMedia("(pointer: coarse)").matches || "ontouchstart" in window;
       const narrow = window.matchMedia("(max-width: 768px)").matches;
+      isTouchDeviceRef.current = touch;
       setIsTouchDevice(touch);
       setIsPocketUI(touch && narrow);
     };
@@ -341,65 +351,103 @@ export default function Studio({ artworkId, onBack }: Props) {
     void preloadBrushTip(brush);
   }, [brush]);
 
-  const renderView = useCallback(() => {
-    if (!doc || !viewCanvasRef.current || !containerRef.current) return;
+  const schedulePaintView = useCallback(() => {
+    if (paintScheduledRef.current) return;
+    paintScheduledRef.current = true;
+    requestAnimationFrame(() => {
+      paintScheduledRef.current = false;
+      paintViewRef.current();
+    });
+  }, []);
+
+  const paintViewRef = useRef<() => void>(() => {});
+
+  paintViewRef.current = () => {
+    const currentDoc = docRef.current;
+    const currentLayers = layersRef.current;
+    if (!currentDoc || !viewCanvasRef.current || !containerRef.current) return;
+
     const view = viewCanvasRef.current;
     const container = containerRef.current;
-    const dpr = window.devicePixelRatio || 1;
+    const rawDpr = window.devicePixelRatio || 1;
+    const dpr = Math.min(rawDpr, isTouchDeviceRef.current ? 2 : 3);
+    const cw = container.clientWidth;
+    const ch = container.clientHeight;
 
-    view.width = Math.floor(container.clientWidth * dpr);
-    view.height = Math.floor(container.clientHeight * dpr);
-    view.style.width = `${container.clientWidth}px`;
-    view.style.height = `${container.clientHeight}px`;
+    const layout = viewLayoutRef.current;
+    if (layout.w !== cw || layout.h !== ch || layout.dpr !== dpr) {
+      view.width = Math.floor(cw * dpr);
+      view.height = Math.floor(ch * dpr);
+      view.style.width = `${cw}px`;
+      view.style.height = `${ch}px`;
+      viewLayoutRef.current = { w: cw, h: ch, dpr };
+    }
 
-    const ctx = view.getContext("2d");
+    const ctx = view.getContext("2d", { alpha: false });
     if (!ctx) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, container.clientWidth, container.clientHeight);
+    ctx.clearRect(0, 0, cw, ch);
+
+    const panNow = panRef.current;
+    const zoomNow = zoomRef.current;
+    const prefsNow = prefsRef.current;
 
     ctx.save();
-    ctx.translate(pan.x, pan.y);
-    ctx.scale(zoom, zoom);
+    ctx.translate(panNow.x, panNow.y);
+    ctx.scale(zoomNow, zoomNow);
 
-    ctx.fillStyle = doc.backgroundColor;
-    ctx.fillRect(0, 0, doc.width, doc.height);
+    ctx.fillStyle = currentDoc.backgroundColor;
+    ctx.fillRect(0, 0, currentDoc.width, currentDoc.height);
 
-    if (prefs.showReference && referenceImgRef.current) {
+    if (prefsNow.showReference && referenceImgRef.current) {
       ctx.globalAlpha = 0.45;
-      ctx.drawImage(referenceImgRef.current, 0, 0, doc.width, doc.height);
+      ctx.drawImage(referenceImgRef.current, 0, 0, currentDoc.width, currentDoc.height);
       ctx.globalAlpha = 1;
     }
 
-    if (prefs.onionSkin && onionSkinRef.current) {
+    if (prefsNow.onionSkin && onionSkinRef.current) {
       ctx.globalAlpha = 0.35;
       ctx.drawImage(onionSkinRef.current, 0, 0);
       ctx.globalAlpha = 1;
     }
 
-    compositeRef.current = compositeLayers(layers, doc.width, doc.height, doc.backgroundColor);
-    const activeIdx = layers.findIndex((l) => l.id === activeLayerId);
-    smudgeCompositeRef.current =
-      activeIdx >= 0
-        ? compositeLayersSlice(layers, 0, activeIdx, doc.width, doc.height, doc.backgroundColor)
-        : compositeRef.current;
+    if (!compositeRef.current) {
+      compositeRef.current = document.createElement("canvas");
+    }
+    compositeLayersInto(
+      compositeRef.current,
+      currentLayers,
+      currentDoc.width,
+      currentDoc.height,
+      currentDoc.backgroundColor,
+    );
+
     ctx.drawImage(compositeRef.current, 0, 0);
 
-    drawSymmetryGuides(ctx, doc.width, doc.height, prefs.symmetry, zoom);
+    drawSymmetryGuides(ctx, currentDoc.width, currentDoc.height, prefsNow.symmetry, zoomNow);
 
-    if (selection) drawSelectionOverlay(ctx, selection, zoom);
+    if (selection) drawSelectionOverlay(ctx, selection, zoomNow);
 
     if (studioMode === "transform" && transform) {
-      drawTransformHandles(ctx, transform, zoom);
+      drawTransformHandles(ctx, transform, zoomNow);
     }
 
     ctx.restore();
 
-    if (prefs.brushCursor && cursor && !eyedropper && !colorDropActive) {
-      const cx = (cursor.x - pan.x) / zoom;
-      const cy = (cursor.y - pan.y) / zoom;
-      const screenX = pan.x + cx * zoom;
-      const screenY = pan.y + cy * zoom;
-      const r = (brush.size * brushSize * 0.5) * zoom;
+    const cursor = cursorRef.current;
+    const showBrushCursor =
+      prefsNow.brushCursor &&
+      !isTouchDeviceRef.current &&
+      cursor &&
+      !eyedropper &&
+      !colorDropActiveRef.current;
+
+    if (showBrushCursor) {
+      const cx = (cursor.x - panNow.x) / zoomNow;
+      const cy = (cursor.y - panNow.y) / zoomNow;
+      const screenX = panNow.x + cx * zoomNow;
+      const screenY = panNow.y + cy * zoomNow;
+      const r = brush.size * brushSize * 0.5 * zoomNow;
       ctx.beginPath();
       ctx.strokeStyle = "rgba(255,255,255,0.8)";
       ctx.lineWidth = 1;
@@ -410,16 +458,16 @@ export default function Studio({ artworkId, onBack }: Props) {
       ctx.stroke();
     }
 
-    if (colorDropActive && colorDropPos && doc) {
+    if (colorDropActiveRef.current && colorDropPos && currentDoc) {
       const rect = view.getBoundingClientRect();
-      const cx = (colorDropPos.x - rect.left - pan.x) / zoom;
-      const cy = (colorDropPos.y - rect.top - pan.y) / zoom;
-      if (cx >= 0 && cy >= 0 && cx <= doc.width && cy <= doc.height) {
-        const r = thresholdPreviewRadius(fillThresholdLive, doc.width) * zoom;
-        const screenX = pan.x + cx * zoom;
-        const screenY = pan.y + cy * zoom;
+      const cx = (colorDropPos.x - rect.left - panNow.x) / zoomNow;
+      const cy = (colorDropPos.y - rect.top - panNow.y) / zoomNow;
+      if (cx >= 0 && cy >= 0 && cx <= currentDoc.width && cy <= currentDoc.height) {
+        const r = thresholdPreviewRadius(fillThresholdLiveRef.current, currentDoc.width) * zoomNow;
+        const screenX = panNow.x + cx * zoomNow;
+        const screenY = panNow.y + cy * zoomNow;
         ctx.beginPath();
-        ctx.strokeStyle = color;
+        ctx.strokeStyle = colorRef.current;
         ctx.lineWidth = 2;
         ctx.setLineDash([5, 4]);
         ctx.arc(screenX, screenY, r, 0, Math.PI * 2);
@@ -430,7 +478,7 @@ export default function Studio({ artworkId, onBack }: Props) {
         ctx.stroke();
       }
     }
-  }, [doc, layers, zoom, pan, prefs, cursor, brush, brushSize, studioMode, transform, activeLayer, activeLayerId, eyedropper, colorDropActive, colorDropPos, fillThresholdLive, color, selection, overlayVersion]);
+  };
 
   function getLayerById(id: string) {
     return layersRef.current.find((l) => l.id === id) ?? null;
@@ -446,9 +494,11 @@ export default function Studio({ artworkId, onBack }: Props) {
       if (layer) restoreLayerState(layer, strokeStart.current.before);
     }
     setIsDrawing(false);
+    isDrawingRef.current = false;
     lastPointer.current = null;
     strokeStart.current = null;
     strokePoints.current = [];
+    schedulePaintView();
   }
 
   function performColorDrop(clientX: number, clientY: number, threshold: number) {
@@ -562,14 +612,35 @@ export default function Studio({ artworkId, onBack }: Props) {
   }
 
   useEffect(() => {
-    renderView();
-  }, [renderView]);
+    schedulePaintView();
+  }, [
+    doc,
+    layers,
+    zoom,
+    pan,
+    prefs,
+    brush,
+    brushSize,
+    studioMode,
+    transform,
+    eyedropper,
+    colorDropActive,
+    colorDropPos,
+    fillThresholdLive,
+    color,
+    selection,
+    overlayVersion,
+    schedulePaintView,
+  ]);
 
   useEffect(() => {
-    const onResize = () => renderView();
+    const onResize = () => {
+      viewLayoutRef.current = { w: 0, h: 0, dpr: 0 };
+      schedulePaintView();
+    };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, [renderView]);
+  }, [schedulePaintView]);
 
   const persist = useCallback(async () => {
     if (!doc) return;
@@ -796,12 +867,16 @@ export default function Studio({ artworkId, onBack }: Props) {
         canvasHeight: doc.height,
       },
     );
-    setLayers([...layersRef.current]);
+    isDrawingRef.current = true;
+    schedulePaintView();
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
   }
 
   function handlePointerMove(e: React.PointerEvent) {
-    setCursor({ x: e.clientX - (containerRef.current?.getBoundingClientRect().left ?? 0), y: e.clientY - (containerRef.current?.getBoundingClientRect().top ?? 0) });
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      cursorRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    }
 
     if (panStart.current) {
       setPan({
@@ -861,7 +936,7 @@ export default function Studio({ artworkId, onBack }: Props) {
       drawSegmentTo(ctx, drawLayer, p);
     }
 
-    setLayers([...layersRef.current]);
+    schedulePaintView();
   }
 
   function handlePointerUp(e: React.PointerEvent) {
@@ -896,6 +971,7 @@ export default function Studio({ artworkId, onBack }: Props) {
 
     if (!isDrawing) return;
     setIsDrawing(false);
+    isDrawingRef.current = false;
 
     if (studioMode === "draw" && prefs.quickShape && strokePoints.current.length > 2) {
       const drawLayer = getActiveDrawingLayer();
@@ -905,7 +981,6 @@ export default function Studio({ artworkId, onBack }: Props) {
         restoreLayerState(drawLayer, strokeStart.current.before);
         const ctx = drawLayer.canvas.getContext("2d");
         if (ctx) drawQuickShape(ctx, shape, color, activeBrush.size * brushSize);
-        setLayers([...layersRef.current]);
       }
     }
 
@@ -915,6 +990,8 @@ export default function Studio({ artworkId, onBack }: Props) {
       pushUndo(strokeStart.current);
       strokeStart.current = null;
     }
+    setLayers([...layersRef.current]);
+    schedulePaintView();
   }
 
   function handleWheel(e: React.WheelEvent) {
