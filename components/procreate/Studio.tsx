@@ -51,6 +51,7 @@ import {
   IconTransform,
   IconUndo,
 } from "./icons";
+import { tipProps } from "./tip";
 
 type Props = {
   artworkId: string;
@@ -526,28 +527,41 @@ export default function Studio({ artworkId, onBack }: Props) {
       {prefs.showInterface && (
         <>
           <div className="procreate-top-left">
-            <button type="button" className="procreate-tool-btn" onClick={onBack} title="Gallery">
+            <button
+              type="button"
+              className="procreate-tool-btn"
+              onClick={onBack}
+              {...tipProps("Gallery — return to your artworks")}
+            >
               <IconGallery className="h-5 w-5" />
             </button>
             <button
               type="button"
               className={`procreate-tool-btn${panel === "actions" ? " active" : ""}`}
               onClick={() => setPanel(panel === "actions" ? null : "actions")}
-              title="Actions"
+              {...tipProps("Actions — export, import, and preferences")}
             >
               <IconActions className="h-5 w-5" />
             </button>
-            <button type="button" className="procreate-tool-btn" title="Adjustments">
+            <button
+              type="button"
+              className="procreate-tool-btn"
+              {...tipProps("Adjustments — blur, sharpen, and effects (coming soon)")}
+            >
               <IconAdjust className="h-5 w-5" />
             </button>
-            <button type="button" className="procreate-tool-btn" title="Selection">
+            <button
+              type="button"
+              className="procreate-tool-btn"
+              {...tipProps("Selection — isolate areas to edit (coming soon)")}
+            >
               <IconSelect className="h-5 w-5" />
             </button>
             <button
               type="button"
               className={`procreate-tool-btn${transformMode ? " active" : ""}`}
               onClick={() => setTransformMode(!transformMode)}
-              title="Transform"
+              {...tipProps("Transform — move and scale the active layer")}
             >
               <IconTransform className="h-5 w-5" />
             </button>
@@ -559,7 +573,7 @@ export default function Studio({ artworkId, onBack }: Props) {
               className={`procreate-tool-btn${tool === "paint" ? " active" : ""}`}
               onClick={() => selectTool("paint")}
               onDoubleClick={openBrushPanel}
-              title="Paint"
+              {...tipProps("Paint — draw with brushes (double-click for library)")}
             >
               <IconBrush className="h-5 w-5" />
             </button>
@@ -568,7 +582,7 @@ export default function Studio({ artworkId, onBack }: Props) {
               className={`procreate-tool-btn${tool === "smudge" ? " active" : ""}`}
               onClick={() => selectTool("smudge")}
               onDoubleClick={openBrushPanel}
-              title="Smudge"
+              {...tipProps("Smudge — blend and mix colors together")}
             >
               <IconSmudge className="h-5 w-5" />
             </button>
@@ -577,7 +591,7 @@ export default function Studio({ artworkId, onBack }: Props) {
               className={`procreate-tool-btn${tool === "erase" ? " active" : ""}`}
               onClick={() => selectTool("erase")}
               onDoubleClick={openBrushPanel}
-              title="Erase"
+              {...tipProps("Eraser — remove strokes (double-click for library)")}
             >
               <IconErase className="h-5 w-5" />
             </button>
@@ -585,7 +599,7 @@ export default function Studio({ artworkId, onBack }: Props) {
               type="button"
               className={`procreate-tool-btn${panel === "layers" ? " active" : ""}`}
               onClick={() => setPanel(panel === "layers" ? null : "layers")}
-              title="Layers"
+              {...tipProps("Layers — add, reorder, and blend layers")}
             >
               <IconLayers className="h-5 w-5" />
             </button>
@@ -593,14 +607,17 @@ export default function Studio({ artworkId, onBack }: Props) {
               type="button"
               className="procreate-color-btn"
               onClick={() => setPanel(panel === "color" ? null : "color")}
-              title="Color"
+              {...tipProps("Color — open the color picker")}
             >
               <span style={{ background: color }} />
             </button>
           </div>
 
           <aside className="procreate-sidebar">
-            <div className="procreate-slider-wrap">
+            <div
+              className="procreate-slider-wrap"
+              {...tipProps("Brush size — drag up for a thicker stroke", "right")}
+            >
               <input
                 type="range"
                 min={0.1}
@@ -608,18 +625,20 @@ export default function Studio({ artworkId, onBack }: Props) {
                 step={0.01}
                 value={brushSize}
                 onChange={(e) => setBrushSize(Number(e.target.value))}
-                title="Brush size"
               />
             </div>
             <button
               type="button"
               className={`procreate-modify-btn${eyedropper ? " active" : ""}`}
               onClick={() => setEyedropper(!eyedropper)}
-              title="Eyedropper"
+              {...tipProps("Eyedropper — pick a color from your canvas", "right")}
             >
               <IconEyedropper className="h-5 w-5" />
             </button>
-            <div className="procreate-slider-wrap">
+            <div
+              className="procreate-slider-wrap"
+              {...tipProps("Brush opacity — drag up for more solid strokes", "right")}
+            >
               <input
                 type="range"
                 min={0.05}
@@ -627,13 +646,22 @@ export default function Studio({ artworkId, onBack }: Props) {
                 step={0.01}
                 value={brushOpacity}
                 onChange={(e) => setBrushOpacity(Number(e.target.value))}
-                title="Brush opacity"
               />
             </div>
-            <button type="button" className="procreate-undo-btn" onClick={undo} title="Undo">
+            <button
+              type="button"
+              className="procreate-undo-btn"
+              onClick={undo}
+              {...tipProps("Undo last action (⌘Z)", "right")}
+            >
               <IconUndo className="h-5 w-5" />
             </button>
-            <button type="button" className="procreate-redo-btn" onClick={redo} title="Redo">
+            <button
+              type="button"
+              className="procreate-redo-btn"
+              onClick={redo}
+              {...tipProps("Redo (⌘⇧Z)", "right")}
+            >
               <IconRedo className="h-5 w-5" />
             </button>
           </aside>
@@ -713,13 +741,38 @@ export default function Studio({ artworkId, onBack }: Props) {
         <div className="procreate-panel procreate-actions-panel">
           <div className="procreate-panel-header">
             <h3>Actions</h3>
-            <button type="button" className="procreate-icon-btn" onClick={() => setPanel(null)}>×</button>
+            <button
+              type="button"
+              className="procreate-icon-btn"
+              onClick={() => setPanel(null)}
+              {...tipProps("Close actions panel")}
+            >
+              ×
+            </button>
           </div>
           <div className="procreate-actions-list">
-            <button type="button" onClick={() => void exportPng()}>Share → Export PNG</button>
-            <button type="button" onClick={fitCanvas}>Canvas → Fit to screen</button>
-            <button type="button" onClick={clearLayer}>Layer → Clear active layer</button>
-            <label className="procreate-file-btn">
+            <button
+              type="button"
+              onClick={() => void exportPng()}
+              {...tipProps("Download your artwork as a PNG file")}
+            >
+              Share → Export PNG
+            </button>
+            <button
+              type="button"
+              onClick={fitCanvas}
+              {...tipProps("Zoom and center the canvas on screen")}
+            >
+              Canvas → Fit to screen
+            </button>
+            <button
+              type="button"
+              onClick={clearLayer}
+              {...tipProps("Remove all strokes from the active layer")}
+            >
+              Layer → Clear active layer
+            </button>
+            <label className="procreate-file-btn" {...tipProps("Add a photo to the active layer")}>
               Insert → Import photo
               <input
                 type="file"
@@ -732,7 +785,7 @@ export default function Studio({ artworkId, onBack }: Props) {
               />
             </label>
             <hr />
-            <label className="procreate-toggle">
+            <label className="procreate-toggle" {...tipProps("Switch to a light-colored interface")}>
               <input
                 type="checkbox"
                 checked={prefs.lightInterface}
@@ -740,7 +793,7 @@ export default function Studio({ artworkId, onBack }: Props) {
               />
               Light interface
             </label>
-            <label className="procreate-toggle">
+            <label className="procreate-toggle" {...tipProps("Move the sidebar to the right side")}>
               <input
                 type="checkbox"
                 checked={prefs.rightHanded}
@@ -748,7 +801,7 @@ export default function Studio({ artworkId, onBack }: Props) {
               />
               Right-hand interface
             </label>
-            <label className="procreate-toggle">
+            <label className="procreate-toggle" {...tipProps("Show a circle preview of your brush on the canvas")}>
               <input
                 type="checkbox"
                 checked={prefs.brushCursor}
@@ -759,6 +812,7 @@ export default function Studio({ artworkId, onBack }: Props) {
             <button
               type="button"
               onClick={() => setPrefs({ ...prefs, showInterface: !prefs.showInterface })}
+              {...tipProps("Hide all menus for a distraction-free canvas (double-tap canvas too)")}
             >
               {prefs.showInterface ? "Hide interface" : "Show interface"}
             </button>

@@ -5,6 +5,7 @@ import type { ArtworkMeta } from "@/lib/procreate/types";
 import { CANVAS_PRESETS } from "@/lib/procreate/brushes";
 import { deleteArtwork, duplicateArtwork, listArtworks } from "@/lib/procreate/storage";
 import { IconPlus } from "./icons";
+import { tipProps } from "./tip";
 
 type Props = {
   onOpen: (id: string) => void;
@@ -56,7 +57,12 @@ export default function Gallery({ onOpen, onCreate }: Props) {
           <h1>Gallery</h1>
           <p>Select artwork or create a new canvas</p>
         </div>
-        <button type="button" className="procreate-btn-primary" onClick={() => setShowNew(true)}>
+        <button
+          type="button"
+          className="procreate-btn-primary"
+          onClick={() => setShowNew(true)}
+          {...tipProps("Create a new blank canvas")}
+        >
           <IconPlus className="h-5 w-5" />
           New canvas
         </button>
@@ -69,7 +75,12 @@ export default function Gallery({ onOpen, onCreate }: Props) {
           <div className="procreate-gallery-empty-icon">+</div>
           <h2>No artwork yet</h2>
           <p>Tap New canvas to start creating — just like Procreate on iPad.</p>
-          <button type="button" className="procreate-btn-primary" onClick={() => setShowNew(true)}>
+          <button
+            type="button"
+            className="procreate-btn-primary"
+            onClick={() => setShowNew(true)}
+            {...tipProps("Create your first artwork")}
+          >
             Create your first canvas
           </button>
         </div>
@@ -81,6 +92,7 @@ export default function Gallery({ onOpen, onCreate }: Props) {
               type="button"
               className="procreate-gallery-card"
               onClick={() => onOpen(art.id)}
+              {...tipProps(`Open "${art.name}"`)}
             >
               <div className="procreate-gallery-thumb">
                 {art.thumbnail ? (
@@ -97,16 +109,29 @@ export default function Gallery({ onOpen, onCreate }: Props) {
                 </span>
               </div>
               <div className="procreate-gallery-card-actions">
-                <button type="button" onClick={(e) => handleDuplicate(e, art.id)} title="Duplicate">
+                <button
+                  type="button"
+                  onClick={(e) => handleDuplicate(e, art.id)}
+                  {...tipProps("Make a copy of this artwork")}
+                >
                   Duplicate
                 </button>
-                <button type="button" onClick={(e) => handleDelete(e, art.id)} title="Delete">
+                <button
+                  type="button"
+                  onClick={(e) => handleDelete(e, art.id)}
+                  {...tipProps("Permanently delete this artwork")}
+                >
                   Delete
                 </button>
               </div>
             </button>
           ))}
-          <button type="button" className="procreate-gallery-card procreate-gallery-new" onClick={() => setShowNew(true)}>
+          <button
+            type="button"
+            className="procreate-gallery-card procreate-gallery-new"
+            onClick={() => setShowNew(true)}
+            {...tipProps("Create a new canvas")}
+          >
             <IconPlus className="h-10 w-10" />
             <span>New canvas</span>
           </button>
@@ -132,10 +157,20 @@ export default function Gallery({ onOpen, onCreate }: Props) {
               </select>
             </label>
             <div className="procreate-modal-actions">
-              <button type="button" className="procreate-btn-ghost" onClick={() => setShowNew(false)}>
+              <button
+                type="button"
+                className="procreate-btn-ghost"
+                onClick={() => setShowNew(false)}
+                {...tipProps("Cancel and return to gallery")}
+              >
                 Cancel
               </button>
-              <button type="button" className="procreate-btn-primary" onClick={handleCreate}>
+              <button
+                type="button"
+                className="procreate-btn-primary"
+                onClick={handleCreate}
+                {...tipProps("Create canvas and open the studio")}
+              >
                 Create
               </button>
             </div>

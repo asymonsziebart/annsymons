@@ -8,6 +8,7 @@ import {
 } from "@/lib/procreate/brushes";
 import type { BrushCategory, BrushDef } from "@/lib/procreate/types";
 import { IconClose, IconSearch } from "./icons";
+import { tipProps } from "./tip";
 
 type Props = {
   selectedId: string;
@@ -29,7 +30,12 @@ export default function BrushPanel({ selectedId, onSelect, onClose }: Props) {
     <div className="procreate-panel procreate-brush-panel">
       <div className="procreate-panel-header">
         <h3>Brushes</h3>
-        <button type="button" className="procreate-icon-btn" onClick={onClose} aria-label="Close">
+        <button
+          type="button"
+          className="procreate-icon-btn"
+          onClick={onClose}
+          {...tipProps("Close brush library")}
+        >
           <IconClose className="h-4 w-4" />
         </button>
       </div>
@@ -51,6 +57,7 @@ export default function BrushPanel({ selectedId, onSelect, onClose }: Props) {
               type="button"
               className={category === cat ? "active" : ""}
               onClick={() => setCategory(cat)}
+              {...tipProps(`Show ${CATEGORY_LABELS[cat]} brushes`)}
             >
               {CATEGORY_LABELS[cat]}
             </button>
@@ -65,6 +72,7 @@ export default function BrushPanel({ selectedId, onSelect, onClose }: Props) {
             type="button"
             className={`procreate-brush-item${selectedId === brush.id ? " selected" : ""}`}
             onClick={() => onSelect(brush)}
+            {...tipProps(`Select ${brush.name} brush`)}
           >
             <span className="procreate-brush-preview" style={{ background: brush.preview }} />
             <span className="procreate-brush-name">{brush.name}</span>

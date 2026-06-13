@@ -14,6 +14,7 @@ import {
   rgbToHsv,
 } from "@/lib/procreate/colorUtils";
 import { IconClose } from "./icons";
+import { tipProps } from "./tip";
 
 type ColorPanelProps = {
   color: string;
@@ -40,7 +41,12 @@ export function ColorPanel({
     <div className="procreate-panel procreate-color-panel">
       <div className="procreate-panel-header">
         <h3>Colors</h3>
-        <button type="button" className="procreate-icon-btn" onClick={onClose} aria-label="Close">
+        <button
+          type="button"
+          className="procreate-icon-btn"
+          onClick={onClose}
+          {...tipProps("Close color panel")}
+        >
           <IconClose className="h-4 w-4" />
         </button>
       </div>
@@ -50,14 +56,14 @@ export function ColorPanel({
           type="button"
           className="procreate-color-swatch large"
           style={{ background: color }}
-          title="Current color"
+          {...tipProps("Current drawing color")}
         />
         <button
           type="button"
           className="procreate-color-swatch small"
           style={{ background: previousColor }}
           onClick={() => onColorChange(previousColor)}
-          title="Previous color"
+          {...tipProps("Switch to previous color")}
         />
       </div>
 
@@ -95,6 +101,7 @@ export function ColorPanel({
                     className={`procreate-color-swatch${c === color ? " active" : ""}`}
                     style={{ background: c }}
                     onClick={() => onColorChange(c)}
+                    {...tipProps(`Select color ${c}`)}
                   />
                 ))}
               </div>
@@ -112,6 +119,7 @@ export function ColorPanel({
               className="procreate-color-swatch"
               style={{ background: c }}
               onClick={() => onColorChange(c)}
+              {...tipProps(`Select color ${c}`)}
             />
           ))}
         </div>
@@ -128,6 +136,7 @@ export function ColorPanel({
                 className="procreate-color-swatch"
                 style={{ background: c }}
                 onClick={() => onColorChange(c)}
+                {...tipProps(`Harmony color ${c}`)}
               />
             ))}
           </div>
@@ -135,16 +144,25 @@ export function ColorPanel({
       )}
 
       <div className="procreate-color-tabs">
-        {(["disc", "classic", "value", "palettes"] as ColorTab[]).map((t) => (
-          <button
-            key={t}
-            type="button"
-            className={tab === t ? "active" : ""}
-            onClick={() => onTabChange(t)}
-          >
-            {t.charAt(0).toUpperCase() + t.slice(1)}
-          </button>
-        ))}
+        {(["disc", "classic", "value", "palettes"] as ColorTab[]).map((t) => {
+          const tabTips: Record<ColorTab, string> = {
+            disc: "Color disc — hue ring with saturation center",
+            classic: "Classic — square picker with hue slider",
+            value: "Value — precise RGB and hex input",
+            palettes: "Palettes — preset color swatch sets",
+          };
+          return (
+            <button
+              key={t}
+              type="button"
+              className={tab === t ? "active" : ""}
+              onClick={() => onTabChange(t)}
+              {...tipProps(tabTips[t])}
+            >
+              {t.charAt(0).toUpperCase() + t.slice(1)}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -364,7 +382,12 @@ export function LayersPanel({
     <div className="procreate-panel procreate-layers-panel">
       <div className="procreate-panel-header">
         <h3>Layers</h3>
-        <button type="button" className="procreate-icon-btn" onClick={onClose} aria-label="Close">
+        <button
+          type="button"
+          className="procreate-icon-btn"
+          onClick={onClose}
+          {...tipProps("Close layers panel")}
+        >
           <IconClose className="h-4 w-4" />
         </button>
       </div>
@@ -383,6 +406,7 @@ export function LayersPanel({
                 e.stopPropagation();
                 onToggleVisible(layer.id);
               }}
+              {...tipProps(layer.visible ? "Hide this layer" : "Show this layer")}
             >
               {layer.visible ? "●" : "○"}
             </button>
@@ -402,6 +426,7 @@ export function LayersPanel({
                 e.stopPropagation();
                 setBlendLayerId(blendLayerId === layer.id ? null : layer.id);
               }}
+              {...tipProps("Change blend mode and layer opacity")}
             >
               {layer.blendMode === "normal" ? "N" : layer.blendMode.slice(0, 2).toUpperCase()}
             </button>
@@ -425,6 +450,7 @@ export function LayersPanel({
                       type="button"
                       className={layer.blendMode === mode ? "active" : ""}
                       onClick={() => onBlendChange(layer.id, mode)}
+                      {...tipProps(`Apply ${label} blend mode`)}
                     >
                       {label}
                     </button>
@@ -437,11 +463,21 @@ export function LayersPanel({
       </div>
 
       <div className="procreate-layers-actions">
-        <button type="button" onClick={onAdd}>+ Layer</button>
-        <button type="button" onClick={() => onDuplicate(activeId)}>Duplicate</button>
-        <button type="button" onClick={() => onMove(activeId, "up")}>↑</button>
-        <button type="button" onClick={() => onMove(activeId, "down")}>↓</button>
-        <button type="button" onClick={() => onDelete(activeId)}>Delete</button>
+        <button type="button" onClick={onAdd} {...tipProps("Add a new blank layer")}>
+          + Layer
+        </button>
+        <button type="button" onClick={() => onDuplicate(activeId)} {...tipProps("Duplicate the active layer")}>
+          Duplicate
+        </button>
+        <button type="button" onClick={() => onMove(activeId, "up")} {...tipProps("Move layer up (in front)")}>
+          ↑
+        </button>
+        <button type="button" onClick={() => onMove(activeId, "down")} {...tipProps("Move layer down (behind)")}>
+          ↓
+        </button>
+        <button type="button" onClick={() => onDelete(activeId)} {...tipProps("Delete the active layer")}>
+          Delete
+        </button>
       </div>
     </div>
   );
