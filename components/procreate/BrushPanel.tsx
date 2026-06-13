@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CATEGORY_LABELS } from "@/lib/procreate/brushes";
+import { importProcreateBrushFile } from "@/lib/procreate/brushImport";
 import type { ImportedBrushSet } from "@/lib/procreate/brushImport";
 import {
   getAllBrushes,
@@ -75,13 +76,7 @@ export default function BrushPanel({
     setImporting(true);
     setImportError(null);
     try {
-      const body = new FormData();
-      body.append("file", file);
-      const res = await fetch("/api/procreate/import-brush", { method: "POST", body });
-      const data = (await res.json()) as ImportedBrushSet & { error?: string };
-      if (!res.ok) throw new Error(data.error ?? "Import failed");
-
-      const set = data;
+      const set = await importProcreateBrushFile(file);
       await saveImportedBrushSet(set);
       await preloadBrushSet(set);
       await refresh();

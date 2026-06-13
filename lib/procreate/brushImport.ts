@@ -11,20 +11,39 @@ export type BplistRoot = {
   $objects: unknown[];
 };
 
-type UidRef = { uid: number };
+function isUid(v: unknown): v is { uid: number } | { UID: number } {
+  if (!v || typeof v !== "object") return false;
+  const o = v as { uid?: number; UID?: number };
+  return typeof o.uid === "number" || typeof o.UID === "number";
+}
 
-function isUid(v: unknown): v is UidRef {
-  return !!v && typeof v === "object" && "uid" in v && typeof (v as UidRef).uid === "number";
+function uidIndex(v: { uid?: number; UID?: number }): number {
+  return v.uid ?? v.UID ?? 0;
 }
 
 function deref(root: BplistRoot, val: unknown): unknown {
-  if (isUid(val)) return root.$objects[val.uid];
+  if (isUid(val)) return root.$objects[uidIndex(val)];
   return val;
+}
+
+function normalizeRoot(parsed: unknown[]): BplistRoot | null {
+  const top = parsed[0];
+  if (!top || typeof top !== "object") return null;
+
+  if ("$objects" in top && Array.isArray((top as BplistRoot).$objects)) {
+    return top as BplistRoot;
+  }
+
+  if ("name" in top || "paintSize" in top) {
+    return { $objects: [null, top] };
+  }
+
+  return null;
 }
 
 function loadSetting(root: BplistRoot, key: string): unknown {
   const settings = root.$objects[1] as Record<string, unknown> | undefined;
-  if (!settings) return undefined;
+  if (!settings || typeof settings !== "object") return undefined;
   return deref(root, settings[key]);
 }
 
@@ -46,8 +65,13 @@ function slugify(name: string): string {
     .slice(0, 48);
 }
 
-function bufferToDataUrl(buf: Buffer, mime = "image/png"): string {
-  return `data:${mime};base64,${buf.toString("base64")}`;
+function bytesToDataUrl(bytes: Uint8Array, mime = "image/png"): string {
+  const chunk = 8192;
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+  }
+  return `data:${mime};base64,${btoa(binary)}`;
 }
 
 function mapProcreateToBrushDef(
@@ -98,10 +122,7 @@ function mapProcreateToBrushDef(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ZipFile = any;
 
-async function pickTipImage(
-  zip: ZipFile,
-  prefix: string,
-): Promise<string | undefined> {
+async function pickTipImage(zip: ZipFile, prefix: string): Promise<string | undefined> {
   const candidates = [
     `${prefix}Shape.png`,
     `${prefix}Brushtip.png`,
@@ -112,8 +133,8 @@ async function pickTipImage(
   for (const path of candidates) {
     const file = zip.file(path);
     if (!file) continue;
-    const buf = await file.async("nodebuffer");
-    return bufferToDataUrl(buf);
+    const bytes = await file.async("uint8array");
+    return bytesToDataUrl(bytes);
   }
   return undefined;
 }
@@ -122,16 +143,16 @@ async function parseBrushArchive(
   zip: ZipFile,
   brushPath: string,
   setName: string,
-  bplist: { parseBuffer: (buf: Buffer) => unknown[] },
+  parseBuffer: (buf: Uint8Array) => unknown[],
 ): Promise<BrushDef | null> {
   const prefix = brushPath ? `${brushPath}/` : "";
   const archiveFile = zip.file(`${prefix}Brush.archive`);
   if (!archiveFile) return null;
 
-  const archiveBytes = await archiveFile.async("nodebuffer");
-  const parsed = bplist.parseBuffer(archiveBytes);
-  const root = parsed[0] as BplistRoot;
-  if (!root?.$objects) return null;
+  const archiveBytes = await archiveFile.async("uint8array");
+  const parsed = parseBuffer(archiveBytes);
+  const root = normalizeRoot(parsed);
+  if (!root) return null;
 
   const tipImage = await pickTipImage(zip, prefix);
   return mapProcreateToBrushDef(root, setName, brushPath || "brush", tipImage);
@@ -147,40 +168,50 @@ function discoverBrushPaths(zip: ZipFile): string[] {
   return [...discovered];
 }
 
-export async function importProcreateBrushBuffer(
-  buffer: Buffer,
-  fileName: string,
-): Promise<ImportedBrushSet> {
+function resolveBrushPaths(raw: unknown, root: BplistRoot | null): string[] {
+  let val = raw;
+  if (root) val = deref(root, val);
+  if (!Array.isArray(val)) return [];
+  const paths: string[] = [];
+  for (const item of val) {
+    const resolved = root ? deref(root, item) : item;
+    if (typeof resolved === "string") paths.push(resolved);
+  }
+  return paths;
+}
+
+/** Parse a Procreate .brushset or .brush file entirely in the browser (no upload). */
+export async function importProcreateBrushFile(file: File): Promise<ImportedBrushSet> {
   const JSZip = (await import("jszip")).default;
   const bplist = await import("bplist-parser");
 
-  const zip = await JSZip.loadAsync(buffer);
-  const setName = fileName.replace(/\.(brushset|brush)$/i, "") || "Imported Brushes";
+  const zip = await JSZip.loadAsync(file);
+  const setName = file.name.replace(/\.(brushset|brush)$/i, "") || "Imported Brushes";
   const brushes: BrushDef[] = [];
-  const lower = fileName.toLowerCase();
+  const lower = file.name.toLowerCase();
+  const parseBuffer = (buf: Uint8Array) => bplist.parseBuffer(buf as unknown as Buffer);
 
   if (lower.endsWith(".brushset")) {
     let paths: string[] = [];
     const plistFile = zip.file("brushset.plist");
     if (plistFile) {
-      const plistBytes = await plistFile.async("nodebuffer");
-      const [plistRoot] = bplist.parseBuffer(plistBytes) as [Record<string, unknown>];
-      const raw = plistRoot?.brushes;
-      if (Array.isArray(raw)) {
-        paths = raw.filter((p): p is string => typeof p === "string");
-      }
+      const plistBytes = await plistFile.async("uint8array");
+      const parsed = parseBuffer(plistBytes);
+      const root = normalizeRoot(parsed);
+      const plistRoot = parsed[0] as Record<string, unknown> | undefined;
+      paths = resolveBrushPaths(plistRoot?.brushes, root);
     }
     if (paths.length === 0) paths = discoverBrushPaths(zip);
 
     for (const brushPath of paths) {
-      const brush = await parseBrushArchive(zip, brushPath, setName, bplist);
+      const brush = await parseBrushArchive(zip, brushPath, setName, parseBuffer);
       if (brush) brushes.push(brush);
     }
   } else if (lower.endsWith(".brush")) {
-    const brush = await parseBrushArchive(zip, "", setName, bplist);
+    const brush = await parseBrushArchive(zip, "", setName, parseBuffer);
     if (brush) brushes.push(brush);
   } else {
-    throw new Error("Please upload a .brushset or .brush file from Procreate.");
+    throw new Error("Please choose a .brushset or .brush file from Procreate.");
   }
 
   if (brushes.length === 0) {
