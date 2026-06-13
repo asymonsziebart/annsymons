@@ -24,7 +24,14 @@ import {
   previewTransform,
   type HandleId,
 } from "./transform";
-import { detectQuickShape, drawQuickShape } from "./quickShape";
+import {
+  detectQuickShape,
+  drawQuickShape,
+  QUICK_SHAPE_HOLD_MS,
+  QUICK_SHAPE_STILL_PX,
+  sampleQuickShapePoints,
+  type QuickShapeResult,
+} from "./quickShape";
 import { renderTextToLayer } from "./textTool";
 import { captureLayerState, cloneImageData } from "./canvasEngine";
 
@@ -125,10 +132,13 @@ export {
   previewTransform,
   detectQuickShape,
   drawQuickShape,
+  QUICK_SHAPE_HOLD_MS,
+  QUICK_SHAPE_STILL_PX,
+  sampleQuickShapePoints,
   renderTextToLayer,
   applyMaskToLayer,
   captureLayerState,
   cloneImageData,
 };
 
-export type { HandleId, TransformState, StudioMode, TextObject, AnimationFrame, SelectionMask };
+export type { HandleId, TransformState, StudioMode, TextObject, AnimationFrame, SelectionMask, QuickShapeResult };
