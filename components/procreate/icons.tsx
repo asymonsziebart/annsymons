@@ -46,27 +46,57 @@ export function IconTransform({ className = "" }: { className?: string }) {
 
 export function IconBrush({ className = "" }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-      <path d="M14 4l6 6-8 8H6v-6l8-8z" strokeLinejoin="round" />
-      <path d="M13 5l6 6" />
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M4 18.5c3-2 6.5-2.5 9.5-1.5" />
+      <path d="M5.5 17c2.5-1 5-1.5 7.5-0.5" />
+      <path d="M12.5 9.5 20 3" strokeWidth="2.25" />
+      <path d="M11 11l2-2" />
     </svg>
   );
 }
 
 export function IconSmudge({ className = "" }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-      <path d="M4 16c3-4 6-6 10-6 2 0 4 1 6 3" strokeLinecap="round" />
-      <path d="M6 18c2-2 5-4 8-4" strokeLinecap="round" />
-      <circle cx="18" cy="14" r="2" />
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M9.5 19.5c-0.5-5.5 1.5-10 5.5-13 2.2-1.6 4.8-1.2 6.5 0.8" />
+      <path d="M16.5 8c1.1-.7 2.5-.4 3.2 0.9" />
+      <path d="M8.5 18.5c-2.5-0.5-4-2.5-3.5-5" />
     </svg>
   );
 }
 
 export function IconErase({ className = "" }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-      <path d="M7 21h10M5 14l7-7 7 7-7 7-7-7z" strokeLinejoin="round" />
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M5 15l7-7 9 9-7 7-9-9z" />
+      <path d="M3.5 20.5h17" />
     </svg>
   );
 }
