@@ -104,6 +104,10 @@ export type StudioPrefs = {
   rightHanded: boolean;
   brushCursor: boolean;
   showInterface: boolean;
+  /** ColorDrop threshold 0–1 (Procreate default ~0.12). */
+  colorDropThreshold: number;
+  /** When true, fill boundaries use all visible layers (Procreate Reference). */
+  colorDropReference: boolean;
 };
 
 export type Point = { x: number; y: number; pressure: number };

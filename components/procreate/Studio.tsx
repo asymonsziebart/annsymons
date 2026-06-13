@@ -25,6 +25,12 @@ import {
   restoreLayerState,
   StrokeEngine,
 } from "@/lib/procreate/canvasEngine";
+import {
+  buildFillReference,
+  floodFillAt,
+  thresholdFromDragDistance,
+  thresholdPreviewRadius,
+} from "@/lib/procreate/floodFill";
 import { sampleColorFromCanvas } from "@/lib/procreate/colorUtils";
 import {
   canvasToDataUrl,
@@ -74,6 +80,7 @@ const MAX_UNDO = 100;
 export default function Studio({ artworkId, onBack }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewCanvasRef = useRef<HTMLCanvasElement>(null);
+  const colorBtnRef = useRef<HTMLButtonElement>(null);
   const strokeEngine = useRef(new StrokeEngine());
 
   const [doc, setDoc] = useState<ArtworkDocument | null>(null);
@@ -97,7 +104,12 @@ export default function Studio({ artworkId, onBack }: Props) {
     rightHanded: false,
     brushCursor: true,
     showInterface: true,
+    colorDropThreshold: 0.12,
+    colorDropReference: true,
   });
+  const [colorDropActive, setColorDropActive] = useState(false);
+  const [colorDropPos, setColorDropPos] = useState<{ x: number; y: number } | null>(null);
+  const [fillThresholdLive, setFillThresholdLive] = useState(0.12);
   const [transformMode, setTransformMode] = useState(false);
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
   const [saveLabel, setSaveLabel] = useState("Saved");
@@ -108,6 +120,9 @@ export default function Studio({ artworkId, onBack }: Props) {
   const lastPointer = useRef<Point | null>(null);
   const panStart = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
   const compositeRef = useRef<HTMLCanvasElement | null>(null);
+  const colorDropStart = useRef<{ x: number; y: number } | null>(null);
+  const colorDropHoldTimer = useRef<number | null>(null);
+  const colorDropPointerId = useRef<number | null>(null);
 
   const activeLayer = layers.find((l) => l.id === activeLayerId);
 
@@ -203,7 +218,7 @@ export default function Studio({ artworkId, onBack }: Props) {
 
     ctx.restore();
 
-    if (prefs.brushCursor && cursor && !eyedropper) {
+    if (prefs.brushCursor && cursor && !eyedropper && !colorDropActive) {
       const cx = (cursor.x - pan.x) / zoom;
       const cy = (cursor.y - pan.y) / zoom;
       const screenX = pan.x + cx * zoom;
@@ -218,7 +233,131 @@ export default function Studio({ artworkId, onBack }: Props) {
       ctx.lineWidth = 0.5;
       ctx.stroke();
     }
-  }, [doc, layers, zoom, pan, prefs.brushCursor, cursor, brush, brushSize, transformMode, activeLayer, eyedropper]);
+
+    if (colorDropActive && colorDropPos && doc) {
+      const rect = view.getBoundingClientRect();
+      const cx = (colorDropPos.x - rect.left - pan.x) / zoom;
+      const cy = (colorDropPos.y - rect.top - pan.y) / zoom;
+      if (cx >= 0 && cy >= 0 && cx <= doc.width && cy <= doc.height) {
+        const r = thresholdPreviewRadius(fillThresholdLive, doc.width) * zoom;
+        const screenX = pan.x + cx * zoom;
+        const screenY = pan.y + cy * zoom;
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 4]);
+        ctx.arc(screenX, screenY, r, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.strokeStyle = "rgba(255,255,255,0.85)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+  }, [doc, layers, zoom, pan, prefs.brushCursor, cursor, brush, brushSize, transformMode, activeLayer, eyedropper, colorDropActive, colorDropPos, fillThresholdLive, color]);
+
+  function performColorDrop(clientX: number, clientY: number, threshold: number) {
+    if (!doc || !activeLayer || activeLayer.locked) return;
+    const pt = screenToCanvas(clientX, clientY);
+    if (!pt) return;
+
+    const before = captureLayerState(activeLayer);
+    if (!before) return;
+
+    const reference = buildFillReference(
+      layers,
+      doc.width,
+      doc.height,
+      doc.backgroundColor,
+      prefs.colorDropReference,
+      activeLayerId,
+    );
+
+    const result = floodFillAt(activeLayer, pt.x, pt.y, color, reference, threshold);
+    if (result.filled) {
+      pushUndo({ layerId: activeLayer.id, before: cloneImageData(before) });
+      setLayers([...layers]);
+    }
+  }
+
+  function cancelColorDropHold() {
+    if (colorDropHoldTimer.current !== null) {
+      window.clearTimeout(colorDropHoldTimer.current);
+      colorDropHoldTimer.current = null;
+    }
+  }
+
+  function startColorDrop(e: React.PointerEvent) {
+    cancelColorDropHold();
+    colorDropPointerId.current = e.pointerId;
+    setColorDropActive(true);
+    setFillThresholdLive(prefs.colorDropThreshold);
+    setColorDropPos({ x: e.clientX, y: e.clientY });
+    colorBtnRef.current?.setPointerCapture(e.pointerId);
+  }
+
+  function handleColorPointerDown(e: React.PointerEvent) {
+    e.stopPropagation();
+    e.preventDefault();
+    colorDropStart.current = { x: e.clientX, y: e.clientY };
+    cancelColorDropHold();
+    colorDropHoldTimer.current = window.setTimeout(() => {
+      colorDropHoldTimer.current = null;
+      startColorDrop(e);
+    }, 380);
+  }
+
+  function handleColorPointerMove(e: React.PointerEvent) {
+    if (colorDropStart.current && !colorDropActive && colorDropHoldTimer.current !== null) {
+      const moved = Math.hypot(
+        e.clientX - colorDropStart.current.x,
+        e.clientY - colorDropStart.current.y,
+      );
+      if (moved > 10) cancelColorDropHold();
+    }
+
+    if (!colorDropActive) return;
+    setColorDropPos({ x: e.clientX, y: e.clientY });
+    if (colorDropStart.current) {
+      const dist = Math.hypot(
+        e.clientX - colorDropStart.current.x,
+        e.clientY - colorDropStart.current.y,
+      );
+      setFillThresholdLive(thresholdFromDragDistance(dist, prefs.colorDropThreshold));
+    }
+  }
+
+  function handleColorPointerUp(e: React.PointerEvent) {
+    cancelColorDropHold();
+
+    if (colorDropActive) {
+      performColorDrop(e.clientX, e.clientY, fillThresholdLive);
+      setColorDropActive(false);
+      setColorDropPos(null);
+      colorDropStart.current = null;
+      colorDropPointerId.current = null;
+      return;
+    }
+
+    if (colorDropStart.current) {
+      const moved = Math.hypot(
+        e.clientX - colorDropStart.current.x,
+        e.clientY - colorDropStart.current.y,
+      );
+      if (moved < 10) {
+        setPanel(panel === "color" ? null : "color");
+      }
+    }
+    colorDropStart.current = null;
+  }
+
+  function handleColorPointerCancel() {
+    cancelColorDropHold();
+    setColorDropActive(false);
+    setColorDropPos(null);
+    colorDropStart.current = null;
+    colorDropPointerId.current = null;
+  }
 
   useEffect(() => {
     renderView();
@@ -321,6 +460,7 @@ export default function Studio({ artworkId, onBack }: Props) {
 
   function handlePointerDown(e: React.PointerEvent) {
     if (!doc || !activeLayer || activeLayer.locked) return;
+    if (colorDropActive) return;
 
     if (e.button === 1 || (e.button === 0 && e.altKey)) {
       panStart.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
@@ -634,10 +774,14 @@ export default function Studio({ artworkId, onBack }: Props) {
               <IconLayers className="h-5 w-5" />
             </button>
             <button
+              ref={colorBtnRef}
               type="button"
-              className="procreate-color-btn"
-              onClick={() => setPanel(panel === "color" ? null : "color")}
-              {...tipProps("Color — open the color picker")}
+              className={`procreate-color-btn${colorDropActive ? " dropping" : ""}`}
+              onPointerDown={handleColorPointerDown}
+              onPointerMove={handleColorPointerMove}
+              onPointerUp={handleColorPointerUp}
+              onPointerCancel={handleColorPointerCancel}
+              {...tipProps("Color — tap to pick, press & drag onto canvas to fill")}
             >
               <span style={{ background: color }} />
             </button>
@@ -710,6 +854,20 @@ export default function Studio({ artworkId, onBack }: Props) {
       >
         <canvas ref={viewCanvasRef} className="procreate-view-canvas" />
       </div>
+
+      {colorDropActive && colorDropPos && (
+        <div
+          className="procreate-colordrop-chip"
+          style={{ left: colorDropPos.x, top: colorDropPos.y, background: color }}
+          aria-hidden
+        />
+      )}
+
+      {colorDropActive && (
+        <div className="procreate-colordrop-hint">
+          Release to fill · drag further for more bleed
+        </div>
+      )}
 
       <div className="procreate-status">
         <span>{doc.name}</span>
@@ -814,6 +972,56 @@ export default function Studio({ artworkId, onBack }: Props) {
                   if (f) void importImage(f);
                 }}
               />
+            </label>
+            <hr />
+            <p className="procreate-actions-label">ColorDrop</p>
+            <label className="procreate-actions-slider" {...tipProps("Default fill bleed — higher fills through more color variation")}>
+              Threshold ({Math.round(prefs.colorDropThreshold * 100)}%)
+              <input
+                type="range"
+                min={0.02}
+                max={0.45}
+                step={0.01}
+                value={prefs.colorDropThreshold}
+                onChange={(e) =>
+                  setPrefs({ ...prefs, colorDropThreshold: Number(e.target.value) })
+                }
+              />
+            </label>
+            <label className="procreate-toggle" {...tipProps("Use all visible layers as fill boundaries (like Procreate Reference)")}>
+              <input
+                type="checkbox"
+                checked={prefs.colorDropReference}
+                onChange={(e) =>
+                  setPrefs({ ...prefs, colorDropReference: e.target.checked })
+                }
+              />
+              Reference all layers
+            </label>
+            <hr />
+            <p className="procreate-actions-label">ColorDrop</p>
+            <label className="procreate-actions-slider" {...tipProps("Default fill bleed — higher fills through more color variation")}>
+              Threshold ({Math.round(prefs.colorDropThreshold * 100)}%)
+              <input
+                type="range"
+                min={0.02}
+                max={0.45}
+                step={0.01}
+                value={prefs.colorDropThreshold}
+                onChange={(e) =>
+                  setPrefs({ ...prefs, colorDropThreshold: Number(e.target.value) })
+                }
+              />
+            </label>
+            <label className="procreate-toggle" {...tipProps("Use all visible layers as fill boundaries (like Procreate Reference)")}>
+              <input
+                type="checkbox"
+                checked={prefs.colorDropReference}
+                onChange={(e) =>
+                  setPrefs({ ...prefs, colorDropReference: e.target.checked })
+                }
+              />
+              Reference all layers
             </label>
             <hr />
             <label className="procreate-toggle" {...tipProps("Switch to a light-colored interface")}>
