@@ -300,23 +300,40 @@ function bindPointerDrag(
   move: (ev: PointerEvent) => void,
   end?: () => void,
 ) {
+  e.preventDefault();
+  e.stopPropagation();
+
   const target = e.currentTarget as HTMLElement;
   target.setPointerCapture(e.pointerId);
+
   const onMove = (ev: PointerEvent) => {
     if (ev.pointerId !== e.pointerId) return;
+    ev.preventDefault();
     move(ev);
   };
   const onUp = (ev: PointerEvent) => {
     if (ev.pointerId !== e.pointerId) return;
-    target.releasePointerCapture(e.pointerId);
-    window.removeEventListener("pointermove", onMove);
-    window.removeEventListener("pointerup", onUp);
-    window.removeEventListener("pointercancel", onUp);
+    if (target.hasPointerCapture(ev.pointerId)) {
+      target.releasePointerCapture(ev.pointerId);
+    }
+    target.removeEventListener("pointermove", onMove);
+    target.removeEventListener("pointerup", onUp);
+    target.removeEventListener("pointercancel", onUp);
     end?.();
   };
-  window.addEventListener("pointermove", onMove);
-  window.addEventListener("pointerup", onUp);
-  window.addEventListener("pointercancel", onUp);
+  target.addEventListener("pointermove", onMove);
+  target.addEventListener("pointerup", onUp);
+  target.addEventListener("pointercancel", onUp);
+}
+
+function bindPickerDrag(
+  e: React.PointerEvent,
+  pick: (ev: PointerEvent, el: HTMLElement) => void,
+  el: HTMLElement,
+  end?: () => void,
+) {
+  pick(e.nativeEvent, el);
+  bindPointerDrag(e, (ev) => pick(ev, el), end);
 }
 
 function ColorDisc({
@@ -345,11 +362,24 @@ function ColorDisc({
       <div
         className="procreate-hue-ring"
         onPointerDown={(e) => {
-          pickHue(e, onChange, v, s);
-          bindPointerDrag(e, (ev) => pickHuePointer(ev, onChange, v, s, e.currentTarget as HTMLElement));
+          bindPickerDrag(
+            e,
+            (ev, el) => pickHuePointer(ev, onChange, v, s, el),
+            e.currentTarget as HTMLElement,
+          );
         }}
       >
-        <span className="procreate-hue-cursor" style={{ left: `${hueX}%`, top: `${hueY}%` }} />
+        <span
+          className="procreate-hue-cursor"
+          style={{ left: `${hueX}%`, top: `${hueY}%` }}
+          onPointerDown={(e) => {
+            bindPickerDrag(
+              e,
+              (ev, el) => pickHuePointer(ev, onChange, v, s, el),
+              e.currentTarget.parentElement as HTMLElement,
+            );
+          }}
+        />
         <div
           className="procreate-sat-disc"
           style={{
@@ -357,10 +387,7 @@ function ColorDisc({
           }}
           onPointerDown={(e) => {
             e.stopPropagation();
-            pickSat(e, h, onChange);
-            bindPointerDrag(e, (ev) =>
-              pickSatPointer(ev, h, onChange, e.currentTarget as HTMLElement),
-            );
+            bindPickerDrag(e, (ev, el) => pickSatPointer(ev, h, onChange, el), e.currentTarget as HTMLElement);
           }}
           onDoubleClick={(e) => {
             e.stopPropagation();
@@ -368,7 +395,18 @@ function ColorDisc({
             onChange(snapped.h, snapped.s, snapped.v);
           }}
         >
-          <span className="procreate-color-cursor" style={{ left: `${s}%`, top: `${100 - v}%` }} />
+          <span
+            className="procreate-color-cursor"
+            style={{ left: `${s}%`, top: `${100 - v}%` }}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              bindPickerDrag(
+                e,
+                (ev, el) => pickSatPointer(ev, h, onChange, el),
+                e.currentTarget.parentElement as HTMLElement,
+              );
+            }}
+          />
         </div>
       </div>
       <button type="button" className="procreate-disc-expand-btn" onClick={onToggleExpand}>
@@ -425,9 +463,10 @@ function HarmonyPicker({
       <div
         className="procreate-harmony-wheel"
         onPointerDown={(e) => {
-          pickHarmonyWheel(e, v, onChange);
-          bindPointerDrag(e, (ev) =>
-            pickHarmonyWheelPointer(ev, v, onChange, e.currentTarget as HTMLElement),
+          bindPickerDrag(
+            e,
+            (ev, el) => pickHarmonyWheelPointer(ev, v, onChange, el),
+            e.currentTarget as HTMLElement,
           );
         }}
       >
@@ -477,14 +516,6 @@ function HarmonyPicker({
   );
 }
 
-function pickHarmonyWheel(
-  e: React.PointerEvent,
-  v: number,
-  onChange: (h: number, s: number, v: number) => void,
-) {
-  pickHarmonyWheelPointer(e.nativeEvent, v, onChange, e.currentTarget as HTMLElement);
-}
-
 function pickHarmonyWheelPointer(
   e: PointerEvent,
   v: number,
@@ -503,15 +534,6 @@ function pickHarmonyWheelPointer(
   onChange(deg, s, v);
 }
 
-function pickHue(
-  e: React.PointerEvent,
-  onChange: (h: number, s: number, v: number) => void,
-  v: number,
-  s: number,
-) {
-  pickHuePointer(e.nativeEvent, onChange, v, s, e.currentTarget as HTMLElement);
-}
-
 function pickHuePointer(
   e: PointerEvent,
   onChange: (h: number, s: number, v: number) => void,
@@ -525,14 +547,6 @@ function pickHuePointer(
   const angle = Math.atan2(e.clientY - cy, e.clientX - cx);
   const deg = ((angle * 180) / Math.PI + 360) % 360;
   onChange(deg, s, v);
-}
-
-function pickSat(
-  e: React.PointerEvent,
-  h: number,
-  onChange: (h: number, s: number, v: number) => void,
-) {
-  pickSatPointer(e.nativeEvent, h, onChange, e.currentTarget as HTMLElement);
 }
 
 function pickSatPointer(
@@ -567,13 +581,24 @@ function ClassicPicker({
           background: `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, ${hueColor})`,
         }}
         onPointerDown={(e) => {
-          pickClassic(e, h, onChange);
-          bindPointerDrag(e, (ev) =>
-            pickClassicPointer(ev, h, onChange, e.currentTarget as HTMLElement),
+          bindPickerDrag(
+            e,
+            (ev, el) => pickClassicPointer(ev, h, onChange, el),
+            e.currentTarget as HTMLElement,
           );
         }}
       >
-        <span className="procreate-color-cursor" style={{ left: `${s}%`, top: `${100 - v}%` }} />
+        <span
+          className="procreate-color-cursor"
+          style={{ left: `${s}%`, top: `${100 - v}%` }}
+          onPointerDown={(e) => {
+            bindPickerDrag(
+              e,
+              (ev, el) => pickClassicPointer(ev, h, onChange, el),
+              e.currentTarget.parentElement as HTMLElement,
+            );
+          }}
+        />
       </div>
       {(["Hue", "Saturation", "Brightness"] as const).map((label, idx) => {
         const key = ["h", "s", "v"][idx] as "h" | "s" | "v";
@@ -599,14 +624,6 @@ function ClassicPicker({
       })}
     </div>
   );
-}
-
-function pickClassic(
-  e: React.PointerEvent,
-  h: number,
-  onChange: (h: number, s: number, v: number) => void,
-) {
-  pickClassicPointer(e.nativeEvent, h, onChange, e.currentTarget as HTMLElement);
 }
 
 function pickClassicPointer(

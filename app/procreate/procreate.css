@@ -469,6 +469,12 @@
   touch-action: manipulation;
 }
 
+.procreate-color-disc-wrap,
+.procreate-classic-picker,
+.procreate-harmony-picker {
+  touch-action: none;
+}
+
 .procreate-color-btn span {
   display: block;
   width: 100%;
@@ -920,14 +926,28 @@
 
 .procreate-hue-cursor {
   position: absolute;
-  width: 16px;
-  height: 16px;
-  border: 2px solid #fff;
+  width: 28px;
+  height: 28px;
+  border: none;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55);
-  pointer-events: none;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: grab;
   z-index: 2;
+  background: radial-gradient(
+    circle at center,
+    transparent 0,
+    transparent 5px,
+    #fff 5px,
+    #fff 7px,
+    transparent 7px
+  );
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55);
+}
+
+.procreate-hue-cursor:active {
+  cursor: grabbing;
 }
 
 .procreate-sat-disc {
@@ -942,13 +962,27 @@
 
 .procreate-color-cursor {
   position: absolute;
-  width: 14px;
-  height: 14px;
-  border: 2px solid #fff;
+  width: 32px;
+  height: 32px;
+  border: none;
   border-radius: 50%;
   transform: translate(-50%, -50%);
+  pointer-events: auto;
+  touch-action: none;
+  cursor: grab;
+  background: radial-gradient(
+    circle at center,
+    transparent 0,
+    transparent 6px,
+    #fff 6px,
+    #fff 8px,
+    transparent 8px
+  );
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
-  pointer-events: none;
+}
+
+.procreate-color-cursor:active {
+  cursor: grabbing;
 }
 
 .procreate-classic-picker {
