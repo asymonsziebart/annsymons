@@ -1,19 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { BlendMode, ColorTab, CustomPalette, Layer } from "@/lib/procreate/types";
+import { useEffect, useRef, useState } from "react";
+import type { BlendMode, ColorTab, CustomPalette, HarmonyMode, Layer } from "@/lib/procreate/types";
 import { BLEND_MODE_LABELS } from "@/lib/procreate/canvasEngine";
 import { DEFAULT_PALETTES } from "@/lib/procreate/brushes";
 import {
+  HARMONY_MODE_LABELS,
+  harmonySchemeColors,
   hexToHsv,
   hexToRgb,
   hsvToHex,
-  hsvToRgb,
-  harmonyColors,
   rgbToHex,
   rgbToHsv,
+  snapDiscColor,
 } from "@/lib/procreate/colorUtils";
-import { loadCustomPalettes, saveCustomPalettes } from "@/lib/procreate/prefsStorage";
+import {
+  loadColorHistory,
+  loadCustomPalettes,
+  pushColorHistory,
+  saveCustomPalettes,
+} from "@/lib/procreate/prefsStorage";
 import { generateId } from "@/lib/procreate/storage";
 import { IconClose, IconEye, IconEyeOff } from "./icons";
 import { tipProps } from "./tip";
@@ -22,28 +28,53 @@ type ColorPanelProps = {
   color: string;
   previousColor: string;
   tab: ColorTab;
+  harmonyMode: HarmonyMode;
   onTabChange: (tab: ColorTab) => void;
+  onHarmonyModeChange: (mode: HarmonyMode) => void;
   onColorChange: (hex: string) => void;
+  onSwapColors: () => void;
   onClose: () => void;
+};
+
+const COLOR_TABS: ColorTab[] = ["disc", "classic", "harmony", "value", "palettes"];
+
+const TAB_LABELS: Record<ColorTab, string> = {
+  disc: "Disc",
+  classic: "Classic",
+  harmony: "Harmony",
+  value: "Value",
+  palettes: "Palettes",
 };
 
 export function ColorPanel({
   color,
   previousColor,
   tab,
+  harmonyMode,
   onTabChange,
+  onHarmonyModeChange,
   onColorChange,
+  onSwapColors,
   onClose,
 }: ColorPanelProps) {
   const hsv = hexToHsv(color);
   const rgb = hexToRgb(color);
-  const harmonies = harmonyColors(color);
   const [customPalettes, setCustomPalettes] = useState<CustomPalette[]>([]);
   const [paletteName, setPaletteName] = useState("My palette");
+  const [history, setHistory] = useState<string[]>([]);
+  const [discExpanded, setDiscExpanded] = useState(false);
+  const [harmonyMenuOpen, setHarmonyMenuOpen] = useState(false);
 
   useEffect(() => {
     setCustomPalettes(loadCustomPalettes());
-  }, []);
+    setHistory(loadColorHistory());
+  }, [color]);
+
+  function pickColor(hex: string) {
+    onColorChange(hex);
+    pushColorHistory(hex);
+    setHistory(loadColorHistory());
+  }
 
   function saveCurrentPalette() {
     const name = paletteName.trim() || "My palette";
@@ -55,10 +86,28 @@ export function ColorPanel({
     saveCustomPalettes(next);
   }
 
+  const activePalette = DEFAULT_PALETTES[0].colors;
+
   return (
     <div className="procreate-panel procreate-color-panel">
-      <div className="procreate-panel-header">
+      <div className="procreate-panel-header procreate-color-header">
         <h3>Colors</h3>
+        <div className="procreate-color-primary-secondary">
+          <button
+            type="button"
+            className="procreate-color-swatch primary"
+            style={{ background: color }}
+            onClick={onSwapColors}
+            {...tipProps("Primary color — tap to swap with secondary")}
+          />
+          <button
+            type="button"
+            className="procreate-color-swatch secondary"
+            style={{ background: previousColor }}
+            onClick={() => pickColor(previousColor)}
+            {...tipProps("Secondary color — tap to use this color")}
+          />
+        </div>
         <button
           type="button"
           className="procreate-icon-btn"
@@ -69,24 +118,15 @@ export function ColorPanel({
         </button>
       </div>
 
-      <div className="procreate-color-current">
-        <button
-          type="button"
-          className="procreate-color-swatch large"
-          style={{ background: color }}
-          {...tipProps("Current drawing color")}
-        />
-        <button
-          type="button"
-          className="procreate-color-swatch small"
-          style={{ background: previousColor }}
-          onClick={() => onColorChange(previousColor)}
-          {...tipProps("Switch to previous color")}
-        />
-      </div>
-
       {tab === "disc" && (
-        <ColorDisc h={hsv.h} s={hsv.s} v={hsv.v} onChange={(h, s, v) => onColorChange(hsvToHex(h, s, v))} />
+        <ColorDisc
+          h={hsv.h}
+          s={hsv.s}
+          v={hsv.v}
+          expanded={discExpanded}
+          onToggleExpand={() => setDiscExpanded((e) => !e)}
+          onChange={(h, s, v) => pickColor(hsvToHex(h, s, v))}
+        />
       )}
 
       {tab === "classic" && (
@@ -94,7 +134,24 @@ export function ColorPanel({
           h={hsv.h}
           s={hsv.s}
           v={hsv.v}
-          onChange={(h, s, v) => onColorChange(hsvToHex(h, s, v))}
+          onChange={(h, s, v) => pickColor(hsvToHex(h, s, v))}
+        />
+      )}
+
+      {tab === "harmony" && (
+        <HarmonyPicker
+          h={hsv.h}
+          s={hsv.s}
+          v={hsv.v}
+          mode={harmonyMode}
+          menuOpen={harmonyMenuOpen}
+          onMenuToggle={() => setHarmonyMenuOpen((o) => !o)}
+          onModeChange={(mode) => {
+            onHarmonyModeChange(mode);
+            setHarmonyMenuOpen(false);
+          }}
+          onChange={(h, s, v) => pickColor(hsvToHex(h, s, v))}
+          onPickColor={pickColor}
         />
       )}
 
@@ -102,7 +159,7 @@ export function ColorPanel({
         <ValuePicker
           rgb={rgb}
           hex={color}
-          onChange={(r, g, b) => onColorChange(rgbToHex(r, g, b))}
+          onChange={(r, g, b) => pickColor(rgbToHex(r, g, b))}
         />
       )}
 
@@ -116,9 +173,9 @@ export function ColorPanel({
                   <button
                     key={c}
                     type="button"
-                    className={`procreate-color-swatch${c === color ? " active" : ""}`}
+                    className={`procreate-color-swatch${c.toLowerCase() === color.toLowerCase() ? " active" : ""}`}
                     style={{ background: c }}
-                    onClick={() => onColorChange(c)}
+                    onClick={() => pickColor(c)}
                     {...tipProps(`Select color ${c}`)}
                   />
                 ))}
@@ -133,9 +190,9 @@ export function ColorPanel({
                   <button
                     key={`${palette.id}-${c}`}
                     type="button"
-                    className={`procreate-color-swatch${c === color ? " active" : ""}`}
+                    className={`procreate-color-swatch${c.toLowerCase() === color.toLowerCase() ? " active" : ""}`}
                     style={{ background: c }}
-                    onClick={() => onColorChange(c)}
+                    onClick={() => pickColor(c)}
                     {...tipProps(`Select color ${c}`)}
                   />
                 ))}
@@ -157,104 +214,259 @@ export function ColorPanel({
       )}
 
       {tab !== "palettes" && (
-        <div className="procreate-palette-row compact">
-          {DEFAULT_PALETTES[0].colors.map((c) => (
-            <button
-              key={c}
-              type="button"
-              className="procreate-color-swatch"
-              style={{ background: c }}
-              onClick={() => onColorChange(c)}
-              {...tipProps(`Select color ${c}`)}
-            />
-          ))}
-        </div>
-      )}
-
-      {tab === "disc" && (
-        <div className="procreate-harmony">
-          <p>Harmony</p>
-          <div className="procreate-palette-row">
-            {harmonies.map((c) => (
-              <button
-                key={c}
-                type="button"
-                className="procreate-color-swatch"
-                style={{ background: c }}
-                onClick={() => onColorChange(c)}
-                {...tipProps(`Harmony color ${c}`)}
-              />
-            ))}
+        <>
+          {history.length > 0 && (
+            <div className="procreate-color-history">
+              <p>History</p>
+              <div className="procreate-palette-row compact">
+                {history.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    className={`procreate-color-swatch${c.toLowerCase() === color.toLowerCase() ? " active" : ""}`}
+                    style={{ background: c }}
+                    onClick={() => pickColor(c)}
+                    {...tipProps(`History color ${c}`)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="procreate-color-default-palette">
+            <p>Default palette</p>
+            <div className="procreate-palette-row compact">
+              {activePalette.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  className={`procreate-color-swatch${c.toLowerCase() === color.toLowerCase() ? " active" : ""}`}
+                  style={{ background: c }}
+                  onClick={() => pickColor(c)}
+                  {...tipProps(`Select color ${c}`)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       <div className="procreate-color-tabs">
-        {(["disc", "classic", "value", "palettes"] as ColorTab[]).map((t) => {
-          const tabTips: Record<ColorTab, string> = {
-            disc: "Color disc — hue ring with saturation center",
-            classic: "Classic — square picker with hue slider",
-            value: "Value — precise RGB and hex input",
-            palettes: "Palettes — preset color swatch sets",
-          };
-          return (
-            <button
-              key={t}
-              type="button"
-              className={tab === t ? "active" : ""}
-              onClick={() => onTabChange(t)}
-              {...tipProps(tabTips[t])}
-            >
-              {t.charAt(0).toUpperCase() + t.slice(1)}
-            </button>
-          );
-        })}
+        {COLOR_TABS.map((t) => (
+          <button
+            key={t}
+            type="button"
+            className={tab === t ? "active" : ""}
+            onClick={() => onTabChange(t)}
+            {...tipProps(`${TAB_LABELS[t]} color picker`)}
+          >
+            {TAB_LABELS[t]}
+          </button>
+        ))}
       </div>
     </div>
   );
+}
+
+function bindPointerDrag(
+  e: React.PointerEvent,
+  move: (ev: PointerEvent) => void,
+  end?: () => void,
+) {
+  const target = e.currentTarget as HTMLElement;
+  target.setPointerCapture(e.pointerId);
+  const onMove = (ev: PointerEvent) => {
+    if (ev.pointerId !== e.pointerId) return;
+    move(ev);
+  };
+  const onUp = (ev: PointerEvent) => {
+    if (ev.pointerId !== e.pointerId) return;
+    target.releasePointerCapture(e.pointerId);
+    window.removeEventListener("pointermove", onMove);
+    window.removeEventListener("pointerup", onUp);
+    window.removeEventListener("pointercancel", onUp);
+    end?.();
+  };
+  window.addEventListener("pointermove", onMove);
+  window.addEventListener("pointerup", onUp);
+  window.addEventListener("pointercancel", onUp);
 }
 
 function ColorDisc({
   h,
   s,
   v,
+  expanded,
+  onToggleExpand,
   onChange,
 }: {
   h: number;
   s: number;
   v: number;
+  expanded: boolean;
+  onToggleExpand: () => void;
   onChange: (h: number, s: number, v: number) => void;
 }) {
-  const innerBg = hsvToHex(h, 100, 100);
+  const hueColor = hsvToHex(h, 100, 100);
+  const hueAngle = ((h - 90) * Math.PI) / 180;
+  const ringR = expanded ? 118 : 98;
+  const hueX = 50 + (Math.cos(hueAngle) * ringR) / (expanded ? 260 : 200) * 100;
+  const hueY = 50 + (Math.sin(hueAngle) * ringR) / (expanded ? 260 : 200) * 100;
 
   return (
-    <div className="procreate-color-disc-wrap">
+    <div className={`procreate-color-disc-wrap${expanded ? " expanded" : ""}`}>
       <div
         className="procreate-hue-ring"
-        onPointerDown={(e) => pickHue(e, onChange, v, s)}
-        onPointerMove={(e) => e.buttons === 1 && pickHue(e, onChange, v, s)}
+        onPointerDown={(e) => {
+          pickHue(e, onChange, v, s);
+          bindPointerDrag(e, (ev) => pickHuePointer(ev, onChange, v, s, e.currentTarget as HTMLElement));
+        }}
       >
+        <span className="procreate-hue-cursor" style={{ left: `${hueX}%`, top: `${hueY}%` }} />
         <div
           className="procreate-sat-disc"
-          style={{ background: innerBg }}
+          style={{
+            background: `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, ${hueColor})`,
+          }}
           onPointerDown={(e) => {
             e.stopPropagation();
-            pickSat(e, h, v, onChange);
+            pickSat(e, h, onChange);
+            bindPointerDrag(e, (ev) =>
+              pickSatPointer(ev, h, onChange, e.currentTarget as HTMLElement),
+            );
           }}
-          onPointerMove={(e) => {
-            if (e.buttons !== 1) return;
+          onDoubleClick={(e) => {
             e.stopPropagation();
-            pickSat(e, h, v, onChange);
+            const snapped = snapDiscColor(h, s, v);
+            onChange(snapped.h, snapped.s, snapped.v);
           }}
         >
-          <span
-            className="procreate-color-cursor"
-            style={{ left: `${s}%`, top: `${100 - v}%` }}
-          />
+          <span className="procreate-color-cursor" style={{ left: `${s}%`, top: `${100 - v}%` }} />
         </div>
       </div>
+      <button type="button" className="procreate-disc-expand-btn" onClick={onToggleExpand}>
+        {expanded ? "Shrink disc" : "Expand disc for fine control"}
+      </button>
     </div>
   );
+}
+
+function HarmonyPicker({
+  h,
+  s,
+  v,
+  mode,
+  menuOpen,
+  onMenuToggle,
+  onModeChange,
+  onChange,
+  onPickColor,
+}: {
+  h: number;
+  s: number;
+  v: number;
+  mode: HarmonyMode;
+  menuOpen: boolean;
+  onMenuToggle: () => void;
+  onModeChange: (mode: HarmonyMode) => void;
+  onChange: (h: number, s: number, v: number) => void;
+  onPickColor: (hex: string) => void;
+}) {
+  const scheme = harmonySchemeColors(h, s, v, mode);
+
+  return (
+    <div className="procreate-harmony-picker">
+      <div className="procreate-harmony-mode">
+        <button type="button" className="procreate-harmony-mode-btn" onClick={onMenuToggle}>
+          {HARMONY_MODE_LABELS[mode]}
+        </button>
+        {menuOpen && (
+          <div className="procreate-harmony-mode-menu">
+            {(Object.keys(HARMONY_MODE_LABELS) as HarmonyMode[]).map((m) => (
+              <button
+                key={m}
+                type="button"
+                className={m === mode ? "active" : ""}
+                onClick={() => onModeChange(m)}
+              >
+                {HARMONY_MODE_LABELS[m]}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      <div
+        className="procreate-harmony-wheel"
+        onPointerDown={(e) => {
+          pickHarmonyWheel(e, v, onChange);
+          bindPointerDrag(e, (ev) =>
+            pickHarmonyWheelPointer(ev, v, onChange, e.currentTarget as HTMLElement),
+          );
+        }}
+      >
+        {scheme.map((hex, i) => {
+          const { h: hh, s: ss } = hexToHsv(hex);
+          const angle = ((hh - 90) * Math.PI) / 180;
+          const radius = Math.max(8, ss);
+          const x = 50 + (Math.cos(angle) * radius * 0.46);
+          const y = 50 + (Math.sin(angle) * radius * 0.46);
+          return (
+            <button
+              key={`${mode}-${i}-${hex}`}
+              type="button"
+              className={`procreate-harmony-reticle${i === 0 ? " primary" : ""}`}
+              style={{ left: `${x}%`, top: `${y}%`, background: hex }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                onPickColor(hex);
+                if (i > 0) {
+                  const picked = hexToHsv(hex);
+                  onChange(picked.h, picked.s, v);
+                }
+              }}
+              {...tipProps(i === 0 ? "Primary harmony color" : "Harmony color — tap to paint with this")}
+            />
+          );
+        })}
+      </div>
+      <label className="procreate-harmony-brightness">
+        <span>Brightness</span>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={v}
+          onChange={(e) => onChange(h, s, Number(e.target.value))}
+        />
+      </label>
+    </div>
+  );
+}
+
+function pickHarmonyWheel(
+  e: React.PointerEvent,
+  v: number,
+  onChange: (h: number, s: number, v: number) => void,
+) {
+  pickHarmonyWheelPointer(e.nativeEvent, v, onChange, e.currentTarget as HTMLElement);
+}
+
+function pickHarmonyWheelPointer(
+  e: PointerEvent,
+  v: number,
+  onChange: (h: number, s: number, v: number) => void,
+  el: HTMLElement,
+) {
+  const rect = el.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const dx = e.clientX - cx;
+  const dy = e.clientY - cy;
+  const dist = Math.min(rect.width / 2, Math.hypot(dx, dy));
+  const maxR = rect.width / 2;
+  const s = Math.max(0, Math.min(100, (dist / maxR) * 100));
+  const deg = ((Math.atan2(dy, dx) * 180) / Math.PI + 360) % 360;
+  onChange(deg, s, v);
 }
 
 function pickHue(
@@ -263,7 +475,17 @@ function pickHue(
   v: number,
   s: number,
 ) {
-  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+  pickHuePointer(e.nativeEvent, onChange, v, s, e.currentTarget as HTMLElement);
+}
+
+function pickHuePointer(
+  e: PointerEvent,
+  onChange: (h: number, s: number, v: number) => void,
+  v: number,
+  s: number,
+  el: HTMLElement,
+) {
+  const rect = el.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 2;
   const angle = Math.atan2(e.clientY - cy, e.clientX - cx);
@@ -274,13 +496,21 @@ function pickHue(
 function pickSat(
   e: React.PointerEvent,
   h: number,
-  v: number,
   onChange: (h: number, s: number, v: number) => void,
 ) {
-  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-  const s = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+  pickSatPointer(e.nativeEvent, h, onChange, e.currentTarget as HTMLElement);
+}
+
+function pickSatPointer(
+  e: PointerEvent,
+  h: number,
+  onChange: (h: number, s: number, v: number) => void,
+  el: HTMLElement,
+) {
+  const rect = el.getBoundingClientRect();
+  const ns = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
   const nv = Math.max(0, Math.min(100, (1 - (e.clientY - rect.top) / rect.height) * 100));
-  onChange(h, s, nv);
+  onChange(h, ns, nv);
 }
 
 function ClassicPicker({
@@ -302,19 +532,37 @@ function ClassicPicker({
         style={{
           background: `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, ${hueColor})`,
         }}
-        onPointerDown={(e) => pickClassic(e, h, onChange)}
-        onPointerMove={(e) => e.buttons === 1 && pickClassic(e, h, onChange)}
+        onPointerDown={(e) => {
+          pickClassic(e, h, onChange);
+          bindPointerDrag(e, (ev) =>
+            pickClassicPointer(ev, h, onChange, e.currentTarget as HTMLElement),
+          );
+        }}
       >
         <span className="procreate-color-cursor" style={{ left: `${s}%`, top: `${100 - v}%` }} />
       </div>
-      <input
-        type="range"
-        min={0}
-        max={360}
-        value={h}
-        onChange={(e) => onChange(Number(e.target.value), s, v)}
-        className="procreate-hue-slider"
-      />
+      {(["Hue", "Saturation", "Brightness"] as const).map((label, idx) => {
+        const key = ["h", "s", "v"][idx] as "h" | "s" | "v";
+        const max = key === "h" ? 360 : 100;
+        const val = key === "h" ? h : key === "s" ? s : v;
+        return (
+          <label key={label} className="procreate-classic-slider">
+            <span>{label}</span>
+            <input
+              type="range"
+              min={0}
+              max={max}
+              value={val}
+              onChange={(e) => {
+                const n = Number(e.target.value);
+                if (key === "h") onChange(n, s, v);
+                else if (key === "s") onChange(h, n, v);
+                else onChange(h, s, n);
+              }}
+            />
+          </label>
+        );
+      })}
     </div>
   );
 }
@@ -324,10 +572,19 @@ function pickClassic(
   h: number,
   onChange: (h: number, s: number, v: number) => void,
 ) {
-  const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-  const s = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-  const v = Math.max(0, Math.min(100, (1 - (e.clientY - rect.top) / rect.height) * 100));
-  onChange(h, s, v);
+  pickClassicPointer(e.nativeEvent, h, onChange, e.currentTarget as HTMLElement);
+}
+
+function pickClassicPointer(
+  e: PointerEvent,
+  h: number,
+  onChange: (h: number, s: number, v: number) => void,
+  el: HTMLElement,
+) {
+  const rect = el.getBoundingClientRect();
+  const ns = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+  const nv = Math.max(0, Math.min(100, (1 - (e.clientY - rect.top) / rect.height) * 100));
+  onChange(h, ns, nv);
 }
 
 function ValuePicker({
@@ -342,6 +599,35 @@ function ValuePicker({
   const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
   return (
     <div className="procreate-value-picker">
+      {(
+        [
+          ["Hue", "h", 360, hsv.h],
+          ["Saturation", "s", 100, hsv.s],
+          ["Brightness", "b", 100, hsv.v],
+        ] as const
+      ).map(([label, ch, max, val]) => (
+        <label key={ch} className="procreate-value-row">
+          <span>{label}</span>
+          <input
+            type="range"
+            min={0}
+            max={max}
+            value={val}
+            onChange={(e) => {
+              const n = Number(e.target.value);
+              const next =
+                ch === "h"
+                  ? hsvToHex(n, hsv.s, hsv.v)
+                  : ch === "s"
+                    ? hsvToHex(hsv.h, n, hsv.v)
+                    : hsvToHex(hsv.h, hsv.s, n);
+              const { r, g, b } = hexToRgb(next);
+              onChange(r, g, b);
+            }}
+          />
+          <input type="number" min={0} max={max} value={Math.round(val)} readOnly />
+        </label>
+      ))}
       {(["r", "g", "b"] as const).map((ch) => (
         <label key={ch} className="procreate-value-row">
           <span>{ch.toUpperCase()}</span>
@@ -380,14 +666,6 @@ function ValuePicker({
             }
           }}
         />
-      </label>
-      <label className="procreate-value-row">
-        <span>H</span>
-        <input type="number" value={Math.round(hsv.h)} readOnly />
-        <span>S</span>
-        <input type="number" value={Math.round(hsv.s)} readOnly />
-        <span>B</span>
-        <input type="number" value={Math.round(hsv.v)} readOnly />
       </label>
     </div>
   );

@@ -1,3 +1,5 @@
+import type { HarmonyMode } from "./types";
+
 export function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const h = hex.replace("#", "");
   const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
@@ -92,6 +94,60 @@ export function harmonyColors(hex: string): string[] {
     hsvToHex(h, s * 0.6, Math.min(100, v + 15)),
     hsvToHex((h + 330) % 360, s, v * 0.85),
   ];
+}
+
+export function harmonyHueOffsets(mode: HarmonyMode): number[] {
+  switch (mode) {
+    case "complementary":
+      return [180];
+    case "split-complementary":
+      return [150, 210];
+    case "analogous":
+      return [30, 330];
+    case "triadic":
+      return [120, 240];
+    case "tetradic":
+      return [90, 180, 270];
+  }
+}
+
+export function harmonySchemeColors(
+  h: number,
+  s: number,
+  v: number,
+  mode: HarmonyMode,
+): string[] {
+  const offsets = [0, ...harmonyHueOffsets(mode)];
+  return offsets.map((offset) => hsvToHex((h + offset) % 360, s, v));
+}
+
+export const HARMONY_MODE_LABELS: Record<HarmonyMode, string> = {
+  complementary: "Complementary",
+  "split-complementary": "Split Complementary",
+  analogous: "Analogous",
+  triadic: "Triadic",
+  tetradic: "Tetradic",
+};
+
+/** Snap saturation disc to common values (Procreate double-tap). */
+export function snapDiscColor(h: number, s: number, v: number): { h: number; s: number; v: number } {
+  const snap = (val: number, targets: number[]) => {
+    let best = val;
+    let bestDist = Infinity;
+    for (const t of targets) {
+      const d = Math.abs(val - t);
+      if (d < bestDist) {
+        bestDist = d;
+        best = t;
+      }
+    }
+    return bestDist <= 18 ? best : val;
+  };
+  return {
+    h,
+    s: snap(s, [0, 50, 100]),
+    v: snap(v, [0, 50, 100]),
+  };
 }
 
 export function sampleColorFromCanvas(

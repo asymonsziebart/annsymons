@@ -319,12 +319,14 @@ export function QuickMenu({
 export function SymmetryBar({
   mode,
   onChange,
+  inline = false,
 }: {
   mode: SymmetryMode;
   onChange: (m: SymmetryMode) => void;
+  inline?: boolean;
 }) {
   return (
-    <div className="procreate-symmetry-bar">
+    <div className={`procreate-symmetry-bar${inline ? " inline" : ""}`}>
       {(
         [
           ["none", "Off"],

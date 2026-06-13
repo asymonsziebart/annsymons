@@ -65,3 +65,28 @@ export function saveCustomPalettes(palettes: CustomPalette[]) {
   if (typeof window === "undefined") return;
   localStorage.setItem(PALETTES_KEY, JSON.stringify(palettes));
 }
+
+const COLOR_HISTORY_KEY = "annsymons-palette-color-history";
+const MAX_COLOR_HISTORY = 14;
+
+export function loadColorHistory(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(COLOR_HISTORY_KEY);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function pushColorHistory(hex: string) {
+  if (typeof window === "undefined") return;
+  try {
+    const normalized = hex.toLowerCase();
+    const prev = loadColorHistory().filter((c) => c.toLowerCase() !== normalized);
+    const next = [normalized, ...prev].slice(0, MAX_COLOR_HISTORY);
+    localStorage.setItem(COLOR_HISTORY_KEY, JSON.stringify(next));
+  } catch {
+    /* ignore */
+  }
+}

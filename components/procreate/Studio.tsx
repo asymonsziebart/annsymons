@@ -8,7 +8,6 @@ import type {
   BlendMode,
   BrushDef,
   BrushOverrides,
-  ColorTab,
   Layer,
   Point,
   SelectionMask,
@@ -93,9 +92,7 @@ import {
   IconActions,
   IconAdjust,
   IconBrush,
-  IconColor,
   IconErase,
-  IconEyedropper,
   IconGallery,
   IconLayers,
   IconRedo,
@@ -155,7 +152,6 @@ export default function Studio({ artworkId, onBack }: Props) {
   const [brushSize, setBrushSize] = useState(1);
   const [brushOpacity, setBrushOpacity] = useState(1);
   const [panel, setPanel] = useState<Panel>(null);
-  const [colorTab, setColorTab] = useState<ColorTab>("disc");
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const panRef = useRef(pan);
@@ -948,7 +944,12 @@ export default function Studio({ artworkId, onBack }: Props) {
 
     if (elapsed < 400 && maxMove < 32) {
       if (gesture.count === 2) undo();
-      else if (gesture.count >= 3) redo();
+      else if (gesture.count === 3) redo();
+      else if (gesture.count >= 4) {
+        const next = !prefsRef.current.showInterface;
+        setPrefs({ ...prefsRef.current, showInterface: next });
+        if (!next) setPanel(null);
+      }
     }
     multiTouchTap.current = null;
     e.preventDefault();
@@ -969,9 +970,13 @@ export default function Studio({ artworkId, onBack }: Props) {
   }
 
   function selectTool(next: Tool) {
+    if (tool === next) {
+      openBrushPanel();
+      return;
+    }
     setTool(next);
     setStudioMode("draw");
-    if (panel === "brush" && next !== tool) setPanel("brush");
+    if (panel === "brush") setPanel(null);
   }
 
   function openBrushPanel() {
@@ -1168,7 +1173,7 @@ export default function Studio({ artworkId, onBack }: Props) {
     return <div className="procreate-loading">Loading studio…</div>;
   }
 
-  const showChrome = isTouchDevice || prefs.showInterface;
+  const showChrome = prefs.showInterface;
 
   const uiClass = [
     "procreate-studio",
@@ -1229,22 +1234,6 @@ export default function Studio({ artworkId, onBack }: Props) {
               {...tipProps("Transform — move, scale, rotate (double-click to apply)")}
             >
               <IconTransform className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              className={`procreate-tool-btn${studioMode === "text" ? " active" : ""}`}
-              onClick={() => setStudioMode("text")}
-              {...tipProps("Text — tap canvas to place text")}
-            >
-              T
-            </button>
-            <button
-              type="button"
-              className="procreate-tool-btn"
-              onClick={() => setQuickMenuOpen(true)}
-              {...tipProps("QuickMenu — shortcuts")}
-            >
-              ⋯
             </button>
           </div>
 
@@ -1311,28 +1300,10 @@ export default function Studio({ artworkId, onBack }: Props) {
             </div>
             <button
               type="button"
-              className="procreate-modify-btn"
-              onClick={() => setPanel(panel === "brushStudio" ? null : "brushStudio")}
-              {...tipProps("Brush Studio — tune brush settings", "right")}
-            >
-              B
-            </button>
-            <button
-              type="button"
-              className="procreate-modify-btn"
-              onClick={() => setPanel(panel === "animation" ? null : "animation")}
-              {...tipProps("Animation Assist — frames and onion skin", "right")}
-            >
-              A
-            </button>
-            <button
-              type="button"
               className={`procreate-modify-btn${eyedropper ? " active" : ""}`}
               onClick={() => setEyedropper(!eyedropper)}
-              {...tipProps("Eyedropper — pick a color from your canvas", "right")}
-            >
-              <IconEyedropper className="h-5 w-5" />
-            </button>
+              {...tipProps("Modify — tap for eyedropper, hold and tap canvas to pick a color", "right")}
+            />
             <div
               className="procreate-slider-wrap"
               {...tipProps("Brush opacity — drag up for more solid strokes", "right")}
@@ -1350,7 +1321,7 @@ export default function Studio({ artworkId, onBack }: Props) {
               type="button"
               className="procreate-undo-btn"
               onClick={undo}
-              {...tipProps("Undo last action (⌘Z)", "right")}
+              {...tipProps("Undo last action (2-finger tap)", "right")}
             >
               <IconUndo className="h-5 w-5" />
             </button>
@@ -1358,20 +1329,18 @@ export default function Studio({ artworkId, onBack }: Props) {
               type="button"
               className="procreate-redo-btn"
               onClick={redo}
-              {...tipProps("Redo (⌘⇧Z)", "right")}
+              {...tipProps("Redo (3-finger tap)", "right")}
             >
               <IconRedo className="h-5 w-5" />
             </button>
           </aside>
-
-          <SymmetryBar mode={prefs.symmetry} onChange={(m) => setPrefs({ ...prefs, symmetry: m })} />
 
       {!showChrome && (
         <button
           type="button"
           className="procreate-show-ui-btn"
           onClick={() => setPrefs({ ...prefs, showInterface: true })}
-          {...tipProps("Show toolbar and tools")}
+          {...tipProps("Show toolbar and tools (4-finger tap toggles)")}
         >
           Show tools
         </button>
@@ -1440,14 +1409,25 @@ export default function Studio({ artworkId, onBack }: Props) {
       )}
 
       {panel === "color" && (
+        <div className="procreate-panel-backdrop" onClick={() => setPanel(null)} aria-hidden />
+      )}
+
+      {panel === "color" && (
         <ColorPanel
           color={color}
           previousColor={prevColor}
-          tab={colorTab}
-          onTabChange={setColorTab}
+          tab={prefs.colorTab}
+          harmonyMode={prefs.harmonyMode}
+          onTabChange={(colorTab) => setPrefs({ ...prefs, colorTab })}
+          onHarmonyModeChange={(harmonyMode) => setPrefs({ ...prefs, harmonyMode })}
           onColorChange={(c) => {
-            setPrevColor(color);
+            if (c.toLowerCase() !== color.toLowerCase()) setPrevColor(color);
             setColor(c);
+          }}
+          onSwapColors={() => {
+            const cur = color;
+            setColor(prevColor);
+            setPrevColor(cur);
           }}
           onClose={() => setPanel(null)}
         />
@@ -1622,6 +1602,35 @@ export default function Studio({ artworkId, onBack }: Props) {
             >
               Canvas → Fit to screen
             </button>
+            <button
+              type="button"
+              onClick={() => {
+                setStudioMode("text");
+                setPanel(null);
+              }}
+              {...tipProps("Text — tap canvas to place text")}
+            >
+              Insert → Add text
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setPanel("brushStudio");
+              }}
+              {...tipProps("Brush Studio — tune brush settings")}
+            >
+              Brush → Brush Studio
+            </button>
+            <button
+              type="button"
+              onClick={() => setPanel("animation")}
+              {...tipProps("Animation Assist — frames and onion skin")}
+            >
+              Canvas → Animation Assist
+            </button>
+            <button type="button" onClick={() => setQuickMenuOpen(true)} {...tipProps("QuickMenu shortcuts")}>
+              Prefs → QuickMenu
+            </button>
             <label className="procreate-actions-slider" {...tipProps("Canvas background color behind layers")}>
               Background
               <input
@@ -1666,6 +1675,9 @@ export default function Studio({ artworkId, onBack }: Props) {
                 Reference → Clear overlay
               </button>
             )}
+            <hr />
+            <p className="procreate-actions-label">Drawing Guide</p>
+            <SymmetryBar inline mode={prefs.symmetry} onChange={(m) => setPrefs({ ...prefs, symmetry: m })} />
             <hr />
             <p className="procreate-actions-label">ColorDrop</p>
             <label className="procreate-actions-slider" {...tipProps("Default fill bleed — higher fills through more color variation")}>
@@ -1732,19 +1744,17 @@ export default function Studio({ artworkId, onBack }: Props) {
               />
               Brush cursor
             </label>
-            {!isTouchDevice && (
-              <button
-                type="button"
-                onClick={() => {
-                  const next = !prefs.showInterface;
-                  if (!next) setPanel(null);
-                  setPrefs({ ...prefs, showInterface: next });
-                }}
-                {...tipProps("Hide all menus for a distraction-free canvas")}
-              >
-                {prefs.showInterface ? "Hide interface" : "Show interface"}
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => {
+                const next = !prefs.showInterface;
+                if (!next) setPanel(null);
+                setPrefs({ ...prefs, showInterface: next });
+              }}
+              {...tipProps("Hide all menus — or 4-finger tap on canvas")}
+            >
+              {prefs.showInterface ? "Hide interface" : "Show interface"}
+            </button>
           </div>
         </div>
       )}

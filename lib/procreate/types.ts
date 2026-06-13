@@ -36,7 +36,14 @@ export type BlendMode =
   | "color"
   | "luminosity";
 
-export type ColorTab = "disc" | "classic" | "value" | "palettes";
+export type ColorTab = "disc" | "classic" | "harmony" | "value" | "palettes";
+
+export type HarmonyMode =
+  | "complementary"
+  | "split-complementary"
+  | "analogous"
+  | "triadic"
+  | "tetradic";
 
 export type CanvasPreset = {
   id: string;
@@ -205,6 +212,8 @@ export type StudioPrefs = {
   quickShape: boolean;
   onionSkin: boolean;
   showReference: boolean;
+  colorTab: ColorTab;
+  harmonyMode: HarmonyMode;
 };
 
 export type CustomPalette = {
@@ -226,6 +235,8 @@ export const DEFAULT_STUDIO_PREFS: StudioPrefs = {
   quickShape: true,
   onionSkin: false,
   showReference: true,
+  colorTab: "disc",
+  harmonyMode: "complementary",
 };
 
 export function normalizeLayerFields(sl: SerializedLayer): SerializedLayer {
