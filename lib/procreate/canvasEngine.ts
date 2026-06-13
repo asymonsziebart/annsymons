@@ -189,47 +189,64 @@ export class StrokeEngine {
     _composite: HTMLCanvasElement | undefined,
     erase: boolean,
   ) {
-    const smoothFrom = smoothPoint(this.lastPoint, from, brush.streamline);
-    const smoothTo = smoothPoint(smoothFrom, to, brush.streamline);
-    const d = dist(smoothFrom, smoothTo);
-    const step = Math.max(1, size * brush.spacing);
+    const d = dist(from, to);
+    if (d < 0.01) {
+      this.stampAt(ctx, to, brush, color, size, alpha, erase, 1);
+      this.lastPoint = to;
+      return;
+    }
+
+    // Keep stamps overlapping so fast strokes stay solid (spacing alone can gap on soft brushes).
+    const step = Math.max(0.5, Math.min(size * brush.spacing, size * 0.12));
     const steps = Math.max(1, Math.ceil(d / step));
 
     for (let i = 0; i <= steps; i++) {
       const t = i / steps;
       const p: Point = {
-        x: lerp(smoothFrom.x, smoothTo.x, t),
-        y: lerp(smoothFrom.y, smoothTo.y, t),
-        pressure: lerp(smoothFrom.pressure, smoothTo.pressure, t),
+        x: lerp(from.x, to.x, t),
+        y: lerp(from.y, to.y, t),
+        pressure: lerp(from.pressure, to.pressure, t),
       };
-
-      const taper =
-        brush.taper > 0
-          ? 1 - brush.taper * 0.5 * (Math.abs(t - 0.5) * 2)
-          : 1;
-      const stampSize = size * taper * (0.5 + p.pressure * 0.5);
-
-      let sx = p.x;
-      let sy = p.y;
-      if (brush.scatter > 0) {
-        const scatterAmt = stampSize * brush.scatter * 0.5;
-        sx += (Math.random() - 0.5) * scatterAmt;
-        sy += (Math.random() - 0.5) * scatterAmt;
-      }
-
-      const stampAlpha = erase ? alpha : alpha * (0.5 + p.pressure * 0.5);
-      stampBrush(ctx, sx, sy, stampSize, color, stampAlpha, brush.hardness, brush.texture);
-
-      if (brush.wetMix > 0 && !erase) {
-        ctx.save();
-        ctx.globalAlpha = brush.wetMix * 0.15;
-        ctx.globalCompositeOperation = "source-over";
-        stampBrush(ctx, sx, sy, stampSize * 1.2, color, 0.3, 0.05, "smooth");
-        ctx.restore();
-      }
+      this.stampAt(ctx, p, brush, color, size, alpha, erase, t);
     }
 
-    this.lastPoint = smoothTo;
+    // Streamline only affects the next segment's start — never shorten what we draw now.
+    this.lastPoint =
+      brush.streamline > 0 ? smoothPoint(this.lastPoint, to, brush.streamline) : to;
+  }
+
+  private stampAt(
+    ctx: CanvasRenderingContext2D,
+    p: Point,
+    brush: BrushDef,
+    color: string,
+    size: number,
+    alpha: number,
+    erase: boolean,
+    t: number,
+  ) {
+    const taper =
+      brush.taper > 0 ? 1 - brush.taper * 0.5 * (Math.abs(t - 0.5) * 2) : 1;
+    const stampSize = size * taper * (0.5 + p.pressure * 0.5);
+
+    let sx = p.x;
+    let sy = p.y;
+    if (brush.scatter > 0) {
+      const scatterAmt = stampSize * brush.scatter * 0.5;
+      sx += (Math.random() - 0.5) * scatterAmt;
+      sy += (Math.random() - 0.5) * scatterAmt;
+    }
+
+    const stampAlpha = erase ? alpha : alpha * (0.5 + p.pressure * 0.5);
+    stampBrush(ctx, sx, sy, stampSize, color, stampAlpha, brush.hardness, brush.texture);
+
+    if (brush.wetMix > 0 && !erase) {
+      ctx.save();
+      ctx.globalAlpha = brush.wetMix * 0.15;
+      ctx.globalCompositeOperation = "source-over";
+      stampBrush(ctx, sx, sy, stampSize * 1.2, color, 0.3, 0.05, "smooth");
+      ctx.restore();
+    }
   }
 
   private smudgeSegment(
@@ -245,7 +262,7 @@ export class StrokeEngine {
     if (!compCtx) return;
 
     const d = dist(from, to);
-    const step = Math.max(2, size * brush.spacing * 0.5);
+    const step = Math.max(0.5, Math.min(size * brush.spacing * 0.5, size * 0.12));
     const steps = Math.max(1, Math.ceil(d / step));
 
     for (let i = 0; i <= steps; i++) {

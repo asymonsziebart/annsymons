@@ -283,6 +283,29 @@ export default function Studio({ artworkId, onBack }: Props) {
     setLayers([...layers]);
   }
 
+  function pointerToPoint(e: PointerEvent): Point | null {
+    const pt = screenToCanvas(e.clientX, e.clientY);
+    if (!pt) return null;
+    pt.pressure = e.pressure > 0 ? e.pressure : 0.5;
+    return pt;
+  }
+
+  function drawSegmentTo(ctx: CanvasRenderingContext2D, to: Point) {
+    if (!lastPointer.current || !activeLayer) return;
+    strokeEngine.current.paintStroke(
+      ctx,
+      lastPointer.current,
+      to,
+      brush,
+      color,
+      tool,
+      brushSize,
+      brushOpacity,
+      compositeRef.current ?? undefined,
+    );
+    lastPointer.current = to;
+  }
+
   function handlePointerDown(e: React.PointerEvent) {
     if (!doc || !activeLayer || activeLayer.locked) return;
 
@@ -349,25 +372,19 @@ export default function Studio({ artworkId, onBack }: Props) {
 
     if (!isDrawing || !activeLayer || transformMode) return;
 
-    const pt = screenToCanvas(e.clientX, e.clientY);
-    if (!pt || !lastPointer.current) return;
-    pt.pressure = e.pressure > 0 ? e.pressure : 0.5;
-
     const ctx = activeLayer.canvas.getContext("2d");
     if (!ctx) return;
 
-    strokeEngine.current.paintStroke(
-      ctx,
-      lastPointer.current,
-      pt,
-      brush,
-      color,
-      tool,
-      brushSize,
-      brushOpacity,
-      compositeRef.current ?? undefined,
-    );
-    lastPointer.current = pt;
+    const native = e.nativeEvent;
+    const coalesced =
+      native.getCoalescedEvents?.().length ? native.getCoalescedEvents() : [native];
+
+    for (const ev of coalesced) {
+      const pt = pointerToPoint(ev);
+      if (!pt || !lastPointer.current) continue;
+      drawSegmentTo(ctx, pt);
+    }
+
     setLayers([...layers]);
   }
 

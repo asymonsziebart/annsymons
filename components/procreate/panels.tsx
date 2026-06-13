@@ -408,7 +408,11 @@ export function LayersPanel({
               }}
               {...tipProps(layer.visible ? "Hide this layer" : "Show this layer")}
             >
-              {layer.visible ? "●" : "○"}
+              {layer.visible ? (
+                <IconEye className="h-4 w-4" />
+              ) : (
+                <IconEyeOff className="h-4 w-4" />
+              )}
             </button>
             <div className="procreate-layer-thumb">
               <LayerThumb canvas={layer.canvas} />
