@@ -1,6 +1,7 @@
-import type { BlendMode, BrushDef, Layer, Point, Tool } from "./types";
+import type { BlendMode, BrushDef, Layer, Point, SymmetryMode, Tool } from "./types";
 import { hexToRgb } from "./colorUtils";
 import { getCachedTipImage } from "./brushLibrary";
+import { mirrorPoints } from "./symmetry";
 
 const BLEND_MAP: Record<BlendMode, GlobalCompositeOperation> = {
   normal: "source-over",
@@ -38,6 +39,15 @@ export function compositeLayers(
 
   for (const layer of layers) {
     if (!layer.visible || layer.opacity <= 0) continue;
+
+    if (layer.clipToLayerId) {
+      const clipSource = layers.find((l) => l.id === layer.clipToLayerId);
+      if (clipSource) {
+        drawLayerClipped(ctx, layer, clipSource, width, height);
+        continue;
+      }
+    }
+
     ctx.save();
     ctx.globalAlpha = layer.opacity;
     ctx.globalCompositeOperation = BLEND_MAP[layer.blendMode] ?? "source-over";
@@ -45,6 +55,29 @@ export function compositeLayers(
     ctx.restore();
   }
   return out;
+}
+
+function drawLayerClipped(
+  ctx: CanvasRenderingContext2D,
+  layer: Layer,
+  clipSource: Layer,
+  width: number,
+  height: number,
+) {
+  const temp = document.createElement("canvas");
+  temp.width = width;
+  temp.height = height;
+  const tctx = temp.getContext("2d");
+  if (!tctx) return;
+  tctx.drawImage(layer.canvas, 0, 0);
+  tctx.globalCompositeOperation = "destination-in";
+  tctx.drawImage(clipSource.canvas, 0, 0);
+
+  ctx.save();
+  ctx.globalAlpha = layer.opacity;
+  ctx.globalCompositeOperation = BLEND_MAP[layer.blendMode] ?? "source-over";
+  ctx.drawImage(temp, 0, 0);
+  ctx.restore();
 }
 
 function lerp(a: number, b: number, t: number): number {
@@ -156,26 +189,59 @@ export class StrokeEngine {
     sizeMul: number,
     opacityMul: number,
     composite?: HTMLCanvasElement,
+    options?: {
+      alphaLock?: boolean;
+      symmetry?: SymmetryMode;
+      canvasWidth?: number;
+      canvasHeight?: number;
+    },
   ) {
     const size = brush.size * sizeMul * (0.35 + to.pressure * 0.65);
     const baseAlpha = brush.opacity * opacityMul * (0.4 + to.pressure * 0.6) * brush.flow;
+    const sym = options?.symmetry ?? "none";
+    const cw = options?.canvasWidth ?? composite?.width ?? 2048;
+    const ch = options?.canvasHeight ?? composite?.height ?? 2048;
 
+    const drawPair = (a: Point, b: Point) => {
+      const pairs: [Point, Point][] = [[a, b]];
+      if (sym !== "none") {
+        const ma = mirrorPoints(a, cw, ch, sym);
+        const mb = mirrorPoints(b, cw, ch, sym);
+        for (let i = 1; i < ma.length; i++) pairs.push([ma[i], mb[i]]);
+      }
+      for (const [f, t] of pairs) this.paintStrokeOnce(ctx, f, t, brush, color, tool, size, baseAlpha, composite, options?.alphaLock);
+    };
+    drawPair(from, to);
+  }
+
+  private paintStrokeOnce(
+    ctx: CanvasRenderingContext2D,
+    from: Point,
+    to: Point,
+    brush: BrushDef,
+    color: string,
+    tool: Tool,
+    size: number,
+    baseAlpha: number,
+    composite: HTMLCanvasElement | undefined,
+    alphaLock?: boolean,
+  ) {
     if (tool === "erase") {
       ctx.save();
       ctx.globalCompositeOperation = "destination-out";
-      this.drawSegment(ctx, from, to, { ...brush, hardness: brush.hardness }, "#000", size, baseAlpha, composite, true);
+      this.drawSegment(ctx, from, to, { ...brush, hardness: brush.hardness }, "#000", size, baseAlpha, composite, true, alphaLock);
       ctx.restore();
       return;
     }
 
     if (tool === "smudge" && composite) {
-      this.smudgeSegment(ctx, from, to, brush, size, baseAlpha, composite);
+      this.smudgeSegment(ctx, from, to, brush, size, baseAlpha, composite, alphaLock);
       return;
     }
 
     ctx.save();
-    ctx.globalCompositeOperation = "source-over";
-    this.drawSegment(ctx, from, to, brush, color, size, baseAlpha, composite, false);
+    ctx.globalCompositeOperation = alphaLock ? "source-atop" : "source-over";
+    this.drawSegment(ctx, from, to, brush, color, size, baseAlpha, composite, false, alphaLock);
     ctx.restore();
   }
 
@@ -189,6 +255,7 @@ export class StrokeEngine {
     alpha: number,
     _composite: HTMLCanvasElement | undefined,
     erase: boolean,
+    _alphaLock?: boolean,
   ) {
     const d = dist(from, to);
     if (d < 0.01) {
@@ -268,6 +335,7 @@ export class StrokeEngine {
     size: number,
     alpha: number,
     composite: HTMLCanvasElement,
+    alphaLock?: boolean,
   ) {
     const compCtx = composite.getContext("2d", { willReadFrequently: true });
     if (!compCtx) return;
@@ -291,6 +359,7 @@ export class StrokeEngine {
       const sample = compCtx.getImageData(sx, sy, sw, sh);
       ctx.save();
       ctx.globalAlpha = alpha * 0.65;
+      if (alphaLock) ctx.globalCompositeOperation = "source-atop";
       ctx.putImageData(sample, sx, sy);
       ctx.restore();
 

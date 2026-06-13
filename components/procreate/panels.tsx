@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import type { BlendMode, ColorTab, Layer } from "@/lib/procreate/types";
+import { useEffect, useState } from "react";
+import type { BlendMode, ColorTab, CustomPalette, Layer } from "@/lib/procreate/types";
 import { BLEND_MODE_LABELS } from "@/lib/procreate/canvasEngine";
 import { DEFAULT_PALETTES } from "@/lib/procreate/brushes";
 import {
@@ -13,6 +13,8 @@ import {
   rgbToHex,
   rgbToHsv,
 } from "@/lib/procreate/colorUtils";
+import { loadCustomPalettes, saveCustomPalettes } from "@/lib/procreate/prefsStorage";
+import { generateId } from "@/lib/procreate/storage";
 import { IconClose, IconEye, IconEyeOff } from "./icons";
 import { tipProps } from "./tip";
 
@@ -36,6 +38,22 @@ export function ColorPanel({
   const hsv = hexToHsv(color);
   const rgb = hexToRgb(color);
   const harmonies = harmonyColors(color);
+  const [customPalettes, setCustomPalettes] = useState<CustomPalette[]>([]);
+  const [paletteName, setPaletteName] = useState("My palette");
+
+  useEffect(() => {
+    setCustomPalettes(loadCustomPalettes());
+  }, []);
+
+  function saveCurrentPalette() {
+    const name = paletteName.trim() || "My palette";
+    const next: CustomPalette[] = [
+      ...customPalettes,
+      { id: generateId(), name, colors: [color, previousColor, ...DEFAULT_PALETTES[0].colors.slice(0, 6)] },
+    ];
+    setCustomPalettes(next);
+    saveCustomPalettes(next);
+  }
 
   return (
     <div className="procreate-panel procreate-color-panel">
@@ -107,6 +125,34 @@ export function ColorPanel({
               </div>
             </div>
           ))}
+          {customPalettes.map((palette) => (
+            <div key={palette.id} className="procreate-palette-group">
+              <p>{palette.name}</p>
+              <div className="procreate-palette-row">
+                {palette.colors.map((c) => (
+                  <button
+                    key={`${palette.id}-${c}`}
+                    type="button"
+                    className={`procreate-color-swatch${c === color ? " active" : ""}`}
+                    style={{ background: c }}
+                    onClick={() => onColorChange(c)}
+                    {...tipProps(`Select color ${c}`)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+          <div className="procreate-palette-save">
+            <input
+              type="text"
+              value={paletteName}
+              onChange={(e) => setPaletteName(e.target.value)}
+              placeholder="Palette name"
+            />
+            <button type="button" className="procreate-btn-sm" onClick={saveCurrentPalette}>
+              Save current colors
+            </button>
+          </div>
         </div>
       )}
 
@@ -358,7 +404,13 @@ type LayersPanelProps = {
   onDelete: (id: string) => void;
   onDuplicate: (id: string) => void;
   onMove: (id: string, direction: "up" | "down") => void;
+  onReorder: (fromId: string, toId: string) => void;
   onRename: (id: string, name: string) => void;
+  onToggleLock: (id: string) => void;
+  onToggleAlphaLock: (id: string) => void;
+  onToggleClip: (id: string) => void;
+  onMergeDown: (id: string) => void;
+  onGroup: (id: string) => void;
   onClose: () => void;
 };
 
@@ -373,10 +425,17 @@ export function LayersPanel({
   onDelete,
   onDuplicate,
   onMove,
+  onReorder,
   onRename,
+  onToggleLock,
+  onToggleAlphaLock,
+  onToggleClip,
+  onMergeDown,
+  onGroup,
   onClose,
 }: LayersPanelProps) {
   const [blendLayerId, setBlendLayerId] = useState<string | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
 
   return (
     <div className="procreate-panel procreate-layers-panel">
@@ -396,7 +455,14 @@ export function LayersPanel({
         {[...layers].reverse().map((layer) => (
           <div
             key={layer.id}
-            className={`procreate-layer-row${layer.id === activeId ? " active" : ""}`}
+            className={`procreate-layer-row${layer.id === activeId ? " active" : ""}${layer.groupId ? " grouped" : ""}`}
+            draggable
+            onDragStart={() => setDragId(layer.id)}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={() => {
+              if (dragId && dragId !== layer.id) onReorder(dragId, layer.id);
+              setDragId(null);
+            }}
             onClick={() => onSelect(layer.id)}
           >
             <button
@@ -423,6 +489,32 @@ export function LayersPanel({
               onClick={(e) => e.stopPropagation()}
               onChange={(e) => onRename(layer.id, e.target.value)}
             />
+            <div className="procreate-layer-flags" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                className={layer.locked ? "on" : ""}
+                onClick={() => onToggleLock(layer.id)}
+                title="Lock"
+              >
+                L
+              </button>
+              <button
+                type="button"
+                className={layer.alphaLock ? "on" : ""}
+                onClick={() => onToggleAlphaLock(layer.id)}
+                title="Alpha lock"
+              >
+                A
+              </button>
+              <button
+                type="button"
+                className={layer.clipToLayerId ? "on" : ""}
+                onClick={() => onToggleClip(layer.id)}
+                title="Clipping mask"
+              >
+                C
+              </button>
+            </div>
             <button
               type="button"
               className="procreate-layer-blend"
@@ -472,6 +564,12 @@ export function LayersPanel({
         </button>
         <button type="button" onClick={() => onDuplicate(activeId)} {...tipProps("Duplicate the active layer")}>
           Duplicate
+        </button>
+        <button type="button" onClick={() => onMergeDown(activeId)} {...tipProps("Merge active layer down")}>
+          Merge ↓
+        </button>
+        <button type="button" onClick={() => onGroup(activeId)} {...tipProps("Group with layer below")}>
+          Group
         </button>
         <button type="button" onClick={() => onMove(activeId, "up")} {...tipProps("Move layer up (in front)")}>
           ↑

@@ -961,7 +961,7 @@
 
 .procreate-layer-row {
   display: grid;
-  grid-template-columns: 24px 44px 1fr 32px;
+  grid-template-columns: 28px 44px 1fr auto 32px;
   align-items: center;
   gap: 0.35rem;
   padding: 0.4rem;
@@ -970,8 +970,35 @@
   position: relative;
 }
 
+.procreate-layer-row.grouped {
+  padding-left: 1rem;
+}
+
 .procreate-layer-row.active {
   background: rgba(0, 122, 255, 0.2);
+}
+
+.procreate-layer-flags {
+  display: flex;
+  gap: 2px;
+}
+
+.procreate-layer-flags button {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  font-size: 0.6rem;
+  font-weight: 700;
+  background: #3a3a3c;
+  border: none;
+  border-radius: 4px;
+  color: #98989d;
+  cursor: pointer;
+}
+
+.procreate-layer-flags button.on {
+  background: #007aff;
+  color: #fff;
 }
 
 .procreate-layer-vis {
@@ -1160,6 +1187,206 @@
 
 .procreate-toggle input {
   accent-color: #007aff;
+}
+
+.procreate-doc-name-btn {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.procreate-doc-name-btn:hover {
+  text-decoration: underline;
+}
+
+.procreate-doc-name-input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: inherit;
+  font: inherit;
+  padding: 0.1rem 0.35rem;
+  min-width: 120px;
+}
+
+.procreate-symmetry-bar {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(28, 28, 30, 0.88);
+  backdrop-filter: blur(12px);
+  border-radius: 10px;
+}
+
+.procreate-symmetry-bar button {
+  min-width: 36px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #98989d;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.procreate-symmetry-bar button.active {
+  background: #007aff;
+  color: #fff;
+}
+
+.procreate-quickmenu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.procreate-quickmenu {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(140px, 1fr));
+  gap: 0.35rem;
+  padding: 0.75rem;
+  background: rgba(44, 44, 46, 0.98);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.procreate-quickmenu button {
+  background: #3a3a3c;
+  border: none;
+  color: #f2f2f7;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.procreate-quickmenu button:hover {
+  background: #48484a;
+}
+
+.procreate-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.35rem;
+  padding: 0.75rem;
+}
+
+.procreate-mode-grid button {
+  background: #3a3a3c;
+  border: none;
+  color: #f2f2f7;
+  padding: 0.55rem 0.35rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.procreate-mode-grid button.active {
+  background: #007aff;
+}
+
+.procreate-panel-hint {
+  font-size: 0.72rem;
+  color: #98989d;
+  padding: 0.5rem 1rem 0.75rem;
+  line-height: 1.4;
+}
+
+.procreate-btn-sm {
+  display: block;
+  margin: 0.5rem 1rem 0.75rem;
+  background: #3a3a3c;
+  border: none;
+  color: #f2f2f7;
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.procreate-selection-panel,
+.procreate-adjust-panel,
+.procreate-brush-studio,
+.procreate-animation-panel,
+.procreate-text-panel {
+  top: 60px;
+  right: 12px;
+  width: min(320px, calc(100vw - 24px));
+}
+
+.procreate-frame-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.procreate-frame-item {
+  background: #3a3a3c;
+  border: none;
+  color: #f2f2f7;
+  text-align: left;
+  padding: 0.45rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.procreate-frame-item.active {
+  background: #007aff;
+}
+
+.procreate-text-input {
+  display: block;
+  width: calc(100% - 2rem);
+  margin: 0.75rem 1rem;
+  background: #1c1c1e;
+  border: 1px solid #48484a;
+  border-radius: 8px;
+  color: #f2f2f7;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.9375rem;
+  resize: vertical;
+}
+
+.procreate-text-panel .procreate-btn-primary {
+  margin: 0.5rem 1rem 1rem;
+}
+
+.procreate-palette-save {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 1rem;
+}
+
+.procreate-palette-save input {
+  background: #1c1c1e;
+  border: 1px solid #48484a;
+  border-radius: 8px;
+  color: #f2f2f7;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.8125rem;
+}
+
+.procreate-studio.hide-ui .procreate-symmetry-bar {
+  opacity: 0;
+  pointer-events: none;
 }
 
 @media (max-width: 640px) {
