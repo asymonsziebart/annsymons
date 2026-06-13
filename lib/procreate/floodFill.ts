@@ -64,7 +64,10 @@ export function floodFillAt(
   const { r: fr, g: fg, b: fb } = hexToRgb(fillHex);
 
   if (
-    matchesPixel(out, seedIdx, fr, fg, fb, 255, 0) &&
+    out[seedIdx + 3] > 250 &&
+    out[seedIdx] === fr &&
+    out[seedIdx + 1] === fg &&
+    out[seedIdx + 2] === fb &&
     matchesPixel(ref, seedIdx, sr, sg, sb, sa, tol)
   ) {
     return { filled: false, pixelCount: 0 };

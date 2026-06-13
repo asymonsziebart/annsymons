@@ -442,6 +442,7 @@
   background: transparent;
   cursor: pointer;
   padding: 4px;
+  touch-action: none;
 }
 
 .procreate-color-btn span {

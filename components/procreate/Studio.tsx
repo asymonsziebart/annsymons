@@ -97,6 +97,8 @@ export default function Studio({ artworkId, onBack }: Props) {
   const [colorTab, setColorTab] = useState<ColorTab>("disc");
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+  const panRef = useRef(pan);
+  const zoomRef = useRef(zoom);
   const [isDrawing, setIsDrawing] = useState(false);
   const [eyedropper, setEyedropper] = useState(false);
   const [prefs, setPrefs] = useState<StudioPrefs>({
@@ -104,12 +106,12 @@ export default function Studio({ artworkId, onBack }: Props) {
     rightHanded: false,
     brushCursor: true,
     showInterface: true,
-    colorDropThreshold: 0.12,
+    colorDropThreshold: 0.18,
     colorDropReference: true,
   });
   const [colorDropActive, setColorDropActive] = useState(false);
   const [colorDropPos, setColorDropPos] = useState<{ x: number; y: number } | null>(null);
-  const [fillThresholdLive, setFillThresholdLive] = useState(0.12);
+  const [fillThresholdLive, setFillThresholdLive] = useState(0.18);
   const [transformMode, setTransformMode] = useState(false);
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
   const [saveLabel, setSaveLabel] = useState("Saved");
@@ -121,8 +123,31 @@ export default function Studio({ artworkId, onBack }: Props) {
   const panStart = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
   const compositeRef = useRef<HTMLCanvasElement | null>(null);
   const colorDropStart = useRef<{ x: number; y: number } | null>(null);
-  const colorDropHoldTimer = useRef<number | null>(null);
-  const colorDropPointerId = useRef<number | null>(null);
+  const colorDropActiveRef = useRef(false);
+  const fillThresholdLiveRef = useRef(0.18);
+  const docRef = useRef(doc);
+  const layersRef = useRef(layers);
+  const activeLayerIdRef = useRef(activeLayerId);
+  const prefsRef = useRef(prefs);
+  const colorRef = useRef(color);
+
+  useEffect(() => {
+    panRef.current = pan;
+    zoomRef.current = zoom;
+  }, [pan, zoom]);
+
+  useEffect(() => {
+    docRef.current = doc;
+    layersRef.current = layers;
+    activeLayerIdRef.current = activeLayerId;
+    prefsRef.current = prefs;
+    colorRef.current = color;
+  }, [doc, layers, activeLayerId, prefs, color]);
+
+  useEffect(() => {
+    colorDropActiveRef.current = colorDropActive;
+    fillThresholdLiveRef.current = fillThresholdLive;
+  }, [colorDropActive, fillThresholdLive]);
 
   const activeLayer = layers.find((l) => l.id === activeLayerId);
 
@@ -257,106 +282,112 @@ export default function Studio({ artworkId, onBack }: Props) {
   }, [doc, layers, zoom, pan, prefs.brushCursor, cursor, brush, brushSize, transformMode, activeLayer, eyedropper, colorDropActive, colorDropPos, fillThresholdLive, color]);
 
   function performColorDrop(clientX: number, clientY: number, threshold: number) {
-    if (!doc || !activeLayer || activeLayer.locked) return;
+    const currentDoc = docRef.current;
+    const currentLayers = layersRef.current;
+    const layerId = activeLayerIdRef.current;
+    const active = currentLayers.find((l) => l.id === layerId);
+    if (!currentDoc || !active || active.locked) return;
+
     const pt = screenToCanvas(clientX, clientY);
     if (!pt) return;
 
-    const before = captureLayerState(activeLayer);
+    const before = captureLayerState(active);
     if (!before) return;
 
     const reference = buildFillReference(
-      layers,
-      doc.width,
-      doc.height,
-      doc.backgroundColor,
-      prefs.colorDropReference,
-      activeLayerId,
+      currentLayers,
+      currentDoc.width,
+      currentDoc.height,
+      currentDoc.backgroundColor,
+      prefsRef.current.colorDropReference,
+      layerId,
     );
 
-    const result = floodFillAt(activeLayer, pt.x, pt.y, color, reference, threshold);
+    const result = floodFillAt(active, pt.x, pt.y, colorRef.current, reference, threshold);
     if (result.filled) {
-      pushUndo({ layerId: activeLayer.id, before: cloneImageData(before) });
-      setLayers([...layers]);
+      pushUndo({ layerId: active.id, before: cloneImageData(before) });
+      setLayers([...currentLayers]);
     }
-  }
-
-  function cancelColorDropHold() {
-    if (colorDropHoldTimer.current !== null) {
-      window.clearTimeout(colorDropHoldTimer.current);
-      colorDropHoldTimer.current = null;
-    }
-  }
-
-  function startColorDrop(e: React.PointerEvent) {
-    cancelColorDropHold();
-    colorDropPointerId.current = e.pointerId;
-    setColorDropActive(true);
-    setFillThresholdLive(prefs.colorDropThreshold);
-    setColorDropPos({ x: e.clientX, y: e.clientY });
-    colorBtnRef.current?.setPointerCapture(e.pointerId);
   }
 
   function handleColorPointerDown(e: React.PointerEvent) {
     e.stopPropagation();
     e.preventDefault();
-    colorDropStart.current = { x: e.clientX, y: e.clientY };
-    cancelColorDropHold();
-    colorDropHoldTimer.current = window.setTimeout(() => {
-      colorDropHoldTimer.current = null;
-      startColorDrop(e);
-    }, 380);
-  }
 
-  function handleColorPointerMove(e: React.PointerEvent) {
-    if (colorDropStart.current && !colorDropActive && colorDropHoldTimer.current !== null) {
-      const moved = Math.hypot(
-        e.clientX - colorDropStart.current.x,
-        e.clientY - colorDropStart.current.y,
-      );
-      if (moved > 10) cancelColorDropHold();
-    }
+    const pointerId = e.pointerId;
+    const startX = e.clientX;
+    const startY = e.clientY;
+    colorDropStart.current = { x: startX, y: startY };
 
-    if (!colorDropActive) return;
-    setColorDropPos({ x: e.clientX, y: e.clientY });
-    if (colorDropStart.current) {
-      const dist = Math.hypot(
-        e.clientX - colorDropStart.current.x,
-        e.clientY - colorDropStart.current.y,
-      );
-      setFillThresholdLive(thresholdFromDragDistance(dist, prefs.colorDropThreshold));
-    }
-  }
+    let dropStarted = false;
 
-  function handleColorPointerUp(e: React.PointerEvent) {
-    cancelColorDropHold();
+    const beginDrop = (x: number, y: number) => {
+      if (dropStarted) return;
+      dropStarted = true;
+      colorDropActiveRef.current = true;
+      fillThresholdLiveRef.current = prefsRef.current.colorDropThreshold;
+      setColorDropActive(true);
+      setFillThresholdLive(prefsRef.current.colorDropThreshold);
+      setColorDropPos({ x, y });
+    };
 
-    if (colorDropActive) {
-      performColorDrop(e.clientX, e.clientY, fillThresholdLive);
-      setColorDropActive(false);
-      setColorDropPos(null);
-      colorDropStart.current = null;
-      colorDropPointerId.current = null;
-      return;
-    }
+    let holdTimer: number | null = window.setTimeout(() => {
+      holdTimer = null;
+      beginDrop(startX, startY);
+    }, 280);
 
-    if (colorDropStart.current) {
-      const moved = Math.hypot(
-        e.clientX - colorDropStart.current.x,
-        e.clientY - colorDropStart.current.y,
-      );
-      if (moved < 10) {
-        setPanel(panel === "color" ? null : "color");
+    const cleanup = () => {
+      if (holdTimer !== null) {
+        window.clearTimeout(holdTimer);
+        holdTimer = null;
       }
-    }
-    colorDropStart.current = null;
-  }
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+    };
 
-  function handleColorPointerCancel() {
-    cancelColorDropHold();
-    setColorDropActive(false);
-    setColorDropPos(null);
-    colorDropStart.current = null;
-    colorDropPointerId.current = null;
+    const onMove = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointerId) return;
+      const dist = Math.hypot(ev.clientX - startX, ev.clientY - startY);
+
+      if (!dropStarted && dist > 6) {
+        if (holdTimer !== null) {
+          window.clearTimeout(holdTimer);
+          holdTimer = null;
+        }
+        beginDrop(ev.clientX, ev.clientY);
+      }
+
+      if (!colorDropActiveRef.current) return;
+
+      setColorDropPos({ x: ev.clientX, y: ev.clientY });
+      const th = thresholdFromDragDistance(dist, prefsRef.current.colorDropThreshold);
+      fillThresholdLiveRef.current = th;
+      setFillThresholdLive(th);
+    };
+
+    const onUp = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointerId) return;
+      cleanup();
+
+      if (colorDropActiveRef.current) {
+        performColorDrop(ev.clientX, ev.clientY, fillThresholdLiveRef.current);
+        colorDropActiveRef.current = false;
+        setColorDropActive(false);
+        setColorDropPos(null);
+        colorDropStart.current = null;
+        return;
+      }
+
+      if (Math.hypot(ev.clientX - startX, ev.clientY - startY) < 8) {
+        setPanel((p) => (p === "color" ? null : "color"));
+      }
+      colorDropStart.current = null;
+    };
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
   }
 
   useEffect(() => {
@@ -402,8 +433,8 @@ export default function Studio({ artworkId, onBack }: Props) {
     const view = viewCanvasRef.current;
     if (!view) return null;
     const rect = view.getBoundingClientRect();
-    const x = (clientX - rect.left - pan.x) / zoom;
-    const y = (clientY - rect.top - pan.y) / zoom;
+    const x = (clientX - rect.left - panRef.current.x) / zoomRef.current;
+    const y = (clientY - rect.top - panRef.current.y) / zoomRef.current;
     return { x, y, pressure: 0.5 };
   }
 
@@ -460,7 +491,7 @@ export default function Studio({ artworkId, onBack }: Props) {
 
   function handlePointerDown(e: React.PointerEvent) {
     if (!doc || !activeLayer || activeLayer.locked) return;
-    if (colorDropActive) return;
+    if (colorDropActiveRef.current) return;
 
     if (e.button === 1 || (e.button === 0 && e.altKey)) {
       panStart.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
@@ -778,9 +809,6 @@ export default function Studio({ artworkId, onBack }: Props) {
               type="button"
               className={`procreate-color-btn${colorDropActive ? " dropping" : ""}`}
               onPointerDown={handleColorPointerDown}
-              onPointerMove={handleColorPointerMove}
-              onPointerUp={handleColorPointerUp}
-              onPointerCancel={handleColorPointerCancel}
               {...tipProps("Color — tap to pick, press & drag onto canvas to fill")}
             >
               <span style={{ background: color }} />
