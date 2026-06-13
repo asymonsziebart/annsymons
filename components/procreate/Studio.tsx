@@ -191,7 +191,15 @@ export default function Studio({ artworkId, onBack }: Props) {
   const colorDropActiveRef = useRef(false);
   const fillThresholdLiveRef = useRef(0.18);
   const activePointerIds = useRef(new Set<number>());
-  const multiTouchTap = useRef<{ count: number; time: number; xs: number[]; ys: number[] } | null>(null);
+  const touchCountRef = useRef(0);
+  const pinchDistRef = useRef<number | null>(null);
+  const multiTouchTap = useRef<{
+    count: number;
+    time: number;
+    xs: number[];
+    ys: number[];
+    pinched: boolean;
+  } | null>(null);
   const smudgeCompositeRef = useRef<HTMLCanvasElement | null>(null);
   const docRef = useRef(doc);
   const layersRef = useRef(layers);
@@ -902,6 +910,8 @@ export default function Studio({ artworkId, onBack }: Props) {
   }
 
   function handlePointerDown(e: React.PointerEvent) {
+    if (e.pointerType === "touch" && touchCountRef.current >= 2) return;
+
     activePointerIds.current.add(e.pointerId);
     if (activePointerIds.current.size > 1) {
       if (
@@ -1025,6 +1035,8 @@ export default function Studio({ artworkId, onBack }: Props) {
   }
 
   function handlePointerMove(e: React.PointerEvent) {
+    if (e.pointerType === "touch" && touchCountRef.current >= 2) return;
+
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       cursorRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
@@ -1159,6 +1171,7 @@ export default function Studio({ artworkId, onBack }: Props) {
   }
 
   function handleTouchStart(e: React.TouchEvent) {
+    touchCountRef.current = e.touches.length;
     const count = e.touches.length;
     if (count >= 2) {
       cancelActiveStroke();
@@ -1167,13 +1180,15 @@ export default function Studio({ artworkId, onBack }: Props) {
         time: Date.now(),
         xs: Array.from(e.touches).map((t) => t.clientX),
         ys: Array.from(e.touches).map((t) => t.clientY),
+        pinched: false,
       };
-      (handleTouchPinch as unknown as { last?: number }).last = undefined;
+      pinchDistRef.current = null;
       e.preventDefault();
     }
   }
 
   function handleTouchEnd(e: React.TouchEvent) {
+    touchCountRef.current = e.touches.length;
     const gesture = multiTouchTap.current;
     if (!gesture || e.touches.length > 0) return;
 
@@ -1186,7 +1201,7 @@ export default function Studio({ artworkId, onBack }: Props) {
       maxMove = Math.max(maxMove, Math.hypot(t.clientX - startX, t.clientY - startY));
     }
 
-    if (elapsed < 400 && maxMove < 32) {
+    if (!gesture.pinched && elapsed < 400 && maxMove < 32) {
       if (gesture.count === 2) undo();
       else if (gesture.count === 3) redo();
       else if (gesture.count >= 4) {
@@ -1196,21 +1211,65 @@ export default function Studio({ artworkId, onBack }: Props) {
       }
     }
     multiTouchTap.current = null;
+    pinchDistRef.current = null;
     e.preventDefault();
   }
 
   function handleTouchPinch(e: React.TouchEvent) {
-    if (multiTouchTap.current) return;
-    if (e.touches.length !== 2) return;
+    touchCountRef.current = e.touches.length;
+    if (e.touches.length !== 2) {
+      pinchDistRef.current = null;
+      return;
+    }
+
+    e.preventDefault();
+
     const dx = e.touches[0].clientX - e.touches[1].clientX;
     const dy = e.touches[0].clientY - e.touches[1].clientY;
     const dist = Math.hypot(dx, dy);
-    const pinchRef = (handleTouchPinch as unknown as { last?: number }).last ?? dist;
-    const scale = dist / pinchRef;
-    (handleTouchPinch as unknown as { last: number }).last = dist;
-    if (Math.abs(scale - 1) > 0.01) {
-      setZoom((z) => Math.max(0.1, Math.min(8, z * scale)));
+
+    if (!multiTouchTap.current) {
+      multiTouchTap.current = {
+        count: 2,
+        time: Date.now(),
+        xs: Array.from(e.touches).map((t) => t.clientX),
+        ys: Array.from(e.touches).map((t) => t.clientY),
+        pinched: false,
+      };
     }
+
+    const last = pinchDistRef.current ?? dist;
+    pinchDistRef.current = dist;
+    const scale = dist / last;
+
+    if (Math.abs(dist - last) > 6) {
+      multiTouchTap.current.pinched = true;
+    }
+
+    if (Math.abs(scale - 1) <= 0.008) return;
+
+    multiTouchTap.current.pinched = true;
+
+    const wrap = containerRef.current;
+    if (!wrap) return;
+
+    const rect = wrap.getBoundingClientRect();
+    const fx = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+    const fy = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+
+    const panNow = panRef.current;
+    const zoomNow = zoomRef.current;
+    const newZoom = Math.max(0.1, Math.min(8, zoomNow * scale));
+    const canvasX = (fx - panNow.x) / zoomNow;
+    const canvasY = (fy - panNow.y) / zoomNow;
+    const newPanX = fx - canvasX * newZoom;
+    const newPanY = fy - canvasY * newZoom;
+
+    panRef.current = { x: newPanX, y: newPanY };
+    zoomRef.current = newZoom;
+    setPan({ x: newPanX, y: newPanY });
+    setZoom(newZoom);
+    schedulePaintView();
   }
 
   function selectTool(next: Tool) {
@@ -1678,7 +1737,13 @@ export default function Studio({ artworkId, onBack }: Props) {
         onWheel={handleWheel}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
+        onTouchCancel={(e) => {
+          touchCountRef.current = e.touches.length;
+          if (e.touches.length === 0) {
+            multiTouchTap.current = null;
+            pinchDistRef.current = null;
+          }
+        }}
         onTouchMove={handleTouchPinch}
       >
         <canvas ref={viewCanvasRef} className="procreate-view-canvas" />
