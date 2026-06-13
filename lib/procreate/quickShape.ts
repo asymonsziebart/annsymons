@@ -69,6 +69,17 @@ export function detectQuickShape(points: Point[]): QuickShapeResult {
     return tieBreak(best, runnerUp).shape;
   }
 
+  // Prefer ellipse over quad when roundness is similar but corners are weak.
+  if (
+    closed &&
+    (best.shape.kind === "square" || best.shape.kind === "rect") &&
+    runnerUp &&
+    (runnerUp.shape.kind === "circle" || runnerUp.shape.kind === "oval") &&
+    runnerUp.error <= best.error * 1.12
+  ) {
+    return runnerUp.shape;
+  }
+
   return best.shape;
 }
 
@@ -178,17 +189,26 @@ function scoreQuadFamily(points: Point[], bounds: Bounds, norm: number): ScoredS
   const { minX, minY, w, h, cx, cy } = bounds;
   if (w < 12 || h < 12) return [];
 
-  const rectErr = meanError(points, (p) => distanceToRect(p, minX, minY, w, h), norm);
+  const corners = findCornerPoints(points, 4);
+  const ellipseErr = meanError(
+    points,
+    (p) => distanceToEllipse(p, cx, cy, w / 2, h / 2),
+    norm,
+  );
+  const rectErr = meanError(points, (p) => distanceToRectPerimeter(p, minX, minY, w, h), norm);
+
+  // Round strokes sit near an ellipse, not a rectangle — need clear corners to qualify.
+  if (corners.length < 3 && rectErr >= ellipseErr * 0.85) return [];
 
   const size = Math.max(w, h);
   const sqX = cx - size / 2;
   const sqY = cy - size / 2;
-  const squareErr = meanError(points, (p) => distanceToRect(p, sqX, sqY, size, size), norm);
+  const squareErr = meanError(points, (p) => distanceToRectPerimeter(p, sqX, sqY, size, size), norm);
 
   const aspect = w / (h || 1);
   const out: ScoredShape[] = [];
 
-  if (aspect > 0.72 && aspect < 1.39) {
+  if (aspect > 0.88 && aspect < 1.14 && squareErr <= rectErr * 1.08) {
     out.push({ shape: { kind: "square", x: sqX, y: sqY, size }, error: squareErr });
   }
   out.push({ shape: { kind: "rect", x: minX, y: minY, w, h }, error: rectErr });
@@ -211,7 +231,7 @@ function scoreTriangle(points: Point[], bounds: Bounds, norm: number): ScoredSha
   if (error > MAX_FIT_ERROR * 1.15) return null;
 
   const quadBest = Math.min(
-    meanError(points, (p) => distanceToRect(p, bounds.minX, bounds.minY, bounds.w, bounds.h), norm),
+    meanError(points, (p) => distanceToRectPerimeter(p, bounds.minX, bounds.minY, bounds.w, bounds.h), norm),
     meanError(
       points,
       (p) => distanceToEllipse(p, bounds.cx, bounds.cy, bounds.w / 2, bounds.h / 2),
@@ -323,9 +343,18 @@ function distanceToEllipse(p: Point, cx: number, cy: number, rx: number, ry: num
   return Math.hypot(p.x - ex, p.y - ey);
 }
 
-function distanceToRect(p: Point, x: number, y: number, w: number, h: number): number {
+function distanceToRectPerimeter(p: Point, x: number, y: number, w: number, h: number): number {
   const x2 = x + w;
   const y2 = y + h;
+  const distLeft = Math.abs(p.x - x);
+  const distRight = Math.abs(p.x - x2);
+  const distTop = Math.abs(p.y - y);
+  const distBottom = Math.abs(p.y - y2);
+
+  if (p.x >= x && p.x <= x2 && p.y >= y && p.y <= y2) {
+    return Math.min(distLeft, distRight, distTop, distBottom);
+  }
+
   const dx = p.x < x ? x - p.x : p.x > x2 ? p.x - x2 : 0;
   const dy = p.y < y ? y - p.y : p.y > y2 ? p.y - y2 : 0;
   return Math.hypot(dx, dy);
