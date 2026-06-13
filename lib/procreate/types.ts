@@ -56,6 +56,21 @@ export type BrushCategory =
   | "elements"
   | "imported";
 
+export type BrushTexture = "smooth" | "grain" | "speckle" | "canvas" | "chalk" | "halftone";
+
+export type BrushStampShape =
+  | "circle"
+  | "flat"
+  | "square"
+  | "hair"
+  | "pixel"
+  | "crosshatch"
+  | "spray"
+  | "star"
+  | "ribbon";
+
+export type BrushStampBlend = "normal" | "screen" | "multiply" | "overlay";
+
 export type BrushDef = {
   id: string;
   name: string;
@@ -69,8 +84,22 @@ export type BrushDef = {
   scatter: number;
   streamline: number;
   wetMix: number;
-  texture: "smooth" | "grain" | "speckle" | "canvas";
+  texture: BrushTexture;
   taper: number;
+  /** Stamp footprint — default circle uses texture rendering */
+  shape?: BrushStampShape;
+  /** Width-to-height ratio for flat / ribbon brushes */
+  aspectRatio?: number;
+  /** Rotate flat shapes along stroke direction */
+  rotationFollowStroke?: boolean;
+  /** Random rotation wobble per stamp (radians) */
+  angleJitter?: number;
+  /** Per-stamp compositing (neon, bokeh, etc.) */
+  stampBlend?: BrushStampBlend;
+  /** Soft outer glow pass (0–1) */
+  glow?: number;
+  /** Ink bleed / color pull duplicate stamp (0–1) */
+  bleed?: number;
   tipImage?: string;
   setName?: string;
   imported?: boolean;

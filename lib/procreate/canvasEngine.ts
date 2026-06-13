@@ -1,5 +1,5 @@
 import type { BlendMode, BrushDef, Layer, Point, SymmetryMode, Tool } from "./types";
-import { hexToRgb } from "./colorUtils";
+import { renderBrushStamp } from "./brushStamps";
 import { getCachedTipImage } from "./brushLibrary";
 import { mirrorPoints } from "./symmetry";
 
@@ -98,78 +98,6 @@ function smoothPoint(prev: Point | null, curr: Point, streamline: number): Point
   };
 }
 
-function stampBrush(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  size: number,
-  color: string,
-  alpha: number,
-  hardness: number,
-  texture: BrushDef["texture"],
-) {
-  const r = size / 2;
-  ctx.save();
-  ctx.globalAlpha = alpha;
-
-  if (texture === "grain" || texture === "speckle") {
-    const grain = ctx.createRadialGradient(x, y, 0, x, y, r);
-    const { r: cr, g: cg, b: cb } = hexToRgb(color);
-    const edge = hardness * 0.6;
-    grain.addColorStop(0, `rgba(${cr},${cg},${cb},1)`);
-    grain.addColorStop(edge, `rgba(${cr},${cg},${cb},${0.85 - hardness * 0.3})`);
-    grain.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
-    ctx.fillStyle = grain;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fill();
-
-    if (texture === "speckle") {
-      ctx.fillStyle = color;
-      const dots = Math.max(3, Math.floor(size * 0.4));
-      for (let i = 0; i < dots; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const rad = Math.random() * r;
-        const dotR = Math.random() * (size * 0.08) + 0.5;
-        ctx.globalAlpha = alpha * (0.3 + Math.random() * 0.7);
-        ctx.beginPath();
-        ctx.arc(x + Math.cos(angle) * rad, y + Math.sin(angle) * rad, dotR, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-  } else if (texture === "canvas") {
-    const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
-    const { r: cr, g: cg, b: cb } = hexToRgb(color);
-    grad.addColorStop(0, `rgba(${cr},${cg},${cb},${0.9})`);
-    grad.addColorStop(hardness * 0.5, `rgba(${cr},${cg},${cb},${0.6})`);
-    grad.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = alpha * 0.15;
-    ctx.strokeStyle = `rgba(${cr},${cg},${cb},0.3)`;
-    ctx.lineWidth = 0.5;
-    for (let i = 0; i < 4; i++) {
-      ctx.beginPath();
-      ctx.moveTo(x - r, y + (Math.random() - 0.5) * r);
-      ctx.lineTo(x + r, y + (Math.random() - 0.5) * r);
-      ctx.stroke();
-    }
-  } else {
-    const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
-    const { r: cr, g: cg, b: cb } = hexToRgb(color);
-    grad.addColorStop(0, `rgba(${cr},${cg},${cb},1)`);
-    grad.addColorStop(Math.max(0.01, hardness), `rgba(${cr},${cg},${cb},${hardness})`);
-    grad.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.restore();
-}
-
 export class StrokeEngine {
   private lastPoint: Point | null = null;
   private lastStamp = 0;
@@ -258,8 +186,9 @@ export class StrokeEngine {
     _alphaLock?: boolean,
   ) {
     const d = dist(from, to);
+    const segmentAngle = Math.atan2(to.y - from.y, to.x - from.x);
     if (d < 0.01) {
-      this.stampAt(ctx, to, brush, color, size, alpha, erase, 1);
+      this.stampAt(ctx, to, brush, color, size, alpha, erase, 1, segmentAngle);
       this.lastPoint = to;
       return;
     }
@@ -275,7 +204,7 @@ export class StrokeEngine {
         y: lerp(from.y, to.y, t),
         pressure: lerp(from.pressure, to.pressure, t),
       };
-      this.stampAt(ctx, p, brush, color, size, alpha, erase, t);
+      this.stampAt(ctx, p, brush, color, size, alpha, erase, t, segmentAngle);
     }
 
     // Streamline only affects the next segment's start — never shorten what we draw now.
@@ -292,6 +221,7 @@ export class StrokeEngine {
     alpha: number,
     erase: boolean,
     t: number,
+    segmentAngle: number,
   ) {
     const taper =
       brush.taper > 0 ? 1 - brush.taper * 0.5 * (Math.abs(t - 0.5) * 2) : 1;
@@ -315,14 +245,23 @@ export class StrokeEngine {
       ctx.drawImage(tip, sx - r, sy - r, stampSize, stampSize);
       ctx.restore();
     } else {
-      stampBrush(ctx, sx, sy, stampSize, color, stampAlpha, brush.hardness, brush.texture);
+      renderBrushStamp(ctx, sx, sy, stampSize, color, stampAlpha, brush, segmentAngle);
     }
 
     if (brush.wetMix > 0 && !erase) {
       ctx.save();
       ctx.globalAlpha = brush.wetMix * 0.15;
       ctx.globalCompositeOperation = "source-over";
-      stampBrush(ctx, sx, sy, stampSize * 1.2, color, 0.3, 0.05, "smooth");
+      renderBrushStamp(
+        ctx,
+        sx,
+        sy,
+        stampSize * 1.2,
+        color,
+        0.3,
+        { ...brush, hardness: 0.05, texture: "smooth", shape: "circle", glow: 0, bleed: 0 },
+        segmentAngle,
+      );
       ctx.restore();
     }
   }
@@ -363,7 +302,16 @@ export class StrokeEngine {
       ctx.putImageData(sample, sx, sy);
       ctx.restore();
 
-      stampBrush(ctx, x, y, size * 0.8, "#888", alpha * 0.2, 0.1, "smooth");
+      renderBrushStamp(
+        ctx,
+        x,
+        y,
+        size * 0.8,
+        "#888",
+        alpha * 0.2,
+        { ...brush, hardness: 0.1, texture: "smooth", shape: "circle" },
+        0,
+      );
     }
     this.lastPoint = to;
   }
