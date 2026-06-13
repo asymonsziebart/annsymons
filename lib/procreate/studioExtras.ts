@@ -27,6 +27,7 @@ import {
 import {
   detectQuickShape,
   drawQuickShape,
+  makePerfectQuickShape,
   QUICK_SHAPE_HOLD_MS,
   QUICK_SHAPE_STILL_PX,
   sampleQuickShapePoints,
@@ -132,6 +133,7 @@ export {
   previewTransform,
   detectQuickShape,
   drawQuickShape,
+  makePerfectQuickShape,
   QUICK_SHAPE_HOLD_MS,
   QUICK_SHAPE_STILL_PX,
   sampleQuickShapePoints,

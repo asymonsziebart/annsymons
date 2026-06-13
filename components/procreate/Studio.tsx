@@ -60,6 +60,7 @@ import {
   flipCanvasLayers,
   hitTransformHandle,
   invertMask,
+  makePerfectQuickShape,
   mergeLayerDown,
   previewTransform,
   QUICK_SHAPE_HOLD_MS,
@@ -560,12 +561,13 @@ export default function Studio({ artworkId, onBack }: Props) {
     }
   }
 
-  function applyQuickShapePreview() {
+  function applyQuickShapePreview(perfect = false) {
     if (!prefsRef.current.quickShape || tool === "smudge") return;
     if (strokePoints.current.length < 3) return;
 
-    const shape = detectQuickShape(strokePoints.current);
+    let shape = detectQuickShape(strokePoints.current);
     if (!shape) return;
+    if (perfect) shape = makePerfectQuickShape(shape);
 
     const drawLayer = getActiveDrawingLayer();
     if (!drawLayer || !strokeStart.current) return;
@@ -579,6 +581,25 @@ export default function Studio({ artworkId, onBack }: Props) {
     quickShapeAppliedRef.current = true;
     quickShapeResultRef.current = shape;
     quickShapeHintRef.current = true;
+    schedulePaintView();
+  }
+
+  function applyPerfectQuickShape() {
+    if (!quickShapeResultRef.current) {
+      applyQuickShapePreview(true);
+      return;
+    }
+    const perfect = makePerfectQuickShape(quickShapeResultRef.current);
+    quickShapeResultRef.current = perfect;
+
+    const drawLayer = getActiveDrawingLayer();
+    if (!drawLayer || !strokeStart.current) return;
+
+    restoreLayerState(drawLayer, strokeStart.current.before);
+    const ctx = drawLayer.canvas.getContext("2d");
+    if (!ctx) return;
+
+    paintQuickShapeOnLayer(ctx, drawLayer, perfect);
     schedulePaintView();
   }
 
@@ -883,6 +904,15 @@ export default function Studio({ artworkId, onBack }: Props) {
   function handlePointerDown(e: React.PointerEvent) {
     activePointerIds.current.add(e.pointerId);
     if (activePointerIds.current.size > 1) {
+      if (
+        isDrawingRef.current &&
+        prefsRef.current.quickShape &&
+        tool !== "smudge" &&
+        studioMode === "draw"
+      ) {
+        applyPerfectQuickShape();
+        return;
+      }
       cancelActiveStroke();
       return;
     }
@@ -2003,7 +2033,7 @@ export default function Studio({ artworkId, onBack }: Props) {
               />
               Show reference overlay
             </label>
-            <label className="procreate-toggle" {...tipProps("Draw and hold to snap: line, circle, oval, square, rectangle, triangle, star")}>
+            <label className="procreate-toggle" {...tipProps("Draw and hold to snap. Second finger while holding: perfect square, circle, or equilateral triangle")}>
               <input
                 type="checkbox"
                 checked={prefs.quickShape}

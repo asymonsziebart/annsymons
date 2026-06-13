@@ -7,21 +7,88 @@ export type QuickShapeResult =
   | { kind: "square"; x: number; y: number; size: number }
   | { kind: "rect"; x: number; y: number; w: number; h: number }
   | { kind: "triangle"; p1: Point; p2: Point; p3: Point }
-  | { kind: "star"; cx: number; cy: number; outerR: number; innerR: number; rotation: number }
   | null;
 
 export const QUICK_SHAPE_HOLD_MS = 650;
 export const QUICK_SHAPE_STILL_PX = 6;
 
+/** Max mean error (as fraction of stroke size) to accept a snap. */
+const MAX_FIT_ERROR = 0.13;
+
+type Bounds = {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+  w: number;
+  h: number;
+  cx: number;
+  cy: number;
+  diagonal: number;
+};
+
+type ScoredShape = { shape: NonNullable<QuickShapeResult>; error: number };
+
+/**
+ * Procreate Pocket QuickShape picks the closest geometric match:
+ * line, ellipse (circle/oval), triangle, or quadrilateral (square/rectangle).
+ */
 export function detectQuickShape(points: Point[]): QuickShapeResult {
   if (points.length < 3) return null;
 
-  const first = points[0];
-  const last = points[points.length - 1];
-  const dx = last.x - first.x;
-  const dy = last.y - first.y;
-  const span = Math.hypot(dx, dy);
+  const bounds = computeBounds(points);
+  if (bounds.w < 10 && bounds.h < 10) return null;
 
+  const norm = Math.max(bounds.diagonal, 1);
+  const closed = isClosedStroke(points, bounds);
+  const candidates: ScoredShape[] = [];
+
+  const line = scoreLine(points, norm, closed);
+  if (line) candidates.push(line);
+
+  if (closed) {
+    candidates.push(...scoreEllipseFamily(points, bounds, norm));
+    candidates.push(...scoreQuadFamily(points, bounds, norm));
+    const tri = scoreTriangle(points, bounds, norm);
+    if (tri) candidates.push(tri);
+  }
+
+  if (candidates.length === 0) return null;
+
+  candidates.sort((a, b) => a.error - b.error);
+  const best = candidates[0];
+  const runnerUp = candidates[1];
+
+  if (best.error > MAX_FIT_ERROR) return null;
+
+  if (closed && best.shape.kind === "line" && runnerUp) {
+    if (runnerUp.error <= best.error * 1.25) return runnerUp.shape;
+  }
+
+  if (runnerUp && runnerUp.error - best.error < 0.018) {
+    return tieBreak(best, runnerUp).shape;
+  }
+
+  return best.shape;
+}
+
+/** Second-finger gesture: rectangle→square, oval→circle, triangle→equilateral. */
+export function makePerfectQuickShape(shape: NonNullable<QuickShapeResult>): NonNullable<QuickShapeResult> {
+  if (shape.kind === "oval") {
+    const r = (shape.rx + shape.ry) / 2;
+    return { kind: "circle", cx: shape.cx, cy: shape.cy, r };
+  }
+  if (shape.kind === "rect") {
+    const size = Math.max(shape.w, shape.h);
+    return { kind: "square", x: shape.x + shape.w / 2 - size / 2, y: shape.y + shape.h / 2 - size / 2, size };
+  }
+  if (shape.kind === "triangle") {
+    return equilateralTriangle(shape.p1, shape.p2, shape.p3);
+  }
+  return shape;
+}
+
+function computeBounds(points: Point[]): Bounds {
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
@@ -34,202 +101,208 @@ export function detectQuickShape(points: Point[]): QuickShapeResult {
   }
   const w = maxX - minX;
   const h = maxY - minY;
-  if (w < 12 && h < 12) return null;
-
-  const cx = (minX + maxX) / 2;
-  const cy = (minY + maxY) / 2;
-  const aspect = w / (h || 1);
-  const circularity = Math.abs(w - h) / Math.max(w, h);
-  const closedLoop = span < Math.max(w, h) * 0.38;
-
-  if (!closedLoop && span >= 10) {
-    const lineErr = maxLineDeviation(points, first, last);
-    if (lineErr < Math.max(6, span * 0.1)) {
-      return { kind: "line", from: first, to: last };
-    }
-  }
-
-  if (!closedLoop && w > 14 && h > 14) {
-    if (aspect > 0.82 && aspect < 1.22) {
-      const size = Math.max(w, h);
-      return { kind: "square", x: minX, y: minY, size };
-    }
-    return { kind: "rect", x: minX, y: minY, w, h };
-  }
-
-  if (!closedLoop) return null;
-
-  const radiusVar = radialVariance(points, cx, cy);
-  const peaks = countRadialPeaks(points, cx, cy);
-
-  if ((peaks >= 8 || peaks === 5 || peaks === 6) && radiusVar > 0.18) {
-    const outerR = (Math.max(w, h) / 2) * 0.98;
-    return { kind: "star", cx, cy, outerR, innerR: outerR * 0.42, rotation: -Math.PI / 2 };
-  }
-
-  if (peaks === 3 || (radiusVar > 0.12 && detectTriangleShape(points, minX, minY, maxX, maxY))) {
-    const tri = triangleFromBounds(minX, minY, maxX, maxY);
-    if (tri) return tri;
-  }
-
-  if (peaks === 4 || isRectangularLoop(points, minX, minY, maxX, maxY)) {
-    if (aspect > 0.86 && aspect < 1.16) {
-      const size = Math.max(w, h);
-      return { kind: "square", x: minX, y: minY, size };
-    }
-    return { kind: "rect", x: minX, y: minY, w, h };
-  }
-
-  if (w > 16 && h > 16 && radiusVar < 0.2) {
-    if (circularity < 0.2) {
-      const r = (Math.max(w, h) / 2) * 0.98;
-      return { kind: "circle", cx, cy, r };
-    }
-    if (circularity < 0.65) {
-      return { kind: "oval", cx, cy, rx: w / 2, ry: h / 2 };
-    }
-  }
-
-  if (w > 18 && h > 18 && circularity < 0.55 && radiusVar < 0.28) {
-    return { kind: "oval", cx, cy, rx: w / 2, ry: h / 2 };
-  }
-
-  return null;
-}
-
-function maxLineDeviation(points: Point[], a: Point, b: Point): number {
-  let max = 0;
-  const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
-  for (const p of points) {
-    const num = Math.abs((b.y - a.y) * p.x - (b.x - a.x) * p.y + b.x * a.y - b.y * a.x);
-    max = Math.max(max, num / len);
-  }
-  return max;
-}
-
-function radialVariance(points: Point[], cx: number, cy: number): number {
-  let sum = 0;
-  const dists: number[] = [];
-  for (const p of points) {
-    const d = Math.hypot(p.x - cx, p.y - cy);
-    dists.push(d);
-    sum += d;
-  }
-  const mean = sum / dists.length || 1;
-  const variance = dists.reduce((s, d) => s + (d - mean) ** 2, 0) / dists.length;
-  return Math.sqrt(variance) / mean;
-}
-
-function countRadialPeaks(points: Point[], cx: number, cy: number): number {
-  const samples: { angle: number; dist: number }[] = [];
-  const step = Math.max(1, Math.floor(points.length / 48));
-  for (let i = 0; i < points.length; i += step) {
-    const p = points[i];
-    samples.push({
-      angle: Math.atan2(p.y - cy, p.x - cx),
-      dist: Math.hypot(p.x - cx, p.y - cy),
-    });
-  }
-  if (samples.length < 6) return 0;
-
-  samples.sort((a, b) => a.angle - b.angle);
-
-  const meanDist = samples.reduce((s, v) => s + v.dist, 0) / samples.length;
-  if (meanDist < 8) return 0;
-
-  let peaks = 0;
-  for (let i = 0; i < samples.length; i++) {
-    const prev = samples[(i - 1 + samples.length) % samples.length];
-    const curr = samples[i];
-    const next = samples[(i + 1) % samples.length];
-    if (curr.dist > prev.dist && curr.dist > next.dist && curr.dist > meanDist * 0.72) {
-      peaks++;
-    }
-  }
-
-  if (peaks === 9 || peaks === 10) return 5;
-  return peaks;
-}
-
-function detectTriangleShape(
-  points: Point[],
-  minX: number,
-  minY: number,
-  maxX: number,
-  maxY: number,
-): boolean {
-  const w = maxX - minX;
-  const h = maxY - minY;
-  if (w < 16 || h < 16) return false;
-
-  const corners = findExtremeCorners(points);
-  if (corners.length < 3) return false;
-
-  const tri = triangleFromBounds(minX, minY, maxX, maxY);
-  if (!tri) return false;
-
-  const verts = [tri.p1, tri.p2, tri.p3];
-  let totalErr = 0;
-  for (const p of points) {
-    totalErr += Math.min(
-      ...verts.map((v) => Math.hypot(p.x - v.x, p.y - v.y)),
-      distanceToTriangleEdge(p, tri),
-    );
-  }
-  const avgErr = totalErr / points.length;
-  return avgErr < Math.max(w, h) * 0.22;
-}
-
-function findExtremeCorners(points: Point[]): Point[] {
-  if (points.length === 0) return [];
-  let top = points[0];
-  let bottom = points[0];
-  let left = points[0];
-  let right = points[0];
-  for (const p of points) {
-    if (p.y < top.y) top = p;
-    if (p.y > bottom.y) bottom = p;
-    if (p.x < left.x) left = p;
-    if (p.x > right.x) right = p;
-  }
-  const uniq: Point[] = [];
-  for (const p of [top, right, bottom, left]) {
-    if (!uniq.some((u) => Math.hypot(u.x - p.x, u.y - p.y) < 6)) uniq.push(p);
-  }
-  return uniq;
-}
-
-function triangleFromBounds(
-  minX: number,
-  minY: number,
-  maxX: number,
-  maxY: number,
-): Extract<QuickShapeResult, { kind: "triangle" }> | null {
-  const w = maxX - minX;
-  const h = maxY - minY;
-  if (w < 12 || h < 12) return null;
-
   return {
-    kind: "triangle",
-    p1: { x: cxOf(minX, maxX), y: minY, pressure: 0.7 },
-    p2: { x: maxX, y: maxY, pressure: 0.7 },
-    p3: { x: minX, y: maxY, pressure: 0.7 },
+    minX,
+    minY,
+    maxX,
+    maxY,
+    w,
+    h,
+    cx: (minX + maxX) / 2,
+    cy: (minY + maxY) / 2,
+    diagonal: Math.hypot(w, h),
   };
 }
 
-function cxOf(minX: number, maxX: number) {
-  return (minX + maxX) / 2;
+function pathLength(points: Point[]): number {
+  let len = 0;
+  for (let i = 1; i < points.length; i++) {
+    len += Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+  }
+  return len;
 }
 
-function distanceToTriangleEdge(
-  p: Point,
-  tri: Extract<QuickShapeResult, { kind: "triangle" }>,
-): number {
-  return Math.min(
-    distanceToSegment(p, tri.p1, tri.p2),
-    distanceToSegment(p, tri.p2, tri.p3),
-    distanceToSegment(p, tri.p3, tri.p1),
+function isClosedStroke(points: Point[], bounds: Bounds): boolean {
+  const first = points[0];
+  const last = points[points.length - 1];
+  const closure = Math.hypot(last.x - first.x, last.y - first.y);
+  const perimeter = pathLength(points);
+  const size = Math.max(bounds.w, bounds.h);
+  return closure < Math.min(perimeter * 0.22, size * 0.42);
+}
+
+function meanError(points: Point[], dist: (p: Point) => number, norm: number): number {
+  let sum = 0;
+  for (const p of points) sum += dist(p);
+  return sum / points.length / norm;
+}
+
+function scoreLine(points: Point[], norm: number, closed: boolean): ScoredShape | null {
+  const first = points[0];
+  const last = points[points.length - 1];
+  const span = Math.hypot(last.x - first.x, last.y - first.y);
+  if (span < 10) return null;
+
+  const error = meanError(points, (p) => distanceToSegment(p, first, last), norm);
+  const closedPenalty = closed ? 0.06 : 0;
+  return {
+    shape: { kind: "line", from: { ...first }, to: { ...last } },
+    error: error + closedPenalty,
+  };
+}
+
+function scoreEllipseFamily(points: Point[], bounds: Bounds, norm: number): ScoredShape[] {
+  const { cx, cy, w, h } = bounds;
+  const rx = w / 2;
+  const ry = h / 2;
+  if (rx < 6 || ry < 6) return [];
+
+  let sumR = 0;
+  for (const p of points) sumR += Math.hypot(p.x - cx, p.y - cy);
+  const r = sumR / points.length;
+
+  const circleErr = meanError(points, (p) => Math.abs(Math.hypot(p.x - cx, p.y - cy) - r), norm);
+  const ovalErr = meanError(points, (p) => distanceToEllipse(p, cx, cy, rx, ry), norm);
+
+  const aspect = w / (h || 1);
+  const out: ScoredShape[] = [];
+
+  if (aspect > 0.72 && aspect < 1.39) {
+    out.push({ shape: { kind: "circle", cx, cy, r }, error: circleErr });
+  }
+  out.push({ shape: { kind: "oval", cx, cy, rx, ry }, error: ovalErr });
+  return out;
+}
+
+function scoreQuadFamily(points: Point[], bounds: Bounds, norm: number): ScoredShape[] {
+  const { minX, minY, w, h, cx, cy } = bounds;
+  if (w < 12 || h < 12) return [];
+
+  const rectErr = meanError(points, (p) => distanceToRect(p, minX, minY, w, h), norm);
+
+  const size = Math.max(w, h);
+  const sqX = cx - size / 2;
+  const sqY = cy - size / 2;
+  const squareErr = meanError(points, (p) => distanceToRect(p, sqX, sqY, size, size), norm);
+
+  const aspect = w / (h || 1);
+  const out: ScoredShape[] = [];
+
+  if (aspect > 0.72 && aspect < 1.39) {
+    out.push({ shape: { kind: "square", x: sqX, y: sqY, size }, error: squareErr });
+  }
+  out.push({ shape: { kind: "rect", x: minX, y: minY, w, h }, error: rectErr });
+  return out;
+}
+
+function scoreTriangle(points: Point[], bounds: Bounds, norm: number): ScoredShape | null {
+  const corners = findCornerPoints(points, 3);
+  if (corners.length < 3) return null;
+
+  const ordered = orderByAngle(corners.slice(0, 3), bounds.cx, bounds.cy);
+  const tri = {
+    kind: "triangle" as const,
+    p1: withPressure(ordered[0]),
+    p2: withPressure(ordered[1]),
+    p3: withPressure(ordered[2]),
+  };
+
+  const error = meanError(points, (p) => distanceToTriangle(p, tri), norm);
+  if (error > MAX_FIT_ERROR * 1.15) return null;
+
+  const quadBest = Math.min(
+    meanError(points, (p) => distanceToRect(p, bounds.minX, bounds.minY, bounds.w, bounds.h), norm),
+    meanError(
+      points,
+      (p) => distanceToEllipse(p, bounds.cx, bounds.cy, bounds.w / 2, bounds.h / 2),
+      norm,
+    ),
   );
+  if (quadBest < error * 0.82) return null;
+
+  return { shape: tri, error };
+}
+
+function tieBreak(a: ScoredShape, b: ScoredShape): ScoredShape {
+  const rank = (s: ScoredShape) => {
+    switch (s.shape.kind) {
+      case "line":
+        return 0;
+      case "circle":
+        return 1;
+      case "oval":
+        return 2;
+      case "square":
+        return 3;
+      case "rect":
+        return 4;
+      case "triangle":
+        return 5;
+      default:
+        return 6;
+    }
+  };
+  return rank(a) <= rank(b) ? a : b;
+}
+
+function findCornerPoints(points: Point[], count: number): Point[] {
+  const step = Math.max(1, Math.floor(points.length / 64));
+  const candidates: { p: Point; score: number }[] = [];
+
+  for (let i = step; i < points.length - step; i += step) {
+    const a = points[i - step];
+    const b = points[i];
+    const c = points[i + step];
+    const turn = Math.PI - angleAt(a, b, c);
+    if (turn > 0.45) candidates.push({ p: b, score: turn });
+  }
+
+  candidates.sort((x, y) => y.score - x.score);
+
+  const picked: Point[] = [];
+  for (const c of candidates) {
+    if (picked.every((p) => Math.hypot(p.x - c.p.x, p.y - c.p.y) > 14)) {
+      picked.push(c.p);
+    }
+    if (picked.length >= count) break;
+  }
+  return picked;
+}
+
+function orderByAngle(pts: Point[], cx: number, cy: number): Point[] {
+  return [...pts].sort((a, b) => Math.atan2(a.y - cy, a.x - cx) - Math.atan2(b.y - cy, b.x - cx));
+}
+
+function equilateralTriangle(p1: Point, p2: Point, p3: Point): Extract<QuickShapeResult, { kind: "triangle" }> {
+  const cx = (p1.x + p2.x + p3.x) / 3;
+  const cy = (p1.y + p2.y + p3.y) / 3;
+  const r =
+    (Math.hypot(p1.x - cx, p1.y - cy) +
+      Math.hypot(p2.x - cx, p2.y - cy) +
+      Math.hypot(p3.x - cx, p3.y - cy)) /
+    3;
+  const angles = [-Math.PI / 2, -Math.PI / 2 + (2 * Math.PI) / 3, -Math.PI / 2 + (4 * Math.PI) / 3];
+  return {
+    kind: "triangle",
+    p1: { x: cx + Math.cos(angles[0]) * r, y: cy + Math.sin(angles[0]) * r, pressure: 0.7 },
+    p2: { x: cx + Math.cos(angles[1]) * r, y: cy + Math.sin(angles[1]) * r, pressure: 0.7 },
+    p3: { x: cx + Math.cos(angles[2]) * r, y: cy + Math.sin(angles[2]) * r, pressure: 0.7 },
+  };
+}
+
+function withPressure(p: Point): Point {
+  return { x: p.x, y: p.y, pressure: p.pressure ?? 0.7 };
+}
+
+function angleAt(a: Point, b: Point, c: Point): number {
+  const v1x = a.x - b.x;
+  const v1y = a.y - b.y;
+  const v2x = c.x - b.x;
+  const v2y = c.y - b.y;
+  const d = Math.hypot(v1x, v1y) * Math.hypot(v2x, v2y);
+  if (d === 0) return Math.PI;
+  const cos = Math.max(-1, Math.min(1, (v1x * v2x + v1y * v2y) / d));
+  return Math.acos(cos);
 }
 
 function distanceToSegment(p: Point, a: Point, b: Point): number {
@@ -239,32 +312,34 @@ function distanceToSegment(p: Point, a: Point, b: Point): number {
   if (lenSq === 0) return Math.hypot(p.x - a.x, p.y - a.y);
   let t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / lenSq;
   t = Math.max(0, Math.min(1, t));
-  const px = a.x + t * dx;
-  const py = a.y + t * dy;
-  return Math.hypot(p.x - px, p.y - py);
+  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
 }
 
-function isRectangularLoop(
-  points: Point[],
-  minX: number,
-  minY: number,
-  maxX: number,
-  maxY: number,
-): boolean {
-  const w = maxX - minX;
-  const h = maxY - minY;
-  if (w < 14 || h < 14) return false;
+function distanceToEllipse(p: Point, cx: number, cy: number, rx: number, ry: number): number {
+  if (rx < 1 || ry < 1) return Infinity;
+  const angle = Math.atan2((p.y - cy) / ry, (p.x - cx) / rx);
+  const ex = cx + Math.cos(angle) * rx;
+  const ey = cy + Math.sin(angle) * ry;
+  return Math.hypot(p.x - ex, p.y - ey);
+}
 
-  const margin = Math.max(4, Math.min(w, h) * 0.12);
-  let edgeHits = 0;
-  for (const p of points) {
-    const nearTop = Math.abs(p.y - minY) < margin;
-    const nearBottom = Math.abs(p.y - maxY) < margin;
-    const nearLeft = Math.abs(p.x - minX) < margin;
-    const nearRight = Math.abs(p.x - maxX) < margin;
-    if (nearTop || nearBottom || nearLeft || nearRight) edgeHits++;
-  }
-  return edgeHits / points.length > 0.45;
+function distanceToRect(p: Point, x: number, y: number, w: number, h: number): number {
+  const x2 = x + w;
+  const y2 = y + h;
+  const dx = p.x < x ? x - p.x : p.x > x2 ? p.x - x2 : 0;
+  const dy = p.y < y ? y - p.y : p.y > y2 ? p.y - y2 : 0;
+  return Math.hypot(dx, dy);
+}
+
+function distanceToTriangle(
+  p: Point,
+  tri: Extract<QuickShapeResult, { kind: "triangle" }>,
+): number {
+  return Math.min(
+    distanceToSegment(p, tri.p1, tri.p2),
+    distanceToSegment(p, tri.p2, tri.p3),
+    distanceToSegment(p, tri.p3, tri.p1),
+  );
 }
 
 export function drawQuickShape(
@@ -310,32 +385,8 @@ export function drawQuickShape(
     ctx.lineTo(shape.p3.x, shape.p3.y);
     ctx.closePath();
     ctx.stroke();
-  } else if (shape.kind === "star") {
-    traceStar(ctx, shape.cx, shape.cy, shape.outerR, shape.innerR, shape.rotation);
-    ctx.stroke();
   }
   ctx.restore();
-}
-
-function traceStar(
-  ctx: CanvasRenderingContext2D,
-  cx: number,
-  cy: number,
-  outerR: number,
-  innerR: number,
-  rotation: number,
-  points = 5,
-) {
-  ctx.beginPath();
-  for (let i = 0; i < points * 2; i++) {
-    const r = i % 2 === 0 ? outerR : innerR;
-    const angle = rotation + (i * Math.PI) / points;
-    const x = cx + Math.cos(angle) * r;
-    const y = cy + Math.sin(angle) * r;
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
-  ctx.closePath();
 }
 
 /** Sample points along a shape path for brush-stamp rendering. */
@@ -382,21 +433,6 @@ export function sampleQuickShapePoints(shape: NonNullable<QuickShapeResult>, ste
 
   if (shape.kind === "triangle") {
     return samplePolyline([shape.p1, shape.p2, shape.p3, shape.p1], s);
-  }
-
-  if (shape.kind === "star") {
-    const verts: Point[] = [];
-    for (let i = 0; i <= 5 * 2; i++) {
-      const idx = i % (5 * 2);
-      const r = idx % 2 === 0 ? shape.outerR : shape.innerR;
-      const angle = shape.rotation + (idx * Math.PI) / 5;
-      verts.push({
-        x: shape.cx + Math.cos(angle) * r,
-        y: shape.cy + Math.sin(angle) * r,
-        pressure: 0.7,
-      });
-    }
-    return samplePolyline(verts, s);
   }
 
   return [];
