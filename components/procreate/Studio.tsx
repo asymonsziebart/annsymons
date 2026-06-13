@@ -469,7 +469,6 @@ export default function Studio({ artworkId, onBack }: Props) {
 
   function handleColorPointerDown(e: React.PointerEvent) {
     e.stopPropagation();
-    e.preventDefault();
 
     const pointerId = e.pointerId;
     const startX = e.clientX;
@@ -491,7 +490,7 @@ export default function Studio({ artworkId, onBack }: Props) {
     let holdTimer: number | null = window.setTimeout(() => {
       holdTimer = null;
       beginDrop(startX, startY);
-    }, 280);
+    }, 300);
 
     const cleanup = () => {
       if (holdTimer !== null) {
@@ -507,16 +506,18 @@ export default function Studio({ artworkId, onBack }: Props) {
       if (ev.pointerId !== pointerId) return;
       const dist = Math.hypot(ev.clientX - startX, ev.clientY - startY);
 
-      if (!dropStarted && dist > 6) {
+      if (!dropStarted && dist > 18) {
         if (holdTimer !== null) {
           window.clearTimeout(holdTimer);
           holdTimer = null;
         }
+        ev.preventDefault();
         beginDrop(ev.clientX, ev.clientY);
       }
 
       if (!colorDropActiveRef.current) return;
 
+      ev.preventDefault();
       setColorDropPos({ x: ev.clientX, y: ev.clientY });
       const th = thresholdFromDragDistance(dist, prefsRef.current.colorDropThreshold);
       fillThresholdLiveRef.current = th;
@@ -536,7 +537,7 @@ export default function Studio({ artworkId, onBack }: Props) {
         return;
       }
 
-      if (Math.hypot(ev.clientX - startX, ev.clientY - startY) < 8) {
+      if (Math.hypot(ev.clientX - startX, ev.clientY - startY) < 14) {
         setPanel((p) => (p === "color" ? null : "color"));
       }
       colorDropStart.current = null;
@@ -1421,8 +1422,10 @@ export default function Studio({ artworkId, onBack }: Props) {
           onTabChange={(colorTab) => setPrefs({ ...prefs, colorTab })}
           onHarmonyModeChange={(harmonyMode) => setPrefs({ ...prefs, harmonyMode })}
           onColorChange={(c) => {
-            if (c.toLowerCase() !== color.toLowerCase()) setPrevColor(color);
-            setColor(c);
+            setColor((current) => {
+              if (c.toLowerCase() !== current.toLowerCase()) setPrevColor(current);
+              return c;
+            });
           }}
           onSwapColors={() => {
             const cur = color;

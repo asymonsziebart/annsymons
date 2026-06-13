@@ -461,7 +461,12 @@
   background: transparent;
   cursor: pointer;
   padding: 4px;
-  touch-action: none;
+  touch-action: manipulation;
+}
+
+.procreate-color-panel button,
+.procreate-color-panel input[type="range"] {
+  touch-action: manipulation;
 }
 
 .procreate-color-btn span {

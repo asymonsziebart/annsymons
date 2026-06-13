@@ -24,6 +24,40 @@ import { generateId } from "@/lib/procreate/storage";
 import { IconClose, IconEye, IconEyeOff } from "./icons";
 import { tipProps } from "./tip";
 
+function ColorSwatch({
+  hex,
+  className = "procreate-color-swatch",
+  active = false,
+  onPick,
+  tip,
+}: {
+  hex: string;
+  className?: string;
+  active?: boolean;
+  onPick: () => void;
+  tip: string;
+}) {
+  return (
+    <button
+      type="button"
+      className={`${className}${active ? " active" : ""}`}
+      style={{ background: hex }}
+      {...tipProps(tip)}
+      onPointerDown={(e) => {
+        e.stopPropagation();
+        e.currentTarget.setPointerCapture(e.pointerId);
+      }}
+      onPointerUp={(e) => {
+        e.stopPropagation();
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+          e.currentTarget.releasePointerCapture(e.pointerId);
+        }
+        onPick();
+      }}
+    />
+  );
+}
+
 type ColorPanelProps = {
   color: string;
   previousColor: string;
@@ -93,19 +127,17 @@ export function ColorPanel({
       <div className="procreate-panel-header procreate-color-header">
         <h3>Colors</h3>
         <div className="procreate-color-primary-secondary">
-          <button
-            type="button"
+          <ColorSwatch
+            hex={color}
             className="procreate-color-swatch primary"
-            style={{ background: color }}
-            onClick={onSwapColors}
-            {...tipProps("Primary color — tap to swap with secondary")}
+            onPick={onSwapColors}
+            tip="Primary color — tap to swap with secondary"
           />
-          <button
-            type="button"
+          <ColorSwatch
+            hex={previousColor}
             className="procreate-color-swatch secondary"
-            style={{ background: previousColor }}
-            onClick={() => pickColor(previousColor)}
-            {...tipProps("Secondary color — tap to use this color")}
+            onPick={() => pickColor(previousColor)}
+            tip="Secondary color — tap to use this color"
           />
         </div>
         <button
@@ -170,13 +202,12 @@ export function ColorPanel({
               <p>{palette.name}</p>
               <div className="procreate-palette-row">
                 {palette.colors.map((c) => (
-                  <button
+                  <ColorSwatch
                     key={c}
-                    type="button"
-                    className={`procreate-color-swatch${c.toLowerCase() === color.toLowerCase() ? " active" : ""}`}
-                    style={{ background: c }}
-                    onClick={() => pickColor(c)}
-                    {...tipProps(`Select color ${c}`)}
+                    hex={c}
+                    active={c.toLowerCase() === color.toLowerCase()}
+                    onPick={() => pickColor(c)}
+                    tip={`Select color ${c}`}
                   />
                 ))}
               </div>
@@ -187,13 +218,12 @@ export function ColorPanel({
               <p>{palette.name}</p>
               <div className="procreate-palette-row">
                 {palette.colors.map((c) => (
-                  <button
+                  <ColorSwatch
                     key={`${palette.id}-${c}`}
-                    type="button"
-                    className={`procreate-color-swatch${c.toLowerCase() === color.toLowerCase() ? " active" : ""}`}
-                    style={{ background: c }}
-                    onClick={() => pickColor(c)}
-                    {...tipProps(`Select color ${c}`)}
+                    hex={c}
+                    active={c.toLowerCase() === color.toLowerCase()}
+                    onPick={() => pickColor(c)}
+                    tip={`Select color ${c}`}
                   />
                 ))}
               </div>
@@ -220,13 +250,12 @@ export function ColorPanel({
               <p>History</p>
               <div className="procreate-palette-row compact">
                 {history.map((c) => (
-                  <button
+                  <ColorSwatch
                     key={c}
-                    type="button"
-                    className={`procreate-color-swatch${c.toLowerCase() === color.toLowerCase() ? " active" : ""}`}
-                    style={{ background: c }}
-                    onClick={() => pickColor(c)}
-                    {...tipProps(`History color ${c}`)}
+                    hex={c}
+                    active={c.toLowerCase() === color.toLowerCase()}
+                    onPick={() => pickColor(c)}
+                    tip={`History color ${c}`}
                   />
                 ))}
               </div>
@@ -236,13 +265,12 @@ export function ColorPanel({
             <p>Default palette</p>
             <div className="procreate-palette-row compact">
               {activePalette.map((c) => (
-                <button
+                <ColorSwatch
                   key={c}
-                  type="button"
-                  className={`procreate-color-swatch${c.toLowerCase() === color.toLowerCase() ? " active" : ""}`}
-                  style={{ background: c }}
-                  onClick={() => pickColor(c)}
-                  {...tipProps(`Select color ${c}`)}
+                  hex={c}
+                  active={c.toLowerCase() === color.toLowerCase()}
+                  onPick={() => pickColor(c)}
+                  tip={`Select color ${c}`}
                 />
               ))}
             </div>
@@ -415,16 +443,22 @@ function HarmonyPicker({
               type="button"
               className={`procreate-harmony-reticle${i === 0 ? " primary" : ""}`}
               style={{ left: `${x}%`, top: `${y}%`, background: hex }}
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
+              {...tipProps(i === 0 ? "Primary harmony color" : "Harmony color — tap to paint with this")}
+              onPointerDown={(e) => {
                 e.stopPropagation();
+                e.currentTarget.setPointerCapture(e.pointerId);
+              }}
+              onPointerUp={(e) => {
+                e.stopPropagation();
+                if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+                  e.currentTarget.releasePointerCapture(e.pointerId);
+                }
                 onPickColor(hex);
                 if (i > 0) {
                   const picked = hexToHsv(hex);
                   onChange(picked.h, picked.s, v);
                 }
               }}
-              {...tipProps(i === 0 ? "Primary harmony color" : "Harmony color — tap to paint with this")}
             />
           );
         })}
