@@ -54,8 +54,8 @@ export default function Gallery({ onOpen, onCreate }: Props) {
     <div className="procreate-gallery">
       <header className="procreate-gallery-header">
         <div>
-          <h1>Gallery</h1>
-          <p>Select artwork or create a new canvas</p>
+          <h1>Palette</h1>
+          <p>Gallery — select artwork or create a new canvas</p>
         </div>
         <button
           type="button"
@@ -74,7 +74,7 @@ export default function Gallery({ onOpen, onCreate }: Props) {
         <div className="procreate-gallery-empty">
           <div className="procreate-gallery-empty-icon">+</div>
           <h2>No artwork yet</h2>
-          <p>Tap New canvas to start creating — just like Procreate on iPad.</p>
+          <p>Tap New canvas to start creating in Palette.</p>
           <button
             type="button"
             className="procreate-btn-primary"

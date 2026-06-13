@@ -331,7 +331,7 @@ export const BRUSHES: BrushDef[] = [
 
 export const DEFAULT_PALETTES: { name: string; colors: string[] }[] = [
   {
-    name: "Procreate Classic",
+    name: "Studio Classic",
     colors: [
       "#000000",
       "#ffffff",

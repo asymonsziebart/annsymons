@@ -46,7 +46,7 @@ export function exportProjectJson(
     })),
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-  downloadBlob(blob, `${doc.name}.procreate-web.json`);
+  downloadBlob(blob, `${doc.name}.palette.json`);
 }
 
 function downloadDataUrl(dataUrl: string, filename: string) {

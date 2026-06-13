@@ -8,7 +8,7 @@ import Studio from "./Studio";
 
 type View = { mode: "gallery" } | { mode: "studio"; id: string };
 
-export default function ProcreateApp() {
+export default function PaletteApp() {
   const [view, setView] = useState<View>({ mode: "gallery" });
 
   async function handleCreate(name: string, width: number, height: number) {

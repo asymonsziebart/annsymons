@@ -1562,7 +1562,7 @@ export default function Studio({ artworkId, onBack }: Props) {
                 }
               />
             </label>
-            <label className="procreate-toggle" {...tipProps("Use all visible layers as fill boundaries (like Procreate Reference)")}>
+            <label className="procreate-toggle" {...tipProps("Use all visible layers as fill boundaries when filling")}>
               <input
                 type="checkbox"
                 checked={prefs.colorDropReference}
