@@ -13,8 +13,8 @@ export type BplistRoot = {
 };
 
 type BrushEntry =
-  | { kind: "folder"; path: string }
-  | { kind: "brush"; path: string };
+  | { kind: "folder"; path: string; label?: string }
+  | { kind: "brush"; path: string; label?: string };
 
 function isUid(v: unknown): v is { uid: number } | { UID: number } {
   if (!v || typeof v !== "object") return false;
@@ -31,11 +31,32 @@ function deref(root: BplistRoot, val: unknown): unknown {
   return val;
 }
 
+function findBrushSettings(root: BplistRoot): Record<string, unknown> | null {
+  for (let i = 1; i < root.$objects.length; i++) {
+    const obj = deref(root, root.$objects[i]);
+    if (!obj || typeof obj !== "object") continue;
+    const rec = obj as Record<string, unknown>;
+    if (
+      "paintSize" in rec ||
+      "plotSpacing" in rec ||
+      (typeof rec.name === "string" && ("renderingMaxTransfer" in rec || "plotJitter" in rec))
+    ) {
+      return rec;
+    }
+  }
+  return null;
+}
+
 function normalizeRoot(top: unknown): BplistRoot | null {
   if (!top || typeof top !== "object") return null;
 
   if ("$objects" in top && Array.isArray((top as BplistRoot).$objects)) {
-    return top as BplistRoot;
+    const root = top as BplistRoot;
+    const settings = findBrushSettings(root);
+    if (settings) {
+      return { $objects: [null, settings, ...root.$objects] };
+    }
+    return root;
   }
 
   if ("name" in top || "paintSize" in top) {
@@ -80,7 +101,7 @@ function bytesToDataUrl(bytes: Uint8Array, mime = "image/png"): string {
 
 function isBinaryPlist(bytes: Uint8Array): boolean {
   return (
-    bytes.length >= 6 &&
+    bytes.length >= 8 &&
     bytes[0] === 0x62 &&
     bytes[1] === 0x70 &&
     bytes[2] === 0x6c &&
@@ -90,13 +111,31 @@ function isBinaryPlist(bytes: Uint8Array): boolean {
   );
 }
 
-/** plist treats all Uint8Array as binary — decode XML plists as text first. */
-function parsePlistBytes(bytes: Uint8Array): unknown {
-  if (isBinaryPlist(bytes)) {
-    return parsePlist(bytes);
+function decodePlistText(bytes: Uint8Array): string {
+  if (bytes.length >= 3 && bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
+    return new TextDecoder("utf-8").decode(bytes.subarray(3));
   }
-  const text = new TextDecoder("utf-8").decode(bytes);
-  return parsePlist(text);
+  if (bytes.length >= 2 && bytes[0] === 0xff && bytes[1] === 0xfe) {
+    return new TextDecoder("utf-16le").decode(bytes.subarray(2));
+  }
+  if (bytes.length >= 2 && bytes[0] === 0xfe && bytes[1] === 0xff) {
+    return new TextDecoder("utf-16be").decode(bytes.subarray(2));
+  }
+  return new TextDecoder("utf-8").decode(bytes);
+}
+
+/** Never throws — plist treats all Uint8Array as binary, so decode XML as text first. */
+function safeParsePlistBytes(bytes: Uint8Array): unknown {
+  try {
+    if (isBinaryPlist(bytes)) {
+      return parsePlist(bytes);
+    }
+    const text = decodePlistText(bytes).trimStart();
+    if (!text) return null;
+    return parsePlist(text);
+  } catch {
+    return null;
+  }
 }
 
 function mapProcreateToBrushDef(
@@ -176,13 +215,21 @@ function fallbackBrush(
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ZipFile = any;
 
+const ARCHIVE_NAMES = ["Brush.archive", "Brush.brusharchive", "Preset.archive"];
+
+function normalizeZipPath(path: string): string {
+  return path.replace(/\\/g, "/").replace(/^\/+/, "");
+}
+
 async function pickTipImage(zip: ZipFile, prefix: string): Promise<string | undefined> {
+  const base = prefix ? `${prefix}/` : "";
   const candidates = [
-    `${prefix}Shape.png`,
-    `${prefix}Brushtip.png`,
-    `${prefix}Stamp.png`,
-    `${prefix}QuickLook/Thumbnail.png`,
-    `${prefix}Preview.png`,
+    `${base}Shape.png`,
+    `${base}Brushtip.png`,
+    `${base}Stamp.png`,
+    `${base}QuickLook/Thumbnail.png`,
+    `${base}Preview.png`,
+    `${base}QuickLook/Preview.png`,
   ];
   for (const path of candidates) {
     const file = zip.file(path);
@@ -193,30 +240,46 @@ async function pickTipImage(zip: ZipFile, prefix: string): Promise<string | unde
   return undefined;
 }
 
+async function findArchiveFile(zip: ZipFile, prefix: string): Promise<ZipFile | null> {
+  const base = prefix ? `${prefix}/` : "";
+  for (const name of ARCHIVE_NAMES) {
+    const file = zip.file(`${base}${name}`);
+    if (file) return file;
+  }
+  const lowerPrefix = base.toLowerCase();
+  let match: ZipFile | null = null;
+  zip.forEach((relPath: string, file: ZipFile) => {
+    if (match) return;
+    const norm = normalizeZipPath(relPath);
+    if (!norm.toLowerCase().startsWith(lowerPrefix)) return;
+    const leaf = norm.slice(base.length);
+    if (/^brush\.archive$/i.test(leaf) || /\.archive$/i.test(leaf)) {
+      match = file;
+    }
+  });
+  return match;
+}
+
 async function parseBrushFromFolderZip(
   zip: ZipFile,
   folderPath: string,
   setName: string,
   displayName?: string,
 ): Promise<BrushDef | null> {
-  const prefix = folderPath ? `${folderPath}/` : "";
-  const archiveFile = zip.file(`${prefix}Brush.archive`);
+  const prefix = normalizeZipPath(folderPath);
+  const archiveFile = await findArchiveFile(zip, prefix);
   const tipImage = await pickTipImage(zip, prefix);
-  const label = displayName ?? (folderPath || "brush");
+  const label = displayName ?? (prefix || "brush");
 
   if (!archiveFile) {
     return fallbackBrush(setName, label, tipImage);
   }
 
-  try {
-    const archiveBytes = await archiveFile.async("uint8array");
-    const top = parsePlistBytes(archiveBytes);
-    const root = normalizeRoot(top);
-    if (root) {
-      return mapProcreateToBrushDef(root, setName, label, tipImage);
-    }
-  } catch {
-    /* fall through to thumbnail-only brush */
+  const archiveBytes = await archiveFile.async("uint8array");
+  const top = safeParsePlistBytes(archiveBytes);
+  const root = normalizeRoot(top);
+  if (root) {
+    return mapProcreateToBrushDef(root, setName, label, tipImage);
   }
 
   return fallbackBrush(setName, label, tipImage);
@@ -225,41 +288,109 @@ async function parseBrushFromFolderZip(
 function discoverBrushEntries(zip: ZipFile): BrushEntry[] {
   const folders = new Set<string>();
   const brushFiles: string[] = [];
+  const previewFolders = new Set<string>();
 
   zip.forEach((relPath: string) => {
-    if (relPath.startsWith("__MACOSX/")) return;
-    if (relPath.endsWith("Brush.archive")) {
-      folders.add(relPath.replace(/\/?Brush\.archive$/, ""));
-    } else if (/\.brush$/i.test(relPath)) {
-      brushFiles.push(relPath);
+    const path = normalizeZipPath(relPath);
+    if (!path || path.startsWith("__MACOSX/")) return;
+
+    if (/brush\.archive$/i.test(path) || /\.archive$/i.test(path)) {
+      folders.add(path.replace(/\/?[^/]+\.archive$/i, ""));
+    } else if (/\.brush$/i.test(path)) {
+      brushFiles.push(path);
+    } else if (/(?:Shape\.png|QuickLook\/Thumbnail\.png|Brushtip\.png)$/i.test(path)) {
+      previewFolders.add(path.replace(/\/?(?:Shape\.png|QuickLook\/Thumbnail\.png|Brushtip\.png)$/i, ""));
     }
   });
 
-  const entries: BrushEntry[] = brushFiles.map((path) => ({ kind: "brush", path }));
+  const entries: BrushEntry[] = brushFiles.map((path) => ({
+    kind: "brush",
+    path,
+    label: path.replace(/\.brush$/i, "").split("/").pop(),
+  }));
+
   for (const path of folders) {
     if (!brushFiles.some((b) => b.startsWith(`${path}/`) || b === `${path}.brush`)) {
-      entries.push({ kind: "folder", path });
+      entries.push({ kind: "folder", path, label: path.split("/").pop() });
     }
   }
+
+  for (const path of previewFolders) {
+    if (
+      folders.has(path) ||
+      brushFiles.some((b) => b.startsWith(`${path}/`) || b.replace(/\.brush$/i, "") === path)
+    ) {
+      continue;
+    }
+    entries.push({ kind: "folder", path, label: path.split("/").pop() });
+  }
+
   return entries;
 }
 
-function readBrushPathsFromSetPlist(zip: ZipFile): Promise<string[]> {
-  const plistFile = zip.file("brushset.plist");
-  if (!plistFile) return Promise.resolve([]);
-
-  return plistFile.async("uint8array").then((bytes: Uint8Array) => {
-    const top = parsePlistBytes(bytes);
-    if (!top || typeof top !== "object") return [];
-    const root = normalizeRoot(top);
-    const record = top as Record<string, unknown>;
-    let val = record.brushes;
-    if (root) val = deref(root, val);
-    if (!Array.isArray(val)) return [];
-    return val
-      .map((item) => (root ? deref(root, item) : item))
-      .filter((item): item is string => typeof item === "string");
+function findSetPlistFile(zip: ZipFile): ZipFile | null {
+  if (zip.file("brushset.plist")) return zip.file("brushset.plist");
+  let match: ZipFile | null = null;
+  zip.forEach((relPath: string, file: ZipFile) => {
+    if (match) return;
+    const path = normalizeZipPath(relPath);
+    if (path.startsWith("__MACOSX/")) return;
+    if (/brushset\.plist$/i.test(path)) match = file;
   });
+  return match;
+}
+
+async function readBrushPathsFromSetPlist(zip: ZipFile): Promise<string[]> {
+  const plistFile = findSetPlistFile(zip);
+  if (!plistFile) return [];
+
+  const bytes = await plistFile.async("uint8array");
+  const top = safeParsePlistBytes(bytes);
+  if (!top || typeof top !== "object") return [];
+
+  const root = normalizeRoot(top);
+  const record = top as Record<string, unknown>;
+  let val = record.brushes;
+  if (root) val = deref(root, val);
+  if (!Array.isArray(val)) return [];
+
+  return val
+    .map((item) => (root ? deref(root, item) : item))
+    .filter((item): item is string => typeof item === "string")
+    .map(normalizeZipPath);
+}
+
+async function parseBrushEntry(
+  zip: ZipFile,
+  entry: BrushEntry,
+  setName: string,
+  JSZip: { loadAsync: (data: Uint8Array) => Promise<ZipFile> },
+): Promise<BrushDef | null> {
+  if (entry.kind === "folder") {
+    return parseBrushFromFolderZip(zip, entry.path, setName, entry.label);
+  }
+
+  const innerFile = zip.file(entry.path);
+  if (!innerFile) return null;
+
+  const innerBytes = await innerFile.async("uint8array");
+  const label = entry.label ?? entry.path.replace(/\.brush$/i, "").split("/").pop() ?? entry.path;
+
+  try {
+    const innerZip = await JSZip.loadAsync(innerBytes);
+    return parseBrushFromFolderZip(innerZip, "", setName, label);
+  } catch {
+    const folderPath = entry.path.replace(/\.brush$/i, "");
+    return parseBrushFromFolderZip(zip, folderPath, setName, label);
+  }
+}
+
+function userFacingImportError(err: unknown): string {
+  const message = err instanceof Error ? err.message : "Import failed";
+  if (/binary plist|bplist|malformed document|Invalid PLIST/i.test(message)) {
+    return "Could not read brush metadata from this file. Try a hard refresh (Ctrl+Shift+R), then import again. If it still fails, re-export the set from Procreate.";
+  }
+  return message;
 }
 
 /** Parse a Procreate .brushset or .brush file entirely in the browser (no upload). */
@@ -284,46 +415,42 @@ export async function importProcreateBrushFile(file: File): Promise<ImportedBrus
     brushes.push(brush);
   }
 
-  if (lower.endsWith(".brushset")) {
-    let plistPaths: string[] = [];
-    try {
-      plistPaths = await readBrushPathsFromSetPlist(zip);
-    } catch {
-      plistPaths = [];
-    }
+  try {
+    if (lower.endsWith(".brushset")) {
+      const plistPaths = await readBrushPathsFromSetPlist(zip);
+      const entries = discoverBrushEntries(zip);
 
-    const entries = discoverBrushEntries(zip);
-
-    for (const p of plistPaths) {
-      if (entries.some((e) => e.path === p || e.path.endsWith(`/${p}`))) continue;
-      entries.push({ kind: "folder", path: p });
-    }
-
-    for (const entry of entries) {
-      try {
-        if (entry.kind === "folder") {
-          addBrush(await parseBrushFromFolderZip(zip, entry.path, setName));
-        } else {
-          const innerFile = zip.file(entry.path);
-          if (!innerFile) continue;
-          const innerBytes = await innerFile.async("uint8array");
-          const innerZip = await JSZip.loadAsync(innerBytes);
-          const label = entry.path.replace(/\.brush$/i, "").split("/").pop() ?? entry.path;
-          addBrush(await parseBrushFromFolderZip(innerZip, "", setName, label));
+      for (const p of plistPaths) {
+        const exists = entries.some((e) => {
+          const ep = normalizeZipPath(e.path);
+          return ep === p || ep.endsWith(`/${p}`) || p.endsWith(`/${ep}`);
+        });
+        if (!exists) {
+          entries.push({ kind: "folder", path: p, label: p.split("/").pop() });
         }
-      } catch {
-        /* try next brush */
       }
+
+      for (const entry of entries) {
+        try {
+          addBrush(await parseBrushEntry(zip, entry, setName, JSZip));
+        } catch {
+          /* try next brush */
+        }
+      }
+    } else if (lower.endsWith(".brush")) {
+      addBrush(await parseBrushFromFolderZip(zip, "", setName));
+    } else {
+      throw new Error("Please choose a .brushset or .brush file from Procreate.");
     }
-  } else if (lower.endsWith(".brush")) {
-    addBrush(await parseBrushFromFolderZip(zip, "", setName));
-  } else {
-    throw new Error("Please choose a .brushset or .brush file from Procreate.");
+  } catch (err) {
+    if (brushes.length === 0) {
+      throw new Error(userFacingImportError(err));
+    }
   }
 
   if (brushes.length === 0) {
     throw new Error(
-      "No brushes could be imported. Try re-exporting the set from Procreate, or use a pack with custom brush shapes.",
+      "No brushes could be imported from this pack. Brushes that only use Procreate built-in shapes may not include importable tip images — try a pack with custom shape PNGs, or re-export from Procreate.",
     );
   }
 
