@@ -592,7 +592,7 @@
 .procreate-brush-panel {
   top: 60px;
   right: 12px;
-  width: min(340px, calc(100vw - 24px));
+  width: min(380px, calc(100vw - 24px));
 }
 
 .procreate-brush-import-row {
@@ -742,7 +742,29 @@
   gap: 0.5rem;
   padding: 0 1rem 1rem;
   overflow-y: auto;
-  max-height: 420px;
+  max-height: min(52vh, 480px);
+}
+
+.procreate-brush-count {
+  font-weight: 500;
+  color: #98989d;
+  font-size: 0.85em;
+}
+
+.procreate-brush-filter-hint,
+.procreate-brush-showing {
+  font-size: 0.72rem;
+  color: #98989d;
+  padding: 0 1rem 0.5rem;
+  line-height: 1.4;
+}
+
+.procreate-brush-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #98989d;
+  font-size: 0.8125rem;
+  padding: 1.5rem 0.5rem;
 }
 
 .procreate-brush-item {
