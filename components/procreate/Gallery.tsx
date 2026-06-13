@@ -59,12 +59,12 @@ export default function Gallery({ onOpen, onCreate }: Props) {
         </div>
         <button
           type="button"
-          className="procreate-btn-primary"
+          className="procreate-btn-primary procreate-gallery-new-btn"
           onClick={() => setShowNew(true)}
           {...tipProps("Create a new blank canvas")}
         >
           <IconPlus className="h-5 w-5" />
-          New canvas
+          <span className="procreate-gallery-new-label">New canvas</span>
         </button>
       </header>
 

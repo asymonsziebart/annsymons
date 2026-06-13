@@ -14,6 +14,112 @@ import { ADJUSTMENT_LABELS } from "@/lib/procreate/adjustments";
 import { IconClose } from "./icons";
 import { tipProps } from "./tip";
 
+export type PocketModifyAction =
+  | "gallery"
+  | "actions"
+  | "adjust"
+  | "select"
+  | "transform";
+
+export function PocketModifyMenu({
+  open,
+  onClose,
+  onAction,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onAction: (action: PocketModifyAction) => void;
+}) {
+  if (!open) return null;
+
+  const items: { id: PocketModifyAction; label: string; tip: string }[] = [
+    { id: "gallery", label: "Gallery", tip: "Return to your artworks" },
+    { id: "actions", label: "Actions", tip: "Canvas settings, export, and preferences" },
+    { id: "adjust", label: "Adjustments", tip: "Blur, sharpen, and color effects" },
+    { id: "select", label: "Selection", tip: "Isolate areas of your artwork" },
+    { id: "transform", label: "Transform", tip: "Move, scale, and rotate" },
+  ];
+
+  return (
+    <div className="procreate-pocket-card procreate-modify-menu" role="dialog" aria-label="Modify">
+      <div className="procreate-pocket-handle" aria-hidden />
+      <h3 className="procreate-pocket-card-title">Modify</h3>
+      <div className="procreate-modify-grid">
+        {items.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            className="procreate-modify-item"
+            onClick={() => {
+              onAction(item.id);
+              onClose();
+            }}
+            {...tipProps(item.tip)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function PocketSelectionBar({
+  mode,
+  onModeChange,
+  onSettings,
+}: {
+  mode: SelectionMode;
+  onModeChange: (m: SelectionMode) => void;
+  onSettings: () => void;
+}) {
+  return (
+    <div className="procreate-pocket-bottom-bar">
+      {(
+        [
+          ["freehand", "Freehand"],
+          ["rect", "Rectangle"],
+          ["auto", "Automatic"],
+        ] as const
+      ).map(([m, label]) => (
+        <button
+          key={m}
+          type="button"
+          className={mode === m ? "active" : ""}
+          onClick={() => onModeChange(m)}
+        >
+          {label}
+        </button>
+      ))}
+      <button type="button" onClick={onSettings}>
+        Settings
+      </button>
+    </div>
+  );
+}
+
+export function PocketTransformBar({ onApply }: { onApply: () => void }) {
+  return (
+    <div className="procreate-pocket-bottom-bar">
+      <button type="button" className="active">
+        Freeform
+      </button>
+      <button type="button" disabled>
+        Uniform
+      </button>
+      <button type="button" disabled>
+        Distort
+      </button>
+      <button type="button" disabled>
+        Warp
+      </button>
+      <button type="button" className="pocket-apply" onClick={onApply}>
+        Done
+      </button>
+    </div>
+  );
+}
+
 export function SelectionPanel({
   mode,
   onModeChange,

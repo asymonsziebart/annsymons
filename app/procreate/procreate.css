@@ -1739,3 +1739,276 @@
     right: auto !important;
   }
 }
+
+/* Procreate Pocket — phone layout */
+.procreate-studio.pocket-ui .procreate-pocket-top-left {
+  position: fixed;
+  top: calc(6px + env(safe-area-inset-top, 0px));
+  left: calc(8px + env(safe-area-inset-left, 0px));
+  z-index: 100;
+}
+
+.procreate-modify-trigger {
+  padding: 0.5rem 0.9rem;
+  min-height: 44px;
+  background: rgba(28, 28, 30, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: none;
+  border-radius: 10px;
+  color: #f2f2f7;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  touch-action: manipulation;
+}
+
+.procreate-modify-trigger.active {
+  background: #007aff;
+  color: #fff;
+}
+
+.procreate-studio.pocket-ui .procreate-top-right {
+  position: fixed;
+  top: calc(6px + env(safe-area-inset-top, 0px));
+  right: calc(8px + env(safe-area-inset-right, 0px));
+  left: auto;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 12px;
+}
+
+.procreate-studio.pocket-ui .procreate-tool-btn,
+.procreate-studio.pocket-ui .procreate-color-btn {
+  width: 42px;
+  height: 42px;
+}
+
+.procreate-studio.pocket-ui .procreate-sidebar {
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: 0;
+  gap: 14px;
+  left: calc(4px + env(safe-area-inset-left, 0px));
+}
+
+.procreate-studio.pocket-ui .procreate-slider-wrap {
+  height: 108px;
+  filter: drop-shadow(0 1px 8px rgba(0, 0, 0, 0.55));
+}
+
+.procreate-studio.pocket-ui .procreate-slider-wrap input[type="range"] {
+  height: 108px;
+  touch-action: manipulation;
+}
+
+.procreate-studio.pocket-ui .procreate-status {
+  display: none;
+}
+
+.procreate-panel-backdrop.pocket {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  background: rgba(0, 0, 0, 0.38);
+}
+
+.procreate-pocket-card {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 120;
+  background: rgba(44, 44, 46, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px 16px 0 0;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.45);
+  animation: pocketSlideUp 0.22s ease-out;
+}
+
+@keyframes pocketSlideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.procreate-pocket-handle {
+  width: 36px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  margin: 10px auto 4px;
+}
+
+.procreate-pocket-card-title {
+  text-align: center;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #98989d;
+  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.procreate-modify-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 0 1rem 1rem;
+}
+
+.procreate-modify-item {
+  min-height: 52px;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 12px;
+  color: #f2f2f7;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.procreate-modify-item:active {
+  background: rgba(0, 122, 255, 0.35);
+}
+
+.procreate-studio.pocket-ui .procreate-panel {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  top: auto !important;
+  width: 100% !important;
+  max-height: min(88dvh, 680px) !important;
+  border-radius: 16px 16px 0 0 !important;
+  z-index: 115 !important;
+  animation: pocketSlideUp 0.22s ease-out;
+  padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
+}
+
+.procreate-studio.pocket-ui .procreate-panel-header {
+  padding-top: 0;
+}
+
+.procreate-studio.pocket-ui .procreate-panel-header::before {
+  content: "";
+  display: block;
+  width: 36px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  margin: 8px auto 6px;
+}
+
+.procreate-studio.pocket-ui .procreate-color-panel {
+  inset: auto 0 0 0 !important;
+  max-height: min(92dvh, 720px) !important;
+  border-radius: 16px 16px 0 0 !important;
+}
+
+.procreate-pocket-bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 95;
+  display: flex;
+  gap: 4px;
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+  background: rgba(28, 28, 30, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.procreate-pocket-bottom-bar button {
+  flex: 1;
+  min-height: 44px;
+  background: transparent;
+  border: none;
+  color: #98989d;
+  font-size: 0.7rem;
+  font-weight: 500;
+  border-radius: 8px;
+  touch-action: manipulation;
+}
+
+.procreate-pocket-bottom-bar button.active {
+  background: #007aff;
+  color: #fff;
+}
+
+.procreate-pocket-bottom-bar button.pocket-apply {
+  background: rgba(0, 122, 255, 0.25);
+  color: #64b5ff;
+  font-weight: 600;
+}
+
+.procreate-pocket-bottom-bar button:disabled {
+  opacity: 0.35;
+}
+
+.procreate-studio.pocket-ui.studio-mode-select .procreate-sidebar,
+.procreate-studio.pocket-ui.studio-mode-transform .procreate-sidebar {
+  bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  top: auto;
+  transform: none;
+}
+
+@media (max-width: 768px) and (pointer: coarse) {
+  .procreate-gallery {
+    padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 0.75rem 5rem;
+  }
+
+  .procreate-gallery-header {
+    margin-bottom: 1rem;
+    padding: 0 0.25rem;
+  }
+
+  .procreate-gallery-header h1 {
+    font-size: 1.375rem;
+  }
+
+  .procreate-gallery-header p {
+    display: none;
+  }
+
+  .procreate-gallery-header .procreate-gallery-new-btn {
+    position: fixed;
+    right: calc(1rem + env(safe-area-inset-right, 0px));
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    z-index: 20;
+    border-radius: 999px;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    justify-content: center;
+    box-shadow: 0 6px 24px rgba(0, 122, 255, 0.45);
+  }
+
+  .procreate-gallery-new-label {
+    display: none;
+  }
+
+  .procreate-gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.65rem;
+  }
+
+  .procreate-gallery-card {
+    border-radius: 10px;
+  }
+
+  .procreate-gallery-card-actions {
+    display: flex;
+  }
+}

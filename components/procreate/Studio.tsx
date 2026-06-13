@@ -79,10 +79,14 @@ import {
   AdjustmentsPanel,
   AnimationPanel,
   BrushStudioPanel,
+  PocketModifyMenu,
+  PocketSelectionBar,
+  PocketTransformBar,
   QuickMenu,
   SelectionPanel,
   SymmetryBar,
   TextPanel,
+  type PocketModifyAction,
 } from "./FeaturePanels";
 import {
   ColorPanel,
@@ -185,6 +189,8 @@ export default function Studio({ artworkId, onBack }: Props) {
   const colorRef = useRef(color);
   const referenceImgRef = useRef<HTMLImageElement | null>(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [isPocketUI, setIsPocketUI] = useState(false);
+  const [modifyMenuOpen, setModifyMenuOpen] = useState(false);
   const onionSkinRef = useRef<HTMLCanvasElement | null>(null);
   const [overlayVersion, setOverlayVersion] = useState(0);
 
@@ -207,8 +213,15 @@ export default function Studio({ artworkId, onBack }: Props) {
   }, []);
 
   useEffect(() => {
-    const coarse = window.matchMedia("(pointer: coarse)").matches;
-    setIsTouchDevice(coarse || "ontouchstart" in window);
+    const updateDeviceUi = () => {
+      const touch = window.matchMedia("(pointer: coarse)").matches || "ontouchstart" in window;
+      const narrow = window.matchMedia("(max-width: 768px)").matches;
+      setIsTouchDevice(touch);
+      setIsPocketUI(touch && narrow);
+    };
+    updateDeviceUi();
+    window.addEventListener("resize", updateDeviceUi);
+    return () => window.removeEventListener("resize", updateDeviceUi);
   }, []);
 
   useEffect(() => {
@@ -1174,6 +1187,31 @@ export default function Studio({ artworkId, onBack }: Props) {
     return <div className="procreate-loading">Loading studio…</div>;
   }
 
+  function handlePocketModify(action: PocketModifyAction) {
+    switch (action) {
+      case "gallery":
+        onBack();
+        break;
+      case "actions":
+        setPanel("actions");
+        break;
+      case "adjust":
+        setPanel("adjust");
+        break;
+      case "select":
+        setStudioMode("select");
+        setPanel(null);
+        break;
+      case "transform":
+        setStudioMode("transform");
+        setTransform(null);
+        setPanel(null);
+        break;
+    }
+  }
+
+  const pocketSheetOpen = modifyMenuOpen || panel !== null;
+
   const showChrome = prefs.showInterface;
 
   const uiClass = [
@@ -1181,6 +1219,9 @@ export default function Studio({ artworkId, onBack }: Props) {
     prefs.lightInterface ? "light" : "",
     prefs.rightHanded ? "right-handed" : "",
     isTouchDevice ? "touch-device" : "",
+    isPocketUI ? "pocket-ui" : "",
+    isPocketUI && studioMode === "select" ? "studio-mode-select" : "",
+    isPocketUI && studioMode === "transform" ? "studio-mode-transform" : "",
     showChrome ? "" : "hide-ui",
   ]
     .filter(Boolean)
@@ -1188,55 +1229,68 @@ export default function Studio({ artworkId, onBack }: Props) {
 
   return (
     <div className={uiClass}>
-      <div className="procreate-top-left">
-            <button
-              type="button"
-              className="procreate-tool-btn"
-              onClick={onBack}
-              {...tipProps("Gallery — return to your artworks")}
-            >
-              <IconGallery className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              className={`procreate-tool-btn${panel === "actions" ? " active" : ""}`}
-              onClick={() => setPanel(panel === "actions" ? null : "actions")}
-              {...tipProps("Actions — export, import, and preferences")}
-            >
-              <IconActions className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              className={`procreate-tool-btn${panel === "adjust" ? " active" : ""}`}
-              onClick={() => setPanel(panel === "adjust" ? null : "adjust")}
-              {...tipProps("Adjustments — blur, sharpen, hue, and more")}
-            >
-              <IconAdjust className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              className={`procreate-tool-btn${studioMode === "select" || panel === "select" ? " active" : ""}`}
-              onClick={() => {
-                setStudioMode("select");
-                setPanel(panel === "select" ? null : "select");
-              }}
-              {...tipProps("Selection — freehand, rectangle, or automatic")}
-            >
-              <IconSelect className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              className={`procreate-tool-btn${studioMode === "transform" ? " active" : ""}`}
-              onClick={() => {
-                setStudioMode("transform");
-                setTransform(null);
-              }}
-              onDoubleClick={commitTransformMode}
-              {...tipProps("Transform — move, scale, rotate (double-click to apply)")}
-            >
-              <IconTransform className="h-5 w-5" />
-            </button>
-          </div>
+      {isPocketUI ? (
+        <div className="procreate-pocket-top-left">
+          <button
+            type="button"
+            className={`procreate-modify-trigger${modifyMenuOpen ? " active" : ""}`}
+            onClick={() => setModifyMenuOpen((o) => !o)}
+            {...tipProps("Modify — gallery, actions, adjustments, and more")}
+          >
+            Modify
+          </button>
+        </div>
+      ) : (
+        <div className="procreate-top-left">
+          <button
+            type="button"
+            className="procreate-tool-btn"
+            onClick={onBack}
+            {...tipProps("Gallery — return to your artworks")}
+          >
+            <IconGallery className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            className={`procreate-tool-btn${panel === "actions" ? " active" : ""}`}
+            onClick={() => setPanel(panel === "actions" ? null : "actions")}
+            {...tipProps("Actions — export, import, and preferences")}
+          >
+            <IconActions className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            className={`procreate-tool-btn${panel === "adjust" ? " active" : ""}`}
+            onClick={() => setPanel(panel === "adjust" ? null : "adjust")}
+            {...tipProps("Adjustments — blur, sharpen, hue, and more")}
+          >
+            <IconAdjust className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            className={`procreate-tool-btn${studioMode === "select" || panel === "select" ? " active" : ""}`}
+            onClick={() => {
+              setStudioMode("select");
+              setPanel(panel === "select" ? null : "select");
+            }}
+            {...tipProps("Selection — freehand, rectangle, or automatic")}
+          >
+            <IconSelect className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            className={`procreate-tool-btn${studioMode === "transform" ? " active" : ""}`}
+            onClick={() => {
+              setStudioMode("transform");
+              setTransform(null);
+            }}
+            onDoubleClick={commitTransformMode}
+            {...tipProps("Transform — move, scale, rotate (double-click to apply)")}
+          >
+            <IconTransform className="h-5 w-5" />
+          </button>
+        </div>
+      )}
 
           <div className="procreate-top-right">
             <button
@@ -1287,7 +1341,7 @@ export default function Studio({ artworkId, onBack }: Props) {
 
           <aside className="procreate-sidebar">
             <div
-              className="procreate-slider-wrap"
+              className="procreate-slider-wrap procreate-slider-size"
               {...tipProps("Brush size — drag up for a thicker stroke", "right")}
             >
               <input
@@ -1299,14 +1353,16 @@ export default function Studio({ artworkId, onBack }: Props) {
                 onChange={(e) => setBrushSize(Number(e.target.value))}
               />
             </div>
-            <button
-              type="button"
-              className={`procreate-modify-btn${eyedropper ? " active" : ""}`}
-              onClick={() => setEyedropper(!eyedropper)}
-              {...tipProps("Modify — tap for eyedropper, hold and tap canvas to pick a color", "right")}
-            />
+            {!isPocketUI && (
+              <button
+                type="button"
+                className={`procreate-modify-btn${eyedropper ? " active" : ""}`}
+                onClick={() => setEyedropper(!eyedropper)}
+                {...tipProps("Modify — tap for eyedropper, hold and tap canvas to pick a color", "right")}
+              />
+            )}
             <div
-              className="procreate-slider-wrap"
+              className="procreate-slider-wrap procreate-slider-opacity"
               {...tipProps("Brush opacity — drag up for more solid strokes", "right")}
             >
               <input
@@ -1318,22 +1374,26 @@ export default function Studio({ artworkId, onBack }: Props) {
                 onChange={(e) => setBrushOpacity(Number(e.target.value))}
               />
             </div>
-            <button
-              type="button"
-              className="procreate-undo-btn"
-              onClick={undo}
-              {...tipProps("Undo last action (2-finger tap)", "right")}
-            >
-              <IconUndo className="h-5 w-5" />
-            </button>
-            <button
-              type="button"
-              className="procreate-redo-btn"
-              onClick={redo}
-              {...tipProps("Redo (3-finger tap)", "right")}
-            >
-              <IconRedo className="h-5 w-5" />
-            </button>
+            {!isPocketUI && (
+              <>
+                <button
+                  type="button"
+                  className="procreate-undo-btn"
+                  onClick={undo}
+                  {...tipProps("Undo last action (2-finger tap)", "right")}
+                >
+                  <IconUndo className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  className="procreate-redo-btn"
+                  onClick={redo}
+                  {...tipProps("Redo (3-finger tap)", "right")}
+                >
+                  <IconRedo className="h-5 w-5" />
+                </button>
+              </>
+            )}
           </aside>
 
       {!showChrome && (
@@ -1345,6 +1405,35 @@ export default function Studio({ artworkId, onBack }: Props) {
         >
           Show tools
         </button>
+      )}
+
+      {isPocketUI && pocketSheetOpen && (
+        <div
+          className="procreate-panel-backdrop pocket"
+          onClick={() => {
+            setModifyMenuOpen(false);
+            setPanel(null);
+          }}
+          aria-hidden
+        />
+      )}
+
+      <PocketModifyMenu
+        open={isPocketUI && modifyMenuOpen}
+        onClose={() => setModifyMenuOpen(false)}
+        onAction={handlePocketModify}
+      />
+
+      {isPocketUI && showChrome && studioMode === "select" && (
+        <PocketSelectionBar
+          mode={selectionMode}
+          onModeChange={setSelectionMode}
+          onSettings={() => setPanel("select")}
+        />
+      )}
+
+      {isPocketUI && showChrome && studioMode === "transform" && (
+        <PocketTransformBar onApply={commitTransformMode} />
       )}
 
       <QuickMenu open={quickMenuOpen} onClose={() => setQuickMenuOpen(false)} onAction={handleQuickAction} />
@@ -1409,7 +1498,7 @@ export default function Studio({ artworkId, onBack }: Props) {
         />
       )}
 
-      {panel === "color" && (
+      {panel === "color" && !isPocketUI && (
         <div className="procreate-panel-backdrop" onClick={() => setPanel(null)} aria-hidden />
       )}
 
