@@ -1,0 +1,1003 @@
+/* Procreate web — dark charcoal studio UI inspired by the iPad app */
+
+.procreate-root {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  background: #1c1c1e;
+  color: #f2f2f7;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  touch-action: none;
+  user-select: none;
+}
+
+.procreate-root * {
+  box-sizing: border-box;
+}
+
+/* Gallery */
+.procreate-gallery {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.procreate-gallery-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.procreate-gallery-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.procreate-gallery-header p {
+  color: #98989d;
+  margin-top: 0.25rem;
+}
+
+.procreate-muted {
+  color: #98989d;
+  text-align: center;
+  padding: 3rem;
+}
+
+.procreate-gallery-empty {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+
+.procreate-gallery-empty-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1rem;
+  border-radius: 20px;
+  background: #2c2c2e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  color: #636366;
+}
+
+.procreate-gallery-empty h2 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.procreate-gallery-empty p {
+  color: #98989d;
+  max-width: 320px;
+  margin: 0 auto 1.5rem;
+}
+
+.procreate-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.procreate-gallery-card {
+  background: #2c2c2e;
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  transition: transform 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+
+.procreate-gallery-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.procreate-gallery-thumb {
+  aspect-ratio: 4/3;
+  background: #3a3a3c;
+  overflow: hidden;
+}
+
+.procreate-gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.procreate-gallery-thumb-empty {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #3a3a3c, #48484a);
+}
+
+.procreate-gallery-card-meta {
+  padding: 0.65rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.procreate-gallery-card-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.procreate-gallery-card-size {
+  font-size: 0.75rem;
+  color: #98989d;
+}
+
+.procreate-gallery-card-actions {
+  display: none;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  gap: 0.25rem;
+}
+
+.procreate-gallery-card:hover .procreate-gallery-card-actions {
+  display: flex;
+}
+
+.procreate-gallery-card-actions button {
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  color: #fff;
+  font-size: 0.65rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.procreate-gallery-new {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 180px;
+  color: #98989d;
+  border: 2px dashed #48484a;
+  background: transparent;
+}
+
+.procreate-gallery-new:hover {
+  border-color: #007aff;
+  color: #007aff;
+}
+
+/* Buttons */
+.procreate-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #007aff;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.65rem 1.1rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.procreate-btn-primary:hover {
+  background: #0066d6;
+}
+
+.procreate-btn-ghost {
+  background: transparent;
+  color: #98989d;
+  border: none;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+}
+
+/* Modal */
+.procreate-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+
+.procreate-modal {
+  background: #2c2c2e;
+  border-radius: 16px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.procreate-modal h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.procreate-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.procreate-field span {
+  font-size: 0.8125rem;
+  color: #98989d;
+}
+
+.procreate-field input,
+.procreate-field select {
+  background: #1c1c1e;
+  border: 1px solid #48484a;
+  border-radius: 8px;
+  color: #f2f2f7;
+  padding: 0.6rem 0.75rem;
+  font-size: 1rem;
+}
+
+.procreate-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* Studio */
+.procreate-studio {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: #0a0a0b;
+}
+
+.procreate-studio.light {
+  background: #e5e5ea;
+  color: #1c1c1e;
+}
+
+.procreate-studio.light .procreate-tool-btn,
+.procreate-studio.light .procreate-sidebar {
+  background: rgba(255, 255, 255, 0.85);
+  color: #1c1c1e;
+}
+
+.procreate-loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #98989d;
+}
+
+.procreate-canvas-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.procreate-view-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Top toolbars */
+.procreate-top-left,
+.procreate-top-right {
+  position: absolute;
+  top: 12px;
+  z-index: 20;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(28, 28, 30, 0.88);
+  backdrop-filter: blur(12px);
+  border-radius: 10px;
+}
+
+.procreate-top-left {
+  left: 12px;
+}
+
+.procreate-top-right {
+  right: 12px;
+}
+
+.procreate-studio.right-handed .procreate-top-left {
+  left: auto;
+  right: 12px;
+}
+
+.procreate-studio.right-handed .procreate-top-right {
+  right: auto;
+  left: 12px;
+}
+
+.procreate-studio.right-handed .procreate-sidebar {
+  left: auto;
+  right: 12px;
+}
+
+.procreate-tool-btn {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #f2f2f7;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.procreate-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.procreate-tool-btn.active {
+  background: #007aff;
+  color: #fff;
+}
+
+.procreate-color-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.procreate-color-btn span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Sidebar */
+.procreate-sidebar {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 6px;
+  background: rgba(28, 28, 30, 0.88);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+}
+
+.procreate-slider-wrap {
+  height: 120px;
+  display: flex;
+  align-items: center;
+}
+
+.procreate-slider-wrap input[type="range"] {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 28px;
+  height: 120px;
+  accent-color: #007aff;
+  cursor: pointer;
+}
+
+.procreate-modify-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #48484a;
+  border: none;
+  border-radius: 8px;
+  color: #f2f2f7;
+  cursor: pointer;
+}
+
+.procreate-modify-btn.active {
+  background: #007aff;
+}
+
+.procreate-undo-btn,
+.procreate-redo-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #98989d;
+  cursor: pointer;
+}
+
+.procreate-undo-btn:hover,
+.procreate-redo-btn:hover {
+  color: #f2f2f7;
+}
+
+.procreate-status {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  display: flex;
+  gap: 1rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+}
+
+.procreate-studio.hide-ui .procreate-top-left,
+.procreate-studio.hide-ui .procreate-top-right,
+.procreate-studio.hide-ui .procreate-sidebar {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+/* Panels */
+.procreate-panel {
+  position: absolute;
+  z-index: 30;
+  background: rgba(44, 44, 46, 0.96);
+  backdrop-filter: blur(16px);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  max-height: calc(100% - 80px);
+  display: flex;
+  flex-direction: column;
+}
+
+.procreate-brush-panel {
+  top: 60px;
+  right: 12px;
+  width: min(340px, calc(100vw - 24px));
+}
+
+.procreate-color-panel {
+  top: 60px;
+  right: 12px;
+  width: min(320px, calc(100vw - 24px));
+}
+
+.procreate-layers-panel {
+  top: 60px;
+  right: 12px;
+  width: min(300px, calc(100vw - 24px));
+}
+
+.procreate-actions-panel {
+  top: 60px;
+  left: 12px;
+  width: min(280px, calc(100vw - 24px));
+}
+
+.procreate-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.procreate-panel-header h3 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.procreate-icon-btn {
+  background: transparent;
+  border: none;
+  color: #98989d;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+}
+
+/* Brush panel */
+.procreate-brush-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem;
+  background: #1c1c1e;
+  border-radius: 8px;
+  color: #98989d;
+}
+
+.procreate-brush-search input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #f2f2f7;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.procreate-brush-categories {
+  display: flex;
+  gap: 0.35rem;
+  padding: 0 1rem 0.75rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.procreate-brush-categories button {
+  flex-shrink: 0;
+  background: #3a3a3c;
+  border: none;
+  color: #98989d;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.procreate-brush-categories button.active {
+  background: #007aff;
+  color: #fff;
+}
+
+.procreate-brush-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  padding: 0 1rem 1rem;
+  overflow-y: auto;
+  max-height: 360px;
+}
+
+.procreate-brush-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem;
+  background: #1c1c1e;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  color: inherit;
+}
+
+.procreate-brush-item.selected {
+  border-color: #007aff;
+}
+
+.procreate-brush-preview {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.procreate-brush-name {
+  font-size: 0.65rem;
+  text-align: center;
+  color: #98989d;
+}
+
+/* Color panel */
+.procreate-color-current {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.procreate-color-swatch {
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+}
+
+.procreate-color-swatch.large {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+}
+
+.procreate-color-swatch.small {
+  width: 28px;
+  height: 28px;
+}
+
+.procreate-color-swatch.active {
+  border-color: #007aff;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.4);
+}
+
+.procreate-color-disc-wrap {
+  padding: 0 1rem;
+}
+
+.procreate-hue-ring {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: conic-gradient(
+    red, yellow, lime, cyan, blue, magenta, red
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: crosshair;
+}
+
+.procreate-sat-disc {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  position: relative;
+  background: linear-gradient(to top, #000, transparent),
+    linear-gradient(to right, #fff, transparent);
+  cursor: crosshair;
+}
+
+.procreate-color-cursor {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.procreate-classic-picker {
+  padding: 0 1rem;
+}
+
+.procreate-classic-square {
+  width: 100%;
+  aspect-ratio: 1;
+  max-height: 180px;
+  border-radius: 8px;
+  position: relative;
+  cursor: crosshair;
+}
+
+.procreate-hue-slider {
+  width: 100%;
+  margin-top: 0.75rem;
+  accent-color: #007aff;
+}
+
+.procreate-value-picker {
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.procreate-value-row {
+  display: grid;
+  grid-template-columns: 2rem 1fr 3rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.procreate-value-row input[type="number"] {
+  background: #1c1c1e;
+  border: 1px solid #48484a;
+  border-radius: 6px;
+  color: #f2f2f7;
+  padding: 0.25rem;
+  width: 100%;
+}
+
+.procreate-hex-input {
+  grid-column: 2 / 4;
+  background: #1c1c1e;
+  border: 1px solid #48484a;
+  border-radius: 6px;
+  color: #f2f2f7;
+  padding: 0.35rem 0.5rem;
+}
+
+.procreate-palette-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0.5rem 1rem;
+}
+
+.procreate-palette-row.compact {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.procreate-palettes {
+  padding: 0 0 0.5rem;
+  overflow-y: auto;
+  max-height: 240px;
+}
+
+.procreate-palette-group p {
+  font-size: 0.75rem;
+  color: #98989d;
+  padding: 0.5rem 1rem 0.25rem;
+}
+
+.procreate-harmony {
+  padding-bottom: 0.5rem;
+}
+
+.procreate-harmony p {
+  font-size: 0.75rem;
+  color: #98989d;
+  padding: 0 1rem 0.25rem;
+}
+
+.procreate-color-tabs {
+  display: flex;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.procreate-color-tabs button {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #98989d;
+  font-size: 0.75rem;
+  padding: 0.65rem;
+  cursor: pointer;
+}
+
+.procreate-color-tabs button.active {
+  color: #007aff;
+  font-weight: 600;
+}
+
+/* Layers */
+.procreate-layers-list {
+  overflow-y: auto;
+  max-height: 320px;
+  padding: 0.5rem;
+}
+
+.procreate-layer-row {
+  display: grid;
+  grid-template-columns: 24px 44px 1fr 32px;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+}
+
+.procreate-layer-row.active {
+  background: rgba(0, 122, 255, 0.2);
+}
+
+.procreate-layer-vis {
+  background: transparent;
+  border: none;
+  color: #98989d;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.procreate-layer-vis.hidden {
+  opacity: 0.4;
+}
+
+.procreate-layer-thumb {
+  width: 40px;
+  height: 40px;
+  background: #1c1c1e;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.procreate-layer-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.procreate-layer-name {
+  background: transparent;
+  border: none;
+  color: #f2f2f7;
+  font-size: 0.8125rem;
+  width: 100%;
+}
+
+.procreate-layer-blend {
+  background: #3a3a3c;
+  border: none;
+  color: #98989d;
+  font-size: 0.65rem;
+  border-radius: 4px;
+  padding: 0.2rem;
+  cursor: pointer;
+}
+
+.procreate-blend-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  background: #1c1c1e;
+  border-radius: 8px;
+  padding: 0.5rem;
+  z-index: 5;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.procreate-blend-menu label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: #98989d;
+  margin-bottom: 0.5rem;
+}
+
+.procreate-blend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.procreate-blend-list button {
+  background: transparent;
+  border: none;
+  color: #f2f2f7;
+  text-align: left;
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.procreate-blend-list button.active {
+  background: #007aff;
+}
+
+.procreate-layers-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.procreate-layers-actions button {
+  flex: 1;
+  min-width: 60px;
+  background: #3a3a3c;
+  border: none;
+  color: #f2f2f7;
+  font-size: 0.75rem;
+  padding: 0.4rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Actions panel */
+.procreate-actions-list {
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  overflow-y: auto;
+}
+
+.procreate-actions-list button,
+.procreate-file-btn {
+  background: transparent;
+  border: none;
+  color: #f2f2f7;
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.procreate-actions-list button:hover,
+.procreate-file-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.procreate-actions-list hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 0.5rem 0;
+}
+
+.procreate-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.procreate-toggle input {
+  accent-color: #007aff;
+}
+
+@media (max-width: 640px) {
+  .procreate-sidebar {
+    left: 6px;
+    padding: 8px 4px;
+  }
+
+  .procreate-slider-wrap {
+    height: 80px;
+  }
+
+  .procreate-slider-wrap input[type="range"] {
+    height: 80px;
+  }
+
+  .procreate-top-left,
+  .procreate-top-right {
+    top: 8px;
+  }
+
+  .procreate-tool-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .procreate-panel {
+    left: 6px !important;
+    right: 6px !important;
+    width: auto !important;
+  }
+}
