@@ -891,7 +891,7 @@
   font-size: 0.75rem;
 }
 
-.procreate-layer-vis.hidden {
+.procreate-layer-vis.is-off {
   opacity: 0.4;
 }
 

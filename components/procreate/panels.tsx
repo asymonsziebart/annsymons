@@ -401,7 +401,7 @@ export function LayersPanel({
           >
             <button
               type="button"
-              className={`procreate-layer-vis${layer.visible ? "" : " hidden"}`}
+              className={`procreate-layer-vis${layer.visible ? "" : " is-off"}`}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleVisible(layer.id);
