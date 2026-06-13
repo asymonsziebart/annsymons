@@ -1,16 +1,26 @@
 import type { CustomPalette, StudioPrefs } from "./types";
 import { DEFAULT_STUDIO_PREFS } from "./types";
 
-const PREFS_KEY = "annsymons-palette-prefs";
+const PREFS_KEY = "annsymons-palette-prefs-v2";
 const PALETTES_KEY = "annsymons-palette-swatches";
 const LEGACY_PREFS_KEY = "annsymons-procreate-prefs";
+const LEGACY_PALETTE_PREFS_KEY = "annsymons-palette-prefs";
 const LEGACY_PALETTES_KEY = "annsymons-procreate-palettes";
 
 function migrateLegacyStorage() {
   if (typeof window === "undefined") return;
   try {
-    if (!localStorage.getItem(PREFS_KEY) && localStorage.getItem(LEGACY_PREFS_KEY)) {
-      localStorage.setItem(PREFS_KEY, localStorage.getItem(LEGACY_PREFS_KEY)!);
+    const current = localStorage.getItem(PREFS_KEY);
+    if (!current) {
+      const legacy =
+        localStorage.getItem(LEGACY_PALETTE_PREFS_KEY) ?? localStorage.getItem(LEGACY_PREFS_KEY);
+      if (legacy) {
+        const parsed = JSON.parse(legacy) as Partial<StudioPrefs>;
+        localStorage.setItem(
+          PREFS_KEY,
+          JSON.stringify({ ...parsed, showInterface: true }),
+        );
+      }
     }
     if (!localStorage.getItem(PALETTES_KEY) && localStorage.getItem(LEGACY_PALETTES_KEY)) {
       localStorage.setItem(PALETTES_KEY, localStorage.getItem(LEGACY_PALETTES_KEY)!);

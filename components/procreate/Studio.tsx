@@ -185,8 +185,10 @@ export default function Studio({ artworkId, onBack }: Props) {
   const layersRef = useRef(layers);
   const activeLayerIdRef = useRef(activeLayerId);
   const prefsRef = useRef(prefs);
+  const prefsHydratedRef = useRef(false);
   const colorRef = useRef(color);
   const referenceImgRef = useRef<HTMLImageElement | null>(null);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   const onionSkinRef = useRef<HTMLCanvasElement | null>(null);
   const [overlayVersion, setOverlayVersion] = useState(0);
 
@@ -205,9 +207,16 @@ export default function Studio({ artworkId, onBack }: Props) {
 
   useEffect(() => {
     setPrefs(loadStudioPrefs());
+    prefsHydratedRef.current = true;
   }, []);
 
   useEffect(() => {
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    setIsTouchDevice(coarse || "ontouchstart" in window);
+  }, []);
+
+  useEffect(() => {
+    if (!prefsHydratedRef.current) return;
     saveStudioPrefs(prefs);
   }, [prefs]);
 
@@ -1159,11 +1168,14 @@ export default function Studio({ artworkId, onBack }: Props) {
     return <div className="procreate-loading">Loading studio…</div>;
   }
 
+  const showChrome = isTouchDevice || prefs.showInterface;
+
   const uiClass = [
     "procreate-studio",
     prefs.lightInterface ? "light" : "",
     prefs.rightHanded ? "right-handed" : "",
-    prefs.showInterface ? "" : "hide-ui",
+    isTouchDevice ? "touch-device" : "",
+    showChrome ? "" : "hide-ui",
   ]
     .filter(Boolean)
     .join(" ");
@@ -1354,7 +1366,7 @@ export default function Studio({ artworkId, onBack }: Props) {
 
           <SymmetryBar mode={prefs.symmetry} onChange={(m) => setPrefs({ ...prefs, symmetry: m })} />
 
-      {!prefs.showInterface && (
+      {!showChrome && (
         <button
           type="button"
           className="procreate-show-ui-btn"
@@ -1720,17 +1732,19 @@ export default function Studio({ artworkId, onBack }: Props) {
               />
               Brush cursor
             </label>
-            <button
-              type="button"
-              onClick={() => {
-                const next = !prefs.showInterface;
-                if (!next) setPanel(null);
-                setPrefs({ ...prefs, showInterface: next });
-              }}
-              {...tipProps("Hide all menus for a distraction-free canvas")}
-            >
-              {prefs.showInterface ? "Hide interface" : "Show interface"}
-            </button>
+            {!isTouchDevice && (
+              <button
+                type="button"
+                onClick={() => {
+                  const next = !prefs.showInterface;
+                  if (!next) setPanel(null);
+                  setPrefs({ ...prefs, showInterface: next });
+                }}
+                {...tipProps("Hide all menus for a distraction-free canvas")}
+              >
+                {prefs.showInterface ? "Hide interface" : "Show interface"}
+              </button>
+            )}
           </div>
         </div>
       )}
