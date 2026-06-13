@@ -26,7 +26,10 @@ export function loadStudioPrefs(): StudioPrefs {
   try {
     const raw = localStorage.getItem(PREFS_KEY);
     if (!raw) return DEFAULT_STUDIO_PREFS;
-    return { ...DEFAULT_STUDIO_PREFS, ...JSON.parse(raw) };
+    const merged = { ...DEFAULT_STUDIO_PREFS, ...JSON.parse(raw) };
+    // Avoid trapping mobile users with a hidden toolbar saved from accidental double-tap.
+    if (!merged.showInterface) merged.showInterface = true;
+    return merged;
   } catch {
     return DEFAULT_STUDIO_PREFS;
   }

@@ -1170,9 +1170,7 @@ export default function Studio({ artworkId, onBack }: Props) {
 
   return (
     <div className={uiClass}>
-      {prefs.showInterface && (
-        <>
-          <div className="procreate-top-left">
+      <div className="procreate-top-left">
             <button
               type="button"
               className="procreate-tool-btn"
@@ -1355,7 +1353,16 @@ export default function Studio({ artworkId, onBack }: Props) {
           </aside>
 
           <SymmetryBar mode={prefs.symmetry} onChange={(m) => setPrefs({ ...prefs, symmetry: m })} />
-        </>
+
+      {!prefs.showInterface && (
+        <button
+          type="button"
+          className="procreate-show-ui-btn"
+          onClick={() => setPrefs({ ...prefs, showInterface: true })}
+          {...tipProps("Show toolbar and tools")}
+        >
+          Show tools
+        </button>
       )}
 
       <QuickMenu open={quickMenuOpen} onClose={() => setQuickMenuOpen(false)} onAction={handleQuickAction} />
@@ -1372,7 +1379,6 @@ export default function Studio({ artworkId, onBack }: Props) {
         onTouchEnd={handleTouchEnd}
         onTouchCancel={handleTouchEnd}
         onTouchMove={handleTouchPinch}
-        onDoubleClick={() => setPrefs((p) => ({ ...p, showInterface: !p.showInterface }))}
       >
         <canvas ref={viewCanvasRef} className="procreate-view-canvas" />
       </div>
@@ -1716,8 +1722,12 @@ export default function Studio({ artworkId, onBack }: Props) {
             </label>
             <button
               type="button"
-              onClick={() => setPrefs({ ...prefs, showInterface: !prefs.showInterface })}
-              {...tipProps("Hide all menus for a distraction-free canvas (double-tap canvas too)")}
+              onClick={() => {
+                const next = !prefs.showInterface;
+                if (!next) setPanel(null);
+                setPrefs({ ...prefs, showInterface: next });
+              }}
+              {...tipProps("Hide all menus for a distraction-free canvas")}
             >
               {prefs.showInterface ? "Hide interface" : "Show interface"}
             </button>
