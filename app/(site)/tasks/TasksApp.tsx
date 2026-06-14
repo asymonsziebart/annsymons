@@ -3117,7 +3117,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
 
       {/* Mobile detail sheet — only when user opens details; list stays usable otherwise */}
       {selected && selectedTaskIds.length === 1 && !detailsMinimized && (
-        <div className="fixed inset-0 z-[60] flex flex-col bg-stone-50 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] lg:hidden">
+        <div className="fixed inset-0 z-[60] flex h-screen h-[100dvh] max-h-screen max-h-[100dvh] flex-col overflow-hidden bg-stone-50 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] lg:hidden">
           <div className="flex shrink-0 items-center justify-between border-b border-stone-200 bg-white px-4 pb-3 pt-3 shadow-sm">
             <button
               type="button"
@@ -3129,7 +3129,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
             <span className="text-xs text-stone-500">Task</span>
             <span className="w-14" aria-hidden />
           </div>
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
             <TaskDetail
               task={selected}
               allTasks={tasks}
@@ -3148,6 +3148,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               onRemoveSubtask={(id) => void removeSubtask(id, selected.id)}
               onMinimize={() => setDetailsMinimized(true)}
               minimizeButtonLabel="Back to list"
+              scrollMode="external"
               inputClass={input}
               labelClass={label}
             />
@@ -3552,6 +3553,7 @@ function TaskDetail({
   onRemoveSubtask,
   onMinimize,
   minimizeButtonLabel,
+  scrollMode = "internal",
   inputClass,
   labelClass,
 }: {
@@ -3570,6 +3572,8 @@ function TaskDetail({
   onMinimize?: () => void;
   /** Defaults to "Minimize" (desktop). Use e.g. "Back to list" on mobile. */
   minimizeButtonLabel?: string;
+  /** Mobile sheets scroll the sheet itself; desktop keeps the detail pane's internal scroller. */
+  scrollMode?: "internal" | "external";
   inputClass: string;
   labelClass: string;
 }) {
@@ -3586,9 +3590,16 @@ function TaskDetail({
   const blockedTitle = completionBlocked
     ? `Complete first: ${prereqBlockers.map((t) => t.title).join(", ")}`
     : undefined;
+  const usesExternalScroll = scrollMode === "external";
+  const shellClass = usesExternalScroll
+    ? "flex min-h-full flex-col"
+    : "flex min-h-0 flex-1 flex-col overflow-hidden";
+  const contentClass = usesExternalScroll
+    ? "px-4 py-4 pb-8"
+    : "min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-4 [-webkit-overflow-scrolling:touch]";
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <div className={shellClass}>
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-stone-200 bg-stone-50/80 px-4 py-3">
         <button
           type="button"
@@ -3615,7 +3626,7 @@ function TaskDetail({
         ) : null}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-4 [-webkit-overflow-scrolling:touch]">
+      <div className={contentClass}>
         <p className="text-xs text-stone-500">My tasks › {task.section_name}</p>
         <input
           type="text"
