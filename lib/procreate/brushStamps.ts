@@ -361,6 +361,7 @@ export function renderBrushStamp(
   alpha: number,
   brush: BrushDef,
   angle: number,
+  compositeOperation?: GlobalCompositeOperation,
 ) {
   const shape = brush.shape ?? "circle";
   const aspect = brush.aspectRatio ?? 0.22;
@@ -374,7 +375,7 @@ export function renderBrushStamp(
   }
 
   ctx.save();
-  ctx.globalCompositeOperation = STAMP_BLEND[blend];
+  ctx.globalCompositeOperation = compositeOperation ?? STAMP_BLEND[blend];
 
   if (shape === "circle") {
     stampCircle(ctx, x, y, size, color, alpha, brush.hardness, brush.texture);
@@ -383,13 +384,14 @@ export function renderBrushStamp(
   }
 
   if (brush.glow && brush.glow > 0) {
-    ctx.globalCompositeOperation = "screen";
+    ctx.globalCompositeOperation = compositeOperation ?? "screen";
     ctx.globalAlpha = alpha * brush.glow * 0.45;
     stampCircle(ctx, x, y, size * 1.75, color, 1, 0.05, "smooth");
   }
 
   if (brush.bleed && brush.bleed > 0) {
-    ctx.globalCompositeOperation = blend === "normal" ? "source-over" : STAMP_BLEND[blend];
+    ctx.globalCompositeOperation =
+      compositeOperation ?? (blend === "normal" ? "source-over" : STAMP_BLEND[blend]);
     const ox = (Math.random() - 0.5) * size * brush.bleed * 0.35;
     const oy = (Math.random() - 0.5) * size * brush.bleed * 0.35;
     ctx.globalAlpha = alpha * brush.bleed * 0.35;

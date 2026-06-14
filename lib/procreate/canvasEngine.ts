@@ -305,7 +305,17 @@ export class StrokeEngine {
       ctx.drawImage(tip, sx - r, sy - r, stampSize, stampSize);
       ctx.restore();
     } else {
-      renderBrushStamp(ctx, sx, sy, stampSize, color, stampAlpha, brush, segmentAngle);
+      renderBrushStamp(
+        ctx,
+        sx,
+        sy,
+        stampSize,
+        color,
+        stampAlpha,
+        brush,
+        segmentAngle,
+        erase ? "destination-out" : undefined,
+      );
     }
 
     if (brush.wetMix > 0 && !erase) {
