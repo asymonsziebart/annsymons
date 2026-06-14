@@ -3129,7 +3129,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
             <span className="text-xs text-stone-500">Task</span>
             <span className="w-14" aria-hidden />
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
             <TaskDetail
               task={selected}
               allTasks={tasks}
@@ -3615,7 +3615,7 @@ function TaskDetail({
         ) : null}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-4">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-4 [-webkit-overflow-scrolling:touch]">
         <p className="text-xs text-stone-500">My tasks › {task.section_name}</p>
         <input
           type="text"
