@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getAllPosts } from "@/lib/data/posts";
 import { getAllRecipes } from "@/lib/data/recipes";
+import { getPurchaseRequestCounts } from "@/lib/data/purchaseRequests";
 import AdminLogoutButton from "./AdminLogoutButton";
 import AdminSeedButton from "./AdminSeedButton";
 
@@ -9,6 +10,7 @@ const privatePages = [
   { href: "/admin/garage", label: "Garage Inventory", description: "Search bins and stored items" },
   { href: "/admin/dogs", label: "Puppy Ranch", description: "Cozy dog breeding game" },
   { href: "/admin/voices", label: "Voices", description: "Things he is not allowed to do" },
+  { href: "/admin/requests", label: "Purchase Requests", description: "Review things to buy" },
   { href: "/tasks", label: "Tasks", description: "Private task board" },
   { href: "/statephotos", label: "State Photos", description: "Map photo manager" },
   { href: "/archery", label: "Archery", description: "Hidden practice page" },
@@ -20,9 +22,10 @@ export const metadata = {
 };
 
 export default async function AdminDashboardPage() {
-  const [posts, recipes] = await Promise.all([
+  const [posts, recipes, purchaseRequestCounts] = await Promise.all([
     getAllPosts(),
     getAllRecipes(),
+    getPurchaseRequestCounts(),
   ]);
 
   return (
@@ -49,6 +52,12 @@ export default async function AdminDashboardPage() {
             className="rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)]"
           >
             Voices
+          </Link>
+          <Link
+            href="/admin/requests"
+            className="rounded-xl bg-sky-700 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-800"
+          >
+            Requests
           </Link>
           <AdminSeedButton />
           <AdminLogoutButton />
@@ -135,6 +144,28 @@ export default async function AdminDashboardPage() {
           </div>
           <p className="mt-2 text-sm text-[var(--color-muted)]">
             Ford Maverick down payment savings, loan estimate, and truck photo.
+          </p>
+        </section>
+
+        <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
+                Purchase Requests
+              </h2>
+              <p className="mt-1 text-sm text-[var(--color-muted)]">
+                {purchaseRequestCounts.pending} pending · {purchaseRequestCounts.total} total
+              </p>
+            </div>
+            <Link
+              href="/admin/requests"
+              className="text-sm font-medium text-[var(--color-accent)] hover:underline"
+            >
+              Review →
+            </Link>
+          </div>
+          <p className="mt-2 text-sm text-[var(--color-muted)]">
+            Accept or reject things we want to buy, with reasons.
           </p>
         </section>
 
