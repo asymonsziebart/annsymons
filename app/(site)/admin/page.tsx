@@ -9,6 +9,7 @@ const privatePages = [
   { href: "/admin/backyard", label: "Backyard Plants", description: "Map plants on a yard photo" },
   { href: "/admin/garage", label: "Garage Inventory", description: "Search bins and stored items" },
   { href: "/admin/dogs", label: "Puppy Ranch", description: "Cozy dog breeding game" },
+  { href: "/admin/movies", label: "Movies", description: "Private Google Drive movie library" },
   { href: "/admin/voices", label: "Voices", description: "Things he is not allowed to do" },
   { href: "/admin/requests", label: "Purchase Requests", description: "Review things to buy" },
   { href: "/tasks", label: "Tasks", description: "Private task board" },

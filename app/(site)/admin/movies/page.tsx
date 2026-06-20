@@ -1,26 +1,36 @@
+import Link from "next/link";
+
 const driveFolderUrl =
   "https://drive.google.com/drive/folders/1RBAj7byBO2YswerQRK105ba74ZvG6Qm9";
 const embeddedDriveFolderUrl =
   "https://drive.google.com/embeddedfolderview?id=1RBAj7byBO2YswerQRK105ba74ZvG6Qm9#grid";
 
 export const metadata = {
-  title: "Movies | Ann Symons",
-  description: "Watch movies from the shared Google Drive folder.",
+  title: "Movies | Admin",
+  description: "Private movie library from the shared Google Drive folder.",
+  robots: "noindex, nofollow",
 };
 
-export default function MoviesPage() {
+export default function AdminMoviesPage() {
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-8 sm:py-20">
-      <header className="mb-8 sm:mb-12">
+    <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-8 sm:py-12">
+      <Link
+        href="/admin"
+        className="inline-flex min-h-11 items-center text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+      >
+        ← Back to Admin
+      </Link>
+
+      <header className="mb-8 mt-4 sm:mb-10">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-accent)]">
-          Movie library
+          Private movie library
         </p>
         <h1 className="font-heading mt-3 text-3xl font-semibold tracking-tight text-[var(--color-ink)] sm:text-4xl">
           Watch movies
         </h1>
         <p className="mt-3 max-w-2xl text-pretty text-base leading-relaxed text-[var(--color-muted)] sm:text-lg">
           Browse the shared Google Drive folder below, then select a movie to
-          preview and play it.
+          preview and play it. This page is only available after admin login.
         </p>
       </header>
 
@@ -54,6 +64,6 @@ export default function MoviesPage() {
           />
         </div>
       </section>
-    </main>
+    </div>
   );
 }
