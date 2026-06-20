@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getDriveMovies, isDriveFileId } from "@/lib/googleDriveMovies";
+import {
+  createMovieStreamToken,
+  getDriveMovies,
+  isDriveFileId,
+} from "@/lib/googleDriveMovies";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +25,9 @@ export default async function AdminMoviePlayerPage({
   const movie = movies.find((item) => item.id === id);
   if (!movie) notFound();
 
-  const streamUrl = `/api/admin/movies/${id}/stream`;
+  const streamExpiresAt = Date.now() + 1000 * 60 * 60 * 12;
+  const streamToken = createMovieStreamToken(id, streamExpiresAt);
+  const streamUrl = `/api/admin/movies/${id}/stream?expires=${streamExpiresAt}&token=${streamToken}`;
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-8 sm:py-12">
@@ -58,16 +64,25 @@ export default async function AdminMoviePlayerPage({
           controls
           playsInline
           preload="metadata"
-          src={streamUrl}
           className="aspect-video w-full bg-black"
         >
+          <source src={streamUrl} type="video/mp4" />
           <a href={streamUrl}>Open the movie stream</a>
         </video>
       </section>
 
       <div className="mt-4 rounded-2xl bg-[var(--color-surface)] p-4 text-sm leading-relaxed text-[var(--color-ink-muted)] ring-1 ring-[var(--color-border)]">
-        If playback does not start right away on the Switch, wait a moment for
-        the stream to prepare and press play again.
+        <p>
+          If playback does not start right away on the Switch, use the direct
+          stream button below. It opens the same private MP4 stream without any
+          Google Drive page.
+        </p>
+        <a
+          href={streamUrl}
+          className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--color-accent)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--color-accent-hover)]"
+        >
+          Open direct movie stream
+        </a>
       </div>
     </div>
   );

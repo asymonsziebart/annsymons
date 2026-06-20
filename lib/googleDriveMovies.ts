@@ -1,3 +1,5 @@
+import { createHmac, timingSafeEqual } from "crypto";
+
 export type DriveMovieFile = {
   id: string;
   name: string;
@@ -9,9 +11,36 @@ export const DRIVE_MOVIES_FOLDER_URL = `https://drive.google.com/drive/folders/$
 const DRIVE_FILE_ID_RE = /^[A-Za-z0-9_-]{20,}$/;
 const USER_AGENT =
   "Mozilla/5.0 (compatible; AnnSymonsMoviePlayer/1.0; +https://www.annsymons.com)";
+const STREAM_TOKEN_SALT = "annsymons-drive-movie-stream";
 
 export function isDriveFileId(value: string): boolean {
   return DRIVE_FILE_ID_RE.test(value);
+}
+
+export function createMovieStreamToken(fileId: string, expiresAt: number): string {
+  return createHmac("sha256", getMovieStreamSecret())
+    .update(`${fileId}:${expiresAt}`)
+    .digest("hex");
+}
+
+export function isMovieStreamTokenValid(
+  fileId: string,
+  expiresAtText: string | null,
+  token: string | null
+): boolean {
+  if (!expiresAtText || !token || !isDriveFileId(fileId)) return false;
+
+  const expiresAt = Number(expiresAtText);
+  if (!Number.isSafeInteger(expiresAt) || expiresAt < Date.now()) return false;
+
+  const expected = createMovieStreamToken(fileId, expiresAt);
+  const expectedBuffer = Buffer.from(expected, "hex");
+  const tokenBuffer = Buffer.from(token, "hex");
+
+  return (
+    expectedBuffer.length === tokenBuffer.length &&
+    timingSafeEqual(expectedBuffer, tokenBuffer)
+  );
 }
 
 export async function getDriveMovies(): Promise<DriveMovieFile[]> {
@@ -122,4 +151,12 @@ function decodeHtmlEntities(value: string): string {
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&amp;/g, "&");
+}
+
+function getMovieStreamSecret(): string {
+  const password = process.env.ADMIN_PASSWORD;
+  if (!password) {
+    throw new Error("ADMIN_PASSWORD is required for movie streaming");
+  }
+  return `${password}:${STREAM_TOKEN_SALT}`;
 }

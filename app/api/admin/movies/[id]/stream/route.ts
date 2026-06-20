@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/auth";
-import { fetchDriveMovieStream, isDriveFileId } from "@/lib/googleDriveMovies";
+import {
+  fetchDriveMovieStream,
+  isDriveFileId,
+  isMovieStreamTokenValid,
+} from "@/lib/googleDriveMovies";
 
 export const runtime = "nodejs";
 
@@ -8,13 +12,19 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const ok = await isAdmin();
-  if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
   const { id } = await params;
   if (!isDriveFileId(id)) {
     return NextResponse.json({ error: "Invalid movie id" }, { status: 400 });
   }
+
+  const url = new URL(request.url);
+  const hasValidStreamToken = isMovieStreamTokenValid(
+    id,
+    url.searchParams.get("expires"),
+    url.searchParams.get("token")
+  );
+  const ok = hasValidStreamToken || (await isAdmin());
+  if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
     const driveResponse = await fetchDriveMovieStream(id, request.headers.get("range"));
@@ -27,6 +37,7 @@ export async function GET(
     copyHeader(driveResponse.headers, headers, "content-range");
     copyHeader(driveResponse.headers, headers, "accept-ranges");
     headers.set("content-type", driveResponse.headers.get("content-type") ?? "video/mp4");
+    headers.set("content-disposition", "inline");
     headers.set("cache-control", "private, no-store");
 
     return new Response(driveResponse.body, {
