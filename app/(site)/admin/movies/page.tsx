@@ -1,17 +1,36 @@
 import Link from "next/link";
+import {
+  DRIVE_MOVIES_FOLDER_URL,
+  getDriveMovies,
+  type DriveMovieFile,
+} from "@/lib/googleDriveMovies";
 
-const driveFolderUrl =
-  "https://drive.google.com/drive/folders/1RBAj7byBO2YswerQRK105ba74ZvG6Qm9";
-const embeddedDriveFolderUrl =
-  "https://drive.google.com/embeddedfolderview?id=1RBAj7byBO2YswerQRK105ba74ZvG6Qm9#grid";
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Movies | Admin",
-  description: "Private movie library from the shared Google Drive folder.",
+  description: "Private movie library with Switch-friendly playback.",
   robots: "noindex, nofollow",
 };
 
-export default function AdminMoviesPage() {
+async function loadMovies(): Promise<{
+  movies: DriveMovieFile[];
+  error: string | null;
+}> {
+  try {
+    return { movies: await getDriveMovies(), error: null };
+  } catch (error) {
+    return {
+      movies: [],
+      error:
+        error instanceof Error ? error.message : "Could not load movies from Google Drive",
+    };
+  }
+}
+
+export default async function AdminMoviesPage() {
+  const { movies, error } = await loadMovies();
+
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-8 sm:py-12">
       <Link
@@ -29,8 +48,8 @@ export default function AdminMoviesPage() {
           Watch movies
         </h1>
         <p className="mt-3 max-w-2xl text-pretty text-base leading-relaxed text-[var(--color-muted)] sm:text-lg">
-          Browse the shared Google Drive folder below, then select a movie to
-          preview and play it. This page is only available after admin login.
+          Pick a movie below to play it with a standard video player. This avoids
+          the Google Drive embedded player that is not available on the Switch.
         </p>
       </header>
 
@@ -41,12 +60,13 @@ export default function AdminMoviesPage() {
               All movies
             </h2>
             <p className="mt-1 text-sm leading-relaxed text-[var(--color-ink-muted)]">
-              If the embedded folder does not load, open it directly in Google
-              Drive.
+              {movies.length > 0
+                ? `${movies.length} movies found in the shared Google Drive folder.`
+                : "Movies are loaded from the shared Google Drive folder."}
             </p>
           </div>
           <a
-            href={driveFolderUrl}
+            href={DRIVE_MOVIES_FOLDER_URL}
             target="_blank"
             rel="noreferrer"
             className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--color-accent)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--color-accent-hover)]"
@@ -55,13 +75,35 @@ export default function AdminMoviesPage() {
           </a>
         </div>
 
-        <div className="h-[68vh] min-h-[32rem] bg-white">
-          <iframe
-            title="Google Drive movie folder"
-            src={embeddedDriveFolderUrl}
-            className="h-full w-full border-0"
-            allow="fullscreen"
-          />
+        <div className="p-4 sm:p-5">
+          {error ? (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-relaxed text-amber-900">
+              Could not load the movie list from Google Drive. Try opening Drive
+              directly, or reload this page. Error: {error}
+            </div>
+          ) : movies.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-cream)]/60 p-6 text-center text-sm text-[var(--color-muted)]">
+              No MP4 movies were found in the Google Drive folder.
+            </div>
+          ) : (
+            <ul className="grid gap-3 sm:grid-cols-2">
+              {movies.map((movie) => (
+                <li key={movie.id}>
+                  <Link
+                    href={`/admin/movies/${movie.id}`}
+                    className="block rounded-2xl border border-[var(--color-border)] bg-[var(--color-cream)]/60 px-4 py-3 transition-colors hover:bg-[var(--color-cream-dark)]/70"
+                  >
+                    <span className="block text-sm font-semibold text-[var(--color-ink)]">
+                      {movie.name}
+                    </span>
+                    <span className="mt-1 block text-xs text-[var(--color-accent)]">
+                      Play movie →
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </section>
     </div>
