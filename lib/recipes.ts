@@ -335,6 +335,31 @@ export const recipes: Recipe[] = [
       "Cool in pan 10 min, then turn out onto wire rack to cool before slicing.",
     ],
   },
+  {
+    slug: "restaurant-style-blended-salsa",
+    title: "Restaurant-Style Blended Salsa",
+    description: "Smooth blended salsa with tomatoes, jalapeño, cilantro, lime, and cumin. Best after sitting overnight.",
+    prepTime: "10 min",
+    servings: "About 3 cups",
+    ingredients: [
+      "1 lb 12 oz petite diced tomatoes",
+      "¼ cup white or yellow onion, rough chopped",
+      "½ to 1 jalapeño, seeds removed for mild salsa",
+      "1 clove garlic",
+      "Small handful cilantro",
+      "1–2 tbsp lime juice",
+      "½ tsp salt, plus more to taste",
+      "Tiny pinch cumin (⅛ tsp)",
+      "Optional pinch sugar, to balance acidity",
+      "Red pepper flakes or red peppers, optional for more heat",
+    ],
+    steps: [
+      "Add tomatoes, onion, jalapeño, garlic, cilantro, lime juice, salt, cumin, and sugar if using to a blender.",
+      "Pulse 3–6 times on medium power, just until smooth but not completely pureed.",
+      "Taste and adjust salt, lime juice, or heat. Substitute or add red peppers if you want it hotter.",
+      "Refrigerate overnight before serving for the best flavor.",
+    ],
+  },
 ];
 
 export function getRecipeBySlug(slug: string): Recipe | undefined {
