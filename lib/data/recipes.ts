@@ -39,7 +39,17 @@ export async function getAllRecipes(): Promise<Recipe[]> {
       ORDER BY title
     `;
     if (Array.isArray(rows) && rows.length > 0) {
-      return (rows as DbRecipe[]).map(toRecipe);
+      const recipesBySlug = new Map<string, Recipe>();
+      for (const recipe of getStaticRecipes()) {
+        recipesBySlug.set(recipe.slug, recipe);
+      }
+      for (const row of rows as DbRecipe[]) {
+        const recipe = toRecipe(row);
+        recipesBySlug.set(recipe.slug, recipe);
+      }
+      return Array.from(recipesBySlug.values()).sort((a, b) =>
+        a.title.localeCompare(b.title)
+      );
     }
   } catch {
     // fallback
