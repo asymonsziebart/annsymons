@@ -1,15 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getRecipeBySlug, getAllRecipes } from "@/lib/data/recipes";
+import { getRecipeBySlug } from "@/lib/data/recipes";
 
 type Props = { params: Promise<{ slug: string }> };
 
 export const dynamic = "force-dynamic";
-
-export async function generateStaticParams() {
-  const recipes = await getAllRecipes();
-  return recipes.map((recipe) => ({ slug: recipe.slug }));
-}
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
