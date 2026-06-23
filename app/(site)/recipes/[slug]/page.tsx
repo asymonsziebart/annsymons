@@ -4,6 +4,8 @@ import { getRecipeBySlug, getAllRecipes } from "@/lib/data/recipes";
 
 type Props = { params: Promise<{ slug: string }> };
 
+export const dynamic = "force-dynamic";
+
 export async function generateStaticParams() {
   const recipes = await getAllRecipes();
   return recipes.map((recipe) => ({ slug: recipe.slug }));

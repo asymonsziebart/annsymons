@@ -8,8 +8,17 @@ import ImageUploadField from "../ImageUploadField";
 
 type Props = Partial<Recipe>;
 
+function recipeSlugFromTitle(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 export default function RecipeForm(initial: Props) {
   const [slug, setSlug] = useState(initial.slug ?? "");
+  const [slugEdited, setSlugEdited] = useState(!!initial.slug);
   const [title, setTitle] = useState(initial.title ?? "");
   const [description, setDescription] = useState(initial.description ?? "");
   const [prepTime, setPrepTime] = useState(initial.prepTime ?? "");
@@ -23,18 +32,30 @@ export default function RecipeForm(initial: Props) {
   const router = useRouter();
   const isEdit = !!initial.slug;
 
+  function handleTitleChange(value: string) {
+    setTitle(value);
+    if (!isEdit && !slugEdited) {
+      setSlug(recipeSlugFromTitle(value));
+    }
+  }
+
+  function handleSlugChange(value: string) {
+    setSlug(recipeSlugFromTitle(value));
+    setSlugEdited(true);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const ingredients = ingredientsText.trim().split("\n").filter(Boolean);
-    const steps = stepsText.trim().split("\n").filter(Boolean);
+    const ingredients = ingredientsText.split("\n").map((line) => line.trim()).filter(Boolean);
+    const steps = stepsText.split("\n").map((line) => line.trim()).filter(Boolean);
     try {
       const url = isEdit ? `/api/admin/recipes/${initial.slug}` : "/api/admin/recipes";
       const method = isEdit ? "PUT" : "POST";
       const payload = isEdit
-        ? { title, description, prepTime, cookTime, servings, ingredients, steps, image }
-        : { slug, title, description, prepTime, cookTime, servings, ingredients, steps, image };
+        ? { title, description, prepTime, cookTime, servings, ingredients, steps, image: image || null }
+        : { slug, title, description, prepTime, cookTime, servings, ingredients, steps, image: image || null };
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -45,7 +66,7 @@ export default function RecipeForm(initial: Props) {
         setError(data.error || "Failed");
         return;
       }
-      router.push("/admin");
+      router.push("/admin/recipes");
       router.refresh();
     } catch {
       setError("Something went wrong");
@@ -62,12 +83,15 @@ export default function RecipeForm(initial: Props) {
       {!isEdit && (
         <div>
           <label className="mb-1 block text-sm font-medium text-[var(--color-ink-muted)]">Slug (URL)</label>
-          <input type="text" value={slug} onChange={(e) => setSlug(e.target.value)} className={inputClass} required />
+          <input type="text" value={slug} onChange={(e) => handleSlugChange(e.target.value)} className={inputClass} required />
+          <p className="mt-1 text-xs text-[var(--color-muted)]">
+            This becomes the public URL: /recipes/{slug || "recipe-name"}
+          </p>
         </div>
       )}
       <div>
         <label className="mb-1 block text-sm font-medium text-[var(--color-ink-muted)]">Title</label>
-        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass} required />
+        <input type="text" value={title} onChange={(e) => handleTitleChange(e.target.value)} className={inputClass} required />
       </div>
       <div>
         <label className="mb-1 block text-sm font-medium text-[var(--color-ink-muted)]">Description</label>
@@ -101,7 +125,7 @@ export default function RecipeForm(initial: Props) {
         <button type="submit" disabled={loading} className="min-h-11 rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)] disabled:opacity-50">
           {loading ? "Saving…" : isEdit ? "Update recipe" : "Create recipe"}
         </button>
-        <Link href="/admin" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]">Cancel</Link>
+        <Link href="/admin/recipes" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]">Cancel</Link>
       </div>
     </form>
   );

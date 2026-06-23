@@ -6,6 +6,7 @@ import AdminLogoutButton from "./AdminLogoutButton";
 import AdminSeedButton from "./AdminSeedButton";
 
 const privatePages = [
+  { href: "/admin/recipes", label: "Recipes", description: "Add recipes, photos, ingredients, and steps" },
   { href: "/admin/backyard", label: "Backyard Plants", description: "Map plants on a yard photo" },
   { href: "/admin/garage", label: "Garage Inventory", description: "Search bins and stored items" },
   { href: "/admin/dogs", label: "Puppy Ranch", description: "Cozy dog breeding game" },
@@ -36,6 +37,12 @@ export default async function AdminDashboardPage() {
           Admin
         </h1>
         <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href="/admin/recipes"
+            className="rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)]"
+          >
+            Recipes
+          </Link>
           <Link
             href="/admin/garage"
             className="rounded-xl bg-sky-700 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-800"
@@ -109,7 +116,9 @@ export default async function AdminDashboardPage() {
                 key={page.href}
                 href={page.href}
                 className={
-                  page.href === "/admin/backyard"
+                  page.href === "/admin/recipes"
+                    ? "rounded-xl border border-[var(--color-accent)] bg-orange-50 px-4 py-3 shadow-sm transition-colors hover:bg-orange-100"
+                    : page.href === "/admin/backyard"
                     ? "rounded-xl border border-emerald-600 bg-emerald-50 px-4 py-3 shadow-sm transition-colors hover:bg-emerald-100"
                     : page.href === "/admin/garage"
                     ? "rounded-xl border border-sky-600 bg-sky-50 px-4 py-3 shadow-sm transition-colors hover:bg-sky-100"
@@ -208,15 +217,28 @@ export default async function AdminDashboardPage() {
 
         <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
-              Recipes
-            </h2>
-            <Link
-              href="/admin/recipes/new"
-              className="text-sm font-medium text-[var(--color-accent)] hover:underline"
-            >
-              + Add recipe
-            </Link>
+            <div>
+              <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
+                Recipes
+              </h2>
+              <p className="mt-1 text-sm text-[var(--color-muted)]">
+                {recipes.length} recipes on the site
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/admin/recipes"
+                className="text-sm font-medium text-[var(--color-accent)] hover:underline"
+              >
+                Manage →
+              </Link>
+              <Link
+                href="/admin/recipes/new"
+                className="text-sm font-medium text-[var(--color-accent)] hover:underline"
+              >
+                + Add
+              </Link>
+            </div>
           </div>
           <ul className="mt-4 space-y-2">
             {recipes.length === 0 ? (

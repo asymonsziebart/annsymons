@@ -6,6 +6,8 @@ export const metadata = {
   description: "Recipes and cooking ideas.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function RecipesPage() {
   const recipes = await getAllRecipes();
 
@@ -24,7 +26,7 @@ export default async function RecipesPage() {
         {recipes.length === 0 ? (
           <li className="col-span-full rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center text-[var(--color-muted)] sm:p-8">
             No recipes yet. Add them in the{" "}
-            <Link href="/admin" className="text-[var(--color-accent)] hover:underline">admin portal</Link> or{" "}
+            <Link href="/admin/recipes" className="text-[var(--color-accent)] hover:underline">admin portal</Link> or{" "}
             <code className="rounded bg-[var(--color-cream-dark)] px-1.5 py-0.5 text-[var(--color-ink-muted)]">
               lib/recipes.ts
             </code>

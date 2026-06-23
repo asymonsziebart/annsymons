@@ -10,10 +10,10 @@ export default function NewRecipePage() {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-8 sm:py-12">
       <Link
-        href="/admin"
+        href="/admin/recipes"
         className="text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-ink)]"
       >
-        ← Admin
+        ← Recipes
       </Link>
       <h1 className="mt-4 font-heading text-2xl font-semibold text-[var(--color-ink)]">
         New recipe
