@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
   if (!post) return { title: "Post | Ann Symons" };
-  return { title: `${post.title} | Ann Symons` };
+  return { title: `${post.title} | Ann Symons`, robots: "noindex, nofollow" };
 }
 
 export default async function BlogPostPage({ params }: Props) {

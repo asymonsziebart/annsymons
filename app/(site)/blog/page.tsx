@@ -4,6 +4,7 @@ import { getAllPosts } from "@/lib/data/posts";
 export const metadata = {
   title: "Blog | Ann Symons",
   description: "Blog posts and updates.",
+  robots: "noindex, nofollow",
 };
 
 export default async function BlogPage() {

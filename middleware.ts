@@ -61,6 +61,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (path.startsWith("/blog")) {
+    if (!(await hasAdminSession(request))) {
+      const loginUrl = new URL("/admin/login", request.url);
+      loginUrl.searchParams.set("next", `${request.nextUrl.pathname}${request.nextUrl.search}`);
+      return NextResponse.redirect(loginUrl);
+    }
+    return NextResponse.next();
+  }
+
   if (!path.startsWith("/admin") || path === "/admin/login") {
     return NextResponse.next();
   }
@@ -88,5 +97,7 @@ export const config = {
     "/statephotos/:path*",
     "/archery",
     "/archery/:path*",
+    "/blog",
+    "/blog/:path*",
   ],
 };

@@ -6,6 +6,7 @@ import AdminLogoutButton from "./AdminLogoutButton";
 import AdminSeedButton from "./AdminSeedButton";
 
 const privatePages = [
+  { href: "/blog", label: "Blog", description: "Private blog posts" },
   { href: "/admin/recipes", label: "Recipes", description: "Add recipes, photos, ingredients, and steps" },
   { href: "/admin/backyard", label: "Backyard Plants", description: "Map plants on a yard photo" },
   { href: "/admin/garage", label: "Garage Inventory", description: "Search bins and stored items" },

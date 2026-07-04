@@ -16,12 +16,6 @@ export default function Footer() {
               Home
             </Link>
             <Link
-              href="/blog"
-              className="text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors"
-            >
-              Blog
-            </Link>
-            <Link
               href="/recipes"
               className="text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors"
             >
