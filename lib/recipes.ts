@@ -414,6 +414,33 @@ export const recipes: Recipe[] = [
       "Freezing Method 3: freeze fully baked pie after cooling 8 hours, wrapped well. To reheat: unwrap, preheat to 350°F with cookie sheet or pizza stone on center rack, bake ~30 min until warmed through; cover with foil if crust or crumble browns too much.",
     ],
   },
+  {
+    slug: "easy-refrigerator-dill-pickles",
+    title: "Easy Refrigerator Dill Pickles",
+    description:
+      "Easy Refrigerator Dill Pickles take only a few minutes to make. Once you make your own homemade dill pickles, you'll never buy store bought again.",
+    prepTime: "10 min",
+    cookTime: "5 min",
+    servings: "18 (~3 quart jars)",
+    ingredients: [
+      "12 pickling cucumbers (quantity can vary depending on size)",
+      "4 cups water",
+      "2 cups white vinegar",
+      "2 tbsp kosher salt",
+      "1 tsp sugar",
+      "1 bunch fresh dill (amount can vary; thick stems removed)",
+      "1 head garlic, skins removed, cloves smashed (use fewer if garlic is strong)",
+      "1 tbsp peppercorn kernels (~10 peppercorns per jar)",
+    ],
+    steps: [
+      "Prepare ingredients: thoroughly wash the pickling cucumbers. Slice into ¼-inch thick slices or spears and set aside. Smash garlic cloves and separate dill from thick stems. Sanitize mason jars by running them through the dishwasher.",
+      "Prepare brine: combine water, white vinegar, kosher salt, and sugar in a medium saucepan. Bring to a boil and swirl the pan until sugar and salt dissolve. Remove from heat and cool to room temperature.",
+      "Make the pickles: layer cucumbers with fresh dill, smashed garlic, and peppercorns in the jars. Don't pack too tight — leave room for the brine. Pour in enough brine to cover the cucumbers.",
+      "Seal with an airtight lid and store in the refrigerator. Flavor is best after at least one week, but they can be eaten anytime. Pickles should keep at least 4–6 weeks in the fridge.",
+      "Notes: quantities listed make about 3 quart-sized jars. Dill and garlic amounts can vary to taste — pack in as much or as little fresh dill as you like.",
+      "If your garlic is particularly strong, use fewer cloves if you are sensitive to the taste.",
+    ],
+  },
 ];
 
 export function getRecipeBySlug(slug: string): Recipe | undefined {
