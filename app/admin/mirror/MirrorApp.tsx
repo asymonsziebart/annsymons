@@ -9,6 +9,9 @@ import {
   isFullscreenSupported,
   toggleFullscreen,
 } from "./mirrorFullscreen";
+import {
+  formatMirrorTimeParts,
+} from "./mirrorScale";
 import { formatMirrorDueLabel, getDueTasksForMirror } from "./mirrorTasks";
 
 const TASK_CYCLE_MS = 8000;
@@ -19,14 +22,6 @@ type MirrorAppProps = {
   initialTasks: TaskRow[];
   initialWeather: MirrorWeather | null;
 };
-
-function formatTime(d: Date): string {
-  return d.toLocaleTimeString(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-  });
-}
 
 function formatDate(d: Date): string {
   return d.toLocaleDateString(undefined, {
@@ -116,6 +111,7 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
   }, [dueTasks.length]);
 
   const currentTask = dueTasks[taskIndex] ?? null;
+  const timeParts = formatMirrorTimeParts(now);
 
   return (
     <>
@@ -138,10 +134,12 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
       ) : null}
 
       <div className="mirror-app__inner">
-      <div className="mirror-app__time" aria-live="polite" aria-atomic="true">
-        {formatTime(now)}
-      </div>
-      <div className="mirror-app__date">{formatDate(now)}</div>
+        <div className="mirror-app__time" aria-live="polite" aria-atomic="true">
+          <span className="mirror-app__time-main">{timeParts.main}</span>
+          <span className="mirror-app__time-sec">{timeParts.seconds}</span>
+          <span className="mirror-app__time-ampm">{timeParts.ampm}</span>
+        </div>
+        <div className="mirror-app__date">{formatDate(now)}</div>
 
       {weather ? (
         <div className="mirror-app__weather" aria-label={`Weather in ${weather.location}`}>

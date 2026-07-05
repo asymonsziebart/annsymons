@@ -18,6 +18,11 @@ body.mirror-active::before {
   --mirror-bg: #000000;
   --mirror-fg: #ffffff;
   --mirror-muted: rgba(255, 255, 255, 0.55);
+  --mirror-time-size: 42vw;
+  --mirror-date-size: 14vw;
+  --mirror-weather-size: 16vw;
+  --mirror-task-size: 5.5vw;
+  --mirror-task-label-size: 2.8vw;
 
   position: fixed;
   inset: 0;
@@ -55,25 +60,44 @@ body.mirror-active::before {
 }
 
 .mirror-app__time {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.12em 0.2em;
+  max-width: 100%;
   font-family: var(--font-fraunces), Georgia, serif;
   font-weight: 300;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
   line-height: 1;
-  /* vmin scales correctly on portrait tablets; rem floor keeps text large on small Android viewports */
-  font-size: clamp(7rem, 38vmin, 22rem);
+}
+
+.mirror-app__time-main {
+  font-size: var(--mirror-time-size);
+}
+
+.mirror-app__time-sec {
+  font-size: calc(var(--mirror-time-size) * 0.38);
+  opacity: 0.72;
+}
+
+.mirror-app__time-ampm {
+  font-size: calc(var(--mirror-time-size) * 0.32);
+  opacity: 0.72;
 }
 
 .mirror-app__date {
-  margin-top: clamp(1rem, 3vmin, 2rem);
-  font-size: clamp(2rem, 9vmin, 4rem);
+  margin-top: 0.35em;
+  font-size: var(--mirror-date-size);
   font-weight: 400;
-  color: var(--mirror-muted);
-  letter-spacing: 0.04em;
+  color: var(--mirror-fg);
+  letter-spacing: 0.02em;
+  line-height: 1.15;
 }
 
 .mirror-app__weather {
-  margin-top: clamp(1.5rem, 5vmin, 3rem);
+  margin-top: calc(var(--mirror-date-size) * 0.75);
 }
 
 .mirror-app__weather-temp {
@@ -81,30 +105,30 @@ body.mirror-active::before {
   font-weight: 300;
   font-variant-numeric: tabular-nums;
   line-height: 1;
-  font-size: clamp(3.5rem, 14vmin, 7rem);
+  font-size: var(--mirror-weather-size);
 }
 
 .mirror-app__weather-condition {
-  margin-top: 0.5rem;
-  font-size: clamp(1.25rem, 4vmin, 2rem);
+  margin-top: 0.35em;
+  font-size: calc(var(--mirror-weather-size) * 0.45);
   font-weight: 500;
 }
 
 .mirror-app__weather-meta {
-  margin-top: 0.45rem;
-  font-size: clamp(1rem, 2.8vmin, 1.35rem);
+  margin-top: 0.3em;
+  font-size: calc(var(--mirror-weather-size) * 0.32);
   color: var(--mirror-muted);
   letter-spacing: 0.02em;
 }
 
 .mirror-app__tasks {
-  margin-top: clamp(2rem, 7vmin, 4.5rem);
+  margin-top: calc(var(--mirror-date-size) * 1.1);
   width: min(100%, 42rem);
   min-height: 5rem;
 }
 
 .mirror-app__task-label {
-  font-size: clamp(0.85rem, 2.2vmin, 1rem);
+  font-size: var(--mirror-task-label-size);
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -112,8 +136,8 @@ body.mirror-active::before {
 }
 
 .mirror-app__task-title {
-  margin-top: 0.75rem;
-  font-size: clamp(1.75rem, 6vmin, 3rem);
+  margin-top: 0.65em;
+  font-size: var(--mirror-task-size);
   font-weight: 500;
   line-height: 1.25;
   transition: opacity 0.6s ease;
@@ -124,8 +148,8 @@ body.mirror-active::before {
 }
 
 .mirror-app__task-meta {
-  margin-top: 0.6rem;
-  font-size: clamp(1rem, 3vmin, 1.35rem);
+  margin-top: 0.45em;
+  font-size: calc(var(--mirror-task-size) * 0.72);
   color: var(--mirror-muted);
   transition: opacity 0.6s ease;
 }
@@ -135,8 +159,8 @@ body.mirror-active::before {
 }
 
 .mirror-app__empty {
-  margin-top: 0.75rem;
-  font-size: clamp(1.25rem, 3.5vmin, 1.75rem);
+  margin-top: 0.65em;
+  font-size: var(--mirror-task-size);
   color: var(--mirror-muted);
 }
 
@@ -144,7 +168,7 @@ body.mirror-active::before {
   display: flex;
   justify-content: center;
   gap: 0.5rem;
-  margin-top: 1.5rem;
+  margin-top: 1.25em;
 }
 
 .mirror-app__dot {
@@ -174,7 +198,7 @@ body.mirror-active::before {
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.82);
   font: inherit;
-  font-size: clamp(0.85rem, 2.2vmin, 1rem);
+  font-size: 1rem;
   font-weight: 500;
   letter-spacing: 0.02em;
   cursor: pointer;
