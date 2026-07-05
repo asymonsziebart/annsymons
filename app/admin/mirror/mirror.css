@@ -61,12 +61,12 @@ body.mirror-active::before {
   letter-spacing: -0.02em;
   line-height: 1;
   /* vmin scales correctly on portrait tablets; rem floor keeps text large on small Android viewports */
-  font-size: clamp(5rem, 24vmin, 16rem);
+  font-size: clamp(7rem, 38vmin, 22rem);
 }
 
 .mirror-app__date {
-  margin-top: clamp(0.75rem, 2.5vmin, 1.75rem);
-  font-size: clamp(1.35rem, 4.5vmin, 2.25rem);
+  margin-top: clamp(1rem, 3vmin, 2rem);
+  font-size: clamp(2rem, 9vmin, 4rem);
   font-weight: 400;
   color: var(--mirror-muted);
   letter-spacing: 0.04em;
