@@ -1,18 +1,41 @@
+/* Override global cream background + paper texture when mirror is active. */
+html.mirror-active,
+body.mirror-active {
+  background: #000 !important;
+  color: #fff !important;
+  overflow: hidden !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  margin: 0 !important;
+}
+
+body.mirror-active::before {
+  display: none !important;
+}
+
 .mirror-app {
   --mirror-bg: #000000;
   --mirror-fg: #ffffff;
   --mirror-muted: rgba(255, 255, 255, 0.55);
 
-  flex: 1;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
+  width: 100%;
+  height: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: -webkit-fill-available;
   overflow: hidden;
   background: var(--mirror-bg);
   color: var(--mirror-fg);
   font-family: var(--font-source-sans), system-ui, sans-serif;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .mirror-app__inner {
@@ -21,7 +44,13 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: clamp(1.5rem, 4vw, 3rem);
+  width: 100%;
+  min-height: 0;
+  padding:
+    max(1.5rem, env(safe-area-inset-top))
+    max(1.5rem, env(safe-area-inset-right))
+    max(1.5rem, env(safe-area-inset-bottom))
+    max(1.5rem, env(safe-area-inset-left));
   text-align: center;
 }
 
@@ -31,19 +60,20 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
   line-height: 1;
-  font-size: clamp(4rem, 18vw, 12rem);
+  /* vmin scales correctly on portrait tablets; rem floor keeps text large on small Android viewports */
+  font-size: clamp(5rem, 24vmin, 16rem);
 }
 
 .mirror-app__date {
-  margin-top: clamp(0.75rem, 2vw, 1.5rem);
-  font-size: clamp(1rem, 3vw, 1.75rem);
+  margin-top: clamp(0.75rem, 2.5vmin, 1.75rem);
+  font-size: clamp(1.35rem, 4.5vmin, 2.25rem);
   font-weight: 400;
   color: var(--mirror-muted);
   letter-spacing: 0.04em;
 }
 
 .mirror-app__weather {
-  margin-top: clamp(1.25rem, 3.5vw, 2.5rem);
+  margin-top: clamp(1.5rem, 5vmin, 3rem);
 }
 
 .mirror-app__weather-temp {
@@ -51,30 +81,30 @@
   font-weight: 300;
   font-variant-numeric: tabular-nums;
   line-height: 1;
-  font-size: clamp(2.5rem, 10vw, 5rem);
+  font-size: clamp(3.5rem, 14vmin, 7rem);
 }
 
 .mirror-app__weather-condition {
-  margin-top: 0.4rem;
-  font-size: clamp(1rem, 2.8vw, 1.5rem);
+  margin-top: 0.5rem;
+  font-size: clamp(1.25rem, 4vmin, 2rem);
   font-weight: 500;
 }
 
 .mirror-app__weather-meta {
-  margin-top: 0.35rem;
-  font-size: clamp(0.8rem, 2vw, 1rem);
+  margin-top: 0.45rem;
+  font-size: clamp(1rem, 2.8vmin, 1.35rem);
   color: var(--mirror-muted);
   letter-spacing: 0.02em;
 }
 
 .mirror-app__tasks {
-  margin-top: clamp(2rem, 6vw, 4rem);
+  margin-top: clamp(2rem, 7vmin, 4.5rem);
   width: min(100%, 42rem);
   min-height: 5rem;
 }
 
 .mirror-app__task-label {
-  font-size: clamp(0.7rem, 1.8vw, 0.85rem);
+  font-size: clamp(0.85rem, 2.2vmin, 1rem);
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -82,8 +112,8 @@
 }
 
 .mirror-app__task-title {
-  margin-top: 0.65rem;
-  font-size: clamp(1.25rem, 4vw, 2.25rem);
+  margin-top: 0.75rem;
+  font-size: clamp(1.75rem, 6vmin, 3rem);
   font-weight: 500;
   line-height: 1.25;
   transition: opacity 0.6s ease;
@@ -94,8 +124,8 @@
 }
 
 .mirror-app__task-meta {
-  margin-top: 0.5rem;
-  font-size: clamp(0.85rem, 2vw, 1.1rem);
+  margin-top: 0.6rem;
+  font-size: clamp(1rem, 3vmin, 1.35rem);
   color: var(--mirror-muted);
   transition: opacity 0.6s ease;
 }
@@ -105,21 +135,21 @@
 }
 
 .mirror-app__empty {
-  margin-top: 0.65rem;
-  font-size: clamp(1rem, 2.5vw, 1.35rem);
+  margin-top: 0.75rem;
+  font-size: clamp(1.25rem, 3.5vmin, 1.75rem);
   color: var(--mirror-muted);
 }
 
 .mirror-app__dots {
   display: flex;
   justify-content: center;
-  gap: 0.45rem;
-  margin-top: 1.25rem;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
 }
 
 .mirror-app__dot {
-  width: 0.4rem;
-  height: 0.4rem;
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.2);
   transition: background 0.3s ease, transform 0.3s ease;
@@ -128,4 +158,15 @@
 .mirror-app__dot--active {
   background: rgba(255, 255, 255, 0.85);
   transform: scale(1.25);
+}
+
+/* Fallback when JS hasn't run yet */
+html:has(.mirror-app),
+body:has(.mirror-app) {
+  background: #000 !important;
+  overflow: hidden !important;
+}
+
+body:has(.mirror-app)::before {
+  display: none !important;
 }

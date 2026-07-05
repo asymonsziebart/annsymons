@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 
+import MirrorBodyLock from "./MirrorBodyLock";
 import "./mirror.css";
 
 export const metadata: Metadata = {
@@ -10,6 +11,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: "cover",
   themeColor: "#000000",
 };
@@ -19,5 +22,10 @@ export default function MirrorLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <div className="mirror-app">{children}</div>;
+  return (
+    <>
+      <MirrorBodyLock />
+      <div className="mirror-app">{children}</div>
+    </>
+  );
 }
