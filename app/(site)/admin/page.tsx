@@ -15,6 +15,7 @@ const privatePages = [
   { href: "/admin/voices", label: "Voices", description: "Things he is not allowed to do" },
   { href: "/admin/requests", label: "Purchase Requests", description: "Review things to buy" },
   { href: "/tasks", label: "Tasks", description: "Private task board" },
+  { href: "/admin/mirror", label: "Smart Mirror", description: "Black full-screen clock and due tasks" },
   { href: "/statephotos", label: "State Photos", description: "Map photo manager" },
   { href: "/archery", label: "Archery", description: "Hidden practice page" },
 ] as const;
