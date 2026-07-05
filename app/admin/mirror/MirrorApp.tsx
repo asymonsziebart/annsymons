@@ -3,13 +3,16 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { TaskRow } from "@/lib/data/taskClientTypes";
+import type { MirrorWeather } from "@/lib/mirrorWeather";
 import { formatMirrorDueLabel, getDueTasksForMirror } from "./mirrorTasks";
 
 const TASK_CYCLE_MS = 8000;
 const TASK_REFRESH_MS = 60_000;
+const WEATHER_REFRESH_MS = 15 * 60_000;
 
 type MirrorAppProps = {
   initialTasks: TaskRow[];
+  initialWeather: MirrorWeather | null;
 };
 
 function formatTime(d: Date): string {
@@ -28,9 +31,10 @@ function formatDate(d: Date): string {
   });
 }
 
-export default function MirrorApp({ initialTasks }: MirrorAppProps) {
+export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppProps) {
   const [now, setNow] = useState(() => new Date());
   const [tasks, setTasks] = useState(initialTasks);
+  const [weather, setWeather] = useState<MirrorWeather | null>(initialWeather);
   const [taskIndex, setTaskIndex] = useState(0);
   const [fading, setFading] = useState(false);
 
@@ -47,6 +51,17 @@ export default function MirrorApp({ initialTasks }: MirrorAppProps) {
     }
   }, []);
 
+  const refreshWeather = useCallback(async () => {
+    try {
+      const res = await fetch("/api/mirror/weather");
+      if (!res.ok) return;
+      const data = (await res.json()) as MirrorWeather;
+      if (typeof data.temperatureF === "number") setWeather(data);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), 1000);
     return () => window.clearInterval(id);
@@ -56,6 +71,12 @@ export default function MirrorApp({ initialTasks }: MirrorAppProps) {
     const id = window.setInterval(refreshTasks, TASK_REFRESH_MS);
     return () => window.clearInterval(id);
   }, [refreshTasks]);
+
+  useEffect(() => {
+    refreshWeather();
+    const id = window.setInterval(refreshWeather, WEATHER_REFRESH_MS);
+    return () => window.clearInterval(id);
+  }, [refreshWeather]);
 
   useEffect(() => {
     setTaskIndex(0);
@@ -83,6 +104,16 @@ export default function MirrorApp({ initialTasks }: MirrorAppProps) {
         {formatTime(now)}
       </div>
       <div className="mirror-app__date">{formatDate(now)}</div>
+
+      {weather ? (
+        <div className="mirror-app__weather" aria-label={`Weather in ${weather.location}`}>
+          <p className="mirror-app__weather-temp">{weather.temperatureF}°</p>
+          <p className="mirror-app__weather-condition">{weather.condition}</p>
+          <p className="mirror-app__weather-meta">
+            H {weather.highF}° · L {weather.lowF}° · {weather.location}
+          </p>
+        </div>
+      ) : null}
 
       <div className="mirror-app__tasks" aria-live="polite">
         {dueTasks.length === 0 ? (

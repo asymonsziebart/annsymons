@@ -42,6 +42,31 @@
   letter-spacing: 0.04em;
 }
 
+.mirror-app__weather {
+  margin-top: clamp(1.25rem, 3.5vw, 2.5rem);
+}
+
+.mirror-app__weather-temp {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  font-size: clamp(2.5rem, 10vw, 5rem);
+}
+
+.mirror-app__weather-condition {
+  margin-top: 0.4rem;
+  font-size: clamp(1rem, 2.8vw, 1.5rem);
+  font-weight: 500;
+}
+
+.mirror-app__weather-meta {
+  margin-top: 0.35rem;
+  font-size: clamp(0.8rem, 2vw, 1rem);
+  color: var(--mirror-muted);
+  letter-spacing: 0.02em;
+}
+
 .mirror-app__tasks {
   margin-top: clamp(2rem, 6vw, 4rem);
   width: min(100%, 42rem);
