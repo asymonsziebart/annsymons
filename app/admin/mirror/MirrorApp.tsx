@@ -143,17 +143,17 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
           <div className="mirror-app__date">{formatDate(now)}</div>
         </div>
 
-      {weather ? (
-        <div className="mirror-app__weather" aria-label={`Weather in ${weather.location}`}>
-          <p className="mirror-app__weather-temp">{weather.temperatureF}°</p>
-          <p className="mirror-app__weather-condition">{weather.condition}</p>
-          <p className="mirror-app__weather-meta">
-            H {weather.highF}° · L {weather.lowF}° · {weather.location}
-          </p>
-        </div>
-      ) : null}
+        {weather ? (
+          <div className="mirror-app__weather" aria-label={`Weather in ${weather.location}`}>
+            <p className="mirror-app__weather-temp">{weather.temperatureF}°</p>
+            <p className="mirror-app__weather-condition">{weather.condition}</p>
+            <p className="mirror-app__weather-meta">
+              H {weather.highF}° · L {weather.lowF}° · {weather.location}
+            </p>
+          </div>
+        ) : null}
 
-      <div className="mirror-app__tasks" aria-live="polite">
+        <div className="mirror-app__tasks" aria-live="polite">
         {dueTasks.length === 0 ? (
           <p className="mirror-app__empty">No tasks due today</p>
         ) : (
@@ -188,7 +188,7 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
             ) : null}
           </>
         )}
-      </div>
+        </div>
       </div>
     </>
   );

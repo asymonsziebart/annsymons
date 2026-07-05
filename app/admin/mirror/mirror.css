@@ -18,17 +18,17 @@ body.mirror-active::before {
   --mirror-bg: #000000;
   --mirror-fg: #ffffff;
   --mirror-muted: rgba(255, 255, 255, 0.55);
-  --mirror-time-size: 22vw;
-  --mirror-date-size: 6.5vw;
-  --mirror-weather-size: 11vw;
-  --mirror-task-size: 4.2vw;
-  --mirror-task-label-size: 2.2vw;
+  --mirror-panel-width: 50vw;
+  --mirror-panel-height: 50vh;
+  --mirror-time-size: 14vw;
+  --mirror-date-size: 4.1vw;
+  --mirror-weather-size: 5.5vw;
+  --mirror-task-size: 2.75vw;
+  --mirror-task-label-size: 1.4vw;
 
   position: fixed;
   inset: 0;
   z-index: 1000;
-  display: flex;
-  flex-direction: column;
   width: 100%;
   height: 100%;
   height: 100vh;
@@ -43,22 +43,21 @@ body.mirror-active::before {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Bottom-left quarter of the screen — classic smart mirror layout. */
 .mirror-app__inner {
-  flex: 1;
+  position: absolute;
+  left: max(1rem, env(safe-area-inset-left));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  width: var(--mirror-panel-width, 50%);
+  height: var(--mirror-panel-height, 50%);
+  max-width: 50%;
+  max-height: 50%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: 0;
-  max-height: 100%;
+  align-items: flex-start;
+  justify-content: flex-end;
   overflow: hidden;
-  padding:
-    max(1.25rem, env(safe-area-inset-top))
-    max(1.25rem, env(safe-area-inset-right))
-    max(1.25rem, env(safe-area-inset-bottom))
-    max(1.25rem, env(safe-area-inset-left));
-  text-align: center;
+  text-align: left;
 }
 
 .mirror-app__clock {
@@ -70,7 +69,7 @@ body.mirror-active::before {
   display: flex;
   flex-wrap: nowrap;
   align-items: baseline;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0.15em 0.25em;
   max-width: 100%;
   white-space: nowrap;
@@ -96,16 +95,17 @@ body.mirror-active::before {
 }
 
 .mirror-app__date {
-  margin-top: 0.4em;
+  margin-top: 0.35em;
   font-size: var(--mirror-date-size);
   font-weight: 400;
   color: var(--mirror-fg);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   line-height: 1.15;
 }
 
 .mirror-app__weather {
-  margin-top: calc(var(--mirror-date-size) * 0.75);
+  margin-top: calc(var(--mirror-date-size) * 0.85);
+  max-width: 100%;
 }
 
 .mirror-app__weather-temp {
@@ -117,34 +117,35 @@ body.mirror-active::before {
 }
 
 .mirror-app__weather-condition {
-  margin-top: 0.35em;
+  margin-top: 0.3em;
   font-size: calc(var(--mirror-weather-size) * 0.45);
   font-weight: 500;
 }
 
 .mirror-app__weather-meta {
-  margin-top: 0.3em;
+  margin-top: 0.25em;
   font-size: calc(var(--mirror-weather-size) * 0.32);
   color: var(--mirror-muted);
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
 }
 
 .mirror-app__tasks {
-  margin-top: calc(var(--mirror-date-size) * 1.1);
-  width: min(100%, 42rem);
-  min-height: 5rem;
+  margin-top: calc(var(--mirror-date-size) * 0.95);
+  width: 100%;
+  min-height: 0;
 }
 
 .mirror-app__task-label {
   font-size: var(--mirror-task-label-size);
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--mirror-muted);
 }
 
 .mirror-app__task-title {
-  margin-top: 0.65em;
+  margin-top: 0.55em;
   font-size: var(--mirror-task-size);
   font-weight: 500;
   line-height: 1.25;
@@ -156,7 +157,7 @@ body.mirror-active::before {
 }
 
 .mirror-app__task-meta {
-  margin-top: 0.45em;
+  margin-top: 0.35em;
   font-size: calc(var(--mirror-task-size) * 0.72);
   color: var(--mirror-muted);
   transition: opacity 0.6s ease;
@@ -167,21 +168,21 @@ body.mirror-active::before {
 }
 
 .mirror-app__empty {
-  margin-top: 0.65em;
+  margin-top: 0.55em;
   font-size: var(--mirror-task-size);
   color: var(--mirror-muted);
 }
 
 .mirror-app__dots {
   display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 1.25em;
+  justify-content: flex-start;
+  gap: 0.45rem;
+  margin-top: 1em;
 }
 
 .mirror-app__dot {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: 0.45rem;
+  height: 0.45rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.2);
   transition: background 0.3s ease, transform 0.3s ease;
@@ -195,8 +196,8 @@ body.mirror-active::before {
 .mirror-app__fullscreen {
   position: fixed;
   z-index: 1001;
+  top: max(1rem, env(safe-area-inset-top));
   right: max(1rem, env(safe-area-inset-right));
-  bottom: max(1rem, env(safe-area-inset-bottom));
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;

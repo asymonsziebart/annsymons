@@ -7,13 +7,19 @@ export function applyMirrorTypography(): void {
   const w = vv?.width ?? window.innerWidth;
   const h = vv?.height ?? window.innerHeight;
 
-  // Balance height-driven size with width cap so the clock fits on one line.
-  const timePx = Math.round(Math.min(h * 0.2, w * 0.22));
-  const datePx = Math.round(Math.min(h * 0.05, w * 0.065));
-  const weatherPx = Math.round(Math.min(h * 0.07, w * 0.11));
-  const taskPx = Math.round(Math.min(h * 0.032, w * 0.042));
-  const taskLabelPx = Math.round(Math.min(h * 0.016, w * 0.022));
+  // Content lives in the bottom-left quarter (50% × 50%); scale from that panel.
+  const panelW = w * 0.5;
+  const panelH = h * 0.5;
+  const basis = Math.min(panelW, panelH);
 
+  const timePx = Math.round(basis * 0.28);
+  const datePx = Math.round(basis * 0.082);
+  const weatherPx = Math.round(basis * 0.11);
+  const taskPx = Math.round(basis * 0.055);
+  const taskLabelPx = Math.round(basis * 0.028);
+
+  root.style.setProperty("--mirror-panel-width", `${Math.round(panelW)}px`);
+  root.style.setProperty("--mirror-panel-height", `${Math.round(panelH)}px`);
   root.style.setProperty("--mirror-time-size", `${timePx}px`);
   root.style.setProperty("--mirror-date-size", `${datePx}px`);
   root.style.setProperty("--mirror-weather-size", `${weatherPx}px`);
