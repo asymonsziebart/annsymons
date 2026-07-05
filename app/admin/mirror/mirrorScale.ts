@@ -6,13 +6,19 @@ export function applyMirrorTypography(): void {
   const vv = window.visualViewport;
   const w = vv?.width ?? window.innerWidth;
   const h = vv?.height ?? window.innerHeight;
-  const short = Math.min(w, h);
 
-  root.style.setProperty("--mirror-time-size", `${Math.round(short * 0.42)}px`);
-  root.style.setProperty("--mirror-date-size", `${Math.round(short * 0.14)}px`);
-  root.style.setProperty("--mirror-weather-size", `${Math.round(short * 0.16)}px`);
-  root.style.setProperty("--mirror-task-size", `${Math.round(short * 0.055)}px`);
-  root.style.setProperty("--mirror-task-label-size", `${Math.round(short * 0.028)}px`);
+  // Balance height-driven size with width cap so the clock fits on one line.
+  const timePx = Math.round(Math.min(h * 0.2, w * 0.22));
+  const datePx = Math.round(Math.min(h * 0.05, w * 0.065));
+  const weatherPx = Math.round(Math.min(h * 0.07, w * 0.11));
+  const taskPx = Math.round(Math.min(h * 0.032, w * 0.042));
+  const taskLabelPx = Math.round(Math.min(h * 0.016, w * 0.022));
+
+  root.style.setProperty("--mirror-time-size", `${timePx}px`);
+  root.style.setProperty("--mirror-date-size", `${datePx}px`);
+  root.style.setProperty("--mirror-weather-size", `${weatherPx}px`);
+  root.style.setProperty("--mirror-task-size", `${taskPx}px`);
+  root.style.setProperty("--mirror-task-label-size", `${taskLabelPx}px`);
 }
 
 export function bindMirrorTypography(): () => void {

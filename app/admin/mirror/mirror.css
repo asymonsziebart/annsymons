@@ -18,11 +18,11 @@ body.mirror-active::before {
   --mirror-bg: #000000;
   --mirror-fg: #ffffff;
   --mirror-muted: rgba(255, 255, 255, 0.55);
-  --mirror-time-size: 42vw;
-  --mirror-date-size: 14vw;
-  --mirror-weather-size: 16vw;
-  --mirror-task-size: 5.5vw;
-  --mirror-task-label-size: 2.8vw;
+  --mirror-time-size: 22vw;
+  --mirror-date-size: 6.5vw;
+  --mirror-weather-size: 11vw;
+  --mirror-task-size: 4.2vw;
+  --mirror-task-label-size: 2.2vw;
 
   position: fixed;
   inset: 0;
@@ -51,26 +51,34 @@ body.mirror-active::before {
   justify-content: center;
   width: 100%;
   min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
   padding:
-    max(1.5rem, env(safe-area-inset-top))
-    max(1.5rem, env(safe-area-inset-right))
-    max(1.5rem, env(safe-area-inset-bottom))
-    max(1.5rem, env(safe-area-inset-left));
+    max(1.25rem, env(safe-area-inset-top))
+    max(1.25rem, env(safe-area-inset-right))
+    max(1.25rem, env(safe-area-inset-bottom))
+    max(1.25rem, env(safe-area-inset-left));
   text-align: center;
+}
+
+.mirror-app__clock {
+  flex-shrink: 0;
+  max-width: 100%;
 }
 
 .mirror-app__time {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: baseline;
   justify-content: center;
-  gap: 0.12em 0.2em;
+  gap: 0.15em 0.25em;
   max-width: 100%;
+  white-space: nowrap;
   font-family: var(--font-fraunces), Georgia, serif;
   font-weight: 300;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.02em;
-  line-height: 1;
+  line-height: 1.05;
 }
 
 .mirror-app__time-main {
@@ -78,17 +86,17 @@ body.mirror-active::before {
 }
 
 .mirror-app__time-sec {
-  font-size: calc(var(--mirror-time-size) * 0.38);
-  opacity: 0.72;
+  font-size: calc(var(--mirror-time-size) * 0.42);
+  opacity: 0.75;
 }
 
 .mirror-app__time-ampm {
-  font-size: calc(var(--mirror-time-size) * 0.32);
-  opacity: 0.72;
+  font-size: calc(var(--mirror-time-size) * 0.36);
+  opacity: 0.75;
 }
 
 .mirror-app__date {
-  margin-top: 0.35em;
+  margin-top: 0.4em;
   font-size: var(--mirror-date-size);
   font-weight: 400;
   color: var(--mirror-fg);

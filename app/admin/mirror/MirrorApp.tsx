@@ -134,12 +134,14 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
       ) : null}
 
       <div className="mirror-app__inner">
-        <div className="mirror-app__time" aria-live="polite" aria-atomic="true">
-          <span className="mirror-app__time-main">{timeParts.main}</span>
-          <span className="mirror-app__time-sec">{timeParts.seconds}</span>
-          <span className="mirror-app__time-ampm">{timeParts.ampm}</span>
+        <div className="mirror-app__clock">
+          <div className="mirror-app__time" aria-live="polite" aria-atomic="true">
+            <span className="mirror-app__time-main">{timeParts.main}</span>
+            <span className="mirror-app__time-sec">:{timeParts.seconds}</span>
+            <span className="mirror-app__time-ampm">{timeParts.ampm}</span>
+          </div>
+          <div className="mirror-app__date">{formatDate(now)}</div>
         </div>
-        <div className="mirror-app__date">{formatDate(now)}</div>
 
       {weather ? (
         <div className="mirror-app__weather" aria-label={`Weather in ${weather.location}`}>
