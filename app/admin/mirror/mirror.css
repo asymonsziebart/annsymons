@@ -46,7 +46,7 @@ body.mirror-active::before {
 /* Bottom-left quarter of the screen — classic smart mirror layout. */
 .mirror-app__inner {
   position: absolute;
-  left: max(1rem, env(safe-area-inset-left));
+  left: 0;
   bottom: max(1rem, env(safe-area-inset-bottom));
   width: var(--mirror-panel-width, 50%);
   height: var(--mirror-panel-height, 50%);
@@ -57,6 +57,7 @@ body.mirror-active::before {
   align-items: flex-start;
   justify-content: flex-end;
   overflow: hidden;
+  padding-left: max(2rem, calc(env(safe-area-inset-left) + 1.25rem));
   text-align: left;
 }
 
