@@ -160,6 +160,45 @@ body.mirror-active::before {
   transform: scale(1.25);
 }
 
+.mirror-app__fullscreen {
+  position: fixed;
+  z-index: 1001;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.82);
+  font: inherit;
+  font-size: clamp(0.85rem, 2.2vmin, 1rem);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.mirror-app__fullscreen:active {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+}
+
+.mirror-app__fullscreen-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+}
+
+.mirror-app__fullscreen-label {
+  line-height: 1;
+}
+
 /* Fallback when JS hasn't run yet */
 html:has(.mirror-app),
 body:has(.mirror-app) {

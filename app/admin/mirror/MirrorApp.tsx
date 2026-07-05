@@ -4,6 +4,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { TaskRow } from "@/lib/data/taskClientTypes";
 import type { MirrorWeather } from "@/lib/mirrorWeather";
+import {
+  getFullscreenElement,
+  isFullscreenSupported,
+  toggleFullscreen,
+} from "./mirrorFullscreen";
 import { formatMirrorDueLabel, getDueTasksForMirror } from "./mirrorTasks";
 
 const TASK_CYCLE_MS = 8000;
@@ -37,6 +42,8 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
   const [weather, setWeather] = useState<MirrorWeather | null>(initialWeather);
   const [taskIndex, setTaskIndex] = useState(0);
   const [fading, setFading] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [canFullscreen, setCanFullscreen] = useState(false);
 
   const dueTasks = useMemo(() => getDueTasksForMirror(tasks, now), [tasks, now]);
 
@@ -79,6 +86,18 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
   }, [refreshWeather]);
 
   useEffect(() => {
+    setCanFullscreen(isFullscreenSupported());
+    const sync = () => setIsFullscreen(Boolean(getFullscreenElement()));
+    sync();
+    document.addEventListener("fullscreenchange", sync);
+    document.addEventListener("webkitfullscreenchange", sync);
+    return () => {
+      document.removeEventListener("fullscreenchange", sync);
+      document.removeEventListener("webkitfullscreenchange", sync);
+    };
+  }, []);
+
+  useEffect(() => {
     setTaskIndex(0);
   }, [dueTasks.length]);
 
@@ -99,7 +118,37 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
   const currentTask = dueTasks[taskIndex] ?? null;
 
   return (
-    <div className="mirror-app__inner">
+    <>
+      {canFullscreen ? (
+        <button
+          type="button"
+          className="mirror-app__fullscreen"
+          onClick={() => void toggleFullscreen()}
+          aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"}
+          title={isFullscreen ? "Exit full screen" : "Full screen"}
+        >
+          {isFullscreen ? (
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="mirror-app__fullscreen-icon">
+              <path
+                fill="currentColor"
+                d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 8h2v3h3v-2h-5v-1zm2-8V5h-2v5h5V8h-3z"
+              />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="mirror-app__fullscreen-icon">
+              <path
+                fill="currentColor"
+                d="M7 7h4V5H5v6h2V7zm10 0v4h2V5h-6v2h4zM7 17v-4H5v6h6v-2H7zm10 0h-4v2h6v-6h-2v4z"
+              />
+            </svg>
+          )}
+          <span className="mirror-app__fullscreen-label">
+            {isFullscreen ? "Exit" : "Full screen"}
+          </span>
+        </button>
+      ) : null}
+
+      <div className="mirror-app__inner">
       <div className="mirror-app__time" aria-live="polite" aria-atomic="true">
         {formatTime(now)}
       </div>
@@ -151,6 +200,7 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
           </>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
