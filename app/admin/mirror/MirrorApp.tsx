@@ -10,6 +10,7 @@ import {
   toggleFullscreen,
 } from "./mirrorFullscreen";
 import {
+  applyMirrorContentInset,
   formatMirrorTimeParts,
 } from "./mirrorScale";
 import { formatMirrorDueLabel, getDueTasksForMirror } from "./mirrorTasks";
@@ -97,6 +98,10 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
   }, [dueTasks.length]);
 
   useEffect(() => {
+    requestAnimationFrame(() => applyMirrorContentInset());
+  }, [dueTasks.length, taskIndex, weather?.temperatureF]);
+
+  useEffect(() => {
     if (dueTasks.length <= 1) return;
 
     const id = window.setInterval(() => {
@@ -134,6 +139,7 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
       ) : null}
 
       <div className="mirror-app__inner">
+        <div className="mirror-app__content">
         <div className="mirror-app__clock">
           <div className="mirror-app__time" aria-live="polite" aria-atomic="true">
             <span className="mirror-app__time-main">{timeParts.main}</span>
@@ -188,6 +194,7 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
             ) : null}
           </>
         )}
+        </div>
         </div>
       </div>
     </>

@@ -25,6 +25,7 @@ body.mirror-active::before {
   --mirror-weather-size: 5.5vw;
   --mirror-task-size: 2.75vw;
   --mirror-task-label-size: 1.4vw;
+  --mirror-content-inset: 2rem;
 
   position: fixed;
   inset: 0;
@@ -43,7 +44,7 @@ body.mirror-active::before {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Bottom-left quarter of the screen — classic smart mirror layout. */
+/* Bottom-left quarter — left inset matches distance from screen top to time. */
 .mirror-app__inner {
   position: absolute;
   left: 0;
@@ -57,8 +58,15 @@ body.mirror-active::before {
   align-items: flex-start;
   justify-content: flex-end;
   overflow: hidden;
-  padding-left: max(2rem, calc(env(safe-area-inset-left) + 1.25rem));
+  box-sizing: border-box;
   text-align: left;
+}
+
+.mirror-app__content {
+  width: 100%;
+  max-width: 100%;
+  margin-left: var(--mirror-content-inset, 0px);
+  box-sizing: border-box;
 }
 
 .mirror-app__clock {

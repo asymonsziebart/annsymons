@@ -27,8 +27,27 @@ export function applyMirrorTypography(): void {
   root.style.setProperty("--mirror-task-label-size", `${taskLabelPx}px`);
 }
 
+/** Match left inset to the time element's distance from the top of the screen. */
+export function applyMirrorContentInset(): void {
+  const root = document.querySelector(".mirror-app") as HTMLElement | null;
+  const content = document.querySelector(".mirror-app__content") as HTMLElement | null;
+  const time = document.querySelector(".mirror-app__time") as HTMLElement | null;
+  if (!root || !content || !time) return;
+
+  // Measure before margin is applied so top offset stays stable.
+  content.style.marginLeft = "0px";
+  const top = Math.max(0, Math.round(time.getBoundingClientRect().top));
+  root.style.setProperty("--mirror-content-inset", `${top}px`);
+}
+
 export function bindMirrorTypography(): () => void {
-  const update = () => applyMirrorTypography();
+  const update = () => {
+    applyMirrorTypography();
+    requestAnimationFrame(() => {
+      applyMirrorContentInset();
+      requestAnimationFrame(applyMirrorContentInset);
+    });
+  };
   update();
   window.addEventListener("resize", update);
   window.addEventListener("orientationchange", update);
