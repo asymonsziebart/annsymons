@@ -1,9 +1,5 @@
 import Link from "next/link";
-import {
-  DRIVE_MOVIES_FOLDER_URL,
-  getDriveMovies,
-  type DriveMovieFile,
-} from "@/lib/googleDriveMovies";
+import { getDriveMovies, type DriveMovieFile } from "@/lib/googleDriveMovies";
 
 export const dynamic = "force-dynamic";
 
@@ -48,13 +44,13 @@ export default async function AdminMoviesPage() {
           Watch movies
         </h1>
         <p className="mt-3 max-w-2xl text-pretty text-base leading-relaxed text-[var(--color-muted)] sm:text-lg">
-          Pick a movie below to play it with a standard video player. This avoids
-          the Google Drive embedded player that is not available on the Switch.
+          Pick a movie below to play it inside this app. The Google Drive player
+          is not used because it is not available on the Switch.
         </p>
       </header>
 
       <section className="overflow-hidden rounded-3xl bg-[var(--color-surface)] shadow-[0_24px_60px_-36px_rgba(28,25,23,0.65)] ring-1 ring-[var(--color-border)]">
-        <div className="flex flex-col gap-4 border-b border-[var(--color-border)] bg-[var(--color-cream-dark)]/45 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="border-b border-[var(--color-border)] bg-[var(--color-cream-dark)]/45 p-4 sm:p-5">
           <div>
             <h2 className="font-heading text-xl font-semibold text-[var(--color-ink)]">
               All movies
@@ -65,21 +61,13 @@ export default async function AdminMoviesPage() {
                 : "Movies are loaded from the shared Google Drive folder."}
             </p>
           </div>
-          <a
-            href={DRIVE_MOVIES_FOLDER_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--color-accent)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--color-accent-hover)]"
-          >
-            Open in Google Drive
-          </a>
         </div>
 
         <div className="p-4 sm:p-5">
           {error ? (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-relaxed text-amber-900">
-              Could not load the movie list from Google Drive. Try opening Drive
-              directly, or reload this page. Error: {error}
+              Could not load the movie list. Reload this page and try again.
+              Error: {error}
             </div>
           ) : movies.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-cream)]/60 p-6 text-center text-sm text-[var(--color-muted)]">
