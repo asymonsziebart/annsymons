@@ -1,6 +1,12 @@
 import type { TaskRow } from "@/lib/data/taskClientTypes";
 import type { MirrorWeather } from "@/lib/mirrorWeather";
 import { formatMirrorDueLabel } from "./mirrorTasks";
+import {
+  getTrainingSamples,
+  normalizeSpeech,
+  transcriptMatchesSample,
+  type MirrorWakeTraining,
+} from "./mirrorWakeTraining";
 
 const WAKE_PHRASES = ["hey mirror", "mirror mirror"] as const;
 const FOLLOW_UP_MS = 8000;
@@ -41,23 +47,37 @@ export type MirrorVoiceContext = {
   dueTasks: TaskRow[];
 };
 
-function normalizeSpeech(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^\w\s']/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+function normalizeSpeechLocal(text: string): string {
+  return normalizeSpeech(text);
 }
 
-export function transcriptHasWakePhrase(text: string): boolean {
-  const n = normalizeSpeech(text);
-  return WAKE_PHRASES.some((phrase) => n.includes(phrase));
+export function transcriptHasWakePhrase(text: string, training?: MirrorWakeTraining): boolean {
+  const n = normalizeSpeechLocal(text);
+  if (WAKE_PHRASES.some((phrase) => n.includes(phrase))) return true;
+  if (!training) return false;
+  return getTrainingSamples(training).some((sample) => transcriptMatchesSample(n, sample));
 }
 
-export function stripWakePhrases(text: string): string {
-  let n = normalizeSpeech(text);
+function stripMatchedSample(text: string, sample: string): string {
+  const n = normalizeSpeechLocal(text);
+  const s = normalizeSpeechLocal(sample);
+  if (!s) return n;
+  if (n.includes(s)) return n.replace(s, " ").replace(/\s+/g, " ").trim();
+  return n;
+}
+
+export function stripWakePhrases(text: string, training?: MirrorWakeTraining): string {
+  let n = normalizeSpeechLocal(text);
   for (const phrase of WAKE_PHRASES) {
     n = n.replaceAll(phrase, " ");
+  }
+  if (training) {
+    for (const sample of getTrainingSamples(training)) {
+      n = stripMatchedSample(n, sample);
+      if (transcriptMatchesSample(n, sample) && n.split(" ").length <= sample.split(" ").length + 1) {
+        n = "";
+      }
+    }
   }
   return n.replace(/\s+/g, " ").trim();
 }
@@ -81,7 +101,7 @@ export function buildMirrorVoiceResponse(
   command: string,
   ctx: MirrorVoiceContext
 ): string {
-  const c = normalizeSpeech(command);
+  const c = normalizeSpeechLocal(command);
 
   if (
     !c ||
@@ -155,10 +175,13 @@ export function getMirrorSpeechRecognition(): SpeechRecognitionLike | null {
 export type MirrorVoiceController = {
   start: () => void;
   stop: () => void;
+  pause: () => void;
+  resume: () => void;
 };
 
 export function createMirrorVoiceController(
   getContext: () => MirrorVoiceContext,
+  getTraining: () => MirrorWakeTraining,
   onStatus: (status: MirrorVoiceStatus) => void
 ): MirrorVoiceController | null {
   const recognition = getMirrorSpeechRecognition();
@@ -168,6 +191,7 @@ export function createMirrorVoiceController(
   }
 
   let running = false;
+  let paused = false;
   let awakeUntil = 0;
   let speaking = false;
   let restartTimer: number | null = null;
@@ -200,8 +224,8 @@ export function createMirrorVoiceController(
   const handleTranscript = async (raw: string, isFinal: boolean) => {
     if (!raw.trim() || speaking) return;
 
-    const hasWake = transcriptHasWakePhrase(raw);
-    const command = stripWakePhrases(raw);
+    const hasWake = transcriptHasWakePhrase(raw, getTraining());
+    const command = stripWakePhrases(raw, getTraining());
     const awake = Date.now() < awakeUntil;
 
     if (hasWake) {
@@ -244,10 +268,10 @@ export function createMirrorVoiceController(
   };
 
   recognition.onend = () => {
-    if (!running) return;
+    if (!running || paused) return;
     if (restartTimer != null) window.clearTimeout(restartTimer);
     restartTimer = window.setTimeout(() => {
-      if (!running) return;
+      if (!running || paused) return;
       try {
         recognition.start();
         setStatus();
@@ -261,6 +285,7 @@ export function createMirrorVoiceController(
     start: () => {
       if (running) return;
       running = true;
+      paused = false;
       try {
         recognition.start();
         onStatus("listening");
@@ -271,6 +296,7 @@ export function createMirrorVoiceController(
     },
     stop: () => {
       running = false;
+      paused = false;
       awakeUntil = 0;
       if (restartTimer != null) window.clearTimeout(restartTimer);
       try {
@@ -279,6 +305,25 @@ export function createMirrorVoiceController(
         /* ignore */
       }
       onStatus("needs-permission");
+    },
+    pause: () => {
+      paused = true;
+      if (restartTimer != null) window.clearTimeout(restartTimer);
+      try {
+        recognition.stop();
+      } catch {
+        /* ignore */
+      }
+    },
+    resume: () => {
+      if (!running) return;
+      paused = false;
+      try {
+        recognition.start();
+        setStatus();
+      } catch {
+        onStatus("error");
+      }
     },
   };
 }

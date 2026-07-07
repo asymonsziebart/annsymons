@@ -15,6 +15,8 @@ import {
 } from "./mirrorScale";
 import { formatMirrorDueLabel, getDueTasksForMirror } from "./mirrorTasks";
 import { useMirrorVoice } from "./useMirrorVoice";
+import MirrorWakeTrainer from "./MirrorWakeTrainer";
+import { countTrainingSamples } from "./mirrorWakeTraining";
 
 const TASK_CYCLE_MS = 8000;
 const TASK_REFRESH_MS = 60_000;
@@ -41,9 +43,17 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
   const [fading, setFading] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [canFullscreen, setCanFullscreen] = useState(false);
+  const [trainerOpen, setTrainerOpen] = useState(false);
 
   const dueTasks = useMemo(() => getDueTasksForMirror(tasks, now), [tasks, now]);
-  const { status: voiceStatus, enableVoice } = useMirrorVoice({
+  const {
+    status: voiceStatus,
+    training,
+    enableVoice,
+    pauseVoice,
+    resumeVoice,
+    updateTraining,
+  } = useMirrorVoice({
     now,
     weather,
     dueTasks,
@@ -126,7 +136,9 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
 
   const voiceStatusLabel =
     voiceStatus === "listening"
-      ? "Listening for “hey mirror”"
+      ? countTrainingSamples(training) > 0
+        ? "Listening (trained wake phrase)"
+        : "Listening for “hey mirror”"
       : voiceStatus === "awake"
         ? "Listening…"
         : voiceStatus === "speaking"
@@ -173,14 +185,31 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
           </svg>
         </button>
       ) : !isFullscreen && voiceStatusLabel ? (
-        <div className="mirror-app__voice-status" aria-live="polite">
-          <span
-            className={`mirror-app__voice-dot mirror-app__voice-dot--${voiceStatus}`}
-            aria-hidden="true"
-          />
-          <span className="mirror-app__voice-label">{voiceStatusLabel}</span>
+        <div className="mirror-app__voice-bar">
+          <div className="mirror-app__voice-status" aria-live="polite">
+            <span
+              className={`mirror-app__voice-dot mirror-app__voice-dot--${voiceStatus}`}
+              aria-hidden="true"
+            />
+            <span className="mirror-app__voice-label">{voiceStatusLabel}</span>
+          </div>
+          <button
+            type="button"
+            className="mirror-app__voice-train"
+            onClick={() => setTrainerOpen(true)}
+          >
+            Train
+          </button>
         </div>
       ) : null}
+
+      <MirrorWakeTrainer
+        open={trainerOpen && !isFullscreen}
+        onClose={() => setTrainerOpen(false)}
+        onTrainingChange={updateTraining}
+        pauseVoice={pauseVoice}
+        resumeVoice={resumeVoice}
+      />
 
       <div className="mirror-app__inner">
         <div className="mirror-app__content">

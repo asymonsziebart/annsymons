@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { TaskRow } from "@/lib/data/taskClientTypes";
 import type { MirrorWeather } from "@/lib/mirrorWeather";
@@ -9,6 +9,7 @@ import {
   type MirrorVoiceController,
   type MirrorVoiceStatus,
 } from "./mirrorVoice";
+import { loadMirrorWakeTraining, type MirrorWakeTraining } from "./mirrorWakeTraining";
 
 type UseMirrorVoiceArgs = {
   now: Date;
@@ -18,14 +19,25 @@ type UseMirrorVoiceArgs = {
 
 export function useMirrorVoice({ now, weather, dueTasks }: UseMirrorVoiceArgs) {
   const [status, setStatus] = useState<MirrorVoiceStatus>("needs-permission");
+  const [training, setTraining] = useState<MirrorWakeTraining>({
+    heyMirror: [],
+    mirrorMirror: [],
+  });
   const controllerRef = useRef<MirrorVoiceController | null>(null);
   const contextRef = useRef({ now, weather, dueTasks });
+  const trainingRef = useRef(training);
 
   contextRef.current = { now, weather, dueTasks };
+  trainingRef.current = training;
+
+  useEffect(() => {
+    setTraining(loadMirrorWakeTraining());
+  }, []);
 
   useEffect(() => {
     const controller = createMirrorVoiceController(
       () => contextRef.current,
+      () => trainingRef.current,
       setStatus
     );
     controllerRef.current = controller;
@@ -39,5 +51,25 @@ export function useMirrorVoice({ now, weather, dueTasks }: UseMirrorVoiceArgs) {
     controllerRef.current?.start();
   };
 
-  return { status, enableVoice };
+  const pauseVoice = useCallback(() => {
+    controllerRef.current?.pause();
+  }, []);
+
+  const resumeVoice = useCallback(() => {
+    controllerRef.current?.resume();
+  }, []);
+
+  const updateTraining = useCallback((next: MirrorWakeTraining) => {
+    trainingRef.current = next;
+    setTraining(next);
+  }, []);
+
+  return {
+    status,
+    training,
+    enableVoice,
+    pauseVoice,
+    resumeVoice,
+    updateTraining,
+  };
 }

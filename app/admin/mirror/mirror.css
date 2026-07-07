@@ -270,7 +270,7 @@ body.mirror-active::before {
   height: 1.25rem;
 }
 
-.mirror-app__voice-status {
+.mirror-app__voice-bar {
   position: fixed;
   z-index: 1001;
   top: max(1rem, env(safe-area-inset-top));
@@ -278,7 +278,13 @@ body.mirror-active::before {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  max-width: min(16rem, calc(100vw - 2rem));
+  max-width: min(calc(100vw - 2rem), 22rem);
+}
+
+.mirror-app__voice-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 0.45rem 0.7rem;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
@@ -286,6 +292,7 @@ body.mirror-active::before {
   font-size: 0.75rem;
   letter-spacing: 0.02em;
   pointer-events: none;
+  min-width: 0;
 }
 
 .mirror-app__voice-dot {
@@ -320,6 +327,166 @@ body.mirror-active::before {
 
 .mirror-app__voice-label {
   line-height: 1.2;
+}
+
+.mirror-app__voice-train {
+  flex-shrink: 0;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.82);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.mirror-app__voice-train:active {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.mirror-trainer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1002;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.mirror-trainer {
+  width: min(100%, 26rem);
+  max-height: min(90vh, 640px);
+  overflow-y: auto;
+  padding: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 1rem;
+  background: #111;
+  color: #fff;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+}
+
+.mirror-trainer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.mirror-trainer__title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.mirror-trainer__close {
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.mirror-trainer__intro,
+.mirror-trainer__prompt,
+.mirror-trainer__message,
+.mirror-trainer__heard {
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.mirror-trainer__targets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.mirror-trainer__target {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.mirror-trainer__target--active {
+  border-color: rgba(140, 180, 255, 0.65);
+  background: rgba(140, 180, 255, 0.12);
+}
+
+.mirror-trainer__target-count {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.mirror-trainer__record {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border: none;
+  border-radius: 0.75rem;
+  background: rgba(120, 220, 160, 0.18);
+  color: #d7ffe6;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mirror-trainer__record:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.mirror-trainer__samples {
+  margin: 0.75rem 0 0;
+  padding-left: 1.1rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.85rem;
+}
+
+.mirror-trainer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.mirror-trainer__secondary,
+.mirror-trainer__primary {
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.mirror-trainer__secondary {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.mirror-trainer__primary {
+  margin-left: auto;
+  border: none;
+  background: rgba(255, 255, 255, 0.92);
+  color: #111;
+  font-weight: 600;
 }
 
 /* Fallback when JS hasn't run yet */
