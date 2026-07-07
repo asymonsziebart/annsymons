@@ -1,9 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { TaskRow } from "@/lib/data/taskClientTypes";
+import type { Recipe } from "@/lib/recipes";
 import type { MirrorWeather } from "@/lib/mirrorWeather";
+import {
+  isRecipeCloseCommand,
+  isRecipeOpenCommand,
+  jarvisLineForRecipeCommand,
+  matchRecipeFromTranscript,
+  parseRecipePanelCommand,
+  type RecipePanel,
+} from "@/lib/mirrorRecipeMatch";
 import {
   getFullscreenElement,
   isFullscreenSupported,
@@ -14,8 +23,12 @@ import {
   formatMirrorTimeParts,
 } from "./mirrorScale";
 import { formatMirrorDueLabel, getDueTasksForMirror } from "./mirrorTasks";
+import type { MirrorRecipeVoiceHandler } from "./mirrorVoice";
+import { bindJarvisVoices } from "./mirrorJarvisSpeak";
+import { bindMirrorWakeLockOnVisible, requestMirrorWakeLock } from "./mirrorWakeLock";
 import { useMirrorVoice } from "./useMirrorVoice";
 import MirrorWakeTrainer from "./MirrorWakeTrainer";
+import MirrorRecipeOverlay from "./MirrorRecipeOverlay";
 import { countTrainingSamples } from "./mirrorWakeTraining";
 
 const TASK_CYCLE_MS = 8000;
@@ -25,6 +38,7 @@ const WEATHER_REFRESH_MS = 15 * 60_000;
 type MirrorAppProps = {
   initialTasks: TaskRow[];
   initialWeather: MirrorWeather | null;
+  initialRecipes: Recipe[];
 };
 
 function formatDate(d: Date): string {
@@ -35,15 +49,91 @@ function formatDate(d: Date): string {
   });
 }
 
-export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppProps) {
+export default function MirrorApp({
+  initialTasks,
+  initialWeather,
+  initialRecipes,
+}: MirrorAppProps) {
   const [now, setNow] = useState(() => new Date());
   const [tasks, setTasks] = useState(initialTasks);
   const [weather, setWeather] = useState<MirrorWeather | null>(initialWeather);
+  const [recipes, setRecipes] = useState(initialRecipes);
+  const [activeRecipe, setActiveRecipe] = useState<Recipe | null>(null);
+  const [recipePanel, setRecipePanel] = useState<RecipePanel>("ingredients");
+  const [recipeStepIndex, setRecipeStepIndex] = useState(0);
   const [taskIndex, setTaskIndex] = useState(0);
   const [fading, setFading] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [canFullscreen, setCanFullscreen] = useState(false);
   const [trainerOpen, setTrainerOpen] = useState(false);
+
+  const recipesRef = useRef(initialRecipes);
+  const activeRecipeRef = useRef<Recipe | null>(null);
+  const recipePanelRef = useRef<RecipePanel>("ingredients");
+  const recipeStepIndexRef = useRef(0);
+
+  recipesRef.current = recipes;
+  activeRecipeRef.current = activeRecipe;
+  recipePanelRef.current = recipePanel;
+  recipeStepIndexRef.current = recipeStepIndex;
+
+  const openRecipe = useCallback((recipe: Recipe) => {
+    setActiveRecipe(recipe);
+    setRecipePanel("ingredients");
+    setRecipeStepIndex(0);
+  }, []);
+
+  const closeRecipe = useCallback(() => {
+    setActiveRecipe(null);
+    setRecipePanel("ingredients");
+    setRecipeStepIndex(0);
+  }, []);
+
+  const getRecipeHandler = useCallback((): MirrorRecipeVoiceHandler => ({
+    handle: (raw, command) => {
+      const recipe = activeRecipeRef.current;
+
+      if (recipe && isRecipeCloseCommand(raw)) {
+        closeRecipe();
+        return "Very good. Closing the recipe.";
+      }
+
+      if (recipe) {
+        const panelCommand = parseRecipePanelCommand(raw, recipePanelRef.current);
+        if (panelCommand) {
+          if (panelCommand.type === "panel") {
+            setRecipePanel(panelCommand.panel);
+            setRecipeStepIndex(0);
+            return jarvisLineForRecipeCommand(panelCommand, recipe, 0);
+          }
+
+          const total = recipe.steps.length;
+          if (total === 0) return "There are no steps for this recipe.";
+
+          const current = recipeStepIndexRef.current;
+          const nextIdx =
+            panelCommand.direction === "next"
+              ? Math.min(current + 1, total - 1)
+              : Math.max(current - 1, 0);
+          setRecipePanel("steps");
+          setRecipeStepIndex(nextIdx);
+          return jarvisLineForRecipeCommand(panelCommand, recipe, nextIdx);
+        }
+      }
+
+      const recipeMatch = matchRecipeFromTranscript(raw, recipesRef.current);
+      if (recipeMatch) {
+        openRecipe(recipeMatch);
+        return `Certainly. Pulling up ${recipeMatch.title}. Showing ingredients.`;
+      }
+
+      if (isRecipeOpenCommand(raw) || isRecipeOpenCommand(command)) {
+        return "I couldn't find that recipe in your collection. Try saying the recipe name more clearly.";
+      }
+
+      return null;
+    },
+  }), [closeRecipe, openRecipe]);
 
   const dueTasks = useMemo(() => getDueTasksForMirror(tasks, now), [tasks, now]);
   const {
@@ -57,6 +147,7 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
     now,
     weather,
     dueTasks,
+    getRecipeHandler,
   });
 
   const refreshTasks = useCallback(async () => {
@@ -98,12 +189,33 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
   }, [refreshWeather]);
 
   useEffect(() => {
+    const refreshRecipes = async () => {
+      try {
+        const res = await fetch("/api/mirror/recipes");
+        if (!res.ok) return;
+        const data = (await res.json()) as { recipes?: Recipe[] };
+        if (Array.isArray(data.recipes)) setRecipes(data.recipes);
+      } catch {
+        /* ignore */
+      }
+    };
+    void refreshRecipes();
+  }, []);
+
+  useEffect(() => {
     setCanFullscreen(isFullscreenSupported());
+    void requestMirrorWakeLock();
+    const unbindWakeLock = bindMirrorWakeLockOnVisible();
+    const unbindJarvisVoices = bindJarvisVoices();
+
     const sync = () => setIsFullscreen(Boolean(getFullscreenElement()));
     sync();
     document.addEventListener("fullscreenchange", sync);
     document.addEventListener("webkitfullscreenchange", sync);
+
     return () => {
+      unbindWakeLock();
+      unbindJarvisVoices();
       document.removeEventListener("fullscreenchange", sync);
       document.removeEventListener("webkitfullscreenchange", sync);
     };
@@ -115,7 +227,7 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
 
   useEffect(() => {
     requestAnimationFrame(() => applyMirrorContentInset());
-  }, [dueTasks.length, taskIndex, weather?.temperatureF]);
+  }, [dueTasks.length, taskIndex, weather?.temperatureF, activeRecipe]);
 
   useEffect(() => {
     if (dueTasks.length <= 1) return;
@@ -138,7 +250,7 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
     voiceStatus === "listening"
       ? countTrainingSamples(training) > 0
         ? "Listening (trained wake phrase)"
-        : "Listening for “hey mirror”"
+        : 'Listening for "hey mirror" or "mirror"'
       : voiceStatus === "awake"
         ? "Listening…"
         : voiceStatus === "speaking"
@@ -175,7 +287,7 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
           className="mirror-app__voice-enable"
           onClick={enableVoice}
           aria-label="Enable voice commands"
-          title='Say "hey mirror" or "mirror mirror"'
+          title='Say "hey mirror" or "mirror"'
         >
           <svg viewBox="0 0 24 24" aria-hidden="true" className="mirror-app__voice-icon">
             <path
@@ -211,7 +323,15 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
         resumeVoice={resumeVoice}
       />
 
-      <div className="mirror-app__inner">
+      {activeRecipe ? (
+        <MirrorRecipeOverlay
+          recipe={activeRecipe}
+          panel={recipePanel}
+          stepIndex={recipeStepIndex}
+        />
+      ) : null}
+
+      <div className={`mirror-app__inner${activeRecipe ? " mirror-app__inner--hidden" : ""}`}>
         <div className="mirror-app__content">
         <div className="mirror-app__clock">
           <div className="mirror-app__time" aria-live="polite" aria-atomic="true">

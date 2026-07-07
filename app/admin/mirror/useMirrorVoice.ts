@@ -15,9 +15,10 @@ type UseMirrorVoiceArgs = {
   now: Date;
   weather: MirrorWeather | null;
   dueTasks: TaskRow[];
+  getRecipeHandler?: () => import("./mirrorVoice").MirrorRecipeVoiceHandler | null;
 };
 
-export function useMirrorVoice({ now, weather, dueTasks }: UseMirrorVoiceArgs) {
+export function useMirrorVoice({ now, weather, dueTasks, getRecipeHandler }: UseMirrorVoiceArgs) {
   const [status, setStatus] = useState<MirrorVoiceStatus>("needs-permission");
   const [training, setTraining] = useState<MirrorWakeTraining>({
     heyMirror: [],
@@ -34,11 +35,15 @@ export function useMirrorVoice({ now, weather, dueTasks }: UseMirrorVoiceArgs) {
     setTraining(loadMirrorWakeTraining());
   }, []);
 
+  const getRecipeHandlerRef = useRef(getRecipeHandler);
+  getRecipeHandlerRef.current = getRecipeHandler;
+
   useEffect(() => {
     const controller = createMirrorVoiceController(
       () => contextRef.current,
       () => trainingRef.current,
-      setStatus
+      setStatus,
+      () => getRecipeHandlerRef.current?.() ?? null
     );
     controllerRef.current = controller;
     return () => {

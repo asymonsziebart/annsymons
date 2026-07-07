@@ -489,6 +489,121 @@ body.mirror-active::before {
   font-weight: 600;
 }
 
+.mirror-app__inner--hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.mirror-recipe {
+  position: fixed;
+  inset: 0;
+  z-index: 1003;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  background: #000;
+  color: #fff;
+  padding:
+    max(1.25rem, env(safe-area-inset-top))
+    max(1.25rem, env(safe-area-inset-right))
+    max(1.5rem, env(safe-area-inset-bottom))
+    max(1.25rem, env(safe-area-inset-left));
+  filter: grayscale(1);
+}
+
+.mirror-recipe__header {
+  max-width: 52rem;
+  margin: 0 auto;
+}
+
+.mirror-recipe__eyebrow {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.mirror-recipe__title {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+  font-weight: 400;
+  line-height: 1.15;
+  color: #fff;
+}
+
+.mirror-recipe__tabs {
+  display: flex;
+  gap: 0.65rem;
+  margin-top: 1.1rem;
+}
+
+.mirror-recipe__tab {
+  padding: 0.4rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.mirror-recipe__tab--active {
+  border-color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mirror-recipe__panel {
+  max-width: 52rem;
+  margin: 1.5rem auto 0;
+}
+
+.mirror-recipe__heading {
+  margin: 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.mirror-recipe__list {
+  margin: 0.85rem 0 0;
+  padding-left: 1.25rem;
+  font-size: clamp(0.95rem, 2vw, 1.1rem);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.mirror-recipe__list li + li {
+  margin-top: 0.55rem;
+}
+
+.mirror-recipe__step-text {
+  margin: 1rem 0 0;
+  font-size: clamp(1.15rem, 2.8vw, 1.65rem);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.mirror-recipe__step-text--empty {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.mirror-recipe__hint {
+  max-width: 52rem;
+  margin: 2rem auto 0;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.38);
+}
+
 /* Fallback when JS hasn't run yet */
 html:has(.mirror-app),
 body:has(.mirror-app) {

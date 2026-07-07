@@ -1,3 +1,4 @@
+import { getAllRecipes } from "@/lib/data/recipes";
 import {
   backfillTaskPrioritiesFromSection,
   getTasks,
@@ -12,6 +13,10 @@ export const dynamic = "force-dynamic";
 export default async function MirrorPage() {
   await backfillTaskPrioritiesFromSection();
   await syncTaskSectionsFromPriority();
-  const [tasks, weather] = await Promise.all([getTasks(), fetchMirrorWeather()]);
-  return <MirrorApp initialTasks={tasks} initialWeather={weather} />;
+  const [tasks, weather, recipes] = await Promise.all([
+    getTasks(),
+    fetchMirrorWeather(),
+    getAllRecipes(),
+  ]);
+  return <MirrorApp initialTasks={tasks} initialWeather={weather} initialRecipes={recipes} />;
 }

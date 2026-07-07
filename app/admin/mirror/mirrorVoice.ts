@@ -1,6 +1,7 @@
 import type { TaskRow } from "@/lib/data/taskClientTypes";
 import type { MirrorWeather } from "@/lib/mirrorWeather";
 import { formatMirrorDueLabel } from "./mirrorTasks";
+import { speakJarvis } from "./mirrorJarvisSpeak";
 import {
   getTrainingSamples,
   normalizeSpeech,
@@ -54,6 +55,8 @@ function normalizeSpeechLocal(text: string): string {
 export function transcriptHasWakePhrase(text: string, training?: MirrorWakeTraining): boolean {
   const n = normalizeSpeechLocal(text);
   if (WAKE_PHRASES.some((phrase) => n.includes(phrase))) return true;
+  if (n === "mirror" || n.startsWith("hey mirror")) return true;
+  if (n.startsWith("mirror ") && !n.startsWith("mirror mirror")) return true;
   if (!training) return false;
   return getTrainingSamples(training).some((sample) => transcriptMatchesSample(n, sample));
 }
@@ -71,6 +74,10 @@ export function stripWakePhrases(text: string, training?: MirrorWakeTraining): s
   for (const phrase of WAKE_PHRASES) {
     n = n.replaceAll(phrase, " ");
   }
+  if (n.startsWith("hey mirror ")) n = n.slice("hey mirror ".length);
+  else if (n === "hey mirror") n = "";
+  else if (n.startsWith("mirror ") && !n.startsWith("mirror mirror ")) n = n.slice("mirror ".length);
+  else if (n === "mirror") n = "";
   if (training) {
     for (const sample of getTrainingSamples(training)) {
       n = stripMatchedSample(n, sample);
@@ -143,21 +150,20 @@ export function buildMirrorVoiceResponse(
     return `You have ${ctx.dueTasks.length} due tasks. ${lines.join(". ")}.${suffix}`;
   }
 
-  return "I didn't catch that. Try time, weather, or tasks.";
+  if (c.includes("recipe")) {
+    return 'Try saying "show me the recipe for" and the recipe name from your collection.';
+  }
+
+  return "I didn't catch that. Try time, weather, tasks, or a recipe.";
 }
+
+export type MirrorRecipeVoiceHandler = {
+  handle: (raw: string, command: string) => string | null | Promise<string | null>;
+};
 
 export function speakMirrorResponse(text: string): Promise<void> {
   return new Promise((resolve) => {
-    if (typeof window === "undefined" || !window.speechSynthesis) {
-      resolve();
-      return;
-    }
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.95;
-    utterance.onend = () => resolve();
-    utterance.onerror = () => resolve();
-    window.speechSynthesis.speak(utterance);
+    speakJarvis(text, resolve);
   });
 }
 
@@ -182,7 +188,8 @@ export type MirrorVoiceController = {
 export function createMirrorVoiceController(
   getContext: () => MirrorVoiceContext,
   getTraining: () => MirrorWakeTraining,
-  onStatus: (status: MirrorVoiceStatus) => void
+  onStatus: (status: MirrorVoiceStatus) => void,
+  getRecipeHandler?: () => MirrorRecipeVoiceHandler | null
 ): MirrorVoiceController | null {
   const recognition = getMirrorSpeechRecognition();
   if (!recognition) {
@@ -228,13 +235,24 @@ export function createMirrorVoiceController(
     const command = stripWakePhrases(raw, getTraining());
     const awake = Date.now() < awakeUntil;
 
+    if (isFinal) {
+      const recipeReply = await getRecipeHandler?.()?.handle(raw, command);
+      if (recipeReply !== null && recipeReply !== undefined) {
+        if (hasWake) awakeUntil = Date.now() + FOLLOW_UP_MS;
+        else if (recipeReply) awakeUntil = Date.now() + FOLLOW_UP_MS;
+        setStatus();
+        await respond(recipeReply);
+        return;
+      }
+    }
+
     if (hasWake) {
       awakeUntil = Date.now() + FOLLOW_UP_MS;
       setStatus();
       if (isFinal && command) {
         await respond(buildMirrorVoiceResponse(command, getContext()));
       } else if (isFinal && !command) {
-        await respond("Yes?");
+        await respond("How may I help you?");
       }
       return;
     }
