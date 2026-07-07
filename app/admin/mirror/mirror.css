@@ -241,6 +241,87 @@ body.mirror-active::before {
   line-height: 1;
 }
 
+.mirror-app__voice-enable {
+  position: fixed;
+  z-index: 1001;
+  top: max(1rem, env(safe-area-inset-top));
+  left: max(1rem, env(safe-area-inset-left));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.mirror-app__voice-enable:active {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.mirror-app__voice-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.mirror-app__voice-status {
+  position: fixed;
+  z-index: 1001;
+  top: max(1rem, env(safe-area-inset-top));
+  left: max(1rem, env(safe-area-inset-left));
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: min(16rem, calc(100vw - 2rem));
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+.mirror-app__voice-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
+  flex-shrink: 0;
+}
+
+.mirror-app__voice-dot--listening,
+.mirror-app__voice-dot--awake {
+  background: rgba(120, 220, 160, 0.9);
+  animation: mirror-voice-pulse 1.4s ease-in-out infinite;
+}
+
+.mirror-app__voice-dot--speaking {
+  background: rgba(140, 180, 255, 0.95);
+}
+
+@keyframes mirror-voice-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+}
+
+.mirror-app__voice-label {
+  line-height: 1.2;
+}
+
 /* Fallback when JS hasn't run yet */
 html:has(.mirror-app),
 body:has(.mirror-app) {

@@ -14,6 +14,7 @@ import {
   formatMirrorTimeParts,
 } from "./mirrorScale";
 import { formatMirrorDueLabel, getDueTasksForMirror } from "./mirrorTasks";
+import { useMirrorVoice } from "./useMirrorVoice";
 
 const TASK_CYCLE_MS = 8000;
 const TASK_REFRESH_MS = 60_000;
@@ -42,6 +43,11 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
   const [canFullscreen, setCanFullscreen] = useState(false);
 
   const dueTasks = useMemo(() => getDueTasksForMirror(tasks, now), [tasks, now]);
+  const { status: voiceStatus, enableVoice } = useMirrorVoice({
+    now,
+    weather,
+    dueTasks,
+  });
 
   const refreshTasks = useCallback(async () => {
     try {
@@ -118,6 +124,19 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
   const currentTask = dueTasks[taskIndex] ?? null;
   const timeParts = formatMirrorTimeParts(now);
 
+  const voiceStatusLabel =
+    voiceStatus === "listening"
+      ? "Listening for “hey mirror”"
+      : voiceStatus === "awake"
+        ? "Listening…"
+        : voiceStatus === "speaking"
+          ? "Speaking"
+          : voiceStatus === "unsupported"
+            ? "Voice not supported in this browser"
+            : voiceStatus === "error"
+              ? "Voice error — tap mic to retry"
+              : null;
+
   return (
     <>
       {canFullscreen && !isFullscreen ? (
@@ -136,6 +155,31 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
           </svg>
           <span className="mirror-app__fullscreen-label">Full screen</span>
         </button>
+      ) : null}
+
+      {!isFullscreen && (voiceStatus === "needs-permission" || voiceStatus === "error") ? (
+        <button
+          type="button"
+          className="mirror-app__voice-enable"
+          onClick={enableVoice}
+          aria-label="Enable voice commands"
+          title='Say "hey mirror" or "mirror mirror"'
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="mirror-app__voice-icon">
+            <path
+              fill="currentColor"
+              d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"
+            />
+          </svg>
+        </button>
+      ) : voiceStatusLabel ? (
+        <div className="mirror-app__voice-status" aria-live="polite">
+          <span
+            className={`mirror-app__voice-dot mirror-app__voice-dot--${voiceStatus}`}
+            aria-hidden="true"
+          />
+          <span className="mirror-app__voice-label">{voiceStatusLabel}</span>
+        </div>
       ) : null}
 
       <div className="mirror-app__inner">
