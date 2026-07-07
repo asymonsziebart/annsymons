@@ -172,7 +172,7 @@ export default function MirrorApp({ initialTasks, initialWeather }: MirrorAppPro
             />
           </svg>
         </button>
-      ) : voiceStatusLabel ? (
+      ) : !isFullscreen && voiceStatusLabel ? (
         <div className="mirror-app__voice-status" aria-live="polite">
           <span
             className={`mirror-app__voice-dot mirror-app__voice-dot--${voiceStatus}`}
