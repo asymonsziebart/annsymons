@@ -1,21 +1,29 @@
 import { NextResponse } from "next/server";
 import { setAdminSession } from "@/lib/auth";
+import { setTasksSession } from "@/lib/tasksAuth";
+import { getAllAdminPasswords } from "@/lib/tasksPassword";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const password = body?.password ?? "";
-    const expected = process.env.ADMIN_PASSWORD;
-    if (!expected) {
+    const password = String(body?.password ?? "").trim();
+    const valid = getAllAdminPasswords();
+    if (valid.length === 0) {
       return NextResponse.json(
-        { error: "Admin login is not configured." },
+        {
+          error:
+            "Admin login is not configured. Set ADMIN_PASSWORD (and optionally TASKS_PASSWORD_TIM) in your environment (e.g. Vercel).",
+        },
         { status: 500 }
       );
     }
-    if (password !== expected) {
+    const match = valid.find((p) => p === password);
+    if (match == null) {
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
-    await setAdminSession();
+    await setAdminSession(match);
+    // Same password unlocks /tasks without a second sign-in.
+    await setTasksSession(match);
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json(

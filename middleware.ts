@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { isLinkPreviewBot } from "@/lib/linkPreviewBots";
-import { getAllTasksPasswords } from "@/lib/tasksPassword";
+import { getAllAdminPasswords, getAllTasksPasswords } from "@/lib/tasksPassword";
 
 const ADMIN_COOKIE = "admin_session";
 const ADMIN_SALT = "annsymons-admin";
@@ -16,11 +16,21 @@ async function sha256(text: string): Promise<string> {
     .join("");
 }
 
+async function cookieMatchesAnyPassword(
+  cookie: string | undefined,
+  passwords: string[],
+  salt: string
+): Promise<boolean> {
+  if (!cookie || passwords.length === 0) return false;
+  for (const p of passwords) {
+    if (cookie === (await sha256(p + salt))) return true;
+  }
+  return false;
+}
+
 async function hasAdminSession(request: NextRequest): Promise<boolean> {
   const cookie = request.cookies.get(ADMIN_COOKIE)?.value;
-  const password = process.env.ADMIN_PASSWORD;
-  if (!password || !cookie) return false;
-  return cookie === (await sha256(password + ADMIN_SALT));
+  return cookieMatchesAnyPassword(cookie, getAllAdminPasswords(), ADMIN_SALT);
 }
 
 export async function middleware(request: NextRequest) {
@@ -38,17 +48,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/tasks/login", request.url));
     }
     const cookie = request.cookies.get(TASKS_COOKIE)?.value;
-    if (!cookie) {
-      return NextResponse.redirect(new URL("/tasks/login", request.url));
-    }
-    let allowed = false;
-    for (const p of passwords) {
-      if (cookie === (await sha256(p + TASKS_SALT))) {
-        allowed = true;
-        break;
-      }
-    }
-    if (!allowed) {
+    if (!(await cookieMatchesAnyPassword(cookie, passwords, TASKS_SALT))) {
       return NextResponse.redirect(new URL("/tasks/login", request.url));
     }
     return NextResponse.next();

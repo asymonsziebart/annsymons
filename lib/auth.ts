@@ -1,17 +1,26 @@
 import { cookies } from "next/headers";
 import { createHash } from "crypto";
+import { getAdminPassword, getAllAdminPasswords } from "@/lib/tasksPassword";
 
 const COOKIE_NAME = "admin_session";
 const SALT = "annsymons-admin";
 
-function getToken(): string {
-  const password = process.env.ADMIN_PASSWORD;
-  if (!password) return "";
-  return createHash("sha256").update(password + SALT).digest("hex");
+function sessionTokenForPassword(plain: string): string {
+  if (!plain) return "";
+  return createHash("sha256").update(plain + SALT).digest("hex");
 }
 
-export async function setAdminSession(): Promise<void> {
-  const token = getToken();
+function getValidAdminSessionTokenSet(): Set<string> {
+  const s = new Set<string>();
+  for (const p of getAllAdminPasswords()) {
+    s.add(sessionTokenForPassword(p));
+  }
+  return s;
+}
+
+/** Set session after login with the exact password entered (so Tim vs primary hash differs). */
+export async function setAdminSession(plainPassword: string): Promise<void> {
+  const token = sessionTokenForPassword(plainPassword);
   if (!token) return;
   const c = await cookies();
   c.set(COOKIE_NAME, token, {
@@ -30,11 +39,12 @@ export async function clearAdminSession(): Promise<void> {
 
 export async function isAdmin(): Promise<boolean> {
   const c = await cookies();
-  const cookie = c.get(COOKIE_NAME);
-  const token = getToken();
-  return !!token && cookie?.value === token;
+  const cookie = c.get(COOKIE_NAME)?.value;
+  if (!cookie) return false;
+  return getValidAdminSessionTokenSet().has(cookie);
 }
 
+/** @deprecated prefer getAllAdminPasswords + per-password tokens; kept for edge tooling */
 export function getAdminTokenForMiddleware(): string {
-  return getToken();
+  return sessionTokenForPassword(getAdminPassword());
 }

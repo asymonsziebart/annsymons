@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { setAdminSession } from "@/lib/auth";
 import { setTasksSession } from "@/lib/tasksAuth";
-import { getAllTasksPasswords } from "@/lib/tasksPassword";
+import { getAllAdminPasswords, getAllTasksPasswords } from "@/lib/tasksPassword";
 
 export async function POST(request: Request) {
   try {
@@ -21,6 +22,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
     await setTasksSession(match);
+    // Tim (and the primary admin password) also unlock /admin and other gated apps.
+    if (getAllAdminPasswords().includes(match)) {
+      await setAdminSession(match);
+    }
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json(
