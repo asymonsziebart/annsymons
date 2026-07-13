@@ -441,6 +441,29 @@ export const recipes: Recipe[] = [
       "If your garlic is particularly strong, use fewer cloves if you are sensitive to the taste.",
     ],
   },
+  {
+    slug: "lactaid-crunchy-rolls",
+    title: "Lactaid Crunchy Rolls",
+    description:
+      "Crunchy crust rolls made with Lactaid milk. Lactaid is real milk with lactose broken down into glucose and galactose, so it tastes slightly sweeter than regular milk and helps the rolls brown beautifully—especially in a gas oven. Substitute Lactaid 1:1 for whole milk.",
+    cookTime: "18–22 min",
+    servings: "8–10 rolls",
+    ingredients: [
+      "500g bread flour",
+      "200g Lactaid milk (warm, approx. 95°F / 35°C)",
+      "125g water (warm, approx. 95°F / 35°C)",
+      "30g unsalted butter (melted and cooled)",
+      "15g sugar (reduced by 5g since Lactaid is naturally sweeter)",
+      "10g fine sea salt",
+      "5g instant yeast",
+    ],
+    steps: [
+      "Knead: Mix all ingredients and knead for 10 minutes until smooth.",
+      "Rise: Let the dough double in size (1 to 1.5 hours).",
+      "Shape: Divide into 8–10 balls and let rise again for 45 minutes on your baking sheet.",
+      "Bake with steam: Preheat your gas oven to 425°F (218°C) with an empty metal pan on the bottom rack. Slash the rolls, mist them with water, put them in, and pour 1 cup of boiling water into the bottom pan to create the steam needed for that crunchy crust. Bake for 18–22 minutes.",
+    ],
+  },
 ];
 
 export function getRecipeBySlug(slug: string): Recipe | undefined {
