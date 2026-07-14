@@ -3,6 +3,7 @@ import type { MirrorWeather } from "@/lib/mirrorWeather";
 import { isQuietCommand, isStopListeningCommand } from "./mirrorCommandParse";
 import { formatMirrorDueLabel } from "./mirrorTasks";
 import { speakJarvis, stopJarvisSpeech } from "./mirrorJarvisSpeak";
+import { playMirrorWakeChime } from "./mirrorWakeChime";
 import {
   getTrainingSamples,
   normalizeSpeech,
@@ -231,6 +232,7 @@ export function createMirrorVoiceController(
   let bareMirrorTimer: number | null = null;
   let bareMirrorParts: string[] = [];
   let handling = false;
+  let lastWakeChimeAt = 0;
   const pendingFinals: { raw: string; settleBareMirror: boolean }[] = [];
 
   recognition.continuous = true;
@@ -255,6 +257,16 @@ export function createMirrorVoiceController(
       bareMirrorTimer = null;
     }
     bareMirrorParts = [];
+  };
+
+  /** Chime once and enter the listening-for-command window. */
+  const acknowledgeWake = () => {
+    const now = Date.now();
+    awakeUntil = now + FOLLOW_UP_MS;
+    setStatus();
+    if (now - lastWakeChimeAt < 1200) return;
+    lastWakeChimeAt = now;
+    playMirrorWakeChime();
   };
 
   const respond = async (text: string, keepAwake = true) => {
@@ -313,8 +325,7 @@ export function createMirrorVoiceController(
         await processFinalTranscript(combinedBare, true);
         return;
       }
-      awakeUntil = Date.now() + FOLLOW_UP_MS;
-      setStatus();
+      // Hold quietly until debounce settles — don't chime yet.
       if (bareMirrorTimer != null) window.clearTimeout(bareMirrorTimer);
       bareMirrorTimer = window.setTimeout(() => {
         bareMirrorTimer = null;
@@ -335,8 +346,11 @@ export function createMirrorVoiceController(
     if (hasWake || awake) {
       const actionReply = await getActionHandler?.()?.handle(raw, command);
       if (actionReply !== null && actionReply !== undefined) {
-        awakeUntil = Date.now() + FOLLOW_UP_MS;
-        setStatus();
+        if (hasWake) acknowledgeWake();
+        else {
+          awakeUntil = Date.now() + FOLLOW_UP_MS;
+          setStatus();
+        }
         await respond(actionReply, true);
         return;
       }
@@ -344,20 +358,21 @@ export function createMirrorVoiceController(
 
     const recipeReply = await getRecipeHandler?.()?.handle(raw, command);
     if (recipeReply !== null && recipeReply !== undefined) {
-      awakeUntil = Date.now() + FOLLOW_UP_MS;
-      setStatus();
+      if (hasWake) acknowledgeWake();
+      else {
+        awakeUntil = Date.now() + FOLLOW_UP_MS;
+        setStatus();
+      }
       await respond(recipeReply, true);
       return;
     }
 
     if (hasWake) {
-      awakeUntil = Date.now() + FOLLOW_UP_MS;
-      setStatus();
+      acknowledgeWake();
       if (command) {
         await respond(buildMirrorVoiceResponse(command, getContext()), true);
-      } else {
-        await respond("How may I help you?", true);
       }
+      // Wake only: chime + show listening — no spoken "How may I help you?"
       return;
     }
 
@@ -383,13 +398,8 @@ export function createMirrorVoiceController(
   const handleInterim = (raw: string) => {
     if (!raw.trim() || speaking) return;
 
-    const training = getTraining();
-    const hasWake = transcriptHasWakePhrase(raw, training);
-
     // While waiting on bare "mirror", richer interim text just extends the wait for a real final.
     if (bareMirrorTimer != null) {
-      awakeUntil = Date.now() + FOLLOW_UP_MS;
-      setStatus();
       if (bareMirrorTimer != null) window.clearTimeout(bareMirrorTimer);
       bareMirrorTimer = window.setTimeout(() => {
         bareMirrorTimer = null;
@@ -400,10 +410,7 @@ export function createMirrorVoiceController(
       return;
     }
 
-    if (hasWake) {
-      awakeUntil = Date.now() + FOLLOW_UP_MS;
-      setStatus();
-    }
+    // Don't chime or flip to awake on interim — wait for a final transcript.
   };
 
   recognition.onresult = (event) => {
@@ -460,6 +467,7 @@ export function createMirrorVoiceController(
       running = false;
       paused = false;
       awakeUntil = 0;
+      lastWakeChimeAt = 0;
       clearBareMirrorWait();
       if (restartTimer != null) window.clearTimeout(restartTimer);
       try {

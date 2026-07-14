@@ -531,6 +531,10 @@ export default function MirrorApp({
               ? "Voice error — tap mic to retry"
               : null;
 
+  const showVoiceBar =
+    Boolean(voiceStatusLabel) &&
+    (!isFullscreen || voiceStatus === "awake" || voiceStatus === "speaking");
+
   return (
     <>
       {canFullscreen && !isFullscreen ? (
@@ -566,8 +570,10 @@ export default function MirrorApp({
             />
           </svg>
         </button>
-      ) : !isFullscreen && voiceStatusLabel ? (
-        <div className="mirror-app__voice-bar">
+      ) : showVoiceBar ? (
+        <div
+          className={`mirror-app__voice-bar${voiceStatus === "awake" ? " mirror-app__voice-bar--awake" : ""}`}
+        >
           <div className="mirror-app__voice-status" aria-live="polite">
             <span
               className={`mirror-app__voice-dot mirror-app__voice-dot--${voiceStatus}`}
@@ -575,13 +581,15 @@ export default function MirrorApp({
             />
             <span className="mirror-app__voice-label">{voiceStatusLabel}</span>
           </div>
-          <button
-            type="button"
-            className="mirror-app__voice-train"
-            onClick={() => setTrainerOpen(true)}
-          >
-            Train
-          </button>
+          {!isFullscreen ? (
+            <button
+              type="button"
+              className="mirror-app__voice-train"
+              onClick={() => setTrainerOpen(true)}
+            >
+              Train
+            </button>
+          ) : null}
         </div>
       ) : null}
 
