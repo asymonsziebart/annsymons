@@ -2,25 +2,28 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  FilesetResolver,
-  HandLandmarker,
-  type NormalizedLandmark,
-} from "@mediapipe/tasks-vision";
+import type { HandLandmarker, NormalizedLandmark } from "@mediapipe/tasks-vision";
 
 type DrawMode = "idle" | "draw" | "erase";
 type Phase = "boot" | "ready" | "starting" | "live" | "error";
 
 const COLORS = ["#ff8b6a", "#7ee0c3", "#9bb4ff", "#f4e27c", "#f4f0ea", "#ff6ad5"] as const;
-const WASM_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm";
+/** Must match the installed `@mediapipe/tasks-vision` major.minor.patch. */
+const MEDIAPIPE_VERSION = "0.10.35";
+const WASM_URLS = [
+  `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MEDIAPIPE_VERSION}/wasm`,
+  `https://unpkg.com/@mediapipe/tasks-vision@${MEDIAPIPE_VERSION}/wasm`,
+] as const;
 const MODEL_URL =
   "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
 
+type LandmarkPoint = Pick<NormalizedLandmark, "x" | "y" | "z">;
+
 function isFingerExtended(
-  landmarks: NormalizedLandmark[],
+  landmarks: LandmarkPoint[],
   tip: number,
   pip: number,
-  mcp: number
+  _mcp: number
 ): boolean {
   const tipToWrist = Math.hypot(landmarks[tip].x - landmarks[0].x, landmarks[tip].y - landmarks[0].y);
   const pipToWrist = Math.hypot(landmarks[pip].x - landmarks[0].x, landmarks[pip].y - landmarks[0].y);
@@ -28,7 +31,7 @@ function isFingerExtended(
   return tipToWrist > pipToWrist * 1.08 && tipAbovePip;
 }
 
-function countExtendedFingers(landmarks: NormalizedLandmark[]): {
+function countExtendedFingers(landmarks: LandmarkPoint[]): {
   index: boolean;
   middle: boolean;
   ring: boolean;
@@ -47,11 +50,53 @@ function countExtendedFingers(landmarks: NormalizedLandmark[]): {
   return { index, middle, ring, pinky, thumb, count };
 }
 
-function resolveMode(landmarks: NormalizedLandmark[]): DrawMode {
+function resolveMode(landmarks: LandmarkPoint[]): DrawMode {
   const f = countExtendedFingers(landmarks);
   if (f.count >= 4) return "erase";
   if (f.index && !f.middle && !f.ring && !f.pinky) return "draw";
   return "idle";
+}
+
+function errorMessage(err: unknown, fallback: string): string {
+  if (err instanceof Error && err.message.trim()) return err.message;
+  if (typeof err === "string" && err.trim()) return err;
+  return fallback;
+}
+
+async function createHandLandmarker(): Promise<HandLandmarker> {
+  const { FilesetResolver, HandLandmarker } = await import("@mediapipe/tasks-vision");
+  let lastError: unknown;
+
+  for (const wasmUrl of WASM_URLS) {
+    try {
+      const vision = await FilesetResolver.forVisionTasks(wasmUrl);
+      try {
+        return await HandLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: MODEL_URL,
+            delegate: "GPU",
+          },
+          runningMode: "VIDEO",
+          numHands: 1,
+        });
+      } catch {
+        return await HandLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: MODEL_URL,
+            delegate: "CPU",
+          },
+          runningMode: "VIDEO",
+          numHands: 1,
+        });
+      }
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Could not load hand tracking.");
 }
 
 function statusLabel(phase: Phase, mode: DrawMode): string {
@@ -125,45 +170,18 @@ export default function AirDrawApp() {
 
     async function initModel() {
       try {
-        const vision = await FilesetResolver.forVisionTasks(WASM_URL);
-        if (cancelled) return;
-        const landmarker = await HandLandmarker.createFromOptions(vision, {
-          baseOptions: {
-            modelAssetPath: MODEL_URL,
-            delegate: "GPU",
-          },
-          runningMode: "VIDEO",
-          numHands: 1,
-        });
+        const landmarker = await createHandLandmarker();
         if (cancelled) {
           landmarker.close();
           return;
         }
         landmarkerRef.current = landmarker;
         setPhase("ready");
-      } catch {
+        setError(null);
+      } catch (e) {
         if (cancelled) return;
-        try {
-          const vision = await FilesetResolver.forVisionTasks(WASM_URL);
-          if (cancelled) return;
-          const landmarker = await HandLandmarker.createFromOptions(vision, {
-            baseOptions: {
-              modelAssetPath: MODEL_URL,
-              delegate: "CPU",
-            },
-            runningMode: "VIDEO",
-            numHands: 1,
-          });
-          if (cancelled) {
-            landmarker.close();
-            return;
-          }
-          landmarkerRef.current = landmarker;
-          setPhase("ready");
-        } catch (e) {
-          setPhase("error");
-          setError(e instanceof Error ? e.message : "Could not load hand tracking.");
-        }
+        setPhase("error");
+        setError(errorMessage(e, "Could not load hand tracking."));
       }
     }
 
