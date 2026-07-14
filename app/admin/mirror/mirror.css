@@ -47,6 +47,7 @@ body.mirror-active::before {
 /*
  * Bottom-left content block: height follows content so the clock is never
  * clipped by a fixed panel. Grows upward from the bottom bezel.
+ * Two-finger pinch/pan adjusts --mirror-user-scale / --mirror-pan-*.
  */
 .mirror-app__inner {
   position: absolute;
@@ -68,6 +69,12 @@ body.mirror-active::before {
   box-sizing: border-box;
   text-align: left;
   padding-left: env(safe-area-inset-left, 0px);
+  transform: translate(var(--mirror-pan-x, 0px), var(--mirror-pan-y, 0px))
+    scale(var(--mirror-user-scale, 1));
+  transform-origin: left bottom;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .mirror-app__content {
