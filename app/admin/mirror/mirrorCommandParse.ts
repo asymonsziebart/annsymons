@@ -357,21 +357,21 @@ export function parseAddTaskCommand(text: string): AddTaskVoiceCommand | null {
   const t = normalize(text);
   if (!t) return null;
 
+  // Title is always capture group 1 (no named groups — tsconfig targets ES2017).
   const patterns: RegExp[] = [
-    /^add (?:a |an |the )?(?:new )?task (?:to |for |called |named )?(?<title>.+)$/,
-    /^create (?:a |an |the )?(?:new )?task (?:to |for |called |named )?(?<title>.+)$/,
-    /^new task (?<title>.+)$/,
-    /^add (?<title>.+) to (?:my )?(?:to ?do|todo|task) list$/,
-    /^put (?<title>.+) on (?:my )?(?:to ?do|todo|task) list$/,
-    /^remind me to (?<title>.+)$/,
-    /^remind me (?<title>.+)$/,
-    /^add (?:a |an |the )?(?:to ?do|todo|task) (?<title>.+)$/,
+    /^add (?:a |an |the )?(?:new )?task (?:to |for |called |named )?(.+)$/,
+    /^create (?:a |an |the )?(?:new )?task (?:to |for |called |named )?(.+)$/,
+    /^new task (.+)$/,
+    /^add (.+) to (?:my )?(?:to ?do|todo|task) list$/,
+    /^put (.+) on (?:my )?(?:to ?do|todo|task) list$/,
+    /^remind me to (.+)$/,
+    /^remind me (.+)$/,
+    /^add (?:a |an |the )?(?:to ?do|todo|task) (.+)$/,
   ];
 
   for (const pattern of patterns) {
     const m = t.match(pattern);
-    if (!m?.groups?.title) continue;
-    const rawTitle = m.groups.title.trim();
+    const rawTitle = (m?.[1] ?? "").trim();
     if (!rawTitle) continue;
     const parsed = stripDueFromTitle(rawTitle);
     if (!parsed.title || parsed.title.length < 2) continue;
