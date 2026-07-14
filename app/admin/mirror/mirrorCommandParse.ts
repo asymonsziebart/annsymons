@@ -43,6 +43,31 @@ export function isHomeCommand(text: string): boolean {
   );
 }
 
+export function isShowTasksCommand(text: string): boolean {
+  const t = normalize(text);
+  if (!t) return false;
+  return (
+    t === "tasks" ||
+    t === "my tasks" ||
+    t === "due tasks" ||
+    /\bshow (me )?(my )?(due )?tasks\b/.test(t) ||
+    /\bopen (my )?(due )?tasks\b/.test(t) ||
+    /\blist (my )?(due )?tasks\b/.test(t) ||
+    /\btask list\b/.test(t) ||
+    /\bshow (the )?task list\b/.test(t)
+  );
+}
+
+export function isCloseTasksCommand(text: string): boolean {
+  const t = normalize(text);
+  if (!t) return false;
+  return (
+    /\bclose (the )?tasks?\b/.test(t) ||
+    /\bhide (the )?tasks?\b/.test(t) ||
+    /\bdismiss (the )?tasks?\b/.test(t)
+  );
+}
+
 export type FullscreenVoiceCommand = "enter" | "exit" | "toggle";
 
 export function parseFullscreenCommand(text: string): FullscreenVoiceCommand | null {
