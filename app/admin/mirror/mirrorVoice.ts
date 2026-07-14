@@ -178,7 +178,7 @@ export function buildMirrorVoiceResponse(
     });
     const rest = ctx.dueTasks.length - first.length;
     const suffix = rest > 0 ? ` Plus ${rest} more.` : "";
-    return `You have ${ctx.dueTasks.length} due tasks. ${lines.join(". ")}.${suffix}`;
+    return `You have ${ctx.dueTasks.length} due tasks. ${lines.join(". ")}.${suffix} Say show tasks to manage them.`;
   }
 
   if (c.includes("recipe")) {

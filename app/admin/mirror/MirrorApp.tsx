@@ -17,8 +17,10 @@ import {
   dueDateIsoForAdd,
   formatDurationClock,
   formatDurationSpoken,
+  isCloseTasksCommand,
   isHomeCommand,
   isRecipeReadCommand,
+  isShowTasksCommand,
   matchTaskForComplete,
   parseAddTaskCommand,
   parseCompleteTaskCommand,
@@ -48,6 +50,7 @@ import { bindMirrorWakeLockOnVisible, requestMirrorWakeLock } from "./mirrorWake
 import { useMirrorVoice } from "./useMirrorVoice";
 import MirrorWakeTrainer from "./MirrorWakeTrainer";
 import MirrorRecipeOverlay from "./MirrorRecipeOverlay";
+import MirrorTasksOverlay from "./MirrorTasksOverlay";
 import { countTrainingSamples } from "./mirrorWakeTraining";
 
 const TASK_CYCLE_MS = 8000;
@@ -111,6 +114,9 @@ export default function MirrorApp({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [canFullscreen, setCanFullscreen] = useState(false);
   const [trainerOpen, setTrainerOpen] = useState(false);
+  const [tasksOpen, setTasksOpen] = useState(false);
+  const [taskActionBusyId, setTaskActionBusyId] = useState<number | null>(null);
+  const [tasksMessage, setTasksMessage] = useState<string | null>(null);
   const [timers, setTimers] = useState<MirrorTimer[]>([]);
 
   const recipesRef = useRef(initialRecipes);
@@ -123,6 +129,7 @@ export default function MirrorApp({
   const announcedTimersRef = useRef<Set<string>>(new Set());
   const sectionsRef = useRef(initialSections);
   const trainerOpenRef = useRef(false);
+  const tasksOpenRef = useRef(false);
 
   recipesRef.current = recipes;
   activeRecipeRef.current = activeRecipe;
@@ -131,11 +138,13 @@ export default function MirrorApp({
   timersRef.current = timers;
   sectionsRef.current = sections;
   trainerOpenRef.current = trainerOpen;
+  tasksOpenRef.current = tasksOpen;
 
   const openRecipe = useCallback((recipe: Recipe) => {
     setActiveRecipe(recipe);
     setRecipePanel("ingredients");
     setRecipeStepIndex(0);
+    setTasksOpen(false);
   }, []);
 
   const closeRecipe = useCallback(() => {
@@ -144,14 +153,35 @@ export default function MirrorApp({
     setRecipeStepIndex(0);
   }, []);
 
-  const goHome = useCallback((): string => {
-    const hadOverlay = Boolean(activeRecipeRef.current) || trainerOpenRef.current;
+  const openTasks = useCallback((): string => {
     closeRecipe();
     setTrainerOpen(false);
+    setTasksOpen(true);
+    setTasksMessage(null);
+    const count = dueTasksRef.current.length;
+    if (count === 0) return "Opening tasks. Nothing is due today.";
+    return `Opening tasks. You have ${count} due.`;
+  }, [closeRecipe]);
+
+  const closeTasks = useCallback((): string => {
+    if (!tasksOpenRef.current) return "Tasks are already closed.";
+    setTasksOpen(false);
+    setTasksMessage(null);
+    return "Closing tasks.";
+  }, []);
+
+  const goHome = useCallback((): string => {
+    const hadOverlay =
+      Boolean(activeRecipeRef.current) || trainerOpenRef.current || tasksOpenRef.current;
+    closeRecipe();
+    setTrainerOpen(false);
+    setTasksOpen(false);
+    setTasksMessage(null);
     return hadOverlay ? "Returning home." : "You're already on the home screen.";
   }, [closeRecipe]);
 
   const completeTaskById = useCallback(async (task: TaskRow): Promise<string> => {
+    setTaskActionBusyId(task.id);
     try {
       const res = await fetch(`/api/tasks/${task.id}`, {
         method: "PATCH",
@@ -163,10 +193,15 @@ export default function MirrorApp({
         task?: TaskRow;
       };
       if (res.status === 409) {
-        return data.error || `I couldn't mark ${task.title} done yet — something is blocking it.`;
+        const msg =
+          data.error || `I couldn't mark ${task.title} done yet — something is blocking it.`;
+        setTasksMessage(msg);
+        return msg;
       }
       if (!res.ok) {
-        return data.error || `I couldn't mark ${task.title} done.`;
+        const msg = data.error || `I couldn't mark ${task.title} done.`;
+        setTasksMessage(msg);
+        return msg;
       }
       if (data.task) {
         setTasks((prev) => prev.map((t) => (t.id === data.task!.id ? data.task! : t)));
@@ -181,9 +216,15 @@ export default function MirrorApp({
           if (payload && Array.isArray(payload.tasks)) setTasks(payload.tasks);
         })
         .catch(() => {});
-      return `Done. Marked ${task.title} complete.`;
+      const msg = `Done. Marked ${task.title} complete.`;
+      setTasksMessage(msg);
+      return msg;
     } catch {
-      return `I couldn't mark ${task.title} done.`;
+      const msg = `I couldn't mark ${task.title} done.`;
+      setTasksMessage(msg);
+      return msg;
+    } finally {
+      setTaskActionBusyId(null);
     }
   }, []);
 
@@ -191,7 +232,9 @@ export default function MirrorApp({
     async (title: string, due: "today" | "tomorrow" | "none"): Promise<string> => {
       const section = pickMirrorDefaultSection(sectionsRef.current);
       if (!section) {
-        return "I couldn't add that — no task sections are set up yet.";
+        const msg = "I couldn't add that — no task sections are set up yet.";
+        setTasksMessage(msg);
+        return msg;
       }
       const due_date = dueDateIsoForAdd(due, new Date());
       try {
@@ -210,14 +253,20 @@ export default function MirrorApp({
           task?: TaskRow;
         };
         if (!res.ok || !data.task) {
-          return data.error || "I couldn't add that task.";
+          const msg = data.error || "I couldn't add that task.";
+          setTasksMessage(msg);
+          return msg;
         }
         setTasks((prev) => [...prev, data.task!]);
         const dueBit =
           due === "tomorrow" ? " due tomorrow" : due === "none" ? " with no due date" : " due today";
-        return `Added ${data.task.title}${dueBit}.`;
+        const msg = `Added ${data.task.title}${dueBit}.`;
+        setTasksMessage(msg);
+        return msg;
       } catch {
-        return "I couldn't add that task.";
+        const msg = "I couldn't add that task.";
+        setTasksMessage(msg);
+        return msg;
       }
     },
     []
@@ -229,6 +278,14 @@ export default function MirrorApp({
 
       if (isHomeCommand(raw) || isHomeCommand(command)) {
         return goHome();
+      }
+
+      if (isCloseTasksCommand(raw) || isCloseTasksCommand(command)) {
+        return closeTasks();
+      }
+
+      if (isShowTasksCommand(raw) || isShowTasksCommand(command)) {
+        return openTasks();
       }
 
       if (recipe && isRecipeCloseCommand(raw)) {
@@ -289,7 +346,7 @@ export default function MirrorApp({
 
       return null;
     },
-  }), [closeRecipe, goHome, openRecipe]);
+  }), [closeRecipe, closeTasks, goHome, openRecipe, openTasks]);
 
   const getActionHandler = useCallback((): MirrorActionVoiceHandler => ({
     handle: async (raw, command) => {
@@ -297,6 +354,14 @@ export default function MirrorApp({
 
       if (isHomeCommand(text) || isHomeCommand(raw)) {
         return goHome();
+      }
+
+      if (isCloseTasksCommand(text) || isCloseTasksCommand(raw)) {
+        return closeTasks();
+      }
+
+      if (isShowTasksCommand(text) || isShowTasksCommand(raw)) {
+        return openTasks();
       }
 
       const fullscreen = parseFullscreenCommand(text) ?? parseFullscreenCommand(raw);
@@ -379,7 +444,7 @@ export default function MirrorApp({
 
       return null;
     },
-  }), [completeTaskById, createTaskFromVoice, goHome]);
+  }), [closeTasks, completeTaskById, createTaskFromVoice, goHome, openTasks]);
 
   const dueTasks = useMemo(() => getDueTasksForMirror(tasks, now), [tasks, now]);
   dueTasksRef.current = dueTasks;
@@ -481,11 +546,7 @@ export default function MirrorApp({
   }, [dueTasks.length]);
 
   useEffect(() => {
-    requestAnimationFrame(() => applyMirrorContentInset());
-  }, [dueTasks.length, taskIndex, weather?.temperatureF, activeRecipe, timers.length]);
-
-  useEffect(() => {
-    if (dueTasks.length <= 1) return;
+    if (dueTasks.length <= 1 || tasksOpen) return;
 
     const id = window.setInterval(() => {
       setFading(true);
@@ -496,7 +557,11 @@ export default function MirrorApp({
     }, TASK_CYCLE_MS);
 
     return () => window.clearInterval(id);
-  }, [dueTasks.length]);
+  }, [dueTasks.length, tasksOpen]);
+
+  useEffect(() => {
+    requestAnimationFrame(() => applyMirrorContentInset());
+  }, [dueTasks.length, taskIndex, weather?.temperatureF, activeRecipe, timers.length, tasksOpen]);
 
   // Expire timers and announce completion.
   useEffect(() => {
@@ -629,6 +694,24 @@ export default function MirrorApp({
         resumeVoice={resumeVoice}
       />
 
+      <MirrorTasksOverlay
+        open={tasksOpen}
+        tasks={dueTasks}
+        now={now}
+        busyId={taskActionBusyId}
+        message={tasksMessage}
+        onClose={() => {
+          setTasksOpen(false);
+          setTasksMessage(null);
+        }}
+        onComplete={(task) => {
+          void completeTaskById(task);
+        }}
+        onAdd={async (title) => {
+          await createTaskFromVoice(title, "today");
+        }}
+      />
+
       {activeRecipe ? (
         <MirrorRecipeOverlay
           recipe={activeRecipe}
@@ -637,7 +720,9 @@ export default function MirrorApp({
         />
       ) : null}
 
-      <div className={`mirror-app__inner${activeRecipe ? " mirror-app__inner--hidden" : ""}`}>
+      <div
+        className={`mirror-app__inner${activeRecipe || tasksOpen ? " mirror-app__inner--hidden" : ""}`}
+      >
         <div className="mirror-app__content">
         <div className="mirror-app__clock">
           <div className="mirror-app__time" aria-live="polite" aria-atomic="true">
@@ -660,33 +745,56 @@ export default function MirrorApp({
 
         <div className="mirror-app__tasks" aria-live="polite">
         {dueTasks.length === 0 ? (
-          <p className="mirror-app__empty">No tasks due today</p>
+          <button
+            type="button"
+            className="mirror-app__empty mirror-app__empty--btn"
+            onClick={() => {
+              setTasksOpen(true);
+              setTasksMessage(null);
+            }}
+          >
+            No tasks due today — tap to add
+          </button>
         ) : (
           <>
-            <p className="mirror-app__task-label">
-              {dueTasks.length === 1 ? "Due task" : `Due tasks · ${taskIndex + 1} of ${dueTasks.length}`}
-            </p>
-            {currentTask ? (
-              <>
-                <p
-                  className={`mirror-app__task-title${fading ? " mirror-app__task-title--fade" : ""}`}
-                >
-                  {currentTask.title}
-                </p>
-                <p
-                  className={`mirror-app__task-meta${fading ? " mirror-app__task-meta--fade" : ""}`}
-                >
-                  {formatMirrorDueLabel(currentTask, now)}
-                  {currentTask.assignee ? ` · ${currentTask.assignee}` : ""}
-                </p>
-              </>
-            ) : null}
+            <button
+              type="button"
+              className="mirror-app__task-hit"
+              onClick={() => {
+                setTasksOpen(true);
+                setTasksMessage(null);
+              }}
+            >
+              <p className="mirror-app__task-label">
+                {dueTasks.length === 1
+                  ? "Due task · tap to manage"
+                  : `Due tasks · ${taskIndex + 1} of ${dueTasks.length} · tap to manage`}
+              </p>
+              {currentTask ? (
+                <>
+                  <p
+                    className={`mirror-app__task-title${fading ? " mirror-app__task-title--fade" : ""}`}
+                  >
+                    {currentTask.title}
+                  </p>
+                  <p
+                    className={`mirror-app__task-meta${fading ? " mirror-app__task-meta--fade" : ""}`}
+                  >
+                    {formatMirrorDueLabel(currentTask, now)}
+                    {currentTask.assignee ? ` · ${currentTask.assignee}` : ""}
+                  </p>
+                </>
+              ) : null}
+            </button>
             {dueTasks.length > 1 ? (
               <div className="mirror-app__dots" aria-hidden="true">
                 {dueTasks.map((t, i) => (
-                  <span
+                  <button
                     key={t.id}
+                    type="button"
                     className={`mirror-app__dot${i === taskIndex ? " mirror-app__dot--active" : ""}`}
+                    onClick={() => setTaskIndex(i)}
+                    aria-label={`Show task ${i + 1}`}
                   />
                 ))}
               </div>

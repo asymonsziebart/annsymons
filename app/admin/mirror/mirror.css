@@ -182,6 +182,31 @@ body.mirror-active::before {
   color: var(--mirror-muted);
 }
 
+.mirror-app__empty--btn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--mirror-muted);
+  font: inherit;
+  font-size: var(--mirror-task-size);
+  text-align: left;
+  cursor: pointer;
+}
+
+.mirror-app__task-hit {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
 .mirror-app__dots {
   display: flex;
   justify-content: flex-start;
@@ -190,11 +215,14 @@ body.mirror-active::before {
 }
 
 .mirror-app__dot {
-  width: 0.45rem;
-  height: 0.45rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  padding: 0;
+  border: none;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.2);
   transition: background 0.3s ease, transform 0.3s ease;
+  cursor: pointer;
 }
 
 .mirror-app__dot--active {
@@ -770,6 +798,198 @@ body.mirror-active::before {
   letter-spacing: 0.04em;
   text-align: center;
   color: rgba(255, 255, 255, 0.38);
+}
+
+.mirror-tasks {
+  position: fixed;
+  inset: 0;
+  z-index: 1003;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  padding:
+    max(1.1rem, env(safe-area-inset-top))
+    max(1.1rem, env(safe-area-inset-right))
+    max(1.25rem, env(safe-area-inset-bottom))
+    max(1.1rem, env(safe-area-inset-left));
+}
+
+.mirror-tasks__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.mirror-tasks__eyebrow {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.mirror-tasks__title {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.mirror-tasks__close {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.mirror-tasks__add {
+  display: flex;
+  gap: 0.55rem;
+  margin-top: 1.1rem;
+  flex-shrink: 0;
+}
+
+.mirror-tasks__input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font: inherit;
+  font-size: 1rem;
+}
+
+.mirror-tasks__input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.mirror-tasks__add-btn {
+  flex-shrink: 0;
+  padding: 0.85rem 1.1rem;
+  border: none;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.92);
+  color: #000;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mirror-tasks__add-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.mirror-tasks__message {
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+  color: rgba(120, 220, 160, 0.9);
+  flex-shrink: 0;
+}
+
+.mirror-tasks__empty {
+  margin: 1.5rem 0 0;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.mirror-tasks__list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-height: 0;
+}
+
+.mirror-tasks__item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.95rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mirror-tasks__item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.mirror-tasks__item-title {
+  margin: 0;
+  font-size: clamp(1.05rem, 2.6vw, 1.25rem);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.mirror-tasks__item-meta {
+  margin: 0.3rem 0 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.mirror-tasks__done {
+  flex-shrink: 0;
+  min-width: 4.5rem;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.95rem;
+  border: 1px solid rgba(120, 220, 160, 0.45);
+  border-radius: 0.75rem;
+  background: rgba(120, 220, 160, 0.14);
+  color: #fff;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mirror-tasks__done:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.mirror-tasks__footer {
+  flex-shrink: 0;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.mirror-tasks__board-link {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.mirror-tasks__hint {
+  margin: 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.38);
+  text-align: center;
 }
 
 /* Fallback when JS hasn't run yet */
