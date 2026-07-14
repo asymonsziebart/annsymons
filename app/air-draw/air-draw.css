@@ -151,6 +151,8 @@ body:has(.air-draw)::before {
 
 .air-draw__cursor {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 18px;
   height: 18px;
   margin: -9px 0 0 -9px;
@@ -160,7 +162,9 @@ body:has(.air-draw)::before {
   pointer-events: none;
   z-index: 2;
   opacity: 0;
-  transition: opacity 0.15s ease, background 0.15s ease, transform 0.1s ease;
+  will-change: transform;
+  transition: opacity 0.12s ease, background 0.12s ease, border-color 0.12s ease,
+    box-shadow 0.12s ease;
 }
 
 .air-draw__cursor--visible {
@@ -169,14 +173,12 @@ body:has(.air-draw)::before {
 
 .air-draw__cursor--draw {
   background: rgba(255, 139, 106, 0.35);
-  transform: scale(1.15);
 }
 
 .air-draw__cursor--erase {
   background: rgba(155, 180, 255, 0.35);
   border-color: #9bb4ff;
   box-shadow: 0 0 16px rgba(155, 180, 255, 0.45);
-  transform: scale(1.6);
 }
 
 .air-draw__cursor--idle {
