@@ -18,14 +18,14 @@ body.mirror-active::before {
   --mirror-bg: #000000;
   --mirror-fg: #ffffff;
   --mirror-muted: rgba(255, 255, 255, 0.55);
-  --mirror-panel-width: 72vw;
-  --mirror-panel-height: 58vh;
-  --mirror-time-size: 18vw;
-  --mirror-date-size: 5.4vw;
-  --mirror-weather-size: 7.2vw;
-  --mirror-task-size: 4vw;
-  --mirror-task-label-size: 2vw;
+  --mirror-panel-width: 78vw;
+  --mirror-time-size: 16vw;
+  --mirror-date-size: 5vw;
+  --mirror-weather-size: 6.5vw;
+  --mirror-task-size: 3.6vw;
+  --mirror-task-label-size: 1.8vw;
   --mirror-content-inset: 1.75rem;
+  --mirror-fit-scale: 1;
 
   position: fixed;
   inset: 0;
@@ -44,20 +44,27 @@ body.mirror-active::before {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Bottom-left panel with breathing room from the bezel. */
+/*
+ * Bottom-left content block: height follows content so the clock is never
+ * clipped by a fixed panel. Grows upward from the bottom bezel.
+ */
 .mirror-app__inner {
   position: absolute;
   left: 0;
+  right: auto;
   bottom: max(1rem, env(safe-area-inset-bottom));
-  width: var(--mirror-panel-width, 72%);
-  height: var(--mirror-panel-height, 58%);
-  max-width: 78%;
-  max-height: 62%;
+  top: auto;
+  width: var(--mirror-panel-width, 78%);
+  height: auto;
+  max-width: min(92vw, 40rem);
+  max-height: calc(
+    100dvh - max(3.5rem, env(safe-area-inset-top)) - max(1rem, env(safe-area-inset-bottom))
+  );
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-end;
-  overflow: hidden;
+  overflow: visible;
   box-sizing: border-box;
   text-align: left;
   padding-left: env(safe-area-inset-left, 0px);
@@ -68,6 +75,8 @@ body.mirror-active::before {
   max-width: 100%;
   margin-left: var(--mirror-content-inset, 1.75rem);
   box-sizing: border-box;
+  transform: scale(var(--mirror-fit-scale, 1));
+  transform-origin: left bottom;
 }
 
 .mirror-app__clock {

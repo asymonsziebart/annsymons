@@ -37,6 +37,7 @@ import {
 } from "./mirrorFullscreen";
 import {
   applyMirrorContentInset,
+  fitMirrorContentToViewport,
   formatMirrorTimeParts,
 } from "./mirrorScale";
 import {
@@ -560,7 +561,10 @@ export default function MirrorApp({
   }, [dueTasks.length, tasksOpen]);
 
   useEffect(() => {
-    requestAnimationFrame(() => applyMirrorContentInset());
+    requestAnimationFrame(() => {
+      applyMirrorContentInset();
+      fitMirrorContentToViewport();
+    });
   }, [dueTasks.length, taskIndex, weather?.temperatureF, activeRecipe, timers.length, tasksOpen]);
 
   // Expire timers and announce completion.

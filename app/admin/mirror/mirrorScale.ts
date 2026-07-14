@@ -7,19 +7,18 @@ export function applyMirrorTypography(): void {
   const w = vv?.width ?? window.innerWidth;
   const h = vv?.height ?? window.innerHeight;
 
-  // Wider/taller panel so larger type still fits on tablets.
-  const panelW = w * 0.72;
-  const panelH = h * 0.58;
-  const basis = Math.min(panelW, panelH);
+  // Width for the bottom-left content block.
+  const panelW = Math.min(w * 0.78, w - 24);
+  // Type scales from the shorter side of a readable content box.
+  const basis = Math.min(panelW, h * 0.55);
 
-  const timePx = Math.round(basis * 0.34);
-  const datePx = Math.round(basis * 0.105);
-  const weatherPx = Math.round(basis * 0.145);
-  const taskPx = Math.round(basis * 0.078);
-  const taskLabelPx = Math.round(basis * 0.038);
+  const timePx = Math.round(basis * 0.3);
+  const datePx = Math.round(basis * 0.095);
+  const weatherPx = Math.round(basis * 0.125);
+  const taskPx = Math.round(basis * 0.07);
+  const taskLabelPx = Math.round(basis * 0.034);
 
   root.style.setProperty("--mirror-panel-width", `${Math.round(panelW)}px`);
-  root.style.setProperty("--mirror-panel-height", `${Math.round(panelH)}px`);
   root.style.setProperty("--mirror-time-size", `${timePx}px`);
   root.style.setProperty("--mirror-date-size", `${datePx}px`);
   root.style.setProperty("--mirror-weather-size", `${weatherPx}px`);
@@ -46,12 +45,42 @@ export function applyMirrorContentInset(): void {
   content.style.marginLeft = "";
 }
 
+/**
+ * If the bottom-anchored block would run under the top chrome / off-screen,
+ * gently shrink type so clock + weather + tasks all stay visible.
+ */
+export function fitMirrorContentToViewport(): void {
+  const root = document.querySelector(".mirror-app") as HTMLElement | null;
+  const inner = document.querySelector(".mirror-app__inner") as HTMLElement | null;
+  const content = document.querySelector(".mirror-app__content") as HTMLElement | null;
+  if (!root || !inner || !content) return;
+
+  const vv = window.visualViewport;
+  const viewH = vv?.height ?? window.innerHeight;
+  const topSafe = 56; // leave room for voice pill / status
+  const bottomSafe = 16;
+  const maxBlock = Math.max(180, viewH - topSafe - bottomSafe);
+
+  // Reset any previous shrink so we measure natural size.
+  root.style.setProperty("--mirror-fit-scale", "1");
+
+  const natural = content.getBoundingClientRect().height;
+  if (natural <= maxBlock || natural <= 0) return;
+
+  const scale = Math.max(0.72, Math.min(1, maxBlock / natural));
+  root.style.setProperty("--mirror-fit-scale", String(scale));
+}
+
 export function bindMirrorTypography(): () => void {
   const update = () => {
     applyMirrorTypography();
     requestAnimationFrame(() => {
       applyMirrorContentInset();
-      requestAnimationFrame(applyMirrorContentInset);
+      fitMirrorContentToViewport();
+      requestAnimationFrame(() => {
+        applyMirrorContentInset();
+        fitMirrorContentToViewport();
+      });
     });
   };
   update();
