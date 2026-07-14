@@ -387,6 +387,7 @@ export default function MirrorApp({
 
   const {
     status: voiceStatus,
+    lastHeard,
     training,
     enableVoice,
     pauseVoice,
@@ -558,10 +559,9 @@ export default function MirrorApp({
       {!isFullscreen && (voiceStatus === "needs-permission" || voiceStatus === "error") ? (
         <button
           type="button"
-          className="mirror-app__voice-enable"
+          className="mirror-app__voice-enable mirror-app__voice-enable--labeled"
           onClick={enableVoice}
           aria-label="Enable voice commands"
-          title='Say "hey mirror" or "mirror mirror"'
         >
           <svg viewBox="0 0 24 24" aria-hidden="true" className="mirror-app__voice-icon">
             <path
@@ -569,6 +569,9 @@ export default function MirrorApp({
               d="M12 14a3 3 0 0 0 3-3V5a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"
             />
           </svg>
+          <span className="mirror-app__voice-enable-text">
+            {voiceStatus === "error" ? "Tap to retry voice" : "Tap to enable voice"}
+          </span>
         </button>
       ) : showVoiceBar ? (
         <div
@@ -589,6 +592,11 @@ export default function MirrorApp({
             >
               Train
             </button>
+          ) : null}
+          {lastHeard && !isFullscreen ? (
+            <div className="mirror-app__voice-heard" aria-live="polite">
+              Heard: “{lastHeard}”
+            </div>
           ) : null}
         </div>
       ) : null}

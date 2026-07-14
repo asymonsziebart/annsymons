@@ -5,13 +5,17 @@ import { formatMirrorDueLabel } from "./mirrorTasks";
 import { speakJarvis, stopJarvisSpeech } from "./mirrorJarvisSpeak";
 import { playMirrorWakeChime } from "./mirrorWakeChime";
 import {
+  detectWakeInTranscript,
+  isAndroidBrowser,
+  isBareMirrorTranscript,
+} from "./mirrorWakeMatch";
+import {
   getTrainingSamples,
   normalizeSpeech,
   transcriptMatchesSample,
   type MirrorWakeTraining,
 } from "./mirrorWakeTraining";
 
-const WAKE_PHRASES = ["hey mirror", "mirror mirror"] as const;
 const FOLLOW_UP_MS = 8000;
 /** Wait for a second "mirror" (or a command) before treating a lone "mirror" as wake. */
 const BARE_MIRROR_DEBOUNCE_MS = 750;
@@ -24,20 +28,27 @@ export type MirrorVoiceStatus =
   | "speaking"
   | "error";
 
+type SpeechRecognitionAlternativeLike = {
+  transcript: string;
+};
+
 type SpeechRecognitionResultLike = {
   isFinal: boolean;
-  0: { transcript: string };
+  length: number;
+  item?: (index: number) => SpeechRecognitionAlternativeLike;
+  0: SpeechRecognitionAlternativeLike;
 };
 
 type SpeechRecognitionEventLike = {
   resultIndex: number;
-  results: SpeechRecognitionResultLike[];
+  results: ArrayLike<SpeechRecognitionResultLike>;
 };
 
 type SpeechRecognitionLike = {
   continuous: boolean;
   interimResults: boolean;
   lang: string;
+  maxAlternatives: number;
   onresult: ((event: SpeechRecognitionEventLike) => void) | null;
   onend: (() => void) | null;
   onerror: ((event: { error?: string }) => void) | null;
@@ -56,19 +67,13 @@ function normalizeSpeechLocal(text: string): string {
   return normalizeSpeech(text);
 }
 
-/** True when the transcript is exactly the single-word wake "mirror". */
-export function isBareMirrorTranscript(text: string): boolean {
-  return normalizeSpeechLocal(text) === "mirror";
-}
+export { isBareMirrorTranscript } from "./mirrorWakeMatch";
 
 export function transcriptHasWakePhrase(text: string, training?: MirrorWakeTraining): boolean {
-  const n = normalizeSpeechLocal(text);
-  if (WAKE_PHRASES.some((phrase) => n.includes(phrase))) return true;
-  // SpeechRecognition sometimes glues repeated words: "mirrormirror"
-  if (n.replace(/\s+/g, "") === "mirrormirror") return true;
-  if (n === "mirror" || n.startsWith("hey mirror")) return true;
-  if (n.startsWith("mirror ") && !n.startsWith("mirror mirror")) return true;
+  const detected = detectWakeInTranscript(text);
+  if (detected.hasWake) return true;
   if (!training) return false;
+  const n = normalizeSpeechLocal(text);
   return getTrainingSamples(training).some((sample) => transcriptMatchesSample(n, sample));
 }
 
@@ -90,15 +95,9 @@ export function joinTranscriptParts(parts: string[]): string {
 }
 
 export function stripWakePhrases(text: string, training?: MirrorWakeTraining): string {
-  let n = normalizeSpeechLocal(text);
-  // Prefer the longer phrases first; allow missing spaces between repeated "mirror".
-  n = n.replace(/hey\s+mirror/g, " ");
-  n = n.replace(/mirror\s*mirror/g, " ");
-  n = n.replace(/\s+/g, " ").trim();
-  if (n.startsWith("hey mirror ")) n = n.slice("hey mirror ".length);
-  else if (n === "hey mirror") n = "";
-  else if (n.startsWith("mirror ")) n = n.slice("mirror ".length);
-  else if (n === "mirror") n = "";
+  const detected = detectWakeInTranscript(text);
+  let n = detected.hasWake ? detected.command : normalizeSpeechLocal(text);
+
   if (training) {
     for (const sample of getTrainingSamples(training)) {
       n = stripMatchedSample(n, sample);
@@ -108,6 +107,17 @@ export function stripWakePhrases(text: string, training?: MirrorWakeTraining): s
     }
   }
   return n.replace(/\s+/g, " ").trim();
+}
+
+function bestTranscriptFromResult(result: SpeechRecognitionResultLike): string {
+  const primary = result[0]?.transcript ?? "";
+  const altCount = typeof result.length === "number" ? result.length : 1;
+  for (let a = 0; a < altCount; a++) {
+    const alt =
+      typeof result.item === "function" ? result.item(a) : (result as { [k: number]: SpeechRecognitionAlternativeLike })[a];
+    if (alt?.transcript && transcriptHasWakePhrase(alt.transcript)) return alt.transcript;
+  }
+  return primary;
 }
 
 function formatSpokenTime(now: Date): string {
@@ -216,7 +226,8 @@ export function createMirrorVoiceController(
   getTraining: () => MirrorWakeTraining,
   onStatus: (status: MirrorVoiceStatus) => void,
   getRecipeHandler?: () => MirrorRecipeVoiceHandler | null,
-  getActionHandler?: () => MirrorActionVoiceHandler | null
+  getActionHandler?: () => MirrorActionVoiceHandler | null,
+  onHeard?: (transcript: string) => void
 ): MirrorVoiceController | null {
   const recognition = getMirrorSpeechRecognition();
   if (!recognition) {
@@ -224,6 +235,7 @@ export function createMirrorVoiceController(
     return null;
   }
 
+  const android = isAndroidBrowser();
   let running = false;
   let paused = false;
   let awakeUntil = 0;
@@ -235,9 +247,10 @@ export function createMirrorVoiceController(
   let lastWakeChimeAt = 0;
   const pendingFinals: { raw: string; settleBareMirror: boolean }[] = [];
 
-  recognition.continuous = true;
+  recognition.continuous = !android;
   recognition.interimResults = true;
   recognition.lang = "en-US";
+  recognition.maxAlternatives = 3;
 
   const setStatus = () => {
     if (speaking) {
@@ -259,6 +272,20 @@ export function createMirrorVoiceController(
     bareMirrorParts = [];
   };
 
+  const scheduleRestart = (delayMs = android ? 120 : 250) => {
+    if (!running || paused || speaking) return;
+    if (restartTimer != null) window.clearTimeout(restartTimer);
+    restartTimer = window.setTimeout(() => {
+      if (!running || paused || speaking) return;
+      try {
+        recognition.start();
+        setStatus();
+      } catch {
+        /* ignore restart race */
+      }
+    }, delayMs);
+  };
+
   /** Chime once and enter the listening-for-command window. */
   const acknowledgeWake = () => {
     const now = Date.now();
@@ -272,10 +299,17 @@ export function createMirrorVoiceController(
   const respond = async (text: string, keepAwake = true) => {
     speaking = true;
     onStatus("speaking");
+    // Stop recognition while speaking so the mic doesn't hear Jarvis (esp. Android).
+    try {
+      recognition.stop();
+    } catch {
+      /* ignore */
+    }
     await speakMirrorResponse(text);
     speaking = false;
     awakeUntil = keepAwake ? Date.now() + FOLLOW_UP_MS : 0;
     setStatus();
+    scheduleRestart(android ? 200 : 250);
   };
 
   const processFinalTranscript = async (raw: string, settleBareMirror = false) => {
@@ -417,10 +451,12 @@ export function createMirrorVoiceController(
     let interim = "";
     let finalText = "";
     for (let i = event.resultIndex; i < event.results.length; i++) {
-      const piece = event.results[i][0].transcript;
+      const piece = bestTranscriptFromResult(event.results[i]);
       if (event.results[i].isFinal) finalText += piece;
       else interim += piece;
     }
+    const heard = (finalText || interim).trim();
+    if (heard) onHeard?.(heard);
     if (finalText) void enqueueFinal(finalText);
     else if (interim) handleInterim(interim);
   };
@@ -432,22 +468,20 @@ export function createMirrorVoiceController(
       running = false;
       return;
     }
-    if (event.error === "no-speech" || event.error === "aborted") return;
+    // Android frequently emits no-speech / network — keep listening.
+    if (
+      event.error === "no-speech" ||
+      event.error === "aborted" ||
+      event.error === "network"
+    ) {
+      scheduleRestart(android ? 180 : 250);
+      return;
+    }
     onStatus("error");
   };
 
   recognition.onend = () => {
-    if (!running || paused) return;
-    if (restartTimer != null) window.clearTimeout(restartTimer);
-    restartTimer = window.setTimeout(() => {
-      if (!running || paused) return;
-      try {
-        recognition.start();
-        setStatus();
-      } catch {
-        /* ignore restart race */
-      }
-    }, 250);
+    scheduleRestart(android ? 120 : 250);
   };
 
   return {
@@ -494,7 +528,7 @@ export function createMirrorVoiceController(
         recognition.start();
         setStatus();
       } catch {
-        onStatus("error");
+        scheduleRestart(150);
       }
     },
   };

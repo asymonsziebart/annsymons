@@ -29,6 +29,7 @@ export function useMirrorVoice({
   getActionHandler,
 }: UseMirrorVoiceArgs) {
   const [status, setStatus] = useState<MirrorVoiceStatus>("needs-permission");
+  const [lastHeard, setLastHeard] = useState<string | null>(null);
   const [training, setTraining] = useState<MirrorWakeTraining>({
     heyMirror: [],
     mirrorMirror: [],
@@ -55,7 +56,8 @@ export function useMirrorVoice({
       () => trainingRef.current,
       setStatus,
       () => getRecipeHandlerRef.current?.() ?? null,
-      () => getActionHandlerRef.current?.() ?? null
+      () => getActionHandlerRef.current?.() ?? null,
+      (heard) => setLastHeard(heard)
     );
     controllerRef.current = controller;
     return () => {
@@ -65,6 +67,7 @@ export function useMirrorVoice({
   }, []);
 
   const enableVoice = () => {
+    setLastHeard(null);
     controllerRef.current?.start();
   };
 
@@ -83,6 +86,7 @@ export function useMirrorVoice({
 
   return {
     status,
+    lastHeard,
     training,
     enableVoice,
     pauseVoice,
