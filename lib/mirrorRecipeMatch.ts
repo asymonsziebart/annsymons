@@ -56,7 +56,11 @@ export function stripMirrorWakePrefix(transcript: string): string {
   let t = normalize(transcript);
   if (t.startsWith("hey mirror ")) return t.slice("hey mirror ".length).trim();
   if (t === "hey mirror") return "";
-  if (t.includes("mirror mirror")) return t;
+  if (t.startsWith("mirror mirror ")) return t.slice("mirror mirror ".length).trim();
+  if (t === "mirror mirror") return "";
+  // Glued repeat from split recognition results
+  if (t.startsWith("mirrormirror ")) return t.slice("mirrormirror ".length).trim();
+  if (t === "mirrormirror") return "";
   if (t.startsWith("mirror ")) return t.slice("mirror ".length).trim();
   if (t === "mirror") return "";
   return t;
