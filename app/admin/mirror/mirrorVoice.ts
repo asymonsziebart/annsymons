@@ -1,7 +1,8 @@
 import type { TaskRow } from "@/lib/data/taskClientTypes";
 import type { MirrorWeather } from "@/lib/mirrorWeather";
+import { isQuietCommand, isStopListeningCommand } from "./mirrorCommandParse";
 import { formatMirrorDueLabel } from "./mirrorTasks";
-import { speakJarvis } from "./mirrorJarvisSpeak";
+import { speakJarvis, stopJarvisSpeech } from "./mirrorJarvisSpeak";
 import {
   getTrainingSamples,
   normalizeSpeech,
@@ -117,7 +118,7 @@ export function buildMirrorVoiceResponse(
     c.includes("hello") ||
     c.includes("hi mirror")
   ) {
-    return "Try asking for the time, weather, or your tasks.";
+    return "Try asking for the time, weather, tasks, add a task, a recipe, a timer, or fullscreen.";
   }
 
   if (c.includes("time") || c.includes("what hour")) {
@@ -154,10 +155,15 @@ export function buildMirrorVoiceResponse(
     return 'Try saying "show me the recipe for" and the recipe name from your collection.';
   }
 
-  return "I didn't catch that. Try time, weather, tasks, or a recipe.";
+  return "I didn't catch that. Try time, weather, tasks, add a task, a recipe, or a timer.";
 }
 
 export type MirrorRecipeVoiceHandler = {
+  handle: (raw: string, command: string) => string | null | Promise<string | null>;
+};
+
+/** Side-effect commands (fullscreen, timers, complete task). Return null if unmatched. */
+export type MirrorActionVoiceHandler = {
   handle: (raw: string, command: string) => string | null | Promise<string | null>;
 };
 
@@ -189,7 +195,8 @@ export function createMirrorVoiceController(
   getContext: () => MirrorVoiceContext,
   getTraining: () => MirrorWakeTraining,
   onStatus: (status: MirrorVoiceStatus) => void,
-  getRecipeHandler?: () => MirrorRecipeVoiceHandler | null
+  getRecipeHandler?: () => MirrorRecipeVoiceHandler | null,
+  getActionHandler?: () => MirrorActionVoiceHandler | null
 ): MirrorVoiceController | null {
   const recognition = getMirrorSpeechRecognition();
   if (!recognition) {
@@ -229,11 +236,47 @@ export function createMirrorVoiceController(
   };
 
   const handleTranscript = async (raw: string, isFinal: boolean) => {
-    if (!raw.trim() || speaking) return;
+    if (!raw.trim()) return;
 
     const hasWake = transcriptHasWakePhrase(raw, getTraining());
     const command = stripWakePhrases(raw, getTraining());
     const awake = Date.now() < awakeUntil;
+    const interruptText = command || normalizeSpeechLocal(raw);
+
+    // Quiet / stop listening work even while Jarvis is speaking.
+    if (isFinal && (isQuietCommand(interruptText) || isQuietCommand(raw))) {
+      stopJarvisSpeech();
+      speaking = false;
+      awakeUntil = 0;
+      setStatus();
+      return;
+    }
+
+    if (isFinal && (isStopListeningCommand(interruptText) || isStopListeningCommand(raw))) {
+      stopJarvisSpeech();
+      speaking = false;
+      awakeUntil = 0;
+      running = false;
+      try {
+        recognition.stop();
+      } catch {
+        /* ignore */
+      }
+      onStatus("needs-permission");
+      return;
+    }
+
+    if (speaking) return;
+
+    if (isFinal && (hasWake || awake)) {
+      const actionReply = await getActionHandler?.()?.handle(raw, command);
+      if (actionReply !== null && actionReply !== undefined) {
+        awakeUntil = Date.now() + FOLLOW_UP_MS;
+        setStatus();
+        await respond(actionReply);
+        return;
+      }
+    }
 
     if (isFinal) {
       const recipeReply = await getRecipeHandler?.()?.handle(raw, command);

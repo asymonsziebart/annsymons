@@ -6,6 +6,8 @@ import type { TaskRow } from "@/lib/data/taskClientTypes";
 import type { MirrorWeather } from "@/lib/mirrorWeather";
 import {
   createMirrorVoiceController,
+  type MirrorActionVoiceHandler,
+  type MirrorRecipeVoiceHandler,
   type MirrorVoiceController,
   type MirrorVoiceStatus,
 } from "./mirrorVoice";
@@ -15,10 +17,17 @@ type UseMirrorVoiceArgs = {
   now: Date;
   weather: MirrorWeather | null;
   dueTasks: TaskRow[];
-  getRecipeHandler?: () => import("./mirrorVoice").MirrorRecipeVoiceHandler | null;
+  getRecipeHandler?: () => MirrorRecipeVoiceHandler | null;
+  getActionHandler?: () => MirrorActionVoiceHandler | null;
 };
 
-export function useMirrorVoice({ now, weather, dueTasks, getRecipeHandler }: UseMirrorVoiceArgs) {
+export function useMirrorVoice({
+  now,
+  weather,
+  dueTasks,
+  getRecipeHandler,
+  getActionHandler,
+}: UseMirrorVoiceArgs) {
   const [status, setStatus] = useState<MirrorVoiceStatus>("needs-permission");
   const [training, setTraining] = useState<MirrorWakeTraining>({
     heyMirror: [],
@@ -37,13 +46,16 @@ export function useMirrorVoice({ now, weather, dueTasks, getRecipeHandler }: Use
 
   const getRecipeHandlerRef = useRef(getRecipeHandler);
   getRecipeHandlerRef.current = getRecipeHandler;
+  const getActionHandlerRef = useRef(getActionHandler);
+  getActionHandlerRef.current = getActionHandler;
 
   useEffect(() => {
     const controller = createMirrorVoiceController(
       () => contextRef.current,
       () => trainingRef.current,
       setStatus,
-      () => getRecipeHandlerRef.current?.() ?? null
+      () => getRecipeHandlerRef.current?.() ?? null,
+      () => getActionHandlerRef.current?.() ?? null
     );
     controllerRef.current = controller;
     return () => {

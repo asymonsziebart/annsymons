@@ -2,8 +2,10 @@ import {
   isTaskOverdue,
   TASK_PRIORITIES,
   type TaskRow,
+  type TaskSectionRow,
 } from "@/lib/data/taskClientTypes";
 import { isYearlyRecurringSuppressedUntilDueYear } from "@/lib/data/taskRecurrence";
+import { normalizeSpeech } from "./mirrorWakeTraining";
 
 function toIsoDateLocal(d: Date): string {
   const y = d.getFullYear();
@@ -59,4 +61,26 @@ export function formatMirrorDueLabel(task: TaskRow, ref = new Date()): string {
 
   if (isTaskOverdue(task)) return "Overdue";
   return "Due";
+}
+
+/** Prefer Inbox / To Do / medium; otherwise first section by sort order. */
+export function pickMirrorDefaultSection(sections: TaskSectionRow[]): TaskSectionRow | null {
+  if (sections.length === 0) return null;
+  const ranked = [
+    "inbox",
+    "to do",
+    "todo",
+    "tasks",
+    "medium priority",
+    "medium",
+    "none",
+  ];
+  for (const needle of ranked) {
+    const hit = sections.find((s) => {
+      const n = normalizeSpeech(s.name);
+      return n === needle || n.startsWith(`${needle} `) || n.includes(needle);
+    });
+    if (hit) return hit;
+  }
+  return [...sections].sort((a, b) => a.sort_order - b.sort_order || a.id - b.id)[0] ?? null;
 }

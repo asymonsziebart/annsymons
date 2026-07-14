@@ -65,7 +65,7 @@ export default function MirrorRecipeOverlay({ recipe, panel, stepIndex }: Props)
       </div>
 
       <p className="mirror-recipe__hint">
-        Say “ingredients”, “steps”, “next”, or “close recipe”
+        Say “ingredients”, “steps”, “next”, “read this step”, “go home”, or “close recipe”
       </p>
     </div>
   );

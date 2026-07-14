@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import type { TaskRow } from "@/lib/data/taskClientTypes";
+import type { TaskRow, TaskSectionRow } from "@/lib/data/taskClientTypes";
 import type { Recipe } from "@/lib/recipes";
 import type { MirrorWeather } from "@/lib/mirrorWeather";
 import {
@@ -14,6 +14,21 @@ import {
   type RecipePanel,
 } from "@/lib/mirrorRecipeMatch";
 import {
+  dueDateIsoForAdd,
+  formatDurationClock,
+  formatDurationSpoken,
+  isHomeCommand,
+  isRecipeReadCommand,
+  matchTaskForComplete,
+  parseAddTaskCommand,
+  parseCompleteTaskCommand,
+  parseFullscreenCommand,
+  parseTimerCommand,
+  recipeReadTarget,
+} from "./mirrorCommandParse";
+import {
+  enterFullscreen,
+  exitFullscreen,
   getFullscreenElement,
   isFullscreenSupported,
   toggleFullscreen,
@@ -22,9 +37,13 @@ import {
   applyMirrorContentInset,
   formatMirrorTimeParts,
 } from "./mirrorScale";
-import { formatMirrorDueLabel, getDueTasksForMirror } from "./mirrorTasks";
-import type { MirrorRecipeVoiceHandler } from "./mirrorVoice";
-import { bindJarvisVoices } from "./mirrorJarvisSpeak";
+import {
+  formatMirrorDueLabel,
+  getDueTasksForMirror,
+  pickMirrorDefaultSection,
+} from "./mirrorTasks";
+import type { MirrorActionVoiceHandler, MirrorRecipeVoiceHandler } from "./mirrorVoice";
+import { bindJarvisVoices, speakJarvis } from "./mirrorJarvisSpeak";
 import { bindMirrorWakeLockOnVisible, requestMirrorWakeLock } from "./mirrorWakeLock";
 import { useMirrorVoice } from "./useMirrorVoice";
 import MirrorWakeTrainer from "./MirrorWakeTrainer";
@@ -37,8 +56,16 @@ const WEATHER_REFRESH_MS = 15 * 60_000;
 
 type MirrorAppProps = {
   initialTasks: TaskRow[];
+  initialSections: TaskSectionRow[];
   initialWeather: MirrorWeather | null;
   initialRecipes: Recipe[];
+};
+
+type MirrorTimer = {
+  id: string;
+  label: string;
+  endsAt: number;
+  durationMs: number;
 };
 
 function formatDate(d: Date): string {
@@ -49,13 +76,31 @@ function formatDate(d: Date): string {
   });
 }
 
+function buildReadAloud(recipe: Recipe, panel: RecipePanel, stepIndex: number, raw: string): string {
+  const target = recipeReadTarget(raw);
+  const preferIngredients =
+    target === "ingredients" || (target === "auto" && panel === "ingredients");
+
+  if (preferIngredients) {
+    if (recipe.ingredients.length === 0) return "There are no ingredients listed.";
+    const list = recipe.ingredients.join(". ");
+    return `Ingredients. ${list}.`;
+  }
+
+  if (recipe.steps.length === 0) return "There are no steps for this recipe.";
+  const idx = Math.min(Math.max(stepIndex, 0), recipe.steps.length - 1);
+  return `Step ${idx + 1}. ${recipe.steps[idx]}`;
+}
+
 export default function MirrorApp({
   initialTasks,
+  initialSections,
   initialWeather,
   initialRecipes,
 }: MirrorAppProps) {
   const [now, setNow] = useState(() => new Date());
   const [tasks, setTasks] = useState(initialTasks);
+  const [sections, setSections] = useState(initialSections);
   const [weather, setWeather] = useState<MirrorWeather | null>(initialWeather);
   const [recipes, setRecipes] = useState(initialRecipes);
   const [activeRecipe, setActiveRecipe] = useState<Recipe | null>(null);
@@ -66,16 +111,26 @@ export default function MirrorApp({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [canFullscreen, setCanFullscreen] = useState(false);
   const [trainerOpen, setTrainerOpen] = useState(false);
+  const [timers, setTimers] = useState<MirrorTimer[]>([]);
 
   const recipesRef = useRef(initialRecipes);
   const activeRecipeRef = useRef<Recipe | null>(null);
   const recipePanelRef = useRef<RecipePanel>("ingredients");
   const recipeStepIndexRef = useRef(0);
+  const dueTasksRef = useRef<TaskRow[]>([]);
+  const taskIndexRef = useRef(0);
+  const timersRef = useRef<MirrorTimer[]>([]);
+  const announcedTimersRef = useRef<Set<string>>(new Set());
+  const sectionsRef = useRef(initialSections);
+  const trainerOpenRef = useRef(false);
 
   recipesRef.current = recipes;
   activeRecipeRef.current = activeRecipe;
   recipePanelRef.current = recipePanel;
   recipeStepIndexRef.current = recipeStepIndex;
+  timersRef.current = timers;
+  sectionsRef.current = sections;
+  trainerOpenRef.current = trainerOpen;
 
   const openRecipe = useCallback((recipe: Recipe) => {
     setActiveRecipe(recipe);
@@ -89,13 +144,114 @@ export default function MirrorApp({
     setRecipeStepIndex(0);
   }, []);
 
+  const goHome = useCallback((): string => {
+    const hadOverlay = Boolean(activeRecipeRef.current) || trainerOpenRef.current;
+    closeRecipe();
+    setTrainerOpen(false);
+    return hadOverlay ? "Returning home." : "You're already on the home screen.";
+  }, [closeRecipe]);
+
+  const completeTaskById = useCallback(async (task: TaskRow): Promise<string> => {
+    try {
+      const res = await fetch(`/api/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "done" }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        task?: TaskRow;
+      };
+      if (res.status === 409) {
+        return data.error || `I couldn't mark ${task.title} done yet — something is blocking it.`;
+      }
+      if (!res.ok) {
+        return data.error || `I couldn't mark ${task.title} done.`;
+      }
+      if (data.task) {
+        setTasks((prev) => prev.map((t) => (t.id === data.task!.id ? data.task! : t)));
+      } else {
+        setTasks((prev) =>
+          prev.map((t) => (t.id === task.id ? { ...t, status: "done" as const } : t))
+        );
+      }
+      void fetch("/api/tasks/list")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((payload: { tasks?: TaskRow[] } | null) => {
+          if (payload && Array.isArray(payload.tasks)) setTasks(payload.tasks);
+        })
+        .catch(() => {});
+      return `Done. Marked ${task.title} complete.`;
+    } catch {
+      return `I couldn't mark ${task.title} done.`;
+    }
+  }, []);
+
+  const createTaskFromVoice = useCallback(
+    async (title: string, due: "today" | "tomorrow" | "none"): Promise<string> => {
+      const section = pickMirrorDefaultSection(sectionsRef.current);
+      if (!section) {
+        return "I couldn't add that — no task sections are set up yet.";
+      }
+      const due_date = dueDateIsoForAdd(due, new Date());
+      try {
+        const res = await fetch("/api/tasks/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title,
+            section_id: section.id,
+            status: "todo",
+            due_date,
+          }),
+        });
+        const data = (await res.json().catch(() => ({}))) as {
+          error?: string;
+          task?: TaskRow;
+        };
+        if (!res.ok || !data.task) {
+          return data.error || "I couldn't add that task.";
+        }
+        setTasks((prev) => [...prev, data.task!]);
+        const dueBit =
+          due === "tomorrow" ? " due tomorrow" : due === "none" ? " with no due date" : " due today";
+        return `Added ${data.task.title}${dueBit}.`;
+      } catch {
+        return "I couldn't add that task.";
+      }
+    },
+    []
+  );
+
   const getRecipeHandler = useCallback((): MirrorRecipeVoiceHandler => ({
     handle: (raw, command) => {
       const recipe = activeRecipeRef.current;
 
+      if (isHomeCommand(raw) || isHomeCommand(command)) {
+        return goHome();
+      }
+
       if (recipe && isRecipeCloseCommand(raw)) {
         closeRecipe();
         return "Very good. Closing the recipe.";
+      }
+
+      if (recipe && (isRecipeReadCommand(raw) || isRecipeReadCommand(command))) {
+        const target = recipeReadTarget(raw || command);
+        const preferIngredients =
+          target === "ingredients" ||
+          (target === "auto" && recipePanelRef.current === "ingredients");
+        if (preferIngredients) {
+          setRecipePanel("ingredients");
+        } else {
+          setRecipePanel("steps");
+        }
+        return buildReadAloud(
+          recipe,
+          preferIngredients ? "ingredients" : "steps",
+          recipeStepIndexRef.current,
+          raw || command
+        );
       }
 
       if (recipe) {
@@ -133,9 +289,102 @@ export default function MirrorApp({
 
       return null;
     },
-  }), [closeRecipe, openRecipe]);
+  }), [closeRecipe, goHome, openRecipe]);
+
+  const getActionHandler = useCallback((): MirrorActionVoiceHandler => ({
+    handle: async (raw, command) => {
+      const text = command || raw;
+
+      if (isHomeCommand(text) || isHomeCommand(raw)) {
+        return goHome();
+      }
+
+      const fullscreen = parseFullscreenCommand(text) ?? parseFullscreenCommand(raw);
+      if (fullscreen) {
+        if (fullscreen === "enter") {
+          const ok = await enterFullscreen();
+          return ok ? "Entering full screen." : "I couldn't enter full screen.";
+        }
+        if (fullscreen === "exit") {
+          await exitFullscreen();
+          return "Exiting full screen.";
+        }
+        const entered = await toggleFullscreen();
+        return entered ? "Entering full screen." : "Exiting full screen.";
+      }
+
+      const timerCmd = parseTimerCommand(text) ?? parseTimerCommand(raw);
+      if (timerCmd) {
+        if (timerCmd.type === "set") {
+          const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+          const label = timerCmd.label || "timer";
+          const next: MirrorTimer = {
+            id,
+            label,
+            endsAt: Date.now() + timerCmd.durationMs,
+            durationMs: timerCmd.durationMs,
+          };
+          setTimers((prev) => [...prev, next]);
+          const spokenLabel = label === "timer" ? "timer" : `${label} timer`;
+          return `Starting a ${spokenLabel} for ${formatDurationSpoken(timerCmd.durationMs)}.`;
+        }
+
+        if (timerCmd.type === "cancel") {
+          const current = timersRef.current;
+          if (current.length === 0) return "There are no timers running.";
+          if (timerCmd.label) {
+            const needle = timerCmd.label;
+            const match = current.find(
+              (t) =>
+                t.label === needle ||
+                t.label.includes(needle) ||
+                needle.includes(t.label)
+            );
+            if (!match) return `I couldn't find a ${needle} timer.`;
+            setTimers((prev) => prev.filter((t) => t.id !== match.id));
+            announcedTimersRef.current.delete(match.id);
+            return `Cancelled the ${match.label} timer.`;
+          }
+          setTimers([]);
+          announcedTimersRef.current.clear();
+          return current.length === 1 ? "Timer cancelled." : "All timers cancelled.";
+        }
+
+        const current = timersRef.current;
+        if (current.length === 0) return "There are no timers running.";
+        const lines = current.map((t) => {
+          const left = Math.max(0, t.endsAt - Date.now());
+          const name = t.label === "timer" ? "Timer" : `${t.label} timer`;
+          return `${name}: ${formatDurationSpoken(left)} remaining`;
+        });
+        return lines.join(". ") + ".";
+      }
+
+      const addCmd = parseAddTaskCommand(text) ?? parseAddTaskCommand(raw);
+      if (addCmd) {
+        return createTaskFromVoice(addCmd.title, addCmd.due);
+      }
+
+      const completeCmd =
+        parseCompleteTaskCommand(text) ?? parseCompleteTaskCommand(raw);
+      if (completeCmd) {
+        const due = dueTasksRef.current;
+        if (due.length === 0) return "You have no tasks due today.";
+        const task = matchTaskForComplete(completeCmd, due, taskIndexRef.current);
+        if (!task) {
+          return "I couldn't tell which task you meant. Try saying the task name, or mark this task done.";
+        }
+        return completeTaskById(task);
+      }
+
+      return null;
+    },
+  }), [completeTaskById, createTaskFromVoice, goHome]);
 
   const dueTasks = useMemo(() => getDueTasksForMirror(tasks, now), [tasks, now]);
+  dueTasksRef.current = dueTasks;
+  taskIndexRef.current = taskIndex;
+
   const {
     status: voiceStatus,
     training,
@@ -148,14 +397,19 @@ export default function MirrorApp({
     weather,
     dueTasks,
     getRecipeHandler,
+    getActionHandler,
   });
 
   const refreshTasks = useCallback(async () => {
     try {
       const res = await fetch("/api/tasks/list");
       if (!res.ok) return;
-      const data = (await res.json()) as { tasks?: TaskRow[] };
+      const data = (await res.json()) as {
+        tasks?: TaskRow[];
+        sections?: TaskSectionRow[];
+      };
       if (Array.isArray(data.tasks)) setTasks(data.tasks);
+      if (Array.isArray(data.sections)) setSections(data.sections);
     } catch {
       /* ignore */
     }
@@ -227,7 +481,7 @@ export default function MirrorApp({
 
   useEffect(() => {
     requestAnimationFrame(() => applyMirrorContentInset());
-  }, [dueTasks.length, taskIndex, weather?.temperatureF, activeRecipe]);
+  }, [dueTasks.length, taskIndex, weather?.temperatureF, activeRecipe, timers.length]);
 
   useEffect(() => {
     if (dueTasks.length <= 1) return;
@@ -243,8 +497,24 @@ export default function MirrorApp({
     return () => window.clearInterval(id);
   }, [dueTasks.length]);
 
+  // Expire timers and announce completion.
+  useEffect(() => {
+    const expired = timers.filter((t) => t.endsAt <= now.getTime());
+    if (expired.length === 0) return;
+
+    for (const t of expired) {
+      if (announcedTimersRef.current.has(t.id)) continue;
+      announcedTimersRef.current.add(t.id);
+      const name = t.label === "timer" ? "Timer" : `${t.label} timer`;
+      speakJarvis(`${name} finished.`);
+    }
+
+    setTimers((prev) => prev.filter((t) => t.endsAt > Date.now()));
+  }, [now, timers]);
+
   const currentTask = dueTasks[taskIndex] ?? null;
   const timeParts = formatMirrorTimeParts(now);
+  const liveTimers = timers.filter((t) => t.endsAt > now.getTime());
 
   const voiceStatusLabel =
     voiceStatus === "listening"
@@ -312,6 +582,26 @@ export default function MirrorApp({
           >
             Train
           </button>
+        </div>
+      ) : null}
+
+      {liveTimers.length > 0 ? (
+        <div className="mirror-app__timers" aria-live="polite" aria-label="Active timers">
+          {liveTimers.map((t) => {
+            const left = Math.max(0, t.endsAt - now.getTime());
+            const urgent = left <= 60_000;
+            return (
+              <div
+                key={t.id}
+                className={`mirror-app__timer${urgent ? " mirror-app__timer--urgent" : ""}`}
+              >
+                <span className="mirror-app__timer-label">
+                  {t.label === "timer" ? "Timer" : t.label}
+                </span>
+                <span className="mirror-app__timer-clock">{formatDurationClock(left)}</span>
+              </div>
+            );
+          })}
         </div>
       ) : null}
 
