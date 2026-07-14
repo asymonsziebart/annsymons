@@ -3,6 +3,7 @@ import type { MirrorWeather } from "@/lib/mirrorWeather";
 import { isQuietCommand, isStopListeningCommand } from "./mirrorCommandParse";
 import { formatMirrorDueLabel } from "./mirrorTasks";
 import { speakJarvis, stopJarvisSpeech } from "./mirrorJarvisSpeak";
+import { playMirrorWakeChime } from "./mirrorWakeChime";
 import {
   getTrainingSamples,
   normalizeSpeech,
@@ -12,6 +13,8 @@ import {
 
 const WAKE_PHRASES = ["hey mirror", "mirror mirror"] as const;
 const FOLLOW_UP_MS = 8000;
+/** Wait for a second "mirror" (or a command) before treating a lone "mirror" as wake. */
+const BARE_MIRROR_DEBOUNCE_MS = 750;
 
 export type MirrorVoiceStatus =
   | "unsupported"
@@ -53,9 +56,16 @@ function normalizeSpeechLocal(text: string): string {
   return normalizeSpeech(text);
 }
 
+/** True when the transcript is exactly the single-word wake "mirror". */
+export function isBareMirrorTranscript(text: string): boolean {
+  return normalizeSpeechLocal(text) === "mirror";
+}
+
 export function transcriptHasWakePhrase(text: string, training?: MirrorWakeTraining): boolean {
   const n = normalizeSpeechLocal(text);
   if (WAKE_PHRASES.some((phrase) => n.includes(phrase))) return true;
+  // SpeechRecognition sometimes glues repeated words: "mirrormirror"
+  if (n.replace(/\s+/g, "") === "mirrormirror") return true;
   if (n === "mirror" || n.startsWith("hey mirror")) return true;
   if (n.startsWith("mirror ") && !n.startsWith("mirror mirror")) return true;
   if (!training) return false;
@@ -70,14 +80,24 @@ function stripMatchedSample(text: string, sample: string): string {
   return n;
 }
 
+export function joinTranscriptParts(parts: string[]): string {
+  return parts
+    .map((p) => p.trim())
+    .filter(Boolean)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function stripWakePhrases(text: string, training?: MirrorWakeTraining): string {
   let n = normalizeSpeechLocal(text);
-  for (const phrase of WAKE_PHRASES) {
-    n = n.replaceAll(phrase, " ");
-  }
+  // Prefer the longer phrases first; allow missing spaces between repeated "mirror".
+  n = n.replace(/hey\s+mirror/g, " ");
+  n = n.replace(/mirror\s*mirror/g, " ");
+  n = n.replace(/\s+/g, " ").trim();
   if (n.startsWith("hey mirror ")) n = n.slice("hey mirror ".length);
   else if (n === "hey mirror") n = "";
-  else if (n.startsWith("mirror ") && !n.startsWith("mirror mirror ")) n = n.slice("mirror ".length);
+  else if (n.startsWith("mirror ")) n = n.slice("mirror ".length);
   else if (n === "mirror") n = "";
   if (training) {
     for (const sample of getTrainingSamples(training)) {
@@ -209,6 +229,11 @@ export function createMirrorVoiceController(
   let awakeUntil = 0;
   let speaking = false;
   let restartTimer: number | null = null;
+  let bareMirrorTimer: number | null = null;
+  let bareMirrorParts: string[] = [];
+  let handling = false;
+  let lastWakeChimeAt = 0;
+  const pendingFinals: { raw: string; settleBareMirror: boolean }[] = [];
 
   recognition.continuous = true;
   recognition.interimResults = true;
@@ -226,25 +251,45 @@ export function createMirrorVoiceController(
     onStatus("listening");
   };
 
-  const respond = async (text: string) => {
+  const clearBareMirrorWait = () => {
+    if (bareMirrorTimer != null) {
+      window.clearTimeout(bareMirrorTimer);
+      bareMirrorTimer = null;
+    }
+    bareMirrorParts = [];
+  };
+
+  /** Chime once and enter the listening-for-command window. */
+  const acknowledgeWake = () => {
+    const now = Date.now();
+    awakeUntil = now + FOLLOW_UP_MS;
+    setStatus();
+    if (now - lastWakeChimeAt < 1200) return;
+    lastWakeChimeAt = now;
+    playMirrorWakeChime();
+  };
+
+  const respond = async (text: string, keepAwake = true) => {
     speaking = true;
     onStatus("speaking");
     await speakMirrorResponse(text);
     speaking = false;
-    awakeUntil = 0;
+    awakeUntil = keepAwake ? Date.now() + FOLLOW_UP_MS : 0;
     setStatus();
   };
 
-  const handleTranscript = async (raw: string, isFinal: boolean) => {
+  const processFinalTranscript = async (raw: string, settleBareMirror = false) => {
     if (!raw.trim()) return;
 
-    const hasWake = transcriptHasWakePhrase(raw, getTraining());
-    const command = stripWakePhrases(raw, getTraining());
+    const training = getTraining();
+    const hasWake = transcriptHasWakePhrase(raw, training);
+    const command = stripWakePhrases(raw, training);
     const awake = Date.now() < awakeUntil;
     const interruptText = command || normalizeSpeechLocal(raw);
 
     // Quiet / stop listening work even while Jarvis is speaking.
-    if (isFinal && (isQuietCommand(interruptText) || isQuietCommand(raw))) {
+    if (isQuietCommand(interruptText) || isQuietCommand(raw)) {
+      clearBareMirrorWait();
       stopJarvisSpeech();
       speaking = false;
       awakeUntil = 0;
@@ -252,7 +297,8 @@ export function createMirrorVoiceController(
       return;
     }
 
-    if (isFinal && (isStopListeningCommand(interruptText) || isStopListeningCommand(raw))) {
+    if (isStopListeningCommand(interruptText) || isStopListeningCommand(raw)) {
+      clearBareMirrorWait();
       stopJarvisSpeech();
       speaking = false;
       awakeUntil = 0;
@@ -268,42 +314,103 @@ export function createMirrorVoiceController(
 
     if (speaking) return;
 
-    if (isFinal && (hasWake || awake)) {
-      const actionReply = await getActionHandler?.()?.handle(raw, command);
-      if (actionReply !== null && actionReply !== undefined) {
-        awakeUntil = Date.now() + FOLLOW_UP_MS;
-        setStatus();
-        await respond(actionReply);
+    // Lone "mirror" often finalizes before the second "mirror" arrives. Wait briefly
+    // so "mirror mirror" is not eaten by the single-word wake shortcut.
+    if (isBareMirrorTranscript(raw) && !settleBareMirror) {
+      bareMirrorParts.push(raw);
+      const combinedBare = joinTranscriptParts(bareMirrorParts);
+      // Second "mirror" completed the wake phrase — handle immediately.
+      if (!isBareMirrorTranscript(combinedBare) && transcriptHasWakePhrase(combinedBare, training)) {
+        clearBareMirrorWait();
+        await processFinalTranscript(combinedBare, true);
         return;
       }
-    }
-
-    if (isFinal) {
-      const recipeReply = await getRecipeHandler?.()?.handle(raw, command);
-      if (recipeReply !== null && recipeReply !== undefined) {
-        if (hasWake) awakeUntil = Date.now() + FOLLOW_UP_MS;
-        else if (recipeReply) awakeUntil = Date.now() + FOLLOW_UP_MS;
-        setStatus();
-        await respond(recipeReply);
-        return;
-      }
-    }
-
-    if (hasWake) {
-      awakeUntil = Date.now() + FOLLOW_UP_MS;
-      setStatus();
-      if (isFinal && command) {
-        await respond(buildMirrorVoiceResponse(command, getContext()));
-      } else if (isFinal && !command) {
-        await respond("How may I help you?");
-      }
+      // Hold quietly until debounce settles — don't chime yet.
+      if (bareMirrorTimer != null) window.clearTimeout(bareMirrorTimer);
+      bareMirrorTimer = window.setTimeout(() => {
+        bareMirrorTimer = null;
+        const combined = joinTranscriptParts(bareMirrorParts);
+        bareMirrorParts = [];
+        void enqueueFinal(combined || "mirror", true);
+      }, BARE_MIRROR_DEBOUNCE_MS);
       return;
     }
 
-    if (awake && isFinal && command) {
-      awakeUntil = 0;
-      await respond(buildMirrorVoiceResponse(command, getContext()));
+    if (bareMirrorTimer != null) {
+      const combined = joinTranscriptParts([...bareMirrorParts, raw]);
+      clearBareMirrorWait();
+      await processFinalTranscript(combined, false);
+      return;
     }
+
+    if (hasWake || awake) {
+      const actionReply = await getActionHandler?.()?.handle(raw, command);
+      if (actionReply !== null && actionReply !== undefined) {
+        if (hasWake) acknowledgeWake();
+        else {
+          awakeUntil = Date.now() + FOLLOW_UP_MS;
+          setStatus();
+        }
+        await respond(actionReply, true);
+        return;
+      }
+    }
+
+    const recipeReply = await getRecipeHandler?.()?.handle(raw, command);
+    if (recipeReply !== null && recipeReply !== undefined) {
+      if (hasWake) acknowledgeWake();
+      else {
+        awakeUntil = Date.now() + FOLLOW_UP_MS;
+        setStatus();
+      }
+      await respond(recipeReply, true);
+      return;
+    }
+
+    if (hasWake) {
+      acknowledgeWake();
+      if (command) {
+        await respond(buildMirrorVoiceResponse(command, getContext()), true);
+      }
+      // Wake only: chime + show listening — no spoken "How may I help you?"
+      return;
+    }
+
+    if (awake && command) {
+      await respond(buildMirrorVoiceResponse(command, getContext()), true);
+    }
+  };
+
+  const enqueueFinal = async (raw: string, settleBareMirror = false) => {
+    pendingFinals.push({ raw, settleBareMirror });
+    if (handling) return;
+    handling = true;
+    try {
+      while (pendingFinals.length > 0) {
+        const next = pendingFinals.shift()!;
+        await processFinalTranscript(next.raw, next.settleBareMirror);
+      }
+    } finally {
+      handling = false;
+    }
+  };
+
+  const handleInterim = (raw: string) => {
+    if (!raw.trim() || speaking) return;
+
+    // While waiting on bare "mirror", richer interim text just extends the wait for a real final.
+    if (bareMirrorTimer != null) {
+      if (bareMirrorTimer != null) window.clearTimeout(bareMirrorTimer);
+      bareMirrorTimer = window.setTimeout(() => {
+        bareMirrorTimer = null;
+        const flushed = joinTranscriptParts(bareMirrorParts);
+        bareMirrorParts = [];
+        void enqueueFinal(flushed || "mirror", true);
+      }, BARE_MIRROR_DEBOUNCE_MS);
+      return;
+    }
+
+    // Don't chime or flip to awake on interim — wait for a final transcript.
   };
 
   recognition.onresult = (event) => {
@@ -314,12 +421,13 @@ export function createMirrorVoiceController(
       if (event.results[i].isFinal) finalText += piece;
       else interim += piece;
     }
-    if (finalText) void handleTranscript(finalText, true);
-    else if (interim) void handleTranscript(interim, false);
+    if (finalText) void enqueueFinal(finalText);
+    else if (interim) handleInterim(interim);
   };
 
   recognition.onerror = (event) => {
     if (event.error === "not-allowed") {
+      clearBareMirrorWait();
       onStatus("needs-permission");
       running = false;
       return;
@@ -359,6 +467,8 @@ export function createMirrorVoiceController(
       running = false;
       paused = false;
       awakeUntil = 0;
+      lastWakeChimeAt = 0;
+      clearBareMirrorWait();
       if (restartTimer != null) window.clearTimeout(restartTimer);
       try {
         recognition.stop();
@@ -369,6 +479,7 @@ export function createMirrorVoiceController(
     },
     pause: () => {
       paused = true;
+      clearBareMirrorWait();
       if (restartTimer != null) window.clearTimeout(restartTimer);
       try {
         recognition.stop();

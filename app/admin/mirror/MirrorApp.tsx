@@ -520,7 +520,7 @@ export default function MirrorApp({
     voiceStatus === "listening"
       ? countTrainingSamples(training) > 0
         ? "Listening (trained wake phrase)"
-        : 'Listening for "hey mirror" or "mirror"'
+        : 'Listening for "hey mirror" or "mirror mirror"'
       : voiceStatus === "awake"
         ? "Listening…"
         : voiceStatus === "speaking"
@@ -530,6 +530,10 @@ export default function MirrorApp({
             : voiceStatus === "error"
               ? "Voice error — tap mic to retry"
               : null;
+
+  const showVoiceBar =
+    Boolean(voiceStatusLabel) &&
+    (!isFullscreen || voiceStatus === "awake" || voiceStatus === "speaking");
 
   return (
     <>
@@ -557,7 +561,7 @@ export default function MirrorApp({
           className="mirror-app__voice-enable"
           onClick={enableVoice}
           aria-label="Enable voice commands"
-          title='Say "hey mirror" or "mirror"'
+          title='Say "hey mirror" or "mirror mirror"'
         >
           <svg viewBox="0 0 24 24" aria-hidden="true" className="mirror-app__voice-icon">
             <path
@@ -566,8 +570,10 @@ export default function MirrorApp({
             />
           </svg>
         </button>
-      ) : !isFullscreen && voiceStatusLabel ? (
-        <div className="mirror-app__voice-bar">
+      ) : showVoiceBar ? (
+        <div
+          className={`mirror-app__voice-bar${voiceStatus === "awake" ? " mirror-app__voice-bar--awake" : ""}`}
+        >
           <div className="mirror-app__voice-status" aria-live="polite">
             <span
               className={`mirror-app__voice-dot mirror-app__voice-dot--${voiceStatus}`}
@@ -575,13 +581,15 @@ export default function MirrorApp({
             />
             <span className="mirror-app__voice-label">{voiceStatusLabel}</span>
           </div>
-          <button
-            type="button"
-            className="mirror-app__voice-train"
-            onClick={() => setTrainerOpen(true)}
-          >
-            Train
-          </button>
+          {!isFullscreen ? (
+            <button
+              type="button"
+              className="mirror-app__voice-train"
+              onClick={() => setTrainerOpen(true)}
+            >
+              Train
+            </button>
+          ) : null}
         </div>
       ) : null}
 
