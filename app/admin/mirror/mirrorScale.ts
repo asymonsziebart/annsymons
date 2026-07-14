@@ -7,16 +7,16 @@ export function applyMirrorTypography(): void {
   const w = vv?.width ?? window.innerWidth;
   const h = vv?.height ?? window.innerHeight;
 
-  // Content lives in the bottom-left quarter (50% × 50%); scale from that panel.
-  const panelW = w * 0.5;
-  const panelH = h * 0.5;
+  // Wider/taller panel so larger type still fits on tablets.
+  const panelW = w * 0.72;
+  const panelH = h * 0.58;
   const basis = Math.min(panelW, panelH);
 
-  const timePx = Math.round(basis * 0.28);
-  const datePx = Math.round(basis * 0.082);
-  const weatherPx = Math.round(basis * 0.11);
-  const taskPx = Math.round(basis * 0.055);
-  const taskLabelPx = Math.round(basis * 0.028);
+  const timePx = Math.round(basis * 0.34);
+  const datePx = Math.round(basis * 0.105);
+  const weatherPx = Math.round(basis * 0.145);
+  const taskPx = Math.round(basis * 0.078);
+  const taskLabelPx = Math.round(basis * 0.038);
 
   root.style.setProperty("--mirror-panel-width", `${Math.round(panelW)}px`);
   root.style.setProperty("--mirror-panel-height", `${Math.round(panelH)}px`);
@@ -27,17 +27,23 @@ export function applyMirrorTypography(): void {
   root.style.setProperty("--mirror-task-label-size", `${taskLabelPx}px`);
 }
 
-/** Match left inset to the time element's distance from the top of the screen. */
+/**
+ * Keep a clear left gutter from the bezel.
+ * (Matching left inset to top offset breaks on portrait tablets and was
+ * accidentally stuck at 0px via an uncleared inline style.)
+ */
 export function applyMirrorContentInset(): void {
   const root = document.querySelector(".mirror-app") as HTMLElement | null;
   const content = document.querySelector(".mirror-app__content") as HTMLElement | null;
-  const time = document.querySelector(".mirror-app__time") as HTMLElement | null;
-  if (!root || !content || !time) return;
+  if (!root || !content) return;
 
-  // Measure before margin is applied so top offset stays stable.
-  content.style.marginLeft = "0px";
-  const top = Math.max(0, Math.round(time.getBoundingClientRect().top));
-  root.style.setProperty("--mirror-content-inset", `${top}px`);
+  const vv = window.visualViewport;
+  const w = vv?.width ?? window.innerWidth;
+  const gutter = Math.max(28, Math.round(w * 0.055));
+
+  root.style.setProperty("--mirror-content-inset", `${gutter}px`);
+  // Clear any leftover inline override so the CSS variable applies.
+  content.style.marginLeft = "";
 }
 
 export function bindMirrorTypography(): () => void {
