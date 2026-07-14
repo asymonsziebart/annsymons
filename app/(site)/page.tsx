@@ -10,6 +10,11 @@ const exploreLinks = [
     label: "Air Draw",
     blurb: "Paint in the air with your fingertip and webcam",
   },
+  {
+    href: "/holo-ttt",
+    label: "Hologram Tic-Tac-Toe",
+    blurb: "Point, pinch, and play on a floating board",
+  },
   { href: "/interests", label: "Interests", blurb: "What I’m into outside of work" },
 ] as const;
 

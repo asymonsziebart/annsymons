@@ -1,0 +1,301 @@
+html:has(.holo-ttt),
+body:has(.holo-ttt) {
+  background: #020308 !important;
+  color: #eef6ff;
+}
+
+body:has(.holo-ttt)::before {
+  display: none !important;
+}
+
+.holo-ttt {
+  --ht-bg: #020308;
+  --ht-fg: #eef6ff;
+  --ht-muted: rgba(238, 246, 255, 0.55);
+  --ht-line: rgba(238, 246, 255, 0.14);
+  --ht-cyan: #5ce1ff;
+  --ht-pink: #ff7ad9;
+
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex: 1;
+  min-height: 100dvh;
+  height: 100%;
+  background: radial-gradient(90% 70% at 50% 35%, #0b1220 0%, var(--ht-bg) 62%);
+  color: var(--ht-fg);
+  font-family: var(--font-source-sans), system-ui, sans-serif;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-font-smoothing: antialiased;
+  touch-action: none;
+}
+
+.holo-ttt__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  flex-wrap: wrap;
+  padding: max(0.7rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) 0.7rem
+    max(1rem, env(safe-area-inset-left));
+  border-bottom: 1px solid var(--ht-line);
+  background: rgba(2, 3, 8, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 4;
+  flex-shrink: 0;
+}
+
+.holo-ttt__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.holo-ttt__title {
+  margin: 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(1.2rem, 3vw, 1.65rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.holo-ttt__home {
+  color: var(--ht-muted);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.holo-ttt__home:hover {
+  color: var(--ht-fg);
+}
+
+.holo-ttt__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.holo-ttt__btn {
+  appearance: none;
+  border: 1px solid var(--ht-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ht-fg);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.holo-ttt__btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(238, 246, 255, 0.28);
+}
+
+.holo-ttt__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.holo-ttt__btn--primary {
+  background: linear-gradient(135deg, rgba(92, 225, 255, 0.95), rgba(120, 170, 255, 0.9));
+  border-color: transparent;
+  color: #041018;
+}
+
+.holo-ttt__btn--primary:hover {
+  background: linear-gradient(135deg, #7aecff, #9cbcff);
+  border-color: transparent;
+  color: #041018;
+}
+
+.holo-ttt__btn--active {
+  border-color: rgba(92, 225, 255, 0.65);
+  background: rgba(92, 225, 255, 0.14);
+  color: #c9f6ff;
+}
+
+.holo-ttt__stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  background: #000;
+}
+
+.holo-ttt__canvas-host {
+  position: absolute;
+  inset: 0;
+}
+
+.holo-ttt__canvas-host canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.holo-ttt__video {
+  position: absolute;
+  right: max(0.75rem, env(safe-area-inset-right));
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  width: min(22vw, 180px);
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  transform: scaleX(-1);
+  border: 1px solid var(--ht-line);
+  border-radius: 0.65rem;
+  opacity: 0.55;
+  z-index: 3;
+  pointer-events: none;
+  background: #000;
+}
+
+.holo-ttt__video--hidden {
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.holo-ttt__hud {
+  position: absolute;
+  left: 50%;
+  top: max(0.75rem, env(safe-area-inset-top));
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  pointer-events: none;
+  max-width: min(92vw, 28rem);
+  text-align: center;
+}
+
+.holo-ttt__status {
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--ht-line);
+  background: rgba(2, 3, 8, 0.65);
+  color: var(--ht-muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.holo-ttt__status--live {
+  color: #b9ffe8;
+  border-color: rgba(92, 225, 255, 0.35);
+}
+
+.holo-ttt__banner {
+  margin: 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(1.1rem, 3.4vw, 1.7rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 24px rgba(92, 225, 255, 0.35);
+}
+
+.holo-ttt__hint {
+  margin: 0;
+  color: var(--ht-muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.holo-ttt__cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  background: rgba(92, 225, 255, 0.22);
+  box-shadow: 0 0 18px rgba(92, 225, 255, 0.45);
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  will-change: transform;
+}
+
+.holo-ttt__cursor--visible {
+  opacity: 1;
+}
+
+.holo-ttt__cursor--pinch {
+  background: rgba(255, 122, 217, 0.35);
+  border-color: #ff7ad9;
+  box-shadow: 0 0 18px rgba(255, 122, 217, 0.55);
+}
+
+.holo-ttt__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: linear-gradient(180deg, rgba(2, 3, 8, 0.55), rgba(2, 3, 8, 0.86));
+}
+
+.holo-ttt__card {
+  width: min(34rem, 100%);
+  text-align: center;
+}
+
+.holo-ttt__card h2 {
+  margin: 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(1.8rem, 5vw, 2.7rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.holo-ttt__card p {
+  margin: 0.85rem auto 0;
+  max-width: 30rem;
+  color: var(--ht-muted);
+  line-height: 1.5;
+  font-size: 0.98rem;
+}
+
+.holo-ttt__card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.7rem;
+  margin-top: 1.4rem;
+}
+
+.holo-ttt__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem 1rem;
+  padding: 0.65rem max(1rem, env(safe-area-inset-right))
+    max(0.75rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  border-top: 1px solid var(--ht-line);
+  background: rgba(2, 3, 8, 0.82);
+  z-index: 4;
+  flex-shrink: 0;
+}
+
+.holo-ttt__footer p {
+  margin: 0;
+  color: var(--ht-muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  max-width: 40rem;
+}
