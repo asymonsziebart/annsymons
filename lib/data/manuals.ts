@@ -57,6 +57,47 @@ const SEED_MANUALS: Array<Omit<ManualItemInput, "slug"> & { slug: string }> = [
     notes:
       "Free-arm sewing machine. Official Brother manuals for the LS-2125 / LS-2125i / LS-2129 series.",
   },
+  {
+    slug: "ford-fusion-titanium-hybrid-2020",
+    name: "2020 Ford Fusion Titanium Hybrid",
+    brand: "Ford",
+    model: "Fusion Titanium Hybrid",
+    category: "Vehicles",
+    location: null,
+    support_url: "https://www.ford.com/support/owner-manuals-details/fusion-hybrid-phev/2020/",
+    documents: [
+      {
+        label: "Owner's Manual (PDF)",
+        url: "https://www.fordservicecontent.com/Ford_Content/Catalog/owner_information/2020_Ford_Fusion-Hybrid-Energi-Owners-Mnaul-version-1_om_EN-US_06_2019.pdf",
+      },
+      {
+        label: "Online Owner's Manual",
+        url: "https://www.fordservicecontent.com/Ford_Content/vdirsnet/OwnerManual/Home/Index?Variantid=6952&languageCode=EN&countryCode=USA&marketCode=US&bookcode=O97504&VIN=&userMarket=USA&div=f&buildtype=web",
+      },
+    ],
+    notes:
+      "2020 Fusion Hybrid / Energi owner's manual (covers SE, SEL, and Titanium Hybrid).",
+  },
+  {
+    slug: "ford-maverick-hybrid-awd-2026",
+    name: "2026 Ford Maverick Hybrid AWD",
+    brand: "Ford",
+    model: "Maverick Hybrid AWD",
+    category: "Vehicles",
+    location: null,
+    support_url: "https://www.ford.com/support/owner-manuals-details/maverick/2026",
+    documents: [
+      {
+        label: "Owner's Manual (PDF)",
+        url: "https://www.fordservicecontent.com/Ford_Content/Catalog/owner_information/2026-Maverick-OM-enUSA-V1.pdf",
+      },
+      {
+        label: "Online Owner's Manual",
+        url: "https://www.fordservicecontent.com/Ford_Content/vdirsnet/OwnerManual/Home/Content?ProcUid=G2190859&Uid=G2207589&buildtype=web&countryCode=USA&div=f&languageCode=en&moidRef=G2130109&userMarket=usa&vFilteringEnabled=False&variantid=10811",
+      },
+    ],
+    notes: "Husband's truck. 2026 Maverick Hybrid with all-wheel drive.",
+  },
 ];
 
 /** Built-in manuals shown when the database is unavailable. */
