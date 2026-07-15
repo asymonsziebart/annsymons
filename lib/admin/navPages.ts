@@ -54,6 +54,12 @@ export const ADMIN_NAV_PAGES: AdminNavPage[] = [
       "vehicle",
       "truck",
       "car",
+      "macbook",
+      "apple",
+      "m4",
+      "instax",
+      "fujifilm",
+      "camera",
     ],
   },
   {

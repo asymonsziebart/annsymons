@@ -98,6 +98,56 @@ const SEED_MANUALS: Array<Omit<ManualItemInput, "slug"> & { slug: string }> = [
     ],
     notes: "Husband's truck. 2026 Maverick Hybrid with all-wheel drive.",
   },
+  {
+    slug: "macbook-pro-m4",
+    name: "MacBook Pro (M4)",
+    brand: "Apple",
+    model: "MacBook Pro M4",
+    category: "Computers",
+    location: null,
+    support_url: "https://support.apple.com/mac/macbook-pro",
+    documents: [
+      {
+        label: "MacBook Pro Getting Started Guide",
+        url: "https://support.apple.com/guide/macbook-pro/welcome/mac",
+      },
+      {
+        label: "Mac User Guide",
+        url: "https://support.apple.com/guide/mac-help/welcome/mac",
+      },
+      {
+        label: "Tech Specs (14-inch, M4, 2024)",
+        url: "https://support.apple.com/en-us/121552",
+      },
+    ],
+    notes:
+      "Covers current MacBook Pro M4 models. Use the Getting Started Guide for hardware basics and the Mac User Guide for macOS.",
+  },
+  {
+    slug: "instax-mini-7-plus",
+    name: "Fujifilm instax mini 7+",
+    brand: "Fujifilm",
+    model: "instax mini 7+",
+    category: "Cameras",
+    location: null,
+    support_url: "https://www.fujifilm.com/us/en/consumer/support/instax/mini-7plus",
+    documents: [
+      {
+        label: "Product page & specs",
+        url: "https://www.fujifilm.com/us/en/consumer/instax/cameras/mini-7plus",
+      },
+      {
+        label: "Owner's Manual (Mini 7S PDF)",
+        url: "https://instax.com/support/pdf/instaxmini7s_manual_01.pdf",
+      },
+      {
+        label: "instax US Support & FAQs",
+        url: "https://www.instaxus.com/support/",
+      },
+    ],
+    notes:
+      "Instant camera using instax mini film. Fujifilm does not publish a separate Mini 7+ PDF; the official Mini 7S manual covers the same film loading, batteries, and shooting basics (exposure dial is on the lens barrel on the 7+).",
+  },
 ];
 
 /** Built-in manuals shown when the database is unavailable. */
