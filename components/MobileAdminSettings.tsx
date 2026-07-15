@@ -3,11 +3,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export default function MobileAdminSettings() {
+type Props = {
+  isAdmin?: boolean;
+};
+
+export default function MobileAdminSettings({ isAdmin = false }: Props) {
   const pathname = usePathname();
   const isHome = pathname === "/";
 
-  if (!isHome) return null;
+  if (!isHome || isAdmin) return null;
 
   return (
     <Link
