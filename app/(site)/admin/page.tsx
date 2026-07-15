@@ -10,6 +10,7 @@ const privatePages = [
   { href: "/admin/recipes", label: "Recipes", description: "Add recipes, photos, ingredients, and steps" },
   { href: "/admin/backyard", label: "Backyard Plants", description: "Map plants on a yard photo" },
   { href: "/admin/garage", label: "Garage Inventory", description: "Search bins and stored items" },
+  { href: "/admin/manuals", label: "Manuals", description: "Appliance and gear manuals in one place" },
   { href: "/admin/dogs", label: "Puppy Ranch", description: "Cozy dog breeding game" },
   { href: "/admin/movies", label: "Movies", description: "Private Google Drive movie library" },
   { href: "/admin/voices", label: "Voices", description: "Things he is not allowed to do" },
@@ -50,6 +51,12 @@ export default async function AdminDashboardPage() {
             className="rounded-xl bg-sky-700 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-800"
           >
             Garage
+          </Link>
+          <Link
+            href="/admin/manuals"
+            className="rounded-xl bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800"
+          >
+            Manuals
           </Link>
           <Link
             href="/admin/dogs"
@@ -124,6 +131,8 @@ export default async function AdminDashboardPage() {
                     ? "rounded-xl border border-emerald-600 bg-emerald-50 px-4 py-3 shadow-sm transition-colors hover:bg-emerald-100"
                     : page.href === "/admin/garage"
                     ? "rounded-xl border border-sky-600 bg-sky-50 px-4 py-3 shadow-sm transition-colors hover:bg-sky-100"
+                    : page.href === "/admin/manuals"
+                    ? "rounded-xl border border-teal-600 bg-teal-50 px-4 py-3 shadow-sm transition-colors hover:bg-teal-100"
                     : page.href === "/admin/dogs"
                     ? "rounded-xl border border-emerald-600 bg-emerald-50 px-4 py-3 shadow-sm transition-colors hover:bg-emerald-100"
                     : page.href === "/admin/voices"
