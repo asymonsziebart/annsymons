@@ -148,6 +148,57 @@ const SEED_MANUALS: Array<Omit<ManualItemInput, "slug"> & { slug: string }> = [
     notes:
       "Instant camera using instax mini film. Fujifilm does not publish a separate Mini 7+ PDF; the official Mini 7S manual covers the same film loading, batteries, and shooting basics (exposure dial is on the lens barrel on the 7+).",
   },
+  {
+    slug: "craftsman-m110",
+    name: "Craftsman M110 Lawn Mower",
+    brand: "Craftsman",
+    model: "M110",
+    category: "Lawn & Garden",
+    location: null,
+    support_url:
+      "https://www.searspartsdirect.com/model/3kdtxd5gjf-000247/craftsman-cmxgmam1125499-gas-walk-behind-mower-parts",
+    documents: [
+      {
+        label: "Instruction Manual (PDF)",
+        url: "https://pdf.lowes.com/productdocuments/922aeb51-d678-45a7-97cc-4b56ba43fdae/10429658.pdf",
+      },
+      {
+        label: "Parts diagrams (CMXGMAM1125499)",
+        url: "https://www.searspartsdirect.com/model/3kdtxd5gjf-000247/craftsman-cmxgmam1125499-gas-walk-behind-mower-parts",
+      },
+      {
+        label: "Craftsman product support",
+        url: "https://www.craftsman.com/en-us/support/customer-support/how-locate-your-product-manual",
+      },
+    ],
+    notes:
+      "21-in gas push mower (series M110; common model CMXGMAM1125499). Instruction manual also covers related CMXGMAM2703840 / CMXGMAM7815137 / CMXGMAM7815145 / CMXGMAM1125500 units.",
+  },
+  {
+    slug: "creality-ender-3-v2",
+    name: "Creality Ender-3 V2 3D Printer",
+    brand: "Creality",
+    model: "Ender-3 V2",
+    category: "3D Printing",
+    location: null,
+    support_url: "https://www.creality.com/download/ender-3-v2-3d-printer-csco",
+    documents: [
+      {
+        label: "User Manual (PDF)",
+        url: "https://3d.nice-cdn.com/upload/file/Ender_3_V2_Manual.pdf",
+      },
+      {
+        label: "Downloads (firmware, software, manuals)",
+        url: "https://www.creality.com/download/ender-3-v2-3d-printer-csco",
+      },
+      {
+        label: "Creality contact",
+        url: "https://www.creality.com/about#contact",
+      },
+    ],
+    notes:
+      "FDM printer with 220×220×250 mm build volume. Use Creality’s download page for the latest firmware and Creality Print / slicer software.",
+  },
 ];
 
 /** Built-in manuals shown when the database is unavailable. */

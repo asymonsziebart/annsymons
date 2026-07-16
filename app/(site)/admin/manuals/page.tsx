@@ -29,8 +29,8 @@ export default async function ManualsAdminPage() {
           Manuals
         </h1>
         <p className="mt-3 max-w-2xl text-pretty text-sm leading-relaxed text-stone-700 sm:text-base">
-          Keep appliance and gear manuals in one place. Search by brand, model, or notes — starting
-          with the Brother LS-2125i sewing machine.
+          Keep appliance and gear manuals in one place. Search by brand, model, or notes — sewing,
+          vehicles, lawn gear, 3D printers, and more.
         </p>
       </header>
 
