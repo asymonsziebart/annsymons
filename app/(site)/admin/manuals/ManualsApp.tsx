@@ -223,7 +223,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
 
   return (
     <div className="mt-6 space-y-6">
-      <div className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
+      <div className="neo p-4 sm:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <label className="block min-w-0 flex-1">
             <span className="text-sm font-medium text-[var(--color-ink-muted)]">Search manuals</span>
@@ -232,7 +232,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Brand, model, category, notes…"
-              className="mt-2 w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] placeholder:text-[var(--color-muted)] focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600"
+              className="neo-input mt-2"
             />
           </label>
           <button
@@ -247,7 +247,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
               setShowForm(true);
               setStatus("");
             }}
-            className="inline-flex min-h-12 items-center justify-center rounded-xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-800"
+            className="neo-btn-primary"
           >
             {showForm && editingId === null ? "Cancel" : "+ Add manual"}
           </button>
@@ -258,10 +258,9 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
             <button
               type="button"
               onClick={() => setQuery("")}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium ${
-                !query
-                  ? "bg-teal-700 text-white"
-                  : "bg-[var(--color-cream)] text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]"
+              aria-pressed={!query}
+              className={`neo-chip ${
+                !query ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]" : ""
               }`}
             >
               All
@@ -271,10 +270,11 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
                 key={category}
                 type="button"
                 onClick={() => setQuery(category)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-medium ${
+                aria-pressed={query.trim().toLowerCase() === category.toLowerCase()}
+                className={`neo-chip ${
                   query.trim().toLowerCase() === category.toLowerCase()
-                    ? "bg-teal-700 text-white"
-                    : "bg-[var(--color-cream)] text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]"
+                    ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
+                    : ""
                 }`}
               >
                 {category}
@@ -289,7 +289,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
           </p>
         ) : null}
         {!dbReady ? (
-          <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <p className="neo-inset mt-3 px-4 py-3 text-sm text-[var(--color-ink-muted)]">
             DATABASE_URL is not set, so new manuals cannot be saved yet. Seeded entries still show when
             the database is connected.
           </p>
@@ -299,7 +299,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
       {showForm ? (
         <form
           onSubmit={saveManual}
-          className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6"
+          className="neo p-4 sm:p-6"
         >
           <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
             {editingId ? "Edit manual" : "Add manual"}
@@ -316,7 +316,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
                 value={form.name}
                 onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
                 placeholder="Brother LS-2125i Sewing Machine"
-                className="mt-2 w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600"
+                className="neo-input mt-2"
               />
             </label>
             <label className="block">
@@ -325,7 +325,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
                 value={form.brand}
                 onChange={(e) => setForm((prev) => ({ ...prev, brand: e.target.value }))}
                 placeholder="Brother"
-                className="mt-2 w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600"
+                className="neo-input mt-2"
               />
             </label>
             <label className="block">
@@ -334,7 +334,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
                 value={form.model}
                 onChange={(e) => setForm((prev) => ({ ...prev, model: e.target.value }))}
                 placeholder="LS-2125i"
-                className="mt-2 w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600"
+                className="neo-input mt-2"
               />
             </label>
             <label className="block">
@@ -344,7 +344,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
                 onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
                 placeholder="Sewing"
                 list="manual-categories"
-                className="mt-2 w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600"
+                className="neo-input mt-2"
               />
               <datalist id="manual-categories">
                 {categories.map((category) => (
@@ -358,7 +358,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
                 value={form.location}
                 onChange={(e) => setForm((prev) => ({ ...prev, location: e.target.value }))}
                 placeholder="Craft room closet"
-                className="mt-2 w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600"
+                className="neo-input mt-2"
               />
             </label>
             <label className="block sm:col-span-2">
@@ -368,7 +368,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
                 value={form.support_url}
                 onChange={(e) => setForm((prev) => ({ ...prev, support_url: e.target.value }))}
                 placeholder="https://support.brother.com/..."
-                className="mt-2 w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600"
+                className="neo-input mt-2"
               />
             </label>
           </div>
@@ -379,7 +379,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
               <button
                 type="button"
                 onClick={addDocumentRow}
-                className="text-sm font-medium text-teal-700 hover:underline"
+                className="neo-link text-sm"
               >
                 + Add link
               </button>
@@ -388,25 +388,25 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
               {form.documents.map((doc, index) => (
                 <div
                   key={index}
-                  className="grid gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-cream)]/50 p-3 sm:grid-cols-[minmax(0,0.4fr)_minmax(0,1fr)_auto]"
+                  className="neo-inset grid gap-3 p-3 sm:grid-cols-[minmax(0,0.4fr)_minmax(0,1fr)_auto]"
                 >
                   <input
                     value={doc.label}
                     onChange={(e) => updateDocument(index, "label", e.target.value)}
                     placeholder="User's Guide"
-                    className="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm text-[var(--color-ink)] focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600"
+                    className="neo-input !py-2 text-sm"
                   />
                   <input
                     type="url"
                     value={doc.url}
                     onChange={(e) => updateDocument(index, "url", e.target.value)}
                     placeholder="https://…/manual.pdf"
-                    className="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm text-[var(--color-ink)] focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600"
+                    className="neo-input !py-2 text-sm"
                   />
                   <button
                     type="button"
                     onClick={() => removeDocumentRow(index)}
-                    className="inline-flex min-h-10 items-center justify-center rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+                    className="neo-btn !min-h-10 text-red-600 hover:text-red-700"
                   >
                     Remove
                   </button>
@@ -422,7 +422,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
               onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))}
               rows={3}
               placeholder="Anything useful to remember later…"
-              className="mt-2 w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600"
+              className="neo-input mt-2"
             />
           </label>
 
@@ -430,7 +430,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
             <button
               type="submit"
               disabled={saving || !dbReady}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="neo-btn-primary disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? "Saving…" : editingId ? "Save changes" : "Save manual"}
             </button>
@@ -441,7 +441,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
                 setShowForm(false);
                 setStatus("");
               }}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]"
+              className="neo-btn"
             >
               Cancel
             </button>
@@ -449,7 +449,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
         </form>
       ) : null}
 
-      <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
+      <section className="neo p-4 sm:p-6">
         <div className="flex items-baseline justify-between gap-3">
           <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
             Your manuals
@@ -460,7 +460,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
         </div>
 
         {filtered.length === 0 ? (
-          <p className="mt-4 rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-cream)]/60 px-4 py-8 text-center text-sm text-[var(--color-muted)]">
+          <p className="neo-inset mt-4 px-4 py-8 text-center text-sm text-[var(--color-muted)]">
             {manuals.length === 0
               ? "No manuals yet. Add one to get started."
               : "No manuals match that search."}
@@ -470,7 +470,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
             {filtered.map((item) => (
               <li
                 key={item.id}
-                className="rounded-xl border border-[var(--color-border)] bg-[var(--color-cream)]/60 px-4 py-4"
+                className="neo-sm card-hover px-4 py-4"
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
@@ -496,7 +496,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
                           href={doc.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex min-h-10 items-center justify-center rounded-lg bg-teal-700 px-3 py-2 text-sm font-semibold text-white hover:bg-teal-800"
+                          className="neo-btn-primary !min-h-10 !px-3 !py-2"
                         >
                           {doc.label}
                         </a>
@@ -506,7 +506,7 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
                           href={item.support_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex min-h-10 items-center justify-center rounded-lg border border-teal-700 px-3 py-2 text-sm font-medium text-teal-800 hover:bg-teal-50"
+                          className="neo-btn !min-h-10 !px-3 !py-2"
                         >
                           Support page
                         </a>
@@ -524,14 +524,14 @@ export default function ManualsApp({ initialManuals, dbReady }: Props) {
                     <button
                       type="button"
                       onClick={() => editManual(item)}
-                      className="inline-flex min-h-10 items-center justify-center rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-white/80"
+                      className="neo-btn !min-h-10"
                     >
                       Edit
                     </button>
                     <button
                       type="button"
                       onClick={() => removeManual(item)}
-                      className="inline-flex min-h-10 items-center justify-center rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+                      className="neo-btn !min-h-10 text-red-600 hover:text-red-700"
                     >
                       Remove
                     </button>

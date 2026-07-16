@@ -395,7 +395,7 @@ export default function GarageInventoryApp({ initialBins, initialBinCode = "" }:
 
   return (
     <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.25fr)]">
-      <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
+      <section className="neo p-4 sm:p-6">
         <h2 className="font-heading text-xl font-semibold text-[var(--color-ink)]">
           Add or update a bin
         </h2>
@@ -415,12 +415,12 @@ export default function GarageInventoryApp({ initialBins, initialBinCode = "" }:
               accept="image/jpeg,image/png,image/gif,image/webp"
               onChange={onFileChange}
               disabled={uploading}
-              className="w-full rounded-xl border border-dashed border-[var(--color-border)] bg-white px-4 py-3 text-sm text-[var(--color-ink-muted)]"
+              className="neo-input text-sm"
             />
           </div>
 
           {photoPath ? (
-            <div className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-cream)]/60">
+            <div className="neo-inset overflow-hidden">
               <img src={photoPath} alt="Uploaded garage bin" className="max-h-64 w-full object-cover" />
               <p className="px-3 py-2 text-xs text-[var(--color-muted)]">{photoPath}</p>
             </div>
@@ -439,7 +439,7 @@ export default function GarageInventoryApp({ initialBins, initialBinCode = "" }:
                     setBinCode(nextCode);
                     setStatus(`Created new bin code ${nextCode}. Export QR labels to print it.`);
                   }}
-                  className="text-xs font-semibold text-[var(--color-accent)] hover:underline"
+                  className="neo-link text-xs"
                 >
                   New code
                 </button>
@@ -449,14 +449,14 @@ export default function GarageInventoryApp({ initialBins, initialBinCode = "" }:
                 value={binCode}
                 onChange={(event) => setBinCode(event.target.value)}
                 placeholder="BIN-001"
-                className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                className="neo-input"
                 required
               />
               <button
                 type="button"
                 onClick={() => void exportQrLabels()}
                 disabled={exportingQr}
-                className="mt-2 inline-flex min-h-10 w-full items-center justify-center rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm font-semibold text-sky-800 hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-50"
+                className="neo-btn mt-2 w-full disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {exportingQr ? "Exporting..." : "Print/export QR labels"}
               </button>
@@ -470,7 +470,7 @@ export default function GarageInventoryApp({ initialBins, initialBinCode = "" }:
                 value={label}
                 onChange={(event) => setLabel(event.target.value)}
                 placeholder="Holiday decor"
-                className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                className="neo-input"
               />
             </div>
           </div>
@@ -484,7 +484,7 @@ export default function GarageInventoryApp({ initialBins, initialBinCode = "" }:
                 type="button"
                 onClick={analyzePhoto}
                 disabled={analyzing || !photoPath}
-                className="inline-flex min-h-10 items-center justify-center rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm font-semibold text-sky-800 hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-50"
+                className="neo-btn disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {analyzing ? "Analyzing..." : "AI inventory from photo"}
               </button>
@@ -495,7 +495,7 @@ export default function GarageInventoryApp({ initialBins, initialBinCode = "" }:
               onChange={(event) => setInventoryText(event.target.value)}
               rows={8}
               placeholder={"One item per line works best:\nChristmas lights\nExtension cords\nCamping stove"}
-              className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+              className="neo-input"
             />
           </div>
 
@@ -509,7 +509,7 @@ export default function GarageInventoryApp({ initialBins, initialBinCode = "" }:
               onChange={(event) => setNotes(event.target.value)}
               rows={3}
               placeholder="Shelf, location, or reminders"
-              className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+              className="neo-input"
             />
           </div>
 
@@ -517,14 +517,14 @@ export default function GarageInventoryApp({ initialBins, initialBinCode = "" }:
             <button
               type="submit"
               disabled={saving || uploading}
-              className="inline-flex min-h-12 flex-1 items-center justify-center rounded-xl bg-[var(--color-accent)] px-4 py-3 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+              className="neo-btn-primary flex-1 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? "Saving..." : "Save bin"}
             </button>
             <button
               type="button"
               onClick={resetForm}
-              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]"
+              className="neo-btn"
             >
               Clear
             </button>
@@ -532,13 +532,13 @@ export default function GarageInventoryApp({ initialBins, initialBinCode = "" }:
         </form>
 
         {status ? (
-          <p className="mt-4 rounded-xl bg-[var(--color-cream)] px-4 py-3 text-sm text-[var(--color-ink-muted)]">
+          <p className="neo-inset mt-4 px-4 py-3 text-sm text-[var(--color-ink-muted)]">
             {status}
           </p>
         ) : null}
       </section>
 
-      <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
+      <section className="neo p-4 sm:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h2 className="font-heading text-xl font-semibold text-[var(--color-ink)]">
@@ -548,7 +548,7 @@ export default function GarageInventoryApp({ initialBins, initialBinCode = "" }:
               Search bin codes, labels, notes, and inventory.
             </p>
           </div>
-          <span className="rounded-full bg-[var(--color-cream-dark)] px-3 py-1 text-sm font-semibold text-[var(--color-ink-muted)]">
+          <span className="neo-chip !min-h-8 !py-1 text-sm">
             {filteredBins.length} / {bins.length}
           </span>
         </div>
@@ -557,7 +557,7 @@ export default function GarageInventoryApp({ initialBins, initialBinCode = "" }:
           type="button"
           onClick={() => void exportQrLabels()}
           disabled={exportingQr}
-          className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-sky-700 px-4 py-3 text-sm font-semibold text-white hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="neo-btn-primary mt-4 w-full disabled:cursor-not-allowed disabled:opacity-50"
         >
           {exportingQr ? "Exporting QR labels..." : "Print/export all QR labels"}
         </button>
@@ -567,11 +567,11 @@ export default function GarageInventoryApp({ initialBins, initialBinCode = "" }:
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search for extension cords, holiday, BIN-001..."
-          className="mt-4 w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+          className="neo-input mt-4"
         />
 
         {filteredBins.length === 0 ? (
-          <p className="mt-4 rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-cream)]/60 px-4 py-8 text-center text-sm text-[var(--color-muted)]">
+          <p className="neo-inset mt-4 px-4 py-8 text-center text-sm text-[var(--color-muted)]">
             No bins match yet.
           </p>
         ) : (
@@ -579,7 +579,7 @@ export default function GarageInventoryApp({ initialBins, initialBinCode = "" }:
             {filteredBins.map((bin) => (
               <li
                 key={bin.id}
-                className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-cream)]/50"
+                className="neo-sm card-hover overflow-hidden"
               >
                 {bin.photo_path ? (
                   <img src={bin.photo_path} alt="" className="h-44 w-full object-cover" loading="lazy" />
@@ -603,14 +603,14 @@ export default function GarageInventoryApp({ initialBins, initialBinCode = "" }:
                       <button
                         type="button"
                         onClick={() => editBin(bin)}
-                        className="rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]"
+                        className="neo-btn !min-h-9 !px-3 !py-1.5"
                       >
                         Edit
                       </button>
                       <button
                         type="button"
                         onClick={() => void deleteBin(bin.id)}
-                        className="rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                        className="neo-btn !min-h-9 !px-3 !py-1.5 text-red-600 hover:text-red-700"
                       >
                         Delete
                       </button>
@@ -618,7 +618,7 @@ export default function GarageInventoryApp({ initialBins, initialBinCode = "" }:
                   </div>
 
                   {bin.inventory_text ? (
-                    <div className="mt-4 rounded-xl bg-white px-3 py-3 text-sm text-[var(--color-ink-muted)]">
+                    <div className="neo-inset mt-4 px-3 py-3 text-sm text-[var(--color-ink-muted)]">
                       <p className="mb-2 text-xs font-bold uppercase tracking-wide text-[var(--color-muted)]">
                         Inventory
                       </p>

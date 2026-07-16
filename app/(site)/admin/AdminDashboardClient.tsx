@@ -20,28 +20,6 @@ type Props = {
   purchaseRequestCounts: { pending: number; total: number };
 };
 
-function pageTileClass(href: string): string {
-  if (href === "/admin/recipes") {
-    return "rounded-xl border border-[var(--color-accent)] bg-orange-50 px-4 py-3 shadow-sm transition-colors hover:bg-orange-100";
-  }
-  if (href === "/admin/backyard") {
-    return "rounded-xl border border-emerald-600 bg-emerald-50 px-4 py-3 shadow-sm transition-colors hover:bg-emerald-100";
-  }
-  if (href === "/admin/garage") {
-    return "rounded-xl border border-sky-600 bg-sky-50 px-4 py-3 shadow-sm transition-colors hover:bg-sky-100";
-  }
-  if (href === "/admin/manuals") {
-    return "rounded-xl border border-teal-600 bg-teal-50 px-4 py-3 shadow-sm transition-colors hover:bg-teal-100";
-  }
-  if (href === "/admin/dogs") {
-    return "rounded-xl border border-emerald-600 bg-emerald-50 px-4 py-3 shadow-sm transition-colors hover:bg-emerald-100";
-  }
-  if (href === "/admin/voices") {
-    return "rounded-xl border border-[var(--color-accent)] bg-orange-50 px-4 py-3 shadow-sm transition-colors hover:bg-orange-100";
-  }
-  return "rounded-xl border border-[var(--color-border)] bg-[var(--color-cream)]/60 px-4 py-3 transition-colors hover:bg-[var(--color-cream-dark)]/70";
-}
-
 function matchesQuery(haystack: string, terms: string[]): boolean {
   return terms.every((term) => haystack.includes(term));
 }
@@ -136,8 +114,11 @@ export default function AdminDashboardClient({
 
   return (
     <>
-      <div className="mb-6 rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-5">
-        <label htmlFor="admin-dashboard-search" className="block text-sm font-medium text-[var(--color-ink-muted)]">
+      <div className="neo mb-6 p-4 sm:p-5">
+        <label
+          htmlFor="admin-dashboard-search"
+          className="block text-sm font-semibold text-[var(--color-ink-muted)]"
+        >
           Search admin
         </label>
         <input
@@ -146,7 +127,7 @@ export default function AdminDashboardClient({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Find manuals, garage, recipes, posts…"
-          className="mt-2 w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] placeholder:text-[var(--color-muted)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+          className="neo-input mt-2"
         />
         {terms.length > 0 ? (
           <p className="mt-2 text-sm text-[var(--color-muted)]">
@@ -169,12 +150,12 @@ export default function AdminDashboardClient({
               <Link
                 key={`${hit.kind}-${hit.href}`}
                 href={hit.href}
-                className="flex items-center justify-between gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-cream)]/70 px-3 py-2.5 hover:bg-[var(--color-cream-dark)]/80"
+                className="neo-sm flex items-center justify-between gap-3 px-3 py-2.5 transition-[box-shadow] hover:shadow-[var(--neo-shadow-out)]"
               >
-                <span className="min-w-0 truncate text-sm font-medium text-[var(--color-ink)]">
+                <span className="min-w-0 truncate text-sm font-semibold text-[var(--color-ink)]">
                   {hit.label}
                 </span>
-                <span className="shrink-0 text-xs font-medium uppercase tracking-wide text-[var(--color-muted)]">
+                <span className="neo-chip !min-h-7 !py-0.5 !text-[0.65rem] uppercase tracking-wide">
                   {hit.kind}
                 </span>
               </Link>
@@ -183,12 +164,12 @@ export default function AdminDashboardClient({
         ) : null}
       </div>
 
-      <div className="space-y-6 sm:space-y-10">
+      <div className="space-y-6 sm:space-y-8">
         {showPuppyBanner ? (
-          <section className="overflow-hidden rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-amber-50 to-orange-50 p-5 shadow-[0_20px_60px_-38px_rgba(21,128,61,0.45)] sm:p-6">
+          <section className="neo p-5 sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-accent)]">
                   Game
                 </p>
                 <h2 className="mt-1 font-heading text-2xl font-semibold text-[var(--color-ink)]">
@@ -198,17 +179,14 @@ export default function AdminDashboardClient({
                   Buy starter dogs, breed puppies, and sell them for coins based on cuteness.
                 </p>
               </div>
-              <Link
-                href="/admin/dogs"
-                className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800"
-              >
+              <Link href="/admin/dogs" className="neo-btn-primary min-h-12">
                 Play Puppy Ranch
               </Link>
             </div>
           </section>
         ) : null}
 
-        <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
+        <section className="neo p-4 sm:p-6">
           <div>
             <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
               Private pages
@@ -218,13 +196,17 @@ export default function AdminDashboardClient({
             </p>
           </div>
           {filteredPages.length === 0 ? (
-            <p className="mt-4 rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-cream)]/60 px-4 py-6 text-center text-sm text-[var(--color-muted)]">
+            <p className="neo-inset mt-4 px-4 py-6 text-center text-sm text-[var(--color-muted)]">
               No pages match that search.
             </p>
           ) : (
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {filteredPages.map((page) => (
-                <Link key={page.href} href={page.href} className={pageTileClass(page.href)}>
+                <Link
+                  key={page.href}
+                  href={page.href}
+                  className="neo-sm card-hover block px-4 py-3"
+                >
                   <span className="block text-sm font-semibold text-[var(--color-ink)]">
                     {page.label}
                   </span>
@@ -238,15 +220,12 @@ export default function AdminDashboardClient({
         </section>
 
         {showTruckFund ? (
-          <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
+          <section className="neo p-4 sm:p-6">
             <div className="flex items-center justify-between gap-3">
               <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
                 Truck Fund
               </h2>
-              <Link
-                href="/admin/truck-fund"
-                className="text-sm font-medium text-[var(--color-accent)] hover:underline"
-              >
+              <Link href="/admin/truck-fund" className="neo-link text-sm">
                 Open →
               </Link>
             </div>
@@ -257,7 +236,7 @@ export default function AdminDashboardClient({
         ) : null}
 
         {showRequests ? (
-          <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
+          <section className="neo p-4 sm:p-6">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
@@ -267,10 +246,7 @@ export default function AdminDashboardClient({
                   {purchaseRequestCounts.pending} pending · {purchaseRequestCounts.total} total
                 </p>
               </div>
-              <Link
-                href="/admin/requests"
-                className="text-sm font-medium text-[var(--color-accent)] hover:underline"
-              >
+              <Link href="/admin/requests" className="neo-link text-sm">
                 Review →
               </Link>
             </div>
@@ -281,15 +257,12 @@ export default function AdminDashboardClient({
         ) : null}
 
         {showPostsSection ? (
-          <section className="rounded-2xl bg-[var(--color-surface)] p-6 ring-1 ring-[var(--color-border)]">
+          <section className="neo p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
                 Blog posts
               </h2>
-              <Link
-                href="/admin/posts/new"
-                className="text-sm font-medium text-[var(--color-accent)] hover:underline"
-              >
+              <Link href="/admin/posts/new" className="neo-link text-sm">
                 + Add post
               </Link>
             </div>
@@ -302,7 +275,7 @@ export default function AdminDashboardClient({
                 filteredPosts.map((post) => (
                   <li
                     key={post.slug}
-                    className="flex items-start justify-between gap-4 rounded-xl bg-[var(--color-cream)]/60 px-3 py-2 sm:bg-transparent sm:px-0 sm:py-0"
+                    className="neo-sm flex items-start justify-between gap-4 px-3 py-2.5"
                   >
                     <Link
                       href={`/blog/${post.slug}`}
@@ -312,7 +285,7 @@ export default function AdminDashboardClient({
                     </Link>
                     <Link
                       href={`/admin/posts/${post.slug}/edit`}
-                      className="text-sm text-[var(--color-accent)] hover:underline"
+                      className="neo-link shrink-0 text-sm"
                     >
                       Edit
                     </Link>
@@ -324,7 +297,7 @@ export default function AdminDashboardClient({
         ) : null}
 
         {showRecipesSection ? (
-          <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
+          <section className="neo p-4 sm:p-6">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
@@ -335,16 +308,10 @@ export default function AdminDashboardClient({
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
-                <Link
-                  href="/admin/recipes"
-                  className="text-sm font-medium text-[var(--color-accent)] hover:underline"
-                >
+                <Link href="/admin/recipes" className="neo-link text-sm">
                   Manage →
                 </Link>
-                <Link
-                  href="/admin/recipes/new"
-                  className="text-sm font-medium text-[var(--color-accent)] hover:underline"
-                >
+                <Link href="/admin/recipes/new" className="neo-link text-sm">
                   + Add
                 </Link>
               </div>
@@ -358,7 +325,7 @@ export default function AdminDashboardClient({
                 filteredRecipes.map((recipe) => (
                   <li
                     key={recipe.slug}
-                    className="flex items-start justify-between gap-4 rounded-xl bg-[var(--color-cream)]/60 px-3 py-2 sm:bg-transparent sm:px-0 sm:py-0"
+                    className="neo-sm flex items-start justify-between gap-4 px-3 py-2.5"
                   >
                     <Link
                       href={`/recipes/${recipe.slug}`}
@@ -368,7 +335,7 @@ export default function AdminDashboardClient({
                     </Link>
                     <Link
                       href={`/admin/recipes/${recipe.slug}/edit`}
-                      className="text-sm text-[var(--color-accent)] hover:underline"
+                      className="neo-link shrink-0 text-sm"
                     >
                       Edit
                     </Link>
@@ -380,7 +347,7 @@ export default function AdminDashboardClient({
         ) : null}
 
         {noMatches ? (
-          <p className="rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-8 text-center text-sm text-[var(--color-muted)]">
+          <p className="neo-inset px-4 py-8 text-center text-sm text-[var(--color-muted)]">
             Nothing matched “{query.trim()}”. Try another word, or clear the search.
           </p>
         ) : null}
@@ -393,13 +360,13 @@ function QuickResult({ page }: { page: AdminNavPage }) {
   return (
     <Link
       href={page.href}
-      className="flex items-start justify-between gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-cream)]/70 px-3 py-2.5 hover:bg-[var(--color-cream-dark)]/80"
+      className="neo-sm flex items-start justify-between gap-3 px-3 py-2.5 transition-[box-shadow] hover:shadow-[var(--neo-shadow-out)]"
     >
       <span className="min-w-0">
         <span className="block text-sm font-semibold text-[var(--color-ink)]">{page.label}</span>
         <span className="mt-0.5 block text-xs text-[var(--color-muted)]">{page.description}</span>
       </span>
-      <span className="shrink-0 text-xs font-medium uppercase tracking-wide text-[var(--color-muted)]">
+      <span className="neo-chip !min-h-7 !py-0.5 !text-[0.65rem] uppercase tracking-wide">
         Page
       </span>
     </Link>

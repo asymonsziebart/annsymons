@@ -16,28 +16,25 @@ export default async function BackyardPlantsPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-8 sm:py-12">
-      <Link
-        href="/admin"
-        className="inline-flex min-h-11 items-center text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-ink)]"
-      >
+      <Link href="/admin" className="neo-link inline-flex min-h-11 items-center text-sm">
         ← Back to Admin
       </Link>
 
-      <header className="mt-4 overflow-hidden rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-lime-50 p-5 shadow-[0_20px_60px_-38px_rgba(21,128,61,0.45)] sm:p-8">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
+      <header className="mt-4">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-accent)]">
           Admin tool
         </p>
-        <h1 className="mt-2 font-heading text-4xl font-semibold tracking-tight text-stone-950 sm:text-5xl">
+        <h1 className="mt-2 font-heading text-4xl font-semibold tracking-tight text-[var(--color-ink)] sm:text-5xl">
           Backyard Plants
         </h1>
-        <p className="mt-3 max-w-2xl text-pretty text-sm leading-relaxed text-stone-700 sm:text-base">
+        <p className="mt-3 max-w-2xl text-pretty text-sm leading-relaxed text-[var(--color-ink-muted)] sm:text-base">
           Upload a photo of your backyard, drop pins where you planted things, and search the
           catalog whenever you forget what went where.
         </p>
       </header>
 
       {!dbReady && (
-        <p className="mt-6 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900 ring-1 ring-amber-200">
+        <p className="neo-inset mt-6 px-4 py-3 text-sm text-[var(--color-ink-muted)]">
           DATABASE_URL is not set — photos and pins will not persist. Add your Neon connection
           string in Vercel (or .env locally), then redeploy.
         </p>

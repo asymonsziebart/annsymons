@@ -408,7 +408,7 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
 
   return (
     <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.9fr)]">
-      <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
+      <section className="neo p-4 sm:p-6">
         <h2 className="font-heading text-xl font-semibold text-[var(--color-ink)]">
           Backyard map
         </h2>
@@ -426,7 +426,7 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
               value={photoTitle}
               onChange={(event) => setPhotoTitle(event.target.value)}
               placeholder="Summer 2026 backyard"
-              className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+              className="neo-input"
             />
           </div>
 
@@ -435,7 +435,7 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
               Upload backyard photo
             </label>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <label className="inline-flex min-h-11 cursor-pointer items-center justify-center whitespace-nowrap rounded-xl border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]">
+              <label className="neo-btn cursor-pointer">
                 <input
                   ref={fileRef}
                   id="backyard-photo"
@@ -450,7 +450,7 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
               <button
                 type="submit"
                 disabled={uploading || !selectedFile}
-                className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+                className="neo-btn-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {uploading ? "Uploading…" : "Upload"}
               </button>
@@ -481,7 +481,7 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
                     resetPinForm();
                     setSelectedPinId(null);
                   }}
-                  className="min-w-0 flex-1 rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                  className="neo-input min-w-0 flex-1"
                 >
                   {photos.map((photo) => (
                     <option key={photo.id} value={photo.id}>
@@ -493,7 +493,7 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
                   <button
                     type="button"
                     onClick={() => void deletePhoto(activePhoto.id)}
-                    className="rounded-xl border border-red-200 bg-white px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                    className="neo-btn text-red-600 hover:text-red-700"
                   >
                     Delete
                   </button>
@@ -511,11 +511,8 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
                     setAddMode((value) => !value);
                     if (addMode) resetPinForm();
                   }}
-                  className={
-                    addMode
-                      ? "rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
-                      : "rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800 hover:bg-emerald-100"
-                  }
+                  aria-pressed={addMode}
+                  className={addMode ? "neo-btn-primary" : "neo-btn"}
                 >
                   {addMode ? "Add pin mode on" : "Add pin mode"}
                 </button>
@@ -531,8 +528,8 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
                 onClick={onMapClick}
                 className={
                   addMode
-                    ? "relative cursor-crosshair overflow-hidden rounded-2xl border-2 border-emerald-400 bg-[var(--color-cream)]/60"
-                    : "relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-cream)]/60"
+                    ? "neo-inset relative cursor-crosshair overflow-hidden ring-2 ring-[var(--color-accent)]"
+                    : "neo-inset relative overflow-hidden"
                 }
               >
                 <img
@@ -559,8 +556,8 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
                       }}
                       className={
                         isSelected || isPending
-                          ? "absolute z-10 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-amber-500 shadow-lg ring-2 ring-amber-300"
-                          : "absolute z-10 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-emerald-600 shadow-md hover:scale-110"
+                          ? "absolute z-10 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--color-accent)] shadow-[var(--neo-shadow-out-sm)] ring-2 ring-white"
+                          : "absolute z-10 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--color-ink)] shadow-[var(--neo-shadow-out-sm)] ring-2 ring-white hover:scale-110"
                       }
                       style={{ left: `${pin.x_pct}%`, top: `${pin.y_pct}%` }}
                     />
@@ -568,20 +565,20 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
                 })}
                 {pendingPin && !editingPinId ? (
                   <span
-                    className="absolute z-20 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-amber-500 shadow-lg ring-2 ring-amber-300"
+                    className="absolute z-20 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--color-accent)] shadow-[var(--neo-shadow-out-sm)] ring-2 ring-white"
                     style={{ left: `${pendingPin.x_pct}%`, top: `${pendingPin.y_pct}%` }}
                   />
                 ) : null}
               </div>
             </>
           ) : (
-            <p className="rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-cream)]/60 px-4 py-8 text-center text-sm text-[var(--color-muted)]">
+            <p className="neo-inset px-4 py-8 text-center text-sm text-[var(--color-muted)]">
               Upload a backyard photo to start placing plant pins.
             </p>
           )}
 
           {pendingPin ? (
-            <form onSubmit={savePin} className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-cream)]/40 p-4">
+            <form onSubmit={savePin} className="neo-inset space-y-4 p-4">
               <h3 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
                 {editingPinId ? "Edit plant pin" : "New plant pin"}
               </h3>
@@ -596,7 +593,7 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
                     onChange={(event) => setPlantName(event.target.value)}
                     placeholder="Tomato"
                     required
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                    className="neo-input"
                   />
                 </div>
                 <div>
@@ -608,7 +605,7 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
                     value={commonName}
                     onChange={(event) => setCommonName(event.target.value)}
                     placeholder="Cherry tomato"
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                    className="neo-input"
                   />
                 </div>
               </div>
@@ -622,7 +619,7 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
                     value={species}
                     onChange={(event) => setSpecies(event.target.value)}
                     placeholder="Solanum lycopersicum"
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                    className="neo-input"
                   />
                 </div>
                 <div>
@@ -637,7 +634,7 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
                     value={plantedYear}
                     onChange={(event) => setPlantedYear(event.target.value)}
                     placeholder="2026"
-                    className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                    className="neo-input"
                   />
                 </div>
               </div>
@@ -651,21 +648,21 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
                   onChange={(event) => setNotes(event.target.value)}
                   rows={3}
                   placeholder="North bed, gets afternoon sun"
-                  className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+                  className="neo-input"
                 />
               </div>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex min-h-12 flex-1 items-center justify-center rounded-xl bg-[var(--color-accent)] px-4 py-3 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)] disabled:cursor-not-allowed disabled:opacity-50"
+                  className="neo-btn-primary flex-1 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {saving ? "Saving..." : editingPinId ? "Update pin" : "Save pin"}
                 </button>
                 <button
                   type="button"
                   onClick={resetPinForm}
-                  className="inline-flex min-h-12 items-center justify-center rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]"
+                  className="neo-btn"
                 >
                   Cancel
                 </button>
@@ -673,7 +670,7 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
                   <button
                     type="button"
                     onClick={() => void deletePin(editingPinId)}
-                    className="inline-flex min-h-12 items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50"
+                    className="neo-btn text-red-600 hover:text-red-700"
                   >
                     Delete
                   </button>
@@ -684,13 +681,13 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
         </div>
 
         {status ? (
-          <p className="mt-4 rounded-xl bg-[var(--color-cream)] px-4 py-3 text-sm text-[var(--color-ink-muted)]">
+          <p className="neo-inset mt-4 px-4 py-3 text-sm text-[var(--color-ink-muted)]">
             {status}
           </p>
         ) : null}
       </section>
 
-      <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
+      <section className="neo p-4 sm:p-6">
         {selectedPin && selectedPinPhoto ? (
           <>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -705,13 +702,13 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
               <button
                 type="button"
                 onClick={clearSelectedPin}
-                className="rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]"
+                className="neo-btn !min-h-9 !px-3 !py-1.5"
               >
                 All plants
               </button>
             </div>
 
-            <div className="relative mt-4 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-cream)]/60">
+            <div className="neo-inset relative mt-4 overflow-hidden">
               <img
                 src={selectedPinPhoto.photo_path}
                 alt={selectedPinPhoto.title || "Backyard photo"}
@@ -719,13 +716,13 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
                 draggable={false}
               />
               <span
-                className="absolute z-10 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-amber-500 shadow-lg ring-2 ring-amber-300"
+                className="absolute z-10 h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--color-accent)] shadow-[var(--neo-shadow-out-sm)] ring-2 ring-white"
                 style={{ left: `${selectedPin.x_pct}%`, top: `${selectedPin.y_pct}%` }}
                 aria-hidden
               />
             </div>
 
-            <div className="mt-4 space-y-3 rounded-2xl border border-emerald-300 bg-emerald-50/80 p-4">
+            <div className="neo-inset mt-4 space-y-3 p-4">
               {selectedPin.common_name ? (
                 <p className="text-sm text-[var(--color-muted)]">{selectedPin.common_name}</p>
               ) : null}
@@ -757,21 +754,21 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
               <button
                 type="button"
                 onClick={() => selectPin(selectedPin, { scrollToMap: true })}
-                className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800 hover:bg-emerald-100"
+                className="neo-btn flex-1"
               >
                 View on map
               </button>
               <button
                 type="button"
                 onClick={() => startEditPin(selectedPin)}
-                className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)]"
+                className="neo-btn-primary flex-1"
               >
                 Edit plant
               </button>
               <button
                 type="button"
                 onClick={() => void deletePin(selectedPin.id)}
-                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                className="neo-btn text-red-600 hover:text-red-700"
               >
                 Delete
               </button>
@@ -788,7 +785,7 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
                   Search by name, species, notes, or year planted.
                 </p>
               </div>
-              <span className="rounded-full bg-[var(--color-cream-dark)] px-3 py-1 text-sm font-semibold text-[var(--color-ink-muted)]">
+              <span className="neo-chip !min-h-8 !py-1 text-sm">
                 {filteredPins.length} / {pins.length}
               </span>
             </div>
@@ -798,11 +795,11 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search tomato, hydrangea, north bed..."
-              className="mt-4 w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+              className="neo-input mt-4"
             />
 
             {filteredPins.length === 0 ? (
-              <p className="mt-4 rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-cream)]/60 px-4 py-8 text-center text-sm text-[var(--color-muted)]">
+              <p className="neo-inset mt-4 px-4 py-8 text-center text-sm text-[var(--color-muted)]">
                 {pins.length === 0 ? "No plant pins yet." : "No plants match your search."}
               </p>
             ) : (
@@ -810,7 +807,7 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
                 {filteredPins.map((pin) => (
                   <li
                     key={pin.id}
-                    className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-cream)]/50 p-4"
+                    className="neo-sm card-hover p-4"
                   >
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <button
@@ -831,12 +828,12 @@ export default function BackyardApp({ initialPhotos, initialPins, useClientBlobU
                       <button
                         type="button"
                         onClick={() => selectPin(pin, { scrollToMap: true })}
-                        className="rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]"
+                        className="neo-btn !min-h-9 !px-3 !py-1.5"
                       >
                         View on map
                       </button>
                     </div>
-                    <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                    <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-accent)]">
                       {photoTitleById.get(pin.photo_id) ?? "Backyard photo"}
                     </p>
                     {pin.planted_year ? (

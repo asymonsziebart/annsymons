@@ -202,9 +202,9 @@ function DogPortrait({ dog }: { dog: Dog }) {
   const scale = dog.age === "puppy" ? 0.92 : 1;
 
   return (
-    <div className="mx-auto overflow-hidden rounded-2xl bg-white p-2 shadow-inner ring-1 ring-amber-100">
+    <div className="neo-inset mx-auto overflow-hidden p-2">
       <svg
-        className="h-40 w-full rounded-xl"
+        className="h-40 w-full rounded-[var(--neo-radius-sm)]"
         viewBox="0 0 260 190"
         role="img"
         aria-label={`${dog.name}, a cartoon ${dog.color.toLowerCase()} ${dog.breed.toLowerCase()}`}
@@ -337,37 +337,37 @@ function DogCard({
 }) {
   return (
     <div
-      className={`rounded-2xl border bg-white p-4 shadow-sm ${
-        selected ? "border-emerald-500 ring-2 ring-emerald-100" : "border-amber-200"
+      className={`neo-sm p-4 ${
+        selected ? "ring-2 ring-[var(--color-accent)]" : ""
       }`}
     >
       <DogPortrait dog={dog} />
       <div className="mt-3 flex items-start justify-between gap-3">
         <div>
-          <h3 className="font-heading text-lg font-semibold text-stone-950">{dog.name}</h3>
-          <p className="text-xs font-medium uppercase tracking-wide text-amber-700">
+          <h3 className="font-heading text-lg font-semibold text-[var(--color-ink)]">{dog.name}</h3>
+          <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-accent)]">
             {dog.age} {dog.breed}
           </p>
         </div>
-        <span className="rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 ring-1 ring-rose-100">
+        <span className="neo-chip !min-h-7 !px-2.5 !py-1 !text-xs text-[var(--color-accent)]">
           Cute {dog.cuteness}
         </span>
       </div>
-      <dl className="mt-3 grid grid-cols-2 gap-2 text-xs text-stone-600">
-        <div className="rounded-lg bg-amber-50 px-2 py-1">
-          <dt className="font-semibold text-stone-800">Color</dt>
+      <dl className="mt-3 grid grid-cols-2 gap-2 text-xs text-[var(--color-ink-muted)]">
+        <div className="neo-inset px-2 py-1">
+          <dt className="font-semibold text-[var(--color-ink)]">Color</dt>
           <dd>{dog.color}</dd>
         </div>
-        <div className="rounded-lg bg-amber-50 px-2 py-1">
-          <dt className="font-semibold text-stone-800">Coat</dt>
+        <div className="neo-inset px-2 py-1">
+          <dt className="font-semibold text-[var(--color-ink)]">Coat</dt>
           <dd>{dog.coat}</dd>
         </div>
-        <div className="rounded-lg bg-amber-50 px-2 py-1">
-          <dt className="font-semibold text-stone-800">Ears</dt>
+        <div className="neo-inset px-2 py-1">
+          <dt className="font-semibold text-[var(--color-ink)]">Ears</dt>
           <dd>{dog.ears}</dd>
         </div>
-        <div className="rounded-lg bg-amber-50 px-2 py-1">
-          <dt className="font-semibold text-stone-800">Vibe</dt>
+        <div className="neo-inset px-2 py-1">
+          <dt className="font-semibold text-[var(--color-ink)]">Vibe</dt>
           <dd>{dog.personality}</dd>
         </div>
       </dl>
@@ -376,11 +376,8 @@ function DogCard({
           <button
             type="button"
             onClick={onSelect}
-            className={`min-h-10 flex-1 rounded-xl px-3 py-2 text-sm font-semibold ${
-              selected
-                ? "bg-emerald-700 text-white hover:bg-emerald-800"
-                : "bg-emerald-50 text-emerald-900 ring-1 ring-emerald-200 hover:bg-emerald-100"
-            }`}
+            aria-pressed={selected}
+            className={`flex-1 ${selected ? "neo-btn-primary" : "neo-btn"}`}
           >
             {selected ? "Selected" : "Pick parent"}
           </button>
@@ -506,48 +503,48 @@ export default function DogBreedingGame() {
   return (
     <div className="mt-6 space-y-6">
       <section className="grid gap-3 sm:grid-cols-4">
-        <div className="rounded-2xl border border-amber-200 bg-white px-4 py-3 shadow-sm">
-          <p className="text-xs font-bold uppercase tracking-wide text-amber-700">Coins</p>
-          <p className="font-heading text-3xl font-semibold text-stone-950">{game.coins}</p>
+        <div className="neo-sm px-4 py-3">
+          <p className="text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">Coins</p>
+          <p className="font-heading text-3xl font-semibold text-[var(--color-ink)]">{game.coins}</p>
         </div>
-        <div className="rounded-2xl border border-amber-200 bg-white px-4 py-3 shadow-sm">
-          <p className="text-xs font-bold uppercase tracking-wide text-amber-700">Dogs</p>
-          <p className="font-heading text-3xl font-semibold text-stone-950">
+        <div className="neo-sm px-4 py-3">
+          <p className="text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">Dogs</p>
+          <p className="font-heading text-3xl font-semibold text-[var(--color-ink)]">
             {game.dogs.length}/{KENNEL_LIMIT}
           </p>
         </div>
-        <div className="rounded-2xl border border-amber-200 bg-white px-4 py-3 shadow-sm">
-          <p className="text-xs font-bold uppercase tracking-wide text-amber-700">Puppies born</p>
-          <p className="font-heading text-3xl font-semibold text-stone-950">{game.births}</p>
+        <div className="neo-sm px-4 py-3">
+          <p className="text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">Puppies born</p>
+          <p className="font-heading text-3xl font-semibold text-[var(--color-ink)]">{game.births}</p>
         </div>
-        <div className="rounded-2xl border border-amber-200 bg-white px-4 py-3 shadow-sm">
-          <p className="text-xs font-bold uppercase tracking-wide text-amber-700">Sold</p>
-          <p className="font-heading text-3xl font-semibold text-stone-950">{game.sold}</p>
+        <div className="neo-sm px-4 py-3">
+          <p className="text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">Sold</p>
+          <p className="font-heading text-3xl font-semibold text-[var(--color-ink)]">{game.sold}</p>
         </div>
       </section>
 
-      <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-950">
+      <div className="neo-inset px-4 py-3 text-sm font-medium text-[var(--color-ink)]">
         {message}
       </div>
 
-      <section className="rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-lime-50 to-amber-50 p-4 shadow-[0_18px_50px_-36px_rgba(21,128,61,0.5)] sm:p-6">
+      <section className="neo p-4 sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-700">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--color-accent)]">
               Breeding pen
             </p>
-            <h2 className="mt-1 font-heading text-2xl font-semibold text-stone-950">
+            <h2 className="mt-1 font-heading text-2xl font-semibold text-[var(--color-ink)]">
               Breed two selected dogs
             </h2>
-            <p className="mt-1 text-sm leading-relaxed text-stone-600">
-              Tap <span className="font-semibold text-stone-800">Pick parent</span> on two adult dogs in the kennel,
+            <p className="mt-1 text-sm leading-relaxed text-[var(--color-ink-muted)]">
+              Tap <span className="font-semibold text-[var(--color-ink)]">Pick parent</span> on two adult dogs in the kennel,
               then press this button. Breeding costs {BREED_COST} coins.
             </p>
           </div>
           <button
             type="button"
             onClick={breedSelected}
-            className="min-h-14 rounded-2xl bg-emerald-700 px-6 py-3 text-base font-bold text-white shadow-sm hover:bg-emerald-800"
+            className="neo-btn-primary !min-h-14 !px-6 !text-base"
           >
             Breed selected dogs
           </button>
@@ -556,18 +553,18 @@ export default function DogBreedingGame() {
           {parentSlotLabels.map((label, index) => (
             <div
               key={index}
-              className={`rounded-2xl border px-4 py-3 ${
+              className={`px-4 py-3 ${
                 selectedParents[index]
-                  ? "border-emerald-300 bg-white text-stone-950"
-                  : "border-dashed border-emerald-300 bg-white/60 text-stone-500"
+                  ? "neo-sm text-[var(--color-ink)]"
+                  : "neo-inset text-[var(--color-muted)]"
               }`}
             >
-              <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">
+              <p className="text-xs font-bold uppercase tracking-wide text-[var(--color-accent)]">
                 Parent {index + 1}
               </p>
               <p className="mt-1 font-heading text-xl font-semibold">{label}</p>
               {selectedParents[index] ? (
-                <p className="mt-1 text-xs text-stone-600">
+                <p className="mt-1 text-xs text-[var(--color-ink-muted)]">
                   {selectedParents[index]!.color} {selectedParents[index]!.breed} · Cute{" "}
                   {selectedParents[index]!.cuteness}
                 </p>
@@ -577,16 +574,16 @@ export default function DogBreedingGame() {
         </div>
       </section>
 
-      <section className="rounded-3xl bg-white p-4 shadow-[0_18px_50px_-36px_rgba(120,53,15,0.55)] ring-1 ring-amber-200 sm:p-6">
+      <section className="neo p-4 sm:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="font-heading text-2xl font-semibold text-stone-950">Starter market</h2>
-            <p className="mt-1 text-sm text-stone-600">Buy adults to start your breeding lines.</p>
+            <h2 className="font-heading text-2xl font-semibold text-[var(--color-ink)]">Starter market</h2>
+            <p className="mt-1 text-sm text-[var(--color-ink-muted)]">Buy adults to start your breeding lines.</p>
           </div>
           <button
             type="button"
             onClick={resetGame}
-            className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+            className="neo-btn text-red-600 hover:text-red-700"
           >
             Reset ranch
           </button>
@@ -600,7 +597,7 @@ export default function DogBreedingGame() {
                 <button
                   type="button"
                   onClick={() => buyDog(dog)}
-                  className="min-h-10 flex-1 rounded-xl bg-amber-600 px-3 py-2 text-sm font-semibold text-white hover:bg-amber-700"
+                  className="neo-btn-primary flex-1"
                 >
                   Buy for {purchasePrice(dog)}
                 </button>
@@ -610,18 +607,18 @@ export default function DogBreedingGame() {
         </div>
       </section>
 
-      <section className="rounded-3xl bg-white p-4 shadow-[0_18px_50px_-36px_rgba(120,53,15,0.55)] ring-1 ring-amber-200 sm:p-6">
+      <section className="neo p-4 sm:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="font-heading text-2xl font-semibold text-stone-950">Kennel</h2>
-            <p className="mt-1 text-sm text-stone-600">
+            <h2 className="font-heading text-2xl font-semibold text-[var(--color-ink)]">Kennel</h2>
+            <p className="mt-1 text-sm text-[var(--color-ink-muted)]">
               Pick two adult dogs, then breed them for {BREED_COST} coins.
             </p>
           </div>
         </div>
 
         {game.dogs.length === 0 ? (
-          <p className="mt-4 rounded-2xl border border-dashed border-amber-300 bg-amber-50 px-4 py-8 text-center text-sm text-stone-600">
+          <p className="neo-inset mt-4 px-4 py-8 text-center text-sm text-[var(--color-muted)]">
             No dogs yet. Buy starter dogs from the market.
           </p>
         ) : (
@@ -637,7 +634,7 @@ export default function DogBreedingGame() {
                     <button
                       type="button"
                       onClick={() => sellPuppy(dog.id)}
-                      className="min-h-10 flex-1 rounded-xl bg-rose-600 px-3 py-2 text-sm font-semibold text-white hover:bg-rose-700"
+                      className="neo-btn-primary flex-1"
                     >
                       Sell for {dog.value}
                     </button>
@@ -650,9 +647,9 @@ export default function DogBreedingGame() {
       </section>
 
       {puppies.length > 0 ? (
-        <section className="rounded-3xl border border-rose-200 bg-rose-50 p-4 sm:p-6">
-          <h2 className="font-heading text-xl font-semibold text-stone-950">Puppy sales board</h2>
-          <p className="mt-1 text-sm text-stone-600">
+        <section className="neo p-4 sm:p-6">
+          <h2 className="font-heading text-xl font-semibold text-[var(--color-ink)]">Puppy sales board</h2>
+          <p className="mt-1 text-sm text-[var(--color-ink-muted)]">
             Cuteness sets sale price. Rare traits and cute combos sell higher.
           </p>
           <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -660,15 +657,15 @@ export default function DogBreedingGame() {
               .slice()
               .sort((a, b) => b.value - a.value)
               .map((dog) => (
-                <li key={dog.id} className="rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-rose-100">
+                <li key={dog.id} className="neo-sm px-4 py-3">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <p className="font-semibold text-stone-950">{dog.name}</p>
-                      <p className="text-xs text-stone-600">
+                      <p className="font-semibold text-[var(--color-ink)]">{dog.name}</p>
+                      <p className="text-xs text-[var(--color-ink-muted)]">
                         {dog.color} {dog.coat} {dog.breed}
                       </p>
                     </div>
-                    <span className="rounded-full bg-rose-600 px-3 py-1 text-sm font-bold text-white">
+                    <span className="neo-chip !min-h-8 !text-sm text-[var(--color-accent)]">
                       {dog.value}
                     </span>
                   </div>

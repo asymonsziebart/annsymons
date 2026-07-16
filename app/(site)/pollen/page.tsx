@@ -10,19 +10,19 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
-function categoryTint(category: string | null): string {
-  if (!category) return "bg-stone-100 text-stone-700 ring-stone-200";
+function categoryTone(category: string | null): string {
+  if (!category) return "text-[var(--color-ink-muted)]";
   const t = category.toLowerCase();
   if (t.includes("very low") || t.includes("low")) {
-    return "bg-emerald-50 text-emerald-900 ring-emerald-200";
+    return "text-[var(--color-teal)]";
   }
   if (t.includes("moderate")) {
-    return "bg-amber-50 text-amber-950 ring-amber-200";
+    return "text-[var(--color-mustard)]";
   }
   if (t.includes("high") || t.includes("very high")) {
-    return "bg-red-50 text-red-950 ring-red-200";
+    return "text-[var(--color-coral)]";
   }
-  return "bg-stone-100 text-stone-800 ring-stone-200";
+  return "text-[var(--color-ink-muted)]";
 }
 
 export default async function PollenPage() {
@@ -31,7 +31,7 @@ export default async function PollenPage() {
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-8 sm:py-16">
       <p className="text-center text-xs text-[var(--color-ink-muted)]">
-        <Link href="/" className="link-accent hover:text-[var(--color-ink)]">
+        <Link href="/" className="neo-link text-xs">
           Home
         </Link>
       </p>
@@ -46,7 +46,7 @@ export default async function PollenPage() {
         . Source:{" "}
         <a
           href="https://developers.google.com/maps/documentation/pollen"
-          className="link-accent underline-offset-2 hover:underline"
+          className="neo-link underline-offset-2 hover:underline"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -57,19 +57,19 @@ export default async function PollenPage() {
 
       {!result.ok ? (
         <div
-          className="mx-auto mt-10 max-w-lg rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-5 text-sm text-amber-950 shadow-sm"
+          className="neo-inset mx-auto mt-10 max-w-lg px-4 py-5 text-sm text-[var(--color-ink)]"
           role="status"
         >
           {result.reason === "missing_key" ? (
             <>
-              <p className="font-medium">API key not configured</p>
-              <p className="mt-2 leading-relaxed text-amber-900/90">
-                Add <code className="rounded bg-amber-100/80 px-1.5 py-0.5 text-xs">GOOGLE_POLLEN_API_KEY</code>{" "}
-                (or reuse <code className="rounded bg-amber-100/80 px-1.5 py-0.5 text-xs">GOOGLE_MAPS_API_KEY</code> with
+              <p className="font-medium text-[var(--color-ink)]">API key not configured</p>
+              <p className="mt-2 leading-relaxed text-[var(--color-ink-muted)]">
+                Add <code className="neo-chip !min-h-0 !px-1.5 !py-0.5 !text-xs">GOOGLE_POLLEN_API_KEY</code>{" "}
+                (or reuse <code className="neo-chip !min-h-0 !px-1.5 !py-0.5 !text-xs">GOOGLE_MAPS_API_KEY</code> with
                 the{" "}
                 <a
                   href="https://console.cloud.google.com/apis/library/pollen.googleapis.com"
-                  className="font-medium underline underline-offset-2"
+                  className="neo-link font-medium underline underline-offset-2"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -80,8 +80,8 @@ export default async function PollenPage() {
             </>
           ) : (
             <>
-              <p className="font-medium">Could not load pollen data</p>
-              <p className="mt-2 text-amber-900/90">
+              <p className="font-medium text-[var(--color-ink)]">Could not load pollen data</p>
+              <p className="mt-2 text-[var(--color-ink-muted)]">
                 {result.reason === "http_error" && result.status != null
                   ? `HTTP ${result.status}${result.detail ? `: ${result.detail}` : ""}`
                   : result.detail ?? "Unexpected error"}
@@ -107,14 +107,14 @@ export default async function PollenPage() {
                   {day.types.map((t) => (
                     <li
                       key={`${day.iso}-${t.code}`}
-                      className="rounded-lg border border-[var(--color-border)] bg-[var(--color-cream)]/40 px-4 py-3"
+                      className="neo-inset px-4 py-3"
                     >
                       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                         <span className="font-medium text-[var(--color-ink)]">{t.displayName}</span>
                         <div className="flex flex-wrap items-center gap-2">
                           {t.category ? (
                             <span
-                              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ${categoryTint(t.category)}`}
+                              className={`neo-chip !min-h-8 !py-1 !text-xs ${categoryTone(t.category)}`}
                             >
                               {t.category}
                             </span>
