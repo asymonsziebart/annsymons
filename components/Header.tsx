@@ -23,16 +23,16 @@ export default function Header() {
   }, [pathname]);
 
   useEffect(() => {
-    if (!menuOpen) return;
+    if (!menuOpen || isTasksApp) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setMenuOpen(false);
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [menuOpen]);
+  }, [menuOpen, isTasksApp]);
 
   useEffect(() => {
-    if (!menuOpen) return;
+    if (!menuOpen || isTasksApp) return;
     const close = (e: MouseEvent) => {
       if (headerRef.current && !headerRef.current.contains(e.target as Node)) {
         setMenuOpen(false);
@@ -40,7 +40,7 @@ export default function Header() {
     };
     document.addEventListener("mousedown", close);
     return () => document.removeEventListener("mousedown", close);
-  }, [menuOpen]);
+  }, [menuOpen, isTasksApp]);
 
   return (
     <header
@@ -86,77 +86,64 @@ export default function Header() {
             );
           })}
         </nav>
-        <button
-          type="button"
-          className={
-            isTasksApp
-              ? "neo-btn touch-manipulation !min-h-0 !rounded-lg !px-2 !py-1.5 text-[var(--color-ink-muted)] md:hidden"
-              : "neo-btn touch-manipulation !min-h-11 !min-w-11 !rounded-full !p-2 text-[var(--color-ink-muted)] md:hidden"
-          }
-          aria-expanded={menuOpen}
-          aria-controls="mobile-main-nav"
-          aria-pressed={menuOpen}
-          onClick={() => setMenuOpen((o) => !o)}
-        >
-          <span className="sr-only">{menuOpen ? "Close menu" : "Open menu"}</span>
-          {menuOpen ? (
-            <svg
-              className="h-6 w-6"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              aria-hidden
-            >
-              <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
-            </svg>
-          ) : (
-            <svg
-              className="h-6 w-6"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              aria-hidden
-            >
-              <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
-            </svg>
-          )}
-        </button>
+        {!isTasksApp ? (
+          <button
+            type="button"
+            className="neo-btn touch-manipulation !min-h-11 !min-w-11 !rounded-full !p-2 text-[var(--color-ink-muted)] md:hidden"
+            aria-expanded={menuOpen}
+            aria-controls="mobile-main-nav"
+            aria-pressed={menuOpen}
+            onClick={() => setMenuOpen((o) => !o)}
+          >
+            <span className="sr-only">{menuOpen ? "Close menu" : "Open menu"}</span>
+            {menuOpen ? (
+              <svg
+                className="h-6 w-6"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden
+              >
+                <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <svg
+                className="h-6 w-6"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden
+              >
+                <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
+              </svg>
+            )}
+          </button>
+        ) : null}
       </div>
-      {menuOpen ? (
+      {!isTasksApp && menuOpen ? (
         <div
           id="mobile-main-nav"
           className="border-t border-[var(--color-border)]/60 bg-[var(--neo-bg)] md:hidden"
         >
           <nav
-            className={
-              isTasksApp
-                ? "mx-auto flex max-w-5xl flex-col gap-1 px-3 py-2 sm:px-6"
-                : "mx-auto flex max-w-5xl flex-col gap-1.5 px-4 py-3 sm:px-8"
-            }
+            className="mx-auto flex max-w-5xl flex-col gap-1.5 px-4 py-3 sm:px-8"
             aria-label="Main"
           >
             {navLinks.map(({ href, label }) => {
               const active =
-                pathname === href || (pathname != null && pathname.startsWith(`${href}/`));
+                pathname === href ||
+                (pathname != null && pathname.startsWith(`${href}/`));
               return (
                 <Link
                   key={href}
                   href={href}
-                  className={
-                    isTasksApp
-                      ? `touch-manipulation rounded-xl px-2 py-2.5 text-sm font-semibold ${
-                          active
-                            ? "text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
-                            : "neo-link"
-                        }`
-                      : `flex min-h-12 touch-manipulation items-center rounded-xl px-3 py-3 text-base font-semibold ${
-                          active
-                            ? "text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
-                            : "neo-link"
-                        }`
-                  }
+                  className={`flex min-h-12 touch-manipulation items-center rounded-xl px-3 py-3 text-base font-semibold ${
+                    active
+                      ? "text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
+                      : "neo-link"
+                  }`}
                 >
                   {label}
                 </Link>
