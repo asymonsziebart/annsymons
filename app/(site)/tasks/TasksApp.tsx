@@ -481,8 +481,18 @@ function compareTaskColumn(a: TaskRow, b: TaskRow, key: keyof TaskRow): number {
 function taskTableDataCell(task: TaskRow, key: keyof TaskRow): ReactNode {
   const v = task[key];
   switch (key) {
-    case "due_date":
-      return formatShortDate(v as string | null);
+    case "due_date": {
+      const label = formatShortDate(v as string | null);
+      // Past due dates only — undated "stale" tasks no longer wash the whole row.
+      if (v && isTaskOverdue(task)) {
+        return (
+          <span className="font-semibold text-[var(--color-coral)]" title="Overdue">
+            {label}
+          </span>
+        );
+      }
+      return label;
+    }
     case "created_at":
     case "last_overdue_email_at":
       return formatCellDateTime(v as string | null | undefined);
@@ -1783,7 +1793,15 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
             />
             <span className="min-w-0 truncate">{task.section_name}</span>
             {task.due_date ? (
-              <span className="shrink-0 text-[var(--color-muted)]">· {formatShortDate(task.due_date)}</span>
+              <span
+                className={`shrink-0 ${
+                  isTaskOverdue(task)
+                    ? "font-semibold text-[var(--color-coral)]"
+                    : "text-[var(--color-muted)]"
+                }`}
+              >
+                · {formatShortDate(task.due_date)}
+              </span>
             ) : null}
           </div>
         ) : (
@@ -2511,7 +2529,6 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                     .map((t) => t.title || `#${t.id}`)
                                     .join(", ")}`
                                 : undefined;
-                              const overdue = isTaskOverdue(task);
                               const subCount = task.subtask_count ?? 0;
                               const subsOpen = Boolean(inlineSubExpanded[task.id]);
                               const inlineSubs = inlineSubtasksByTask[task.id] ?? [];
@@ -2522,7 +2539,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                   onClick={(e) => handleTaskRowClick(task.id, e)}
                                   className={`cursor-pointer border-b border-[var(--color-border)] hover:bg-[var(--color-cream-dark)] ${
                                     selectedTaskIds.includes(task.id) ? "shadow-[inset_2px_0_0_0_var(--color-accent)] bg-[var(--color-cream-dark)]" : ""
-                                  } ${overdue && !done ? "bg-red-50" : ""} ${
+                                  } ${
                                     draggingTaskId === task.id ? "opacity-40" : ""
                                   } ${completionBlocked ? "opacity-[0.92]" : ""}`}
                                 >
