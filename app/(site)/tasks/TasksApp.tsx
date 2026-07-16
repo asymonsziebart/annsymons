@@ -640,7 +640,7 @@ function SortableTaskTh({
     <th
       scope="col"
       aria-sort={ariaSort}
-      className={`relative isolate border-r border-stone-200 bg-stone-50 ${className ?? ""}`.trim()}
+      className={`relative isolate border-r border-[var(--color-border)] bg-[var(--neo-bg)] ${className ?? ""}`.trim()}
       style={
         widthPx != null
           ? { width: widthPx, minWidth: widthPx, maxWidth: widthPx, boxSizing: "border-box" }
@@ -649,7 +649,7 @@ function SortableTaskTh({
     >
       <button
         type="button"
-        className="relative z-0 flex min-h-9 w-[calc(100%-0.5rem)] min-w-0 max-w-[calc(100%-0.5rem)] items-center gap-0.5 pr-0.5 text-left text-[0.65rem] font-semibold uppercase tracking-wide text-stone-600 hover:bg-stone-100 hover:text-stone-900 whitespace-nowrap"
+        className="relative z-0 flex min-h-9 w-[calc(100%-0.5rem)] min-w-0 max-w-[calc(100%-0.5rem)] items-center gap-0.5 pr-0.5 text-left text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--color-muted)] hover:bg-[var(--color-cream-dark)] hover:text-[var(--color-ink)] whitespace-nowrap"
         onClick={() => onSort(colKey)}
       >
         <span className="min-w-0 flex-1 truncate text-left">{label}</span>
@@ -666,7 +666,7 @@ function SortableTaskTh({
           e.preventDefault();
           onColumnAutoFit(colKey);
         }}
-        className="pointer-events-auto absolute right-0 top-0 z-[100] w-2 min-h-9 touch-none select-none bg-stone-300/80 hover:bg-sky-500/80"
+        className="pointer-events-auto absolute right-0 top-0 z-[100] w-2 min-h-9 touch-none select-none bg-[var(--color-muted)]/40 hover:bg-[var(--color-accent)]/80"
         style={{
           bottom: 0,
           touchAction: "none",
@@ -1664,23 +1664,22 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   ).length;
 
   const shell =
-    "flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden bg-stone-50 text-stone-900 antialiased";
-  const input =
-    "w-full rounded-md border border-stone-200 bg-white px-3 py-2 text-base text-stone-900 placeholder:text-stone-400 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 sm:text-sm";
+    "flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden bg-[var(--neo-bg)] text-[var(--color-ink)] antialiased";
+  const input = "neo-input text-base sm:text-sm";
   const filterSelect = `${input} w-full min-w-0 sm:w-auto sm:min-w-[7.5rem] lg:max-w-[11rem]`;
-  const label = "text-xs font-medium text-stone-500";
+  const label = "text-xs font-medium text-[var(--color-muted)]";
 
   if (sections.length === 0) {
     return (
       <div className={`${shell} items-center justify-center p-8`}>
-        <div className="max-w-md rounded-xl border border-stone-200 bg-white p-6 text-center shadow-sm">
-          <p className="text-stone-600">
+        <div className="neo max-w-md p-6 text-center">
+          <p className="text-[var(--color-muted)]">
             Tasks need database setup. In Neon, run{" "}
-            <code className="rounded bg-stone-100 px-1.5 py-0.5 text-xs text-stone-800">
+            <code className="neo-inset rounded px-1.5 py-0.5 text-xs text-[var(--color-ink-muted)]">
               db/migrate-tasks-asana-layout.sql
             </code>{" "}
             (or use a fresh{" "}
-            <code className="rounded bg-stone-100 px-1.5 py-0.5 text-xs text-stone-800">
+            <code className="neo-inset rounded px-1.5 py-0.5 text-xs text-[var(--color-ink-muted)]">
               create-tasks-table.sql
             </code>
             ).
@@ -1688,7 +1687,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
           <button
             type="button"
             onClick={() => void refresh()}
-            className="mt-4 rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500"
+            className="neo-btn-primary mt-4"
           >
             Retry
           </button>
@@ -1711,10 +1710,10 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     const boxPad = compact ? "px-1.5 py-1" : "px-2 py-1.5";
     const titleCls = compact
       ? `min-w-0 flex-1 truncate text-xs font-medium leading-tight ${
-          done ? "text-stone-500 line-through" : "text-stone-900"
+          done ? "text-[var(--color-muted)] line-through" : "text-[var(--color-ink)]"
         }`
       : `min-w-0 flex-1 font-medium leading-snug ${
-          done ? "text-stone-500 line-through" : "text-stone-900"
+          done ? "text-[var(--color-muted)] line-through" : "text-[var(--color-ink)]"
         }`;
     const chk = compact ? "h-4 w-4" : "h-5 w-5";
     const dragProps = draggableForDue
@@ -1748,10 +1747,10 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
             handleTaskRowClick(task.id, e as unknown as React.MouseEvent<Element>);
           }
         }}
-        className={`rounded-md border ${boxPad} text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-sky-400 ${
+        className={`neo-sm ${boxPad} text-left outline-none transition-shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] ${
           selectedTaskIds.includes(task.id)
-            ? "border-sky-400 bg-sky-50"
-            : "border-stone-200 bg-white hover:border-stone-300"
+            ? "shadow-[var(--neo-shadow-in-sm)] !text-[var(--color-accent)]"
+            : ""
         } ${done ? "opacity-80" : ""} ${compact ? "" : "text-sm"} ${
           draggableForDue ? "cursor-grab active:cursor-grabbing" : ""
         } ${draggingTaskId === task.id ? "opacity-60" : ""}`}
@@ -1763,10 +1762,10 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               disabled={!done && completionBlocked}
               title={completionBlockedTitle}
               onClick={() => void patchTask(task.id, { status: done ? "todo" : "done" })}
-              className={`flex ${chk} items-center justify-center rounded border text-[10px] ${
+              className={`flex ${chk} items-center justify-center rounded text-[10px] ${
                 done
-                  ? "border-sky-600 bg-sky-600 text-white"
-                  : "border-stone-300 bg-white"
+                  ? "bg-[var(--color-accent)] text-white shadow-[var(--neo-shadow-in-sm)]"
+                  : "neo-sm"
               } ${!done && completionBlocked ? "cursor-not-allowed opacity-50" : ""}`}
               aria-label={done ? "Mark incomplete" : "Complete"}
             >
@@ -1778,13 +1777,13 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
           </span>
         </div>
         {!compact ? (
-          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[0.65rem] text-stone-500">
+          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[0.65rem] text-[var(--color-muted)]">
             <span
               className={`inline-block h-1.5 w-1.5 shrink-0 rounded-full ${priorityDotClass(task.priority)}`}
             />
             <span className="min-w-0 truncate">{task.section_name}</span>
             {task.due_date ? (
-              <span className="shrink-0 text-stone-400">· {formatShortDate(task.due_date)}</span>
+              <span className="shrink-0 text-[var(--color-muted)]">· {formatShortDate(task.due_date)}</span>
             ) : null}
           </div>
         ) : (
@@ -1803,17 +1802,17 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
 
   return (
     <div className={shell}>
-      <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden border-t border-stone-200">
+      <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden border-t border-[var(--color-border)]">
         {/* List pane — grows to full width when detail pane is minimized */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-          <header className="flex shrink-0 flex-col gap-3 border-b border-stone-200 bg-white px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-4 lg:px-8">
+          <header className="flex shrink-0 flex-col gap-3 border-b border-[var(--color-border)] bg-[var(--neo-bg)] px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-4 lg:px-8">
             <div className="flex min-w-0 items-start justify-between gap-3">
               <div className="min-w-0">
-                <h1 className="font-heading text-lg font-semibold text-stone-900">My tasks</h1>
-                <p className="text-xs text-stone-500">
+                <h1 className="font-heading text-lg font-semibold text-[var(--color-ink)]">My tasks</h1>
+                <p className="text-xs text-[var(--color-muted)]">
                   {hasActiveTaskFilters ? (
                     <>
-                      <span className="font-medium text-stone-700">
+                      <span className="font-medium text-[var(--color-ink-muted)]">
                         {filteredTasks.length} matching
                       </span>
                       {" · "}
@@ -1822,16 +1821,16 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                   ) : null}
                   {openCount} open ·{" "}
                   {taskViewMode === "week" ? (
-                    <span className="font-medium text-stone-700">{weekViewLayout.weekLabel}</span>
+                    <span className="font-medium text-[var(--color-ink-muted)]">{weekViewLayout.weekLabel}</span>
                   ) : null}
                   {taskViewMode === "month" ? (
-                    <span className="font-medium text-stone-700">{monthViewLayout.monthTitle}</span>
+                    <span className="font-medium text-[var(--color-ink-muted)]">{monthViewLayout.monthTitle}</span>
                   ) : null}
                   {taskViewMode === "year" ? (
-                    <span className="font-medium text-stone-700">{yearViewLayout.yearTitle}</span>
+                    <span className="font-medium text-[var(--color-ink-muted)]">{yearViewLayout.yearTitle}</span>
                   ) : null}
                   {taskViewMode !== "list" ? " · " : null}
-                  <span className="hidden text-stone-400 md:inline">
+                  <span className="hidden text-[var(--color-muted)] md:inline">
                     {taskViewMode !== "list" ? (
                       <>
                         Drag a task onto any day to set its due date · Monday-start weeks · Ctrl/⌘+click
@@ -1845,12 +1844,12 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                       </>
                     )}
                   </span>
-                  <span className="text-stone-400 md:hidden">Tap a task for details</span>
+                  <span className="text-[var(--color-muted)] md:hidden">Tap a task for details</span>
                 </p>
               </div>
               <button
                 type="button"
-                className="inline-flex min-h-10 shrink-0 items-center rounded-md border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-sm hover:bg-stone-50 lg:hidden"
+                className="neo-btn !min-h-10 shrink-0 !px-3 !py-2 text-xs lg:hidden"
                 aria-expanded={!topControlsCollapsed}
                 aria-controls="task-top-controls"
                 onClick={() => {
@@ -1871,14 +1870,14 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 <button
                   type="button"
                   onClick={() => setDetailsMinimized(false)}
-                  className="col-span-2 min-h-10 rounded-md border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-medium text-sky-800 shadow-sm hover:bg-sky-100 lg:col-span-1 lg:py-1.5"
+                  className="neo-btn col-span-2 !min-h-10 text-xs lg:col-span-1"
                 >
                   <span className="lg:hidden">Task details</span>
                   <span className="hidden lg:inline">Show details</span>
                 </button>
               )}
               <div
-                className="col-span-2 inline-flex min-h-10 items-center gap-0.5 rounded-md border border-stone-200 bg-stone-50 p-0.5 lg:col-span-1"
+                className="neo-sm col-span-2 inline-flex min-h-10 items-center gap-0.5 p-0.5 lg:col-span-1"
                 role="group"
                 aria-label="Task layout"
               >
@@ -1887,8 +1886,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                   onClick={() => setTaskViewMode("list")}
                   className={`min-h-9 flex-1 rounded px-2 py-1 text-[0.7rem] font-medium lg:min-h-0 lg:flex-none lg:px-2.5 lg:text-xs ${
                     taskViewMode === "list"
-                      ? "bg-white text-stone-900 shadow-sm"
-                      : "text-stone-600 hover:text-stone-900"
+                      ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
+                      : "text-[var(--color-muted)] hover:text-[var(--color-ink)]"
                   }`}
                 >
                   List
@@ -1898,8 +1897,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                   onClick={() => setTaskViewMode("week")}
                   className={`min-h-9 flex-1 rounded px-2 py-1 text-[0.7rem] font-medium lg:min-h-0 lg:flex-none lg:px-2.5 lg:text-xs ${
                     taskViewMode === "week"
-                      ? "bg-white text-stone-900 shadow-sm"
-                      : "text-stone-600 hover:text-stone-900"
+                      ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
+                      : "text-[var(--color-muted)] hover:text-[var(--color-ink)]"
                   }`}
                 >
                   Week
@@ -1909,8 +1908,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                   onClick={() => setTaskViewMode("month")}
                   className={`min-h-9 flex-1 rounded px-2 py-1 text-[0.7rem] font-medium lg:min-h-0 lg:flex-none lg:px-2.5 lg:text-xs ${
                     taskViewMode === "month"
-                      ? "bg-white text-stone-900 shadow-sm"
-                      : "text-stone-600 hover:text-stone-900"
+                      ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
+                      : "text-[var(--color-muted)] hover:text-[var(--color-ink)]"
                   }`}
                 >
                   Month
@@ -1920,21 +1919,21 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                   onClick={() => setTaskViewMode("year")}
                   className={`min-h-9 flex-1 rounded px-2 py-1 text-[0.7rem] font-medium lg:min-h-0 lg:flex-none lg:px-2.5 lg:text-xs ${
                     taskViewMode === "year"
-                      ? "bg-white text-stone-900 shadow-sm"
-                      : "text-stone-600 hover:text-stone-900"
+                      ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
+                      : "text-[var(--color-muted)] hover:text-[var(--color-ink)]"
                   }`}
                 >
                   Year
                 </button>
               </div>
               {taskViewMode === "week" ? (
-                <div className="col-span-2 flex min-h-10 items-center gap-0.5 rounded-md border border-stone-200 bg-white px-0.5 py-0.5 shadow-sm lg:col-span-1">
+                <div className="neo-sm col-span-2 flex min-h-10 items-center gap-0.5 px-0.5 py-0.5 lg:col-span-1">
                   <button
                     type="button"
                     title="Previous week"
                     aria-label="Previous week"
                     onClick={() => setWeekOffset((o) => o - 1)}
-                    className="min-h-9 flex-1 rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 lg:min-h-0 lg:flex-none"
+                    className="neo-btn !min-h-9 flex-1 !px-2 !py-1 text-xs lg:min-h-0 lg:flex-none"
                   >
                     ←
                   </button>
@@ -1942,7 +1941,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     type="button"
                     title="Jump to this week"
                     onClick={() => setWeekOffset(0)}
-                    className="min-h-9 flex-[2] rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 lg:min-h-0 lg:flex-none"
+                    className="neo-btn !min-h-9 flex-[2] !px-2 !py-1 text-xs lg:min-h-0 lg:flex-none"
                   >
                     This week
                   </button>
@@ -1951,20 +1950,20 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     title="Next week"
                     aria-label="Next week"
                     onClick={() => setWeekOffset((o) => o + 1)}
-                    className="min-h-9 flex-1 rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 lg:min-h-0 lg:flex-none"
+                    className="neo-btn !min-h-9 flex-1 !px-2 !py-1 text-xs lg:min-h-0 lg:flex-none"
                   >
                     →
                   </button>
                 </div>
               ) : null}
               {taskViewMode === "month" ? (
-                <div className="col-span-2 flex min-h-10 items-center gap-0.5 rounded-md border border-stone-200 bg-white px-0.5 py-0.5 shadow-sm lg:col-span-1">
+                <div className="neo-sm col-span-2 flex min-h-10 items-center gap-0.5 px-0.5 py-0.5 lg:col-span-1">
                   <button
                     type="button"
                     title="Previous month"
                     aria-label="Previous month"
                     onClick={() => setMonthOffset((o) => o - 1)}
-                    className="min-h-9 flex-1 rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 lg:min-h-0 lg:flex-none"
+                    className="neo-btn !min-h-9 flex-1 !px-2 !py-1 text-xs lg:min-h-0 lg:flex-none"
                   >
                     ←
                   </button>
@@ -1972,7 +1971,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     type="button"
                     title="Jump to this month"
                     onClick={() => setMonthOffset(0)}
-                    className="min-h-9 flex-[2] rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 lg:min-h-0 lg:flex-none"
+                    className="neo-btn !min-h-9 flex-[2] !px-2 !py-1 text-xs lg:min-h-0 lg:flex-none"
                   >
                     This month
                   </button>
@@ -1981,20 +1980,20 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     title="Next month"
                     aria-label="Next month"
                     onClick={() => setMonthOffset((o) => o + 1)}
-                    className="min-h-9 flex-1 rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 lg:min-h-0 lg:flex-none"
+                    className="neo-btn !min-h-9 flex-1 !px-2 !py-1 text-xs lg:min-h-0 lg:flex-none"
                   >
                     →
                   </button>
                 </div>
               ) : null}
               {taskViewMode === "year" ? (
-                <div className="col-span-2 flex min-h-10 items-center gap-0.5 rounded-md border border-stone-200 bg-white px-0.5 py-0.5 shadow-sm lg:col-span-1">
+                <div className="neo-sm col-span-2 flex min-h-10 items-center gap-0.5 px-0.5 py-0.5 lg:col-span-1">
                   <button
                     type="button"
                     title="Previous year"
                     aria-label="Previous year"
                     onClick={() => setYearOffset((o) => o - 1)}
-                    className="min-h-9 flex-1 rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 lg:min-h-0 lg:flex-none"
+                    className="neo-btn !min-h-9 flex-1 !px-2 !py-1 text-xs lg:min-h-0 lg:flex-none"
                   >
                     ←
                   </button>
@@ -2002,7 +2001,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     type="button"
                     title="Jump to this year"
                     onClick={() => setYearOffset(0)}
-                    className="min-h-9 flex-[2] rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 lg:min-h-0 lg:flex-none"
+                    className="neo-btn !min-h-9 flex-[2] !px-2 !py-1 text-xs lg:min-h-0 lg:flex-none"
                   >
                     This year
                   </button>
@@ -2011,7 +2010,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     title="Next year"
                     aria-label="Next year"
                     onClick={() => setYearOffset((o) => o + 1)}
-                    className="min-h-9 flex-1 rounded px-2 py-1 text-xs font-medium text-stone-700 hover:bg-stone-100 lg:min-h-0 lg:flex-none"
+                    className="neo-btn !min-h-9 flex-1 !px-2 !py-1 text-xs lg:min-h-0 lg:flex-none"
                   >
                     →
                   </button>
@@ -2019,7 +2018,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               ) : null}
               {taskViewMode === "list" ? (
                 <label className="col-span-2 flex min-w-0 flex-col gap-0.5 lg:col-span-1">
-                  <span className="text-[0.65rem] font-medium uppercase tracking-wide text-stone-500">
+                  <span className="text-[0.65rem] font-medium uppercase tracking-wide text-[var(--color-muted)]">
                     Order within section
                   </span>
                   <select
@@ -2030,7 +2029,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                       else if (v === "due_asc") setTaskTableSort({ key: "due_date", dir: "asc" });
                       else if (v === "due_desc") setTaskTableSort({ key: "due_date", dir: "desc" });
                     }}
-                    className="min-h-10 w-full rounded-md border border-stone-200 bg-white px-2 py-2 text-xs text-stone-800 shadow-sm lg:min-h-0 lg:max-w-[11rem] lg:py-1.5"
+                    className="neo-input min-h-10 w-full text-xs lg:min-h-0 lg:max-w-[11rem]"
                     aria-label="Sort tasks within each section"
                   >
                     <option value="due_asc">Due date (soonest first)</option>
@@ -2048,7 +2047,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               <button
                 type="button"
                 onClick={() => setShowCompleted((v) => !v)}
-                className="min-h-10 rounded-md border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-sm hover:bg-stone-50 lg:min-h-0 lg:py-1.5"
+                className="neo-btn !min-h-10 text-xs lg:min-h-0"
               >
                 {showCompleted ? "Hide completed" : "Show completed"}
               </button>
@@ -2058,10 +2057,10 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                   type="button"
                   onClick={() => setColumnsPanelOpen((o) => !o)}
                   title="Choose which columns appear in the list. Your selection is saved in this browser."
-                  className={`min-h-10 rounded-md border px-3 py-2 text-xs font-medium shadow-sm lg:min-h-0 lg:py-1.5 ${
+                  className={`neo-btn !min-h-10 text-xs lg:min-h-0 ${
                     columnsPanelOpen
-                      ? "border-sky-300 bg-sky-50 text-sky-900"
-                      : "border-stone-200 bg-white text-stone-700 hover:bg-stone-50"
+                      ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
+                      : ""
                   }`}
                   aria-expanded={columnsPanelOpen}
                   aria-haspopup="true"
@@ -2070,16 +2069,16 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 </button>
                 {columnsPanelOpen ? (
                   <div
-                    className="z-[200] rounded-lg border border-stone-200 bg-white py-2 shadow-lg max-md:fixed max-md:left-2 max-md:right-2 max-md:top-1/2 max-md:mt-0 max-md:w-auto max-md:-translate-y-1/2 md:absolute md:right-0 md:top-full md:mt-1 md:w-[min(100vw-2rem,18rem)] md:translate-y-0"
+                    className="neo z-[200] py-2 max-md:fixed max-md:left-2 max-md:right-2 max-md:top-1/2 max-md:mt-0 max-md:w-auto max-md:-translate-y-1/2 md:absolute md:right-0 md:top-full md:mt-1 md:w-[min(100vw-2rem,18rem)] md:translate-y-0"
                     role="dialog"
                     aria-label="Choose visible columns"
                   >
-                    <div className="border-b border-stone-100 px-3 pb-2">
-                      <p className="text-xs font-medium text-stone-500">Visible fields</p>
-                      <p className="mt-0.5 text-[0.65rem] text-stone-400">
+                    <div className="border-b border-[var(--color-border)] px-3 pb-2">
+                      <p className="text-xs font-medium text-[var(--color-muted)]">Visible fields</p>
+                      <p className="mt-0.5 text-[0.65rem] text-[var(--color-muted)]">
                         At least one column stays on. “Deselect all” keeps Title only.
                       </p>
-                      <p className="mt-1.5 text-[0.65rem] text-sky-700/90">
+                      <p className="mt-1.5 text-[0.65rem] text-[var(--color-accent)]/90">
                         Your choices are saved in this browser and load automatically next time.
                       </p>
                     </div>
@@ -2089,13 +2088,13 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                         const onlyOne = visibleTaskTableKeys.length === 1 && checked;
                         return (
                           <li key={k}>
-                            <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm text-stone-800 hover:bg-stone-50">
+                            <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]">
                               <input
                                 type="checkbox"
                                 checked={checked}
                                 disabled={onlyOne}
                                 onChange={() => toggleTaskColumnVisibility(k)}
-                                className="rounded border-stone-300 text-sky-600 focus:ring-sky-500"
+                                className="rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
                               />
                               <span className="min-w-0 flex-1">{TASK_TABLE_LABELS[k]}</span>
                             </label>
@@ -2103,12 +2102,12 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                         );
                       })}
                     </ul>
-                    <div className="flex flex-col gap-1 border-t border-stone-100 px-2 pt-2">
+                    <div className="flex flex-col gap-1 border-t border-[var(--color-border)] px-2 pt-2">
                       <button
                         type="button"
                         onClick={() => deselectAllTaskTableColumns()}
                         title={`Hide all columns except ${TASK_TABLE_LABELS[TASK_TABLE_DESELECT_ALL_KEEP]}`}
-                        className="w-full rounded-md py-1.5 text-xs font-medium text-stone-700 hover:bg-stone-100"
+                        className="w-full rounded-md py-1.5 text-xs font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]"
                       >
                         Deselect all
                       </button>
@@ -2118,7 +2117,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                           showAllTaskTableColumns();
                           setColumnsPanelOpen(false);
                         }}
-                        className="w-full rounded-md py-1.5 text-xs font-medium text-sky-700 hover:bg-sky-50"
+                        className="w-full rounded-md py-1.5 text-xs font-medium text-[var(--color-accent)] hover:bg-[var(--color-cream-dark)]"
                       >
                         Show all columns
                       </button>
@@ -2130,7 +2129,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               <button
                 type="button"
                 onClick={() => void refresh()}
-                className="min-h-10 rounded-md border border-stone-200 bg-white px-3 py-2 text-xs text-stone-700 shadow-sm hover:bg-stone-50 lg:min-h-0 lg:py-1.5"
+                className="neo-btn !min-h-10 text-xs lg:min-h-0"
               >
                 Refresh
               </button>
@@ -2139,14 +2138,14 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Suburban Library Cooperative Vega portal (Sterling Heights card) — checkouts & due dates (new tab)"
-                className="inline-flex min-h-10 items-center justify-center rounded-md border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-sky-800 shadow-sm hover:bg-sky-50 lg:min-h-0 lg:py-1.5"
+                className="neo-btn !min-h-10 text-xs text-[var(--color-accent)] lg:min-h-0"
               >
                 Library account
               </a>
               <button
                 type="button"
                 onClick={() => void logout()}
-                className="min-h-10 rounded-md border border-stone-200 bg-white px-3 py-2 text-xs text-stone-700 shadow-sm hover:bg-stone-50 lg:min-h-0 lg:py-1.5"
+                className="neo-btn !min-h-10 text-xs lg:min-h-0"
               >
                 Sign out
               </button>
@@ -2169,12 +2168,12 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
             </div>
           ) : null}
 
-          <div className="shrink-0 border-b border-stone-200 bg-white">
+          <div className="shrink-0 border-b border-[var(--color-border)] bg-[var(--neo-bg)]">
             <div className="px-4 py-2 sm:px-6 lg:px-8">
               <button
                 type="button"
                 onClick={() => setFiltersBarCollapsed((c) => !c)}
-                className="flex min-h-10 w-full touch-manipulation items-center gap-2 rounded-md py-1.5 text-left text-sm text-stone-800 hover:bg-stone-50"
+                className="flex min-h-10 w-full touch-manipulation items-center gap-2 rounded-md py-1.5 text-left text-sm text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]"
                 aria-expanded={!filtersBarCollapsed}
                 aria-controls="task-filters-panel"
                 aria-label={
@@ -2183,27 +2182,27 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     : "Minimize search and filters"
                 }
               >
-                <span className="shrink-0 text-stone-400" aria-hidden>
+                <span className="shrink-0 text-[var(--color-muted)]" aria-hidden>
                   {filtersBarCollapsed ? "▸" : "▾"}
                 </span>
                 <span className="shrink-0 font-medium">Search & filters</span>
                 {filtersBarCollapsed ? (
-                  <span className="min-w-0 truncate text-xs font-normal text-stone-500">
+                  <span className="min-w-0 truncate text-xs font-normal text-[var(--color-muted)]">
                     · {filtersCollapsedSummary}
                     {hasActiveTaskFilters ? (
-                      <span className="whitespace-nowrap text-stone-600">
+                      <span className="whitespace-nowrap text-[var(--color-muted)]">
                         {" "}
                         · {filteredTasks.length} matching
                       </span>
                     ) : (
-                      <span className="whitespace-nowrap text-stone-500">
+                      <span className="whitespace-nowrap text-[var(--color-muted)]">
                         {" "}
                         · {filteredTasks.length} in list
                       </span>
                     )}
                   </span>
                 ) : (
-                  <span className="ml-auto shrink-0 text-xs font-medium text-stone-500">
+                  <span className="ml-auto shrink-0 text-xs font-medium text-[var(--color-muted)]">
                     Minimize
                   </span>
                 )}
@@ -2212,7 +2211,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
             {!filtersBarCollapsed ? (
               <div
                 id="task-filters-panel"
-                className="border-t border-stone-100 px-4 py-2.5 sm:px-6 lg:px-8"
+                className="border-t border-[var(--color-border)] px-4 py-2.5 sm:px-6 lg:px-8"
               >
                 <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
                   <div className="min-w-0 flex-1 sm:min-w-[12rem] sm:max-w-md">
@@ -2323,12 +2322,12 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                       allowCustom={false}
                     />
                   </div>
-                  <label className="flex cursor-pointer items-center gap-2 pb-0.5 text-sm text-stone-700 sm:pb-2">
+                  <label className="flex cursor-pointer items-center gap-2 pb-0.5 text-sm text-[var(--color-ink-muted)] sm:pb-2">
                     <input
                       type="checkbox"
                       checked={filterOverdueOnly}
                       onChange={(e) => setFilterOverdueOnly(e.target.checked)}
-                      className="rounded border-stone-300 text-sky-600 focus:ring-sky-500"
+                      className="rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
                     />
                     Overdue only
                   </label>
@@ -2336,7 +2335,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     type="button"
                     disabled={!hasActiveTaskFilters}
                     onClick={() => clearTaskFilters()}
-                    className="rounded-md border border-stone-200 bg-white px-3 py-2 text-xs font-medium text-stone-700 shadow-sm hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="neo-btn text-xs disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Clear filters
                   </button>
@@ -2357,10 +2356,10 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 return (
                   <section
                     key={sec.id}
-                    className={`overflow-hidden rounded-2xl border bg-white shadow-sm ${
+                    className={`neo overflow-hidden ${
                       dragOverSectionId === sec.id
-                        ? "border-sky-300 ring-2 ring-sky-100"
-                        : "border-stone-200"
+                        ? "ring-2 ring-[var(--color-accent)]/40"
+                        : ""
                     }`}
                     onDragOver={(e) => {
                       if (draggingTaskIdRef.current == null) return;
@@ -2374,21 +2373,21 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     <button
                       type="button"
                       onClick={() => setCollapsed((c) => ({ ...c, [sec.id]: !c[sec.id] }))}
-                      className="flex min-h-12 w-full items-center gap-2 bg-stone-50/90 px-3 py-2 text-left"
+                      className="flex min-h-12 w-full items-center gap-2 bg-[var(--neo-bg)] px-3 py-2 text-left"
                     >
-                      <span className="text-stone-400">{isCollapsed ? "▸" : "▾"}</span>
+                      <span className="text-[var(--color-muted)]">{isCollapsed ? "▸" : "▾"}</span>
                       <span
                         className={`h-2.5 w-2.5 shrink-0 rounded-full ${sectionDotClass(sec.color_key)}`}
                       />
-                      <span className="min-w-0 flex-1 truncate font-medium text-stone-800">{sec.name}</span>
-                      <span className="rounded-full bg-white px-2 py-0.5 text-xs text-stone-500 ring-1 ring-stone-200">
+                      <span className="min-w-0 flex-1 truncate font-medium text-[var(--color-ink-muted)]">{sec.name}</span>
+                      <span className="neo-chip !min-h-0 !px-2 !py-0.5 text-xs">
                         {list.length}
                       </span>
                     </button>
                     {!isCollapsed ? (
                       <div className="space-y-2 p-3">
                         {list.length === 0 ? (
-                          <p className="rounded-xl border border-dashed border-stone-200 bg-stone-50 px-3 py-4 text-center text-sm text-stone-400">
+                          <p className="neo-inset px-3 py-4 text-center text-sm text-[var(--color-muted)]">
                             No tasks in this section
                           </p>
                         ) : (
@@ -2412,7 +2411,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                           <button
                             type="button"
                             onClick={() => void quickAddTask(sec.id)}
-                            className="shrink-0 rounded-md bg-sky-600 px-3 py-2 text-sm font-medium text-white hover:bg-sky-500"
+                            className="neo-btn-primary shrink-0 !px-3 !py-2 text-sm"
                           >
                             Add
                           </button>
@@ -2423,21 +2422,21 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 );
               })}
             </div>
-            <div className="hidden border-y border-stone-200 bg-white md:block">
+            <div className="hidden border-y border-[var(--color-border)] bg-[var(--neo-bg)] md:block">
               <div className="overflow-x-auto">
                 <table className="w-max min-w-full border-separate border-spacing-0 text-left text-sm">
-                  <thead className="sticky top-0 z-20 border-b border-stone-200 bg-stone-50 text-stone-500 shadow-[0_1px_0_0_rgb(231_229_228)]">
+                  <thead className="sticky top-0 z-20 border-b border-[var(--color-border)] bg-[var(--neo-bg)] text-[var(--color-muted)] shadow-[var(--neo-shadow-out-sm)]">
                     <tr>
                       <th
-                        className="w-9 border-r border-stone-200 px-2 py-2.5 pl-4 sm:pl-6 lg:pl-8"
+                        className="w-9 border-r border-[var(--color-border)] px-2 py-2.5 pl-4 sm:pl-6 lg:pl-8"
                         aria-label="Drag"
                       />
                       <th
-                        className="w-12 border-r border-stone-200 whitespace-nowrap px-0 py-2.5"
+                        className="w-12 border-r border-[var(--color-border)] whitespace-nowrap px-0 py-2.5"
                         aria-label="Mark done"
                       />
                       <th
-                        className="w-8 border-r border-stone-200 px-0 py-2.5"
+                        className="w-8 border-r border-[var(--color-border)] px-0 py-2.5"
                         aria-label="Expand subtasks"
                       />
                       {visibleTaskTableKeys.map((k) => (
@@ -2463,7 +2462,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                         key={sec.id}
                         className={`transition-colors ${
                           dragOverSectionId === sec.id
-                            ? "bg-sky-50 ring-1 ring-inset ring-sky-300"
+                            ? "shadow-[var(--neo-shadow-in-sm)] ring-1 ring-inset ring-[var(--color-accent)]"
                             : ""
                         }`}
                         onDragOver={(e) => {
@@ -2476,8 +2475,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                         onDrop={(e) => void dropTaskOnSection(e, sec.id)}
                       >
                         <tr
-                          className={`bg-stone-50/95 hover:bg-stone-100/80 ${
-                            secIdx > 0 ? "border-t-2 border-stone-200" : ""
+                          className={`bg-[var(--neo-bg)] hover:bg-[var(--color-cream-dark)] ${
+                            secIdx > 0 ? "border-t-2 border-[var(--color-border)]" : ""
                           }`}
                         >
                           <td colSpan={taskTableColspan} className="p-0">
@@ -2488,12 +2487,12 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                               }
                               className="flex w-full items-center gap-2 px-4 py-2 text-left sm:px-6 lg:px-8"
                             >
-                              <span className="text-stone-400">{isCollapsed ? "▸" : "▾"}</span>
+                              <span className="text-[var(--color-muted)]">{isCollapsed ? "▸" : "▾"}</span>
                               <span
                                 className={`h-2.5 w-2.5 shrink-0 rounded-full ${sectionDotClass(sec.color_key)}`}
                               />
-                              <span className="font-medium text-stone-800">{sec.name}</span>
-                              <span className="text-xs text-stone-500">({list.length})</span>
+                              <span className="font-medium text-[var(--color-ink-muted)]">{sec.name}</span>
+                              <span className="text-xs text-[var(--color-muted)]">({list.length})</span>
                             </button>
                           </td>
                         </tr>
@@ -2519,8 +2518,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                 <Fragment key={task.id}>
                                 <tr
                                   onClick={(e) => handleTaskRowClick(task.id, e)}
-                                  className={`cursor-pointer border-b border-stone-100 hover:bg-stone-50 ${
-                                    selectedTaskIds.includes(task.id) ? "bg-sky-50" : ""
+                                  className={`cursor-pointer border-b border-[var(--color-border)] hover:bg-[var(--color-cream-dark)] ${
+                                    selectedTaskIds.includes(task.id) ? "shadow-[inset_2px_0_0_0_var(--color-accent)] bg-[var(--color-cream-dark)]" : ""
                                   } ${overdue && !done ? "bg-red-50" : ""} ${
                                     draggingTaskId === task.id ? "opacity-40" : ""
                                   } ${completionBlocked ? "opacity-[0.92]" : ""}`}
@@ -2535,7 +2534,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                       tabIndex={0}
                                       title="Drag to another section"
                                       aria-label={`Drag task ${task.title} to another section`}
-                                      className="inline-flex cursor-grab select-none text-stone-400 active:cursor-grabbing hover:text-stone-600"
+                                      className="inline-flex cursor-grab select-none text-[var(--color-muted)] active:cursor-grabbing hover:text-[var(--color-ink-muted)]"
                                       onDragStart={(e) => {
                                         e.stopPropagation();
                                         const payload = JSON.stringify({ taskId: task.id });
@@ -2567,10 +2566,10 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                           status: done ? "todo" : "done",
                                         })
                                       }
-                                      className={`flex h-5 w-5 items-center justify-center rounded border text-xs ${
+                                      className={`flex h-5 w-5 items-center justify-center rounded text-xs ${
                                         done
-                                          ? "border-sky-600 bg-sky-600 text-white"
-                                          : "border-stone-300 bg-white"
+                                          ? "bg-[var(--color-accent)] text-white shadow-[var(--neo-shadow-in-sm)]"
+                                          : "neo-sm"
                                       } ${
                                         !done && completionBlocked
                                           ? "cursor-not-allowed opacity-50"
@@ -2588,7 +2587,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                     {subCount > 0 ? (
                                       <button
                                         type="button"
-                                        className="flex h-7 w-7 items-center justify-center rounded text-stone-500 hover:bg-stone-100 hover:text-stone-800"
+                                        className="flex h-7 w-7 items-center justify-center rounded text-[var(--color-muted)] hover:bg-[var(--color-cream-dark)] hover:text-[var(--color-ink)]"
                                         aria-expanded={subsOpen}
                                         aria-label={
                                           subsOpen ? "Hide subtasks" : "Show subtasks"
@@ -2612,7 +2611,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                       colKey === "requester" ||
                                       colKey === "project_label";
                                     const tdClass = [
-                                      "border-l border-stone-100 px-2 py-2.5 align-middle text-stone-700",
+                                      "border-l border-[var(--color-border)] px-2 py-2.5 align-middle text-[var(--color-ink-muted)]",
                                       customW == null &&
                                         (isLongText
                                           ? "max-w-[14rem] whitespace-normal break-words"
@@ -2643,7 +2642,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                       {colKey === "title" ? (
                                         <span
                                           className={`block truncate ${
-                                            done ? "text-stone-400 line-through" : "text-stone-900"
+                                            done ? "text-[var(--color-muted)] line-through" : "text-[var(--color-ink)]"
                                           }`}
                                           title={task.title}
                                         >
@@ -2657,13 +2656,13 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                   })}
                                 </tr>
                                 {subCount > 0 && subsOpen && (
-                                  <tr className="border-b border-stone-100 bg-stone-50/90">
+                                  <tr className="border-b border-[var(--color-border)] bg-[var(--neo-bg)]">
                                     <td colSpan={taskTableColspan} className="px-0 py-0">
-                                      <div className="border-t border-stone-100 py-2 pl-[3.25rem] sm:pl-[4.25rem] lg:pl-[5.25rem] pr-4 sm:pr-6 lg:pr-8">
+                                      <div className="border-t border-[var(--color-border)] py-2 pl-[3.25rem] sm:pl-[4.25rem] lg:pl-[5.25rem] pr-4 sm:pr-6 lg:pr-8">
                                         {subsLoading ? (
-                                          <p className="text-xs text-stone-500">Loading subtasks…</p>
+                                          <p className="text-xs text-[var(--color-muted)]">Loading subtasks…</p>
                                         ) : inlineSubs.length === 0 ? (
-                                          <p className="text-xs text-stone-500">No subtasks</p>
+                                          <p className="text-xs text-[var(--color-muted)]">No subtasks</p>
                                         ) : (
                                           <ul className="space-y-1.5">
                                             {inlineSubs.map((sub) => (
@@ -2677,10 +2676,10 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                                     e.stopPropagation();
                                                     void toggleSubtask(sub);
                                                   }}
-                                                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] ${
+                                                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded text-[10px] ${
                                                     sub.done
-                                                      ? "border-sky-600 bg-sky-600 text-white"
-                                                      : "border-stone-300 bg-white"
+                                                      ? "bg-[var(--color-accent)] text-white shadow-[var(--neo-shadow-in-sm)]"
+                                                      : "neo-sm"
                                                   }`}
                                                   aria-label={
                                                     sub.done
@@ -2693,8 +2692,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                                 <span
                                                   className={
                                                     sub.done
-                                                      ? "text-stone-400 line-through"
-                                                      : "text-stone-700"
+                                                      ? "text-[var(--color-muted)] line-through"
+                                                      : "text-[var(--color-ink-muted)]"
                                                   }
                                                 >
                                                   {sub.title}
@@ -2714,13 +2713,13 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                               <tr>
                                 <td
                                   colSpan={taskTableColspan}
-                                  className="py-8 text-center text-sm text-stone-400"
+                                  className="py-8 text-center text-sm text-[var(--color-muted)]"
                                 >
                                   No tasks — drop one here from another section
                                 </td>
                               </tr>
                             )}
-                            <tr className="border-t border-stone-100 bg-white">
+                            <tr className="border-t border-[var(--color-border)] bg-[var(--neo-bg)]">
                               <td
                                 colSpan={taskTableColspan}
                                 className="px-4 py-2 sm:px-6 lg:px-8"
@@ -2741,7 +2740,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                   <button
                                     type="button"
                                     onClick={() => void quickAddTask(sec.id)}
-                                    className="shrink-0 rounded-md bg-sky-600 px-3 py-2 text-sm font-medium text-white hover:bg-sky-500"
+                                    className="neo-btn-primary shrink-0 !px-3 !py-2 text-sm"
                                   >
                                     Add
                                   </button>
@@ -2759,7 +2758,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
             </>
             ) : calendarBuckets != null ? (
             <div
-              className="border-y border-stone-200 bg-white px-4 pb-4 sm:px-6 lg:px-8"
+              className="border-y border-[var(--color-border)] bg-[var(--neo-bg)] px-4 pb-4 sm:px-6 lg:px-8"
               role="region"
               aria-label={
                 taskViewMode === "week"
@@ -2770,22 +2769,22 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               }
             >
               <div
-                className={`mb-3 rounded-lg border px-3 py-2.5 sm:px-4 ${
+                className={`mb-3 px-3 py-2.5 sm:px-4 ${
                   calendarBuckets.overdue.length > 0
-                    ? "border-red-200 bg-red-50/90"
-                    : "border-stone-100 bg-stone-50/90"
+                    ? "rounded-lg border border-red-200 bg-red-50/90"
+                    : "neo-sm"
                 }`}
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <h2 className="text-xs font-semibold uppercase tracking-wide text-red-900">
                     Overdue
                   </h2>
-                  <span className="text-[0.65rem] text-stone-500">
+                  <span className="text-[0.65rem] text-[var(--color-muted)]">
                     Open tasks due before today (or stale with no due date)
                   </span>
                 </div>
                 {calendarBuckets.overdue.length === 0 ? (
-                  <p className="mt-2 text-xs text-stone-500">None in the current filters.</p>
+                  <p className="mt-2 text-xs text-[var(--color-muted)]">None in the current filters.</p>
                 ) : (
                   <ul className="mt-2 grid list-none gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {calendarBuckets.overdue.map((task) => (
@@ -2797,7 +2796,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
 
               {taskViewMode === "week" ? (
                 <div className="overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch]">
-                  <div className="grid min-w-[52rem] grid-cols-7 gap-px rounded-lg border border-stone-200 bg-stone-200 shadow-sm">
+                  <div className="neo-sm grid min-w-[52rem] grid-cols-7 gap-px overflow-hidden">
                     {weekViewLayout.days.map((day) => {
                       const isToday = day.iso === weekViewLayout.todayIso;
                       const colTasks = weekViewLayout.byDay.get(day.iso) ?? [];
@@ -2808,30 +2807,30 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                           onDragOver={(e) => calendarDayDragOver(e, day.iso)}
                           onDragLeave={(e) => calendarDayDragLeave(e, day.iso)}
                           onDrop={(e) => void dropTaskOnCalendarDay(e, day.iso)}
-                          className={`flex min-h-[14rem] flex-col bg-white sm:min-h-[16rem] ${
+                          className={`flex min-h-[14rem] flex-col bg-[var(--neo-bg)] sm:min-h-[16rem] ${
                             dropHi
                               ? "z-[1] ring-2 ring-inset ring-emerald-500 bg-emerald-50/50"
                               : isToday
-                                ? "ring-2 ring-inset ring-sky-300"
+                                ? "ring-2 ring-inset ring-[var(--color-accent)]"
                                 : ""
                           }`}
                         >
                           <div
-                            className={`shrink-0 border-b border-stone-100 px-2 py-2 text-center ${
-                              isToday ? "bg-sky-50/80" : "bg-stone-50/90"
+                            className={`shrink-0 border-b border-[var(--color-border)] px-2 py-2 text-center ${
+                              isToday ? "bg-[var(--color-cream-dark)]/80" : "bg-[var(--neo-bg)]"
                             }`}
                           >
-                            <div className="text-[0.65rem] font-semibold uppercase tracking-wide text-stone-500">
+                            <div className="text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--color-muted)]">
                               {day.weekday}
                             </div>
-                            <div className="text-sm font-semibold text-stone-800">{day.dateLabel}</div>
+                            <div className="text-sm font-semibold text-[var(--color-ink-muted)]">{day.dateLabel}</div>
                             {isToday ? (
-                              <div className="mt-0.5 text-[0.6rem] font-medium text-sky-700">Today</div>
+                              <div className="mt-0.5 text-[0.6rem] font-medium text-[var(--color-accent)]">Today</div>
                             ) : null}
                           </div>
                           <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-2">
                             {colTasks.length === 0 ? (
-                              <p className="text-center text-[0.65rem] text-stone-400">—</p>
+                              <p className="text-center text-[0.65rem] text-[var(--color-muted)]">—</p>
                             ) : (
                               colTasks.map((task) => (
                                 <div key={task.id}>{renderWeekTaskCard(task, undefined, true)}</div>
@@ -2847,16 +2846,16 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
 
               {taskViewMode === "month" ? (
                 <div className="overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch]">
-                  <p className="mb-2 text-[0.65rem] text-stone-500">
+                  <p className="mb-2 text-[0.65rem] text-[var(--color-muted)]">
                     Drag tasks onto a day to change the due date. Click the day number or “+more →
                     week” to open that week.
                   </p>
-                  <div className="inline-block min-w-full rounded-lg border border-stone-200 bg-stone-200 p-px shadow-sm">
-                    <div className="grid grid-cols-7 gap-px bg-stone-200">
+                  <div className="neo-sm inline-block min-w-full overflow-hidden p-px">
+                    <div className="grid grid-cols-7 gap-px bg-[var(--color-border)]">
                       {CALENDAR_WEEKDAY_HEADERS.map((h) => (
                         <div
                           key={h}
-                          className="bg-stone-50 py-1.5 text-center text-[0.65rem] font-semibold uppercase tracking-wide text-stone-500"
+                          className="bg-[var(--neo-bg)] py-1.5 text-center text-[0.65rem] font-semibold uppercase tracking-wide text-[var(--color-muted)]"
                         >
                           {h}
                         </div>
@@ -2872,13 +2871,13 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                             onDragOver={(e) => calendarDayDragOver(e, cell.iso)}
                             onDragLeave={(e) => calendarDayDragLeave(e, cell.iso)}
                             onDrop={(e) => void dropTaskOnCalendarDay(e, cell.iso)}
-                            className={`flex min-h-[5.5rem] flex-col bg-white p-1 sm:min-h-[6.5rem] ${
+                            className={`flex min-h-[5.5rem] flex-col bg-[var(--neo-bg)] p-1 sm:min-h-[6.5rem] ${
                               !cell.inMonth ? "opacity-[0.45]" : ""
                             } ${
                               dropHi
                                 ? "z-[1] ring-2 ring-inset ring-emerald-500 bg-emerald-50/50"
                                 : isToday
-                                  ? "ring-2 ring-inset ring-sky-300"
+                                  ? "ring-2 ring-inset ring-[var(--color-accent)]"
                                   : ""
                             }`}
                           >
@@ -2892,8 +2891,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                   setWeekOffset(weekOffsetForIsoDate(cell.iso));
                                   setTaskViewMode("week");
                                 }}
-                                className={`min-h-6 w-full rounded px-0.5 text-right text-[0.65rem] font-semibold tabular-nums hover:bg-stone-100 ${
-                                  cell.inMonth ? "text-stone-700" : "text-stone-400"
+                                className={`min-h-6 w-full rounded px-0.5 text-right text-[0.65rem] font-semibold tabular-nums hover:bg-[var(--color-cream-dark)] ${
+                                  cell.inMonth ? "text-[var(--color-ink-muted)]" : "text-[var(--color-muted)]"
                                 }`}
                               >
                                 {cell.inMonth ? dayNum : ""}
@@ -2912,7 +2911,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                     setWeekOffset(weekOffsetForIsoDate(cell.iso));
                                     setTaskViewMode("week");
                                   }}
-                                  className="w-full rounded py-0.5 text-center text-[0.6rem] font-medium text-sky-700 hover:bg-sky-50 hover:underline"
+                                  className="w-full rounded py-0.5 text-center text-[0.6rem] font-medium text-[var(--color-accent)] hover:bg-[var(--color-cream-dark)] hover:underline"
                                 >
                                   +{colTasks.length - 2} more → week
                                 </button>
@@ -2928,7 +2927,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
 
               {taskViewMode === "year" ? (
                 <div>
-                  <p className="mb-2 text-[0.65rem] text-stone-500">
+                  <p className="mb-2 text-[0.65rem] text-[var(--color-muted)]">
                     Drag tasks onto a day to set the due date. Click a day or month title to open month
                     view. Badge counts are open tasks only.
                   </p>
@@ -2936,7 +2935,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                   {yearViewLayout.months.map((mo) => (
                     <div
                       key={mo.month0}
-                      className="rounded-lg border border-stone-200 bg-white p-1.5 shadow-sm"
+                      className="neo-sm p-1.5"
                     >
                       <button
                         type="button"
@@ -2948,15 +2947,15 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                           );
                           setTaskViewMode("month");
                         }}
-                        className="w-full rounded py-0.5 text-center text-xs font-semibold text-stone-800 hover:bg-stone-50 hover:text-sky-800"
+                        className="w-full rounded py-0.5 text-center text-xs font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)] hover:text-[var(--color-accent)]"
                       >
                         {mo.label}
                       </button>
-                      <div className="mt-1 grid grid-cols-7 gap-px rounded bg-stone-100 p-px text-[0.5rem] leading-tight">
+                      <div className="mt-1 grid grid-cols-7 gap-px rounded bg-[var(--color-border)] p-px text-[0.5rem] leading-tight">
                         {CALENDAR_WEEKDAY_HEADERS.map((h) => (
                           <div
                             key={`${mo.month0}-${h}`}
-                            className="bg-stone-50 py-0.5 text-center font-medium text-stone-400"
+                            className="bg-[var(--neo-bg)] py-0.5 text-center font-medium text-[var(--color-muted)]"
                           >
                             {h}
                           </div>
@@ -2998,26 +2997,26 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                               onDragOver={(e) => calendarDayDragOver(e, cell.iso)}
                               onDragLeave={(e) => calendarDayDragLeave(e, cell.iso)}
                               onDrop={(e) => void dropTaskOnCalendarDay(e, cell.iso)}
-                              className={`min-h-[1.45rem] w-full cursor-pointer bg-white p-0.5 text-left outline-none ring-offset-1 hover:bg-stone-50 focus-visible:ring-2 focus-visible:ring-sky-400 ${
+                              className={`min-h-[1.45rem] w-full cursor-pointer bg-[var(--neo-bg)] p-0.5 text-left outline-none ring-offset-1 hover:bg-[var(--color-cream-dark)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] ${
                                 !cell.inMonth ? "opacity-[0.35]" : ""
                               } ${
                                 dropHi
                                   ? "z-[1] ring-2 ring-inset ring-emerald-500 bg-emerald-50/50"
                                   : isToday
-                                    ? "ring-1 ring-inset ring-sky-400"
+                                    ? "ring-1 ring-inset ring-[var(--color-accent)]"
                                     : ""
                               }`}
                             >
                               <div className="flex items-start justify-between gap-0.5">
                                 <span
                                   className={`tabular-nums ${
-                                    cell.inMonth ? "text-stone-700" : "text-stone-400"
+                                    cell.inMonth ? "text-[var(--color-ink-muted)]" : "text-[var(--color-muted)]"
                                   }`}
                                 >
                                   {cell.inMonth ? dayNum : ""}
                                 </span>
                                 {openN > 0 ? (
-                                  <span className="shrink-0 rounded-sm bg-sky-600 px-0.5 text-[0.45rem] font-bold leading-none text-white">
+                                  <span className="shrink-0 rounded-sm bg-[var(--color-accent)] px-0.5 text-[0.45rem] font-bold leading-none text-white">
                                     {openN}
                                   </span>
                                 ) : null}
@@ -3046,7 +3045,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               ) : null}
 
               {calendarBuckets.laterOpenCount > 0 ? (
-                <p className="mt-3 text-center text-[0.65rem] text-stone-500">
+                <p className="mt-3 text-center text-[0.65rem] text-[var(--color-muted)]">
                   {calendarBuckets.laterOpenCount} open task
                   {calendarBuckets.laterOpenCount === 1 ? "" : "s"} {calendarBuckets.laterHint} — use
                   List view for full section order.
@@ -3057,7 +3056,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
 
             <form
               onSubmit={handleAddSection}
-              className="mt-4 flex gap-2 border-t border-stone-200 px-4 pt-4 sm:px-6 lg:px-8"
+              className="mt-4 flex gap-2 border-t border-[var(--color-border)] px-4 pt-4 sm:px-6 lg:px-8"
             >
               <input
                 type="text"
@@ -3068,7 +3067,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               />
               <button
                 type="submit"
-                className="shrink-0 rounded-md border border-stone-200 bg-white px-3 py-2 text-sm text-stone-700 shadow-sm hover:bg-stone-50"
+                className="neo-btn shrink-0 text-sm"
               >
                 Add section
               </button>
@@ -3078,7 +3077,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
 
         {/* Detail pane — fixed width; list uses remaining horizontal space */}
         {showDetailPane && (
-          <aside className="hidden min-h-0 w-[min(100%,26rem)] shrink-0 overflow-hidden border-l border-stone-200 bg-white shadow-[inset_1px_0_0_0_rgb(231_229_228)] lg:flex lg:w-[26rem] lg:flex-col xl:w-[28rem]">
+          <aside className="neo hidden min-h-0 w-[min(100%,26rem)] shrink-0 overflow-hidden !rounded-none border-l border-[var(--color-border)] lg:flex lg:w-[26rem] lg:flex-col xl:w-[28rem]">
             <TaskDetail
               task={selected!}
               allTasks={tasks}
@@ -3105,11 +3104,11 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
         <button
           type="button"
           onClick={() => setDetailsMinimized(false)}
-          className="fixed right-0 top-1/2 z-30 hidden -translate-y-1/2 rounded-l-lg border border-r-0 border-stone-200 bg-white px-2 py-6 text-xs font-medium text-stone-600 shadow-md hover:bg-stone-50 lg:block"
+          className="neo-btn fixed right-0 top-1/2 z-30 hidden -translate-y-1/2 !rounded-l-lg !rounded-r-none !px-2 !py-6 text-xs lg:block"
           aria-label="Show task details"
         >
           Details
-          <span className="mt-1 block text-lg leading-none text-stone-400" aria-hidden>
+          <span className="mt-1 block text-lg leading-none text-[var(--color-muted)]" aria-hidden>
             ‹
           </span>
         </button>
@@ -3117,16 +3116,16 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
 
       {/* Mobile detail sheet — only when user opens details; list stays usable otherwise */}
       {selected && selectedTaskIds.length === 1 && !detailsMinimized && (
-        <div className="fixed inset-0 z-[60] flex h-screen h-[100dvh] max-h-screen max-h-[100dvh] flex-col overflow-hidden bg-stone-50 pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] lg:hidden">
-          <div className="flex shrink-0 items-center justify-between border-b border-stone-200 bg-white px-4 pb-3 pt-3 shadow-sm">
+        <div className="fixed inset-0 z-[60] flex h-screen h-[100dvh] max-h-screen max-h-[100dvh] flex-col overflow-hidden bg-[var(--neo-bg)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[env(safe-area-inset-top)] lg:hidden">
+          <div className="flex shrink-0 items-center justify-between border-b border-[var(--color-border)] bg-[var(--neo-bg)] px-4 pb-3 pt-3">
             <button
               type="button"
               onClick={() => setDetailsMinimized(true)}
-              className="min-h-11 min-w-11 touch-manipulation py-2 text-left text-sm font-medium text-sky-700 hover:text-sky-800"
+              className="neo-link min-h-11 min-w-11 touch-manipulation py-2 text-left text-sm"
             >
               ← Back
             </button>
-            <span className="text-xs text-stone-500">Task</span>
+            <span className="text-xs text-[var(--color-muted)]">Task</span>
             <span className="w-14" aria-hidden />
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain touch-pan-y [-webkit-overflow-scrolling:touch]">
@@ -3162,13 +3161,13 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
           className="pointer-events-auto fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 z-50 flex max-w-[calc(100vw-1.5rem-env(safe-area-inset-left)-env(safe-area-inset-right))] -translate-x-1/2 flex-col items-center gap-2"
         >
           {bulkPanel === "section" && (
-            <div className="max-h-64 w-[min(100vw-1.5rem,20rem)] overflow-y-auto rounded-xl border border-stone-200 bg-white p-2 shadow-lg sm:min-w-[14rem]">
-              <p className="px-2 pb-1 text-xs font-medium text-stone-500">Move to section</p>
+            <div className="neo max-h-64 w-[min(100vw-1.5rem,20rem)] overflow-y-auto p-2 sm:min-w-[14rem]">
+              <p className="px-2 pb-1 text-xs font-medium text-[var(--color-muted)]">Move to section</p>
               {sections.map((s) => (
                 <button
                   key={s.id}
                   type="button"
-                  className="w-full rounded-lg px-3 py-2 text-left text-sm text-stone-800 hover:bg-stone-100"
+                  className="w-full rounded-lg px-3 py-2 text-left text-sm text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]"
                   onClick={() => void bulkPatchSelected({ section_id: s.id })}
                 >
                   {s.name}
@@ -3177,8 +3176,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
             </div>
           )}
           {bulkPanel === "assignee" && (
-            <div className="w-[min(100vw-1.5rem,20rem)] rounded-xl border border-stone-200 bg-white p-4 shadow-lg">
-              <p className="mb-2 text-xs font-medium text-stone-500">Assignee (all selected)</p>
+            <div className="neo w-[min(100vw-1.5rem,20rem)] p-4">
+              <p className="mb-2 text-xs font-medium text-[var(--color-muted)]">Assignee (all selected)</p>
               <AssigneeSelect
                 value={bulkAssigneeDraft || null}
                 onChange={(v) => setBulkAssigneeDraft(v ?? "")}
@@ -3187,7 +3186,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               <div className="mt-3 flex gap-2">
                 <button
                   type="button"
-                  className="flex-1 rounded-md bg-sky-600 py-2 text-sm font-medium text-white hover:bg-sky-500"
+                  className="neo-btn-primary flex-1 text-sm"
                   onClick={() =>
                     void bulkPatchSelected({
                       assignee: normalizeTaskAssignee(bulkAssigneeDraft.trim()) || null,
@@ -3198,7 +3197,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 </button>
                 <button
                   type="button"
-                  className="rounded-md border border-stone-200 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50"
+                  className="neo-btn text-sm"
                   onClick={() => void bulkPatchSelected({ assignee: null })}
                 >
                   Clear
@@ -3207,8 +3206,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
             </div>
           )}
           {bulkPanel === "date" && (
-            <div className="w-[min(100vw-1.5rem,20rem)] rounded-xl border border-stone-200 bg-white p-4 shadow-lg">
-              <p className="mb-2 text-xs font-medium text-stone-500">Due date (all selected)</p>
+            <div className="neo w-[min(100vw-1.5rem,20rem)] p-4">
+              <p className="mb-2 text-xs font-medium text-[var(--color-muted)]">Due date (all selected)</p>
               <input
                 type="date"
                 value={bulkDueDraft}
@@ -3218,7 +3217,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               <div className="mt-3 flex gap-2">
                 <button
                   type="button"
-                  className="flex-1 rounded-md bg-sky-600 py-2 text-sm font-medium text-white hover:bg-sky-500"
+                  className="neo-btn-primary flex-1 text-sm"
                   onClick={() =>
                     void bulkPatchSelected({ due_date: bulkDueDraft || null })
                   }
@@ -3227,7 +3226,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 </button>
                 <button
                   type="button"
-                  className="rounded-md border border-stone-200 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50"
+                  className="neo-btn text-sm"
                   onClick={() => void bulkPatchSelected({ due_date: null })}
                 >
                   Clear due date
@@ -3236,25 +3235,25 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
             </div>
           )}
           {bulkPanel === "more" && (
-            <div className="w-[min(100vw-1.5rem,20rem)] rounded-xl border border-stone-200 bg-white py-1 shadow-lg sm:min-w-[15rem]">
+            <div className="neo w-[min(100vw-1.5rem,20rem)] py-1 sm:min-w-[15rem]">
               <button
                 type="button"
-                className="w-full px-4 py-2.5 text-left text-sm text-stone-800 hover:bg-stone-50"
+                className="w-full px-4 py-2.5 text-left text-sm text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]"
                 onClick={() => void bulkPatchSelected({ status: "done" })}
               >
                 Mark complete
               </button>
               <button
                 type="button"
-                className="w-full px-4 py-2.5 text-left text-sm text-stone-800 hover:bg-stone-50"
+                className="w-full px-4 py-2.5 text-left text-sm text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]"
                 onClick={() => void bulkPatchSelected({ status: "todo" })}
               >
                 Mark incomplete
               </button>
-              <div className="my-1 border-t border-stone-100" />
+              <div className="my-1 border-t border-[var(--color-border)]" />
               <button
                 type="button"
-                className="w-full px-4 py-2.5 text-left text-sm text-stone-600 hover:bg-stone-50"
+                className="w-full px-4 py-2.5 text-left text-sm text-[var(--color-muted)] hover:bg-[var(--color-cream-dark)]"
                 onClick={() => {
                   setBulkPanel(null);
                   setSelectedTaskIds([]);
@@ -3265,17 +3264,17 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
             </div>
           )}
 
-          <div className="flex max-w-[calc(100vw-1.5rem)] flex-wrap items-center gap-0.5 rounded-2xl border border-stone-200 bg-white px-2 py-2 shadow-xl sm:gap-1 sm:px-3">
-            <span className="shrink-0 px-2 text-sm font-medium text-stone-800">
+          <div className="neo flex max-w-[calc(100vw-1.5rem)] flex-wrap items-center gap-0.5 px-2 py-2 sm:gap-1 sm:px-3">
+            <span className="shrink-0 px-2 text-sm font-medium text-[var(--color-ink-muted)]">
               {multiSelectCount} selected
             </span>
-            <span className="hidden h-6 w-px bg-stone-200 sm:block" aria-hidden />
+            <span className="hidden h-6 w-px bg-[var(--color-border)] sm:block" aria-hidden />
             <button
               type="button"
               title="Change section"
               aria-label="Change section"
-              className={`rounded-lg p-2 text-stone-600 hover:bg-stone-100 ${
-                bulkPanel === "section" ? "bg-stone-100" : ""
+              className={`rounded-lg p-2 text-[var(--color-muted)] hover:bg-[var(--color-cream-dark)] ${
+                bulkPanel === "section" ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]" : ""
               }`}
               onClick={() => setBulkPanel((p) => (p === "section" ? null : "section"))}
             >
@@ -3295,8 +3294,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               type="button"
               title="Change assignee"
               aria-label="Change assignee"
-              className={`rounded-lg p-2 text-stone-600 hover:bg-stone-100 ${
-                bulkPanel === "assignee" ? "bg-stone-100" : ""
+              className={`rounded-lg p-2 text-[var(--color-muted)] hover:bg-[var(--color-cream-dark)] ${
+                bulkPanel === "assignee" ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]" : ""
               }`}
               onClick={() => {
                 setBulkAssigneeDraft("");
@@ -3320,8 +3319,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               type="button"
               title="Change due date"
               aria-label="Change due date"
-              className={`rounded-lg p-2 text-stone-600 hover:bg-stone-100 ${
-                bulkPanel === "date" ? "bg-stone-100" : ""
+              className={`rounded-lg p-2 text-[var(--color-muted)] hover:bg-[var(--color-cream-dark)] ${
+                bulkPanel === "date" ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]" : ""
               }`}
               onClick={() => {
                 setBulkDueDraft("");
@@ -3364,8 +3363,8 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
               type="button"
               title="More actions"
               aria-label="More actions"
-              className={`rounded-lg p-2 text-stone-600 hover:bg-stone-100 ${
-                bulkPanel === "more" ? "bg-stone-100" : ""
+              className={`rounded-lg p-2 text-[var(--color-muted)] hover:bg-[var(--color-cream-dark)] ${
+                bulkPanel === "more" ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]" : ""
               }`}
               onClick={() => setBulkPanel((p) => (p === "more" ? null : "more"))}
             >
@@ -3381,12 +3380,12 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                 <circle cx="19" cy="12" r="2" />
               </svg>
             </button>
-            <span className="hidden h-6 w-px bg-stone-200 sm:block" aria-hidden />
+            <span className="hidden h-6 w-px bg-[var(--color-border)] sm:block" aria-hidden />
             <button
               type="button"
               title="Clear selection"
               aria-label="Clear selection"
-              className="rounded-lg p-2 text-stone-500 hover:bg-stone-100 hover:text-stone-800"
+              className="rounded-lg p-2 text-[var(--color-muted)] hover:bg-[var(--color-cream-dark)] hover:text-[var(--color-ink)]"
               onClick={() => {
                 setBulkPanel(null);
                 setSelectedTaskIds([]);
@@ -3472,17 +3471,17 @@ function TaskPrerequisiteDeps({
         <ul className="flex flex-wrap gap-1.5">
           {selectedTasks.map((t) => (
             <li key={t.id}>
-              <span className="inline-flex max-w-full items-center gap-1 rounded-full border border-stone-200 bg-stone-50 px-2 py-0.5 text-xs text-stone-800">
+              <span className="neo-chip !min-h-0 max-w-full gap-1 !px-2 !py-0.5 text-xs">
                 <span
                   className="min-w-0 max-w-[16rem] truncate"
                   title={`${t.section_name} — ${t.title}`}
                 >
-                  <span className="text-stone-500">{t.section_name}</span>
-                  <span className="text-stone-400"> · </span>#{t.id} {t.title}
+                  <span className="text-[var(--color-muted)]">{t.section_name}</span>
+                  <span className="text-[var(--color-muted)]"> · </span>#{t.id} {t.title}
                 </span>
                 <button
                   type="button"
-                  className="shrink-0 rounded px-0.5 text-stone-500 hover:text-stone-900"
+                  className="shrink-0 rounded px-0.5 text-[var(--color-muted)] hover:text-[var(--color-ink)]"
                   onClick={() => removePrereq(t.id)}
                   aria-label={`Remove prerequisite ${t.title}`}
                 >
@@ -3493,7 +3492,7 @@ function TaskPrerequisiteDeps({
           ))}
         </ul>
       ) : (
-        <p className="text-xs text-stone-500">
+        <p className="text-xs text-[var(--color-muted)]">
           None — this task is not waiting on any other task.
         </p>
       )}
@@ -3507,21 +3506,21 @@ function TaskPrerequisiteDeps({
           aria-label="Search tasks to add as prerequisite"
         />
         {q.trim() !== "" ? (
-          <ul className="mt-1 max-h-40 overflow-y-auto rounded-md border border-stone-200 bg-white text-left text-sm shadow-sm">
+          <ul className="neo-sm mt-1 max-h-40 overflow-y-auto text-left text-sm">
             {peerMatches.length === 0 ? (
-              <li className="px-3 py-2 text-stone-500">No matching tasks</li>
+              <li className="px-3 py-2 text-[var(--color-muted)]">No matching tasks</li>
             ) : (
               peerMatches.slice(0, 50).map((t) => (
-                <li key={t.id} className="border-b border-stone-100 last:border-0">
+                <li key={t.id} className="border-b border-[var(--color-border)] last:border-0">
                   <button
                     type="button"
-                    className="w-full px-3 py-2 text-left text-stone-800 hover:bg-stone-50"
+                    className="w-full px-3 py-2 text-left text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]"
                     onClick={() => addPrereq(t.id)}
                   >
-                    <span className="block text-[0.65rem] font-medium text-stone-500">
+                    <span className="block text-[0.65rem] font-medium text-[var(--color-muted)]">
                       {t.section_name}
                     </span>
-                    <span className="text-stone-400 tabular-nums">#{t.id}</span>{" "}
+                    <span className="text-[var(--color-muted)] tabular-nums">#{t.id}</span>{" "}
                     <span className="break-words">{t.title}</span>
                   </button>
                 </li>
@@ -3530,7 +3529,7 @@ function TaskPrerequisiteDeps({
           </ul>
         ) : null}
       </div>
-      <p className="text-[0.65rem] leading-snug text-stone-500">
+      <p className="text-[0.65rem] leading-snug text-[var(--color-muted)]">
         Prerequisites can be any task. This task cannot be completed until each prerequisite is done
         or cancelled.
       </p>
@@ -3600,17 +3599,17 @@ function TaskDetail({
 
   return (
     <div className={shellClass}>
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-stone-200 bg-stone-50/80 px-4 py-3">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border)] bg-[var(--neo-bg)] px-4 py-3">
         <button
           type="button"
           disabled={!done && completionBlocked}
           title={blockedTitle}
           onClick={() => onPatch({ status: done ? "todo" : "done" })}
-          className={`rounded-md px-3 py-1.5 text-sm font-medium ${
+          className={`text-sm font-medium ${
             done
-              ? "border border-stone-200 bg-white text-stone-700 shadow-sm hover:bg-stone-50"
-              : "bg-sky-600 text-white hover:bg-sky-500"
-          } ${!done && completionBlocked ? "cursor-not-allowed opacity-50 hover:bg-sky-600" : ""}`}
+              ? "neo-btn"
+              : "neo-btn-primary"
+          } ${!done && completionBlocked ? "cursor-not-allowed opacity-50" : ""}`}
         >
           {done ? "Mark incomplete" : "Mark complete"}
         </button>
@@ -3618,7 +3617,7 @@ function TaskDetail({
           <button
             type="button"
             onClick={onMinimize}
-            className="min-h-11 touch-manipulation rounded-md border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-600 shadow-sm hover:bg-stone-50"
+            className="neo-btn min-h-11 touch-manipulation text-xs"
             aria-label={minimizeButtonLabel ?? "Minimize task details"}
           >
             {minimizeButtonLabel ?? "Minimize"}
@@ -3627,7 +3626,7 @@ function TaskDetail({
       </div>
 
       <div className={contentClass}>
-        <p className="text-xs text-stone-500">My tasks › {task.section_name}</p>
+        <p className="text-xs text-[var(--color-muted)]">My tasks › {task.section_name}</p>
         <input
           type="text"
           defaultValue={task.title}
@@ -3639,7 +3638,7 @@ function TaskDetail({
           className={`mt-2 ${inputClass} text-lg font-semibold`}
         />
 
-        <div className="mt-6 space-y-0 divide-y divide-stone-200">
+        <div className="mt-6 space-y-0 divide-y divide-[var(--color-border)]">
           <Field label="Assignee" className={labelClass}>
             <AssigneeSelect
               value={task.assignee}
@@ -3696,7 +3695,7 @@ function TaskDetail({
               <option value="yearly">Yearly</option>
             </select>
             {effectiveRecurrenceInterval(task) != null ? (
-              <p className="mt-1 text-[0.65rem] text-stone-500">
+              <p className="mt-1 text-[0.65rem] text-[var(--color-muted)]">
                 Marking complete advances the due date and reopens the task.
               </p>
             ) : null}
@@ -3860,15 +3859,15 @@ function TaskDetail({
             {subtasks.map((s) => (
               <li
                 key={s.id}
-                className="flex items-center gap-2 rounded-md border border-stone-200 bg-stone-50/50 px-2 py-2"
+                className="neo-sm flex items-center gap-2 px-2 py-2"
               >
                 <button
                   type="button"
                   onClick={() => onToggleSubtask(s)}
-                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border text-xs ${
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded text-xs ${
                     s.done
-                      ? "border-sky-600 bg-sky-600 text-white"
-                      : "border-stone-300 bg-white"
+                      ? "bg-[var(--color-accent)] text-white shadow-[var(--neo-shadow-in-sm)]"
+                      : "neo-sm"
                   }`}
                 >
                   {s.done ? "✓" : ""}
@@ -3877,7 +3876,7 @@ function TaskDetail({
                   type="text"
                   defaultValue={s.title}
                   key={`${s.id}-${s.title}`}
-                  className="min-w-0 flex-1 border-0 bg-transparent text-sm text-stone-900 outline-none"
+                  className="min-w-0 flex-1 border-0 bg-transparent text-sm text-[var(--color-ink)] outline-none"
                   onBlur={(e) => {
                     const v = e.target.value.trim();
                     if (v && v !== s.title) onRenameSubtask(s, v);
@@ -3886,7 +3885,7 @@ function TaskDetail({
                 <button
                   type="button"
                   onClick={() => onRemoveSubtask(s.id)}
-                  className="text-xs text-stone-500 hover:text-red-600"
+                  className="text-xs text-[var(--color-muted)] hover:text-red-600"
                 >
                   Remove
                 </button>
@@ -3909,7 +3908,7 @@ function TaskDetail({
             <button
               type="button"
               onClick={onAddSubtask}
-              className="shrink-0 rounded-md border border-stone-200 bg-stone-800 px-3 py-2 text-sm text-white shadow-sm hover:bg-stone-700"
+              className="neo-btn-primary shrink-0 text-sm"
             >
               Add
             </button>
@@ -3919,7 +3918,7 @@ function TaskDetail({
         <button
           type="button"
           onClick={onDelete}
-          className="mt-10 w-full rounded-md border border-red-200 bg-white py-2 text-sm text-red-600 hover:bg-red-50"
+          className="neo-btn mt-10 w-full text-red-600 hover:text-red-700"
         >
           Delete task
         </button>

@@ -74,13 +74,16 @@ export function AssigneeBadge({ assignee }: { assignee: string | null }) {
     <span className="inline-flex items-center gap-1 whitespace-nowrap">
       {isBot ? (
         <span
-          className="rounded bg-violet-100 px-1.5 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-violet-800"
+          className="neo-chip !min-h-0 !px-1.5 !py-0.5 text-[0.65rem] uppercase tracking-wide"
           title="Assigned to Bot"
         >
           Bot
         </span>
-      ) : null}
-      <span>{normalized ?? assignee}</span>
+      ) : (
+        <span className="neo-chip !min-h-0 !px-2 !py-0.5 text-xs font-medium">
+          {normalized ?? assignee}
+        </span>
+      )}
     </span>
   );
 }
