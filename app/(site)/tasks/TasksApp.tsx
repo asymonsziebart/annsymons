@@ -2809,7 +2809,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                           onDrop={(e) => void dropTaskOnCalendarDay(e, day.iso)}
                           className={`flex min-h-[14rem] flex-col bg-[var(--neo-bg)] sm:min-h-[16rem] ${
                             dropHi
-                              ? "z-[1] ring-2 ring-inset ring-emerald-500 bg-emerald-50/50"
+                              ? "z-[1] shadow-[var(--neo-shadow-in-sm)] text-[var(--color-accent)]"
                               : isToday
                                 ? "ring-2 ring-inset ring-[var(--color-accent)]"
                                 : ""
@@ -2875,7 +2875,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                               !cell.inMonth ? "opacity-[0.45]" : ""
                             } ${
                               dropHi
-                                ? "z-[1] ring-2 ring-inset ring-emerald-500 bg-emerald-50/50"
+                                ? "z-[1] shadow-[var(--neo-shadow-in-sm)] text-[var(--color-accent)]"
                                 : isToday
                                   ? "ring-2 ring-inset ring-[var(--color-accent)]"
                                   : ""
@@ -3001,7 +3001,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                                 !cell.inMonth ? "opacity-[0.35]" : ""
                               } ${
                                 dropHi
-                                  ? "z-[1] ring-2 ring-inset ring-emerald-500 bg-emerald-50/50"
+                                  ? "z-[1] shadow-[var(--neo-shadow-in-sm)] text-[var(--color-accent)]"
                                   : isToday
                                     ? "ring-1 ring-inset ring-[var(--color-accent)]"
                                     : ""
