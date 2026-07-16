@@ -8,7 +8,7 @@ export const metadata = {
 export default function TasksLoginPage() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
-      <div className="w-full max-w-sm rounded-2xl bg-[var(--color-surface)] p-8 shadow-lg ring-1 ring-[var(--color-border)]">
+      <div className="neo w-full max-w-sm p-8">
         <h1 className="font-heading text-xl font-semibold text-[var(--color-ink)]">
           Tasks
         </h1>

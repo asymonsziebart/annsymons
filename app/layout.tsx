@@ -1,16 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Source_Sans_3 } from "next/font/google";
+import { Nunito, Outfit } from "next/font/google";
 import "./globals.css";
 
-const fraunces = Fraunces({
+const outfit = Outfit({
   subsets: ["latin"],
-  variable: "--font-fraunces",
+  variable: "--font-outfit",
   display: "swap",
 });
 
-const sourceSans = Source_Sans_3({
+const nunito = Nunito({
   subsets: ["latin"],
-  variable: "--font-source-sans",
+  variable: "--font-nunito",
   display: "swap",
 });
 
@@ -27,7 +27,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#faf7f4",
+  themeColor: "#e6eaf0",
 };
 
 export default function RootLayout({
@@ -36,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${sourceSans.variable}`}>
+    <html lang="en" className={`${outfit.variable} ${nunito.variable}`}>
       <body className="relative flex h-dvh min-h-0 flex-col overflow-hidden antialiased">
         {children}
       </body>

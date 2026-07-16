@@ -19,7 +19,7 @@ export default function MobileAdminSettings({ isAdmin = false }: Props) {
       className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] z-[100] lg:hidden"
       aria-label="Open settings login"
     >
-      <span className="flex min-h-14 items-center gap-2 rounded-full bg-[var(--color-accent)] px-4 py-3 text-white shadow-2xl ring-2 ring-white/80 transition-transform active:scale-95">
+      <span className="neo-btn-primary flex min-h-14 items-center gap-2 !rounded-full px-4 py-3 transition-transform active:scale-95">
         <svg
           className="h-6 w-6"
           viewBox="0 0 24 24"

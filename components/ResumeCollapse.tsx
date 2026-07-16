@@ -16,22 +16,25 @@ export default function ResumeCollapse({ resume }: { resume: Resume }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <section className="overflow-hidden rounded-2xl bg-[var(--color-surface)] shadow-[0_18px_50px_-32px_rgba(28,25,23,0.45)] ring-1 ring-[var(--color-border)]">
+    <section className="neo overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex min-h-14 w-full items-center justify-between gap-4 px-4 py-4 text-left transition-colors hover:bg-[var(--color-cream-dark)]/50 sm:px-6"
+        className="flex min-h-14 w-full items-center justify-between gap-4 px-4 py-4 text-left transition-[box-shadow] duration-200 hover:shadow-[var(--neo-shadow-in-sm)] sm:px-6"
         aria-expanded={open}
       >
         <span className="font-heading text-lg font-semibold text-[var(--color-ink)]">
           Resume
         </span>
-        <span className="text-[var(--color-muted)]" aria-hidden>
+        <span
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[var(--color-muted)] shadow-[var(--neo-shadow-out-sm)]"
+          aria-hidden
+        >
           {open ? "▼" : "▶"}
         </span>
       </button>
       {open && (
-        <div className="border-t border-[var(--color-border)] p-4 sm:p-8">
+        <div className="mx-4 mb-4 rounded-[var(--neo-radius-sm)] p-4 shadow-[var(--neo-shadow-in)] sm:mx-6 sm:mb-6 sm:p-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               <h2 className="font-heading text-xl font-semibold text-[var(--color-ink)]">
@@ -50,7 +53,7 @@ export default function ResumeCollapse({ resume }: { resume: Resume }) {
               href="/Profile.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-accent-hover)] sm:w-auto"
+              className="neo-btn-primary w-full shrink-0 sm:w-auto"
             >
               Download resume (PDF)
             </a>
@@ -60,7 +63,7 @@ export default function ResumeCollapse({ resume }: { resume: Resume }) {
           </p>
 
           {resume.experience.length > 0 && (
-            <div className="mt-8 border-t border-[var(--color-border)] pt-8">
+            <div className="mt-8 pt-8 shadow-[inset_0_1px_0_var(--color-border)]">
               <h3 className="font-heading font-semibold text-[var(--color-ink)]">
                 Experience
               </h3>
@@ -83,7 +86,7 @@ export default function ResumeCollapse({ resume }: { resume: Resume }) {
           )}
 
           {resume.education.length > 0 && (
-            <div className="mt-6 border-t border-[var(--color-border)] pt-6">
+            <div className="mt-6 pt-6 shadow-[inset_0_1px_0_var(--color-border)]">
               <h3 className="font-heading font-semibold text-[var(--color-ink)]">
                 Education
               </h3>
@@ -102,16 +105,13 @@ export default function ResumeCollapse({ resume }: { resume: Resume }) {
           )}
 
           {resume.skills.length > 0 && (
-            <div className="mt-6 border-t border-[var(--color-border)] pt-6">
+            <div className="mt-6 pt-6 shadow-[inset_0_1px_0_var(--color-border)]">
               <h3 className="font-heading font-semibold text-[var(--color-ink)]">
                 Skills
               </h3>
-              <ul className="mt-3 flex flex-wrap gap-2">
+              <ul className="mt-3 flex flex-wrap gap-2.5">
                 {resume.skills.map((skill) => (
-                  <li
-                    key={skill}
-                    className="rounded-full bg-[var(--color-cream-dark)] px-3 py-1 text-xs font-medium text-[var(--color-ink-muted)] ring-1 ring-[var(--color-border)]"
-                  >
+                  <li key={skill} className="neo-chip !min-h-8 !py-1 text-xs">
                     {skill}
                   </li>
                 ))}

@@ -73,10 +73,10 @@ export default function AdminSideNav() {
             key={page.href}
             href={page.href}
             title={page.description}
-            className={`rounded-lg px-3 py-2.5 text-sm transition-colors ${
+            className={`rounded-xl px-3 py-2.5 text-sm transition-[box-shadow,color] duration-200 ${
               active
-                ? "bg-stone-800 font-semibold text-white"
-                : "text-stone-700 hover:bg-stone-200/80 hover:text-stone-950"
+                ? "font-semibold text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
+                : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:shadow-[var(--neo-shadow-out-sm)]"
             } ${collapsed ? "text-center" : ""}`}
           >
             {collapsed ? (
@@ -91,7 +91,7 @@ export default function AdminSideNav() {
             ) : (
               <>
                 <span className="block font-medium">{page.label}</span>
-                <span className={`mt-0.5 block text-xs leading-snug ${active ? "text-stone-300" : "text-stone-500"}`}>
+                <span className={`mt-0.5 block text-xs leading-snug ${active ? "text-[var(--color-accent)]/80" : "text-[var(--color-muted)]"}`}>
                   {page.description}
                 </span>
               </>
@@ -108,7 +108,7 @@ export default function AdminSideNav() {
       <button
         type="button"
         onClick={() => setMobileOpen(true)}
-        className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-[max(1rem,env(safe-area-inset-left))] z-[90] inline-flex min-h-12 items-center gap-2 rounded-full bg-stone-900 px-4 py-3 text-sm font-semibold text-white shadow-lg lg:hidden"
+        className="neo-btn-primary fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-[max(1rem,env(safe-area-inset-left))] z-[90] !rounded-full lg:hidden"
         aria-label="Open admin menu"
       >
         <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -122,20 +122,20 @@ export default function AdminSideNav() {
         <div className="fixed inset-0 z-[95] lg:hidden">
           <button
             type="button"
-            className="absolute inset-0 bg-stone-950/40"
+            className="absolute inset-0 bg-[var(--color-ink)]/25"
             aria-label="Close admin menu"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="absolute inset-y-0 left-0 flex w-[min(20rem,88vw)] flex-col border-r border-stone-200 bg-[var(--color-cream)] shadow-xl">
-            <div className="flex items-center justify-between border-b border-stone-200 px-3 py-3">
+          <aside className="neo absolute inset-y-0 left-0 flex w-[min(20rem,88vw)] flex-col !rounded-none">
+            <div className="flex items-center justify-between px-3 py-3 shadow-[inset_0_-1px_0_var(--color-border)]">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-stone-500">Admin</p>
-                <p className="font-heading text-base font-semibold text-stone-950">Pages</p>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-[var(--color-muted)]">Admin</p>
+                <p className="font-heading text-base font-semibold text-[var(--color-ink)]">Pages</p>
               </div>
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
-                className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-lg text-stone-600 hover:bg-stone-200"
+                className="neo-btn !min-h-10 !min-w-10 !p-0"
                 aria-label="Close admin menu"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -150,22 +150,22 @@ export default function AdminSideNav() {
 
       {/* Desktop collapsible rail */}
       <aside
-        className={`relative z-20 hidden shrink-0 flex-col border-r border-stone-200 bg-[var(--color-cream)]/95 backdrop-blur-sm transition-[width] duration-200 lg:flex ${
+        className={`relative z-20 hidden shrink-0 flex-col bg-[var(--neo-bg)] shadow-[6px_0_16px_var(--neo-dark-soft)] transition-[width] duration-200 lg:flex ${
           ready && collapsed ? "w-[4.25rem]" : "w-64"
         }`}
         aria-label="Admin side menu"
       >
-        <div className={`flex items-center border-b border-stone-200 px-2 py-3 ${collapsed ? "justify-center" : "justify-between gap-2 px-3"}`}>
+        <div className={`flex items-center px-2 py-3 shadow-[inset_0_-1px_0_var(--color-border)] ${collapsed ? "justify-center" : "justify-between gap-2 px-3"}`}>
           {!collapsed ? (
             <div className="min-w-0">
-              <p className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-stone-500">Admin</p>
-              <p className="truncate font-heading text-sm font-semibold text-stone-950">Pages</p>
+              <p className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-[var(--color-muted)]">Admin</p>
+              <p className="truncate font-heading text-sm font-semibold text-[var(--color-ink)]">Pages</p>
             </div>
           ) : null}
           <button
             type="button"
             onClick={toggleCollapsed}
-            className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-lg text-stone-600 hover:bg-stone-200 hover:text-stone-950"
+            className="neo-btn !min-h-10 !min-w-10 !p-0"
             aria-label={collapsed ? "Expand admin menu" : "Collapse admin menu"}
             aria-expanded={!collapsed}
           >

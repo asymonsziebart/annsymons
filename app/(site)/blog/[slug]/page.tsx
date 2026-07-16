@@ -25,17 +25,17 @@ export default async function BlogPostPage({ params }: Props) {
     <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-8 sm:py-20">
       <Link
         href="/blog"
-        className="link-accent inline-flex min-h-11 items-center text-sm font-medium text-[var(--color-accent)] transition-colors hover:text-[var(--color-accent-hover)]"
+        className="neo-btn !min-h-11 text-[var(--color-accent)]"
       >
         ← Back to Blog
       </Link>
-      <article className="mt-4 rounded-2xl bg-[var(--color-surface)] p-5 shadow-[0_18px_50px_-34px_rgba(28,25,23,0.5)] ring-1 ring-[var(--color-border)] sm:mt-8 sm:p-12">
+      <article className="neo mt-4 p-5 sm:mt-8 sm:p-12">
         <h1 className="font-heading text-balance text-3xl font-semibold tracking-tight text-[var(--color-ink)] sm:text-4xl">
           {post.title}
         </h1>
         <time
           dateTime={post.date}
-          className="mt-3 block text-sm text-[var(--color-accent)]"
+          className="mt-3 block text-sm font-bold text-[var(--color-accent)]"
         >
           {new Date(post.date).toLocaleDateString("en-US", {
             year: "numeric",

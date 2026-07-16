@@ -45,7 +45,7 @@ export default function Header() {
   return (
     <header
       ref={headerRef}
-      className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-surface)]/90 pt-[env(safe-area-inset-top)] backdrop-blur-md"
+      className="neo-nav sticky top-0 z-50 pt-[env(safe-area-inset-top)]"
     >
       <div
         className={
@@ -65,28 +65,37 @@ export default function Header() {
           Ann Symons
         </Link>
         <nav
-          className="hidden items-center gap-6 md:flex md:gap-8"
+          className="hidden items-center gap-2 md:flex md:gap-3"
           aria-label="Main"
         >
-          {navLinks.map(({ href, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className="link-accent text-sm font-medium text-[var(--color-ink-muted)] transition-colors hover:text-[var(--color-ink)]"
-            >
-              {label}
-            </Link>
-          ))}
+          {navLinks.map(({ href, label }) => {
+            const active =
+              pathname === href || (pathname != null && pathname.startsWith(`${href}/`));
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`rounded-xl px-3 py-2 text-sm font-semibold transition-[box-shadow,color,transform] duration-200 ${
+                  active
+                    ? "text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
+                    : "neo-link hover:shadow-[var(--neo-shadow-out-sm)]"
+                }`}
+              >
+                {label}
+              </Link>
+            );
+          })}
         </nav>
         <button
           type="button"
           className={
             isTasksApp
-              ? "touch-manipulation rounded-md p-1.5 text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)] hover:text-[var(--color-ink)] md:hidden"
-              : "min-h-11 min-w-11 touch-manipulation rounded-full p-2 text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)] hover:text-[var(--color-ink)] md:hidden"
+              ? "neo-btn touch-manipulation !min-h-0 !rounded-lg !px-2 !py-1.5 text-[var(--color-ink-muted)] md:hidden"
+              : "neo-btn touch-manipulation !min-h-11 !min-w-11 !rounded-full !p-2 text-[var(--color-ink-muted)] md:hidden"
           }
           aria-expanded={menuOpen}
           aria-controls="mobile-main-nav"
+          aria-pressed={menuOpen}
           onClick={() => setMenuOpen((o) => !o)}
         >
           <span className="sr-only">{menuOpen ? "Close menu" : "Open menu"}</span>
@@ -118,33 +127,41 @@ export default function Header() {
       {menuOpen ? (
         <div
           id="mobile-main-nav"
-          className={
-            isTasksApp
-              ? "border-t border-[var(--color-border)] bg-[var(--color-surface)]/95 shadow-md backdrop-blur-md md:hidden"
-              : "border-t border-[var(--color-border)] bg-[var(--color-surface)]/95 shadow-lg backdrop-blur-md md:hidden"
-          }
+          className="border-t border-[var(--color-border)]/60 bg-[var(--neo-bg)] md:hidden"
         >
           <nav
             className={
               isTasksApp
-                ? "mx-auto flex max-w-5xl flex-col px-3 py-2 sm:px-6"
-                : "mx-auto flex max-w-5xl flex-col gap-1 px-4 py-3 sm:px-8"
+                ? "mx-auto flex max-w-5xl flex-col gap-1 px-3 py-2 sm:px-6"
+                : "mx-auto flex max-w-5xl flex-col gap-1.5 px-4 py-3 sm:px-8"
             }
             aria-label="Main"
           >
-            {navLinks.map(({ href, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className={
-                  isTasksApp
-                    ? "link-accent touch-manipulation rounded-lg px-2 py-2.5 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]/60 hover:text-[var(--color-ink)]"
-                    : "link-accent flex min-h-12 touch-manipulation items-center rounded-xl px-3 py-3 text-base font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]/60 hover:text-[var(--color-ink)]"
-                }
-              >
-                {label}
-              </Link>
-            ))}
+            {navLinks.map(({ href, label }) => {
+              const active =
+                pathname === href || (pathname != null && pathname.startsWith(`${href}/`));
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={
+                    isTasksApp
+                      ? `touch-manipulation rounded-xl px-2 py-2.5 text-sm font-semibold ${
+                          active
+                            ? "text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
+                            : "neo-link"
+                        }`
+                      : `flex min-h-12 touch-manipulation items-center rounded-xl px-3 py-3 text-base font-semibold ${
+                          active
+                            ? "text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
+                            : "neo-link"
+                        }`
+                  }
+                >
+                  {label}
+                </Link>
+              );
+            })}
           </nav>
         </div>
       ) : null}

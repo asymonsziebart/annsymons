@@ -42,7 +42,7 @@ export default function RecipeList({ recipes }: Props) {
   return (
     <>
       <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
-        <p className="text-sm text-[var(--color-muted)]">
+        <p className="text-sm font-semibold text-[var(--color-muted)]">
           {filteredRecipes.length} of {recipes.length} recipes
         </p>
         <label className="w-full sm:max-w-sm">
@@ -52,26 +52,26 @@ export default function RecipeList({ recipes }: Props) {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search recipes..."
-            className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+            className="neo-input text-sm"
           />
         </label>
       </div>
 
-      <ul className="grid gap-4 sm:grid-cols-2 sm:gap-6">
+      <ul className="grid gap-5 sm:grid-cols-2 sm:gap-7">
         {recipes.length === 0 ? (
-          <li className="col-span-full rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center text-[var(--color-muted)] sm:p-8">
+          <li className="neo col-span-full p-5 text-center text-[var(--color-muted)] sm:p-8">
             No recipes yet. Add them in the{" "}
-            <Link href="/admin/recipes" className="text-[var(--color-accent)] hover:underline">
+            <Link href="/admin/recipes" className="font-semibold text-[var(--color-accent)] hover:underline">
               admin portal
             </Link>{" "}
             or{" "}
-            <code className="rounded bg-[var(--color-cream-dark)] px-1.5 py-0.5 text-[var(--color-ink-muted)]">
+            <code className="neo-inset rounded px-1.5 py-0.5 text-[var(--color-ink-muted)]">
               lib/recipes.ts
             </code>
             .
           </li>
         ) : filteredRecipes.length === 0 ? (
-          <li className="col-span-full rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center text-[var(--color-muted)] sm:p-8">
+          <li className="neo col-span-full p-5 text-center text-[var(--color-muted)] sm:p-8">
             No recipes match &ldquo;{query.trim()}&rdquo;.
           </li>
         ) : (
@@ -79,7 +79,7 @@ export default function RecipeList({ recipes }: Props) {
             <li key={recipe.slug}>
               <Link
                 href={`/recipes/${recipe.slug}`}
-                className="card-hover block overflow-hidden rounded-2xl bg-[var(--color-surface)] shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)]"
+                className="card-hover block overflow-hidden"
               >
                 {recipe.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -89,7 +89,7 @@ export default function RecipeList({ recipes }: Props) {
                     className="h-44 w-full object-cover sm:h-48"
                   />
                 ) : (
-                  <div className="flex h-44 items-center justify-center bg-[var(--color-cream-dark)] text-5xl sm:h-48">
+                  <div className="flex h-44 items-center justify-center text-5xl text-[var(--color-muted)] shadow-[var(--neo-shadow-in)] sm:h-48">
                     🍳
                   </div>
                 )}
@@ -101,7 +101,7 @@ export default function RecipeList({ recipes }: Props) {
                     {recipe.description}
                   </p>
                   {(recipe.prepTime || recipe.cookTime || recipe.servings) && (
-                    <p className="mt-3 text-xs text-[var(--color-accent)]">
+                    <p className="mt-3 text-xs font-bold text-[var(--color-accent)]">
                       {[recipe.prepTime, recipe.cookTime, recipe.servings]
                         .filter(Boolean)
                         .join(" · ")}

@@ -25,47 +25,29 @@ export default async function AdminDashboardPage() {
           Admin
         </h1>
         <div className="flex flex-wrap items-center gap-3">
-          <Link
-            href="/admin/recipes"
-            className="rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)]"
-          >
+          <Link href="/admin/recipes" className="neo-btn-primary !min-h-10 !px-4 !py-2">
             Recipes
           </Link>
-          <Link
-            href="/admin/garage"
-            className="rounded-xl bg-sky-700 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-800"
-          >
+          <Link href="/admin/garage" className="neo-btn !min-h-10 !px-4 !py-2">
             Garage
           </Link>
-          <Link
-            href="/admin/manuals"
-            className="rounded-xl bg-teal-700 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-800"
-          >
+          <Link href="/admin/manuals" className="neo-btn !min-h-10 !px-4 !py-2">
             Manuals
           </Link>
-          <Link
-            href="/admin/dogs"
-            className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
-          >
+          <Link href="/admin/dogs" className="neo-btn !min-h-10 !px-4 !py-2">
             Puppy Ranch
           </Link>
-          <Link
-            href="/admin/voices"
-            className="rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)]"
-          >
+          <Link href="/admin/voices" className="neo-btn-primary !min-h-10 !px-4 !py-2">
             Voices
           </Link>
-          <Link
-            href="/admin/requests"
-            className="rounded-xl bg-sky-700 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-800"
-          >
+          <Link href="/admin/requests" className="neo-btn !min-h-10 !px-4 !py-2">
             Requests
           </Link>
           <AdminSeedButton />
           <AdminLogoutButton />
           <Link
             href="/"
-            className="text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+            className="neo-link text-sm"
           >
             View site →
           </Link>

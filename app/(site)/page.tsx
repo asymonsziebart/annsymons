@@ -31,12 +31,12 @@ export default async function Home() {
         <h2 className="text-center font-heading text-xl font-semibold tracking-tight text-[var(--color-ink)] sm:text-2xl">
           Explore
         </h2>
-        <ul className="mt-6 divide-y divide-[var(--color-border)] border-y border-[var(--color-border)]">
+        <ul className="neo-inset mt-6 space-y-1 p-2 sm:p-3">
           {exploreLinks.map(({ href, label, blurb }) => (
             <li key={href}>
               <Link
                 href={href}
-                className="group flex min-h-14 items-baseline justify-between gap-4 py-4 transition-colors"
+                className="neo-explore-row group flex min-h-14 items-baseline justify-between gap-4 px-3 py-3.5 sm:px-4"
               >
                 <span className="font-heading text-lg text-[var(--color-ink)] transition-colors group-hover:text-[var(--color-accent)]">
                   {label}

@@ -54,7 +54,7 @@ export default function TasksLoginForm() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
-          className="w-full rounded-lg border border-[var(--color-border)] bg-white px-4 py-2.5 text-[var(--color-ink)] placeholder:text-[var(--color-muted)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+          className="neo-input"
           autoComplete="current-password"
           required
         />
@@ -67,7 +67,7 @@ export default function TasksLoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-xl bg-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)] disabled:opacity-50"
+        className="neo-btn-primary w-full disabled:opacity-50"
       >
         {loading ? "Signing in…" : "Sign in"}
       </button>

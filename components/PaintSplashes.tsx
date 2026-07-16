@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Decorative paint-splash blobs for the background. Pure CSS, no images.
+ * Soft ambient light orbs for neumorphic depth. Pure CSS, no images.
  */
 export default function PaintSplashes() {
   return (
@@ -9,25 +9,25 @@ export default function PaintSplashes() {
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
       aria-hidden
     >
-      {/* Large soft blob – top right */}
+      {/* Soft highlight – top right */}
       <div
-        className="absolute -right-36 -top-24 h-60 w-60 rounded-full opacity-25 blur-3xl sm:-right-32 sm:-top-32 sm:h-80 sm:w-80 sm:opacity-30"
-        style={{ background: "var(--color-splash-coral)" }}
+        className="absolute -right-28 -top-20 h-64 w-64 rounded-full opacity-40 blur-3xl sm:-right-24 sm:-top-28 sm:h-80 sm:w-80 sm:opacity-50"
+        style={{ background: "var(--neo-light)" }}
       />
-      {/* Medium blob – bottom left */}
+      {/* Cool shadow pool – bottom left */}
       <div
-        className="absolute -bottom-20 -left-28 h-52 w-52 rounded-full opacity-20 blur-3xl sm:-bottom-24 sm:-left-24 sm:h-64 sm:w-64 sm:opacity-25"
+        className="absolute -bottom-24 -left-24 h-56 w-56 rounded-full opacity-30 blur-3xl sm:-bottom-28 sm:-left-20 sm:h-72 sm:w-72 sm:opacity-40"
         style={{ background: "var(--color-splash-teal)" }}
       />
-      {/* Smaller blob – middle left */}
+      {/* Mid soft fill – left */}
       <div
-        className="absolute -left-16 top-1/3 h-40 w-40 rounded-full opacity-15 blur-2xl sm:left-0 sm:h-48 sm:w-48 sm:opacity-20"
-        style={{ background: "var(--color-splash-mustard)" }}
-      />
-      {/* Small accent – bottom right */}
-      <div
-        className="absolute -right-16 bottom-1/4 h-36 w-36 rounded-full opacity-15 blur-2xl sm:right-0 sm:h-40 sm:w-40 sm:opacity-20"
+        className="absolute -left-12 top-1/3 h-44 w-44 rounded-full opacity-25 blur-3xl sm:left-0 sm:h-52 sm:w-52 sm:opacity-30"
         style={{ background: "var(--color-splash-coral)" }}
+      />
+      {/* Subtle lift – bottom right */}
+      <div
+        className="absolute -right-12 bottom-1/4 h-40 w-40 rounded-full opacity-25 blur-3xl sm:right-0 sm:h-48 sm:w-48 sm:opacity-35"
+        style={{ background: "var(--neo-light)" }}
       />
     </div>
   );

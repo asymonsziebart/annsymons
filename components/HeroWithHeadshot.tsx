@@ -54,7 +54,7 @@ export default function HeroWithHeadshot({ name, tagline, website }: HeroProps) 
           </p>
         )}
         {website && (
-          <p className="mt-2 text-sm text-[var(--color-ink-muted)]">
+          <p className="mt-2 text-sm font-semibold text-[var(--color-ink-muted)]">
             {website}
           </p>
         )}
@@ -62,16 +62,18 @@ export default function HeroWithHeadshot({ name, tagline, website }: HeroProps) 
 
       <div className="mx-auto mt-8 flex justify-center overflow-visible sm:mt-10">
         <div
-          className="hero-headshot-circle hero-headshot-fly-in relative h-52 w-52 overflow-hidden rounded-full ring-4 ring-[var(--color-surface)] shadow-xl sm:h-72 sm:w-72 md:h-80 md:w-80"
+          className="hero-headshot-circle hero-headshot-fly-in neo-float relative h-52 w-52 overflow-hidden rounded-full p-1.5 sm:h-72 sm:w-72 md:h-80 md:w-80"
           style={entranceDone ? scrollStyle : undefined}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/headshot.png"
-            alt={`${name} – professional headshot`}
-            className="h-full w-full object-cover"
-            fetchPriority="high"
-          />
+          <div className="h-full w-full overflow-hidden rounded-full shadow-[var(--neo-shadow-in-sm)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/headshot.png"
+              alt={`${name} – professional headshot`}
+              className="h-full w-full object-cover"
+              fetchPriority="high"
+            />
+          </div>
         </div>
       </div>
     </>

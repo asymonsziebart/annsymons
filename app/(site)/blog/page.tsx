@@ -21,12 +21,12 @@ export default async function BlogPage() {
         </p>
       </header>
 
-      <ul className="space-y-4 sm:space-y-6">
+      <ul className="space-y-5 sm:space-y-6">
         {posts.length === 0 ? (
-          <li className="rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-center text-[var(--color-muted)] sm:p-8">
+          <li className="neo p-5 text-center text-[var(--color-muted)] sm:p-8">
             No posts yet. Add entries in the{" "}
-            <Link href="/admin" className="text-[var(--color-accent)] hover:underline">admin portal</Link> or{" "}
-            <code className="rounded bg-[var(--color-cream-dark)] px-1.5 py-0.5 text-[var(--color-ink-muted)]">
+            <Link href="/admin" className="font-semibold text-[var(--color-accent)] hover:underline">admin portal</Link> or{" "}
+            <code className="neo-inset rounded px-1.5 py-0.5 text-[var(--color-ink-muted)]">
               lib/posts.ts
             </code>
             .
@@ -36,14 +36,14 @@ export default async function BlogPage() {
             <li key={post.slug}>
               <Link
                 href={`/blog/${post.slug}`}
-                className="card-hover block rounded-2xl bg-[var(--color-surface)] p-5 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-8"
+                className="card-hover block p-5 sm:p-8"
               >
                 <h2 className="font-heading text-xl font-semibold leading-snug text-[var(--color-ink)]">
                   {post.title}
                 </h2>
                 <time
                   dateTime={post.date}
-                  className="mt-2 block text-sm text-[var(--color-accent)]"
+                  className="mt-2 block text-sm font-bold text-[var(--color-accent)]"
                 >
                   {new Date(post.date).toLocaleDateString("en-US", {
                     year: "numeric",

@@ -33,7 +33,7 @@ export default function AdminSeedButton() {
         type="button"
         onClick={handleSeed}
         disabled={loading}
-        className="rounded-lg border border-[var(--color-border)] bg-white px-3 py-1.5 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)] disabled:opacity-50"
+        className="neo-btn !min-h-9 !px-3 !py-1.5 disabled:opacity-50"
       >
         {loading ? "Seeding…" : "Seed from site content"}
       </button>

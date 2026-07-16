@@ -15,7 +15,7 @@ export default function AdminLogoutButton() {
     <button
       type="button"
       onClick={handleLogout}
-      className="rounded-lg border border-[var(--color-border)] bg-white px-3 py-1.5 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]"
+      className="neo-btn !min-h-9 !px-3 !py-1.5"
     >
       Log out
     </button>

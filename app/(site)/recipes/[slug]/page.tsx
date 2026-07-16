@@ -22,11 +22,11 @@ export default async function RecipePage({ params }: Props) {
     <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-8 sm:py-20">
       <Link
         href="/recipes"
-        className="link-accent inline-flex min-h-11 items-center text-sm font-medium text-[var(--color-accent)] transition-colors hover:text-[var(--color-accent-hover)]"
+        className="neo-btn !min-h-11 text-[var(--color-accent)]"
       >
         ← Back to Recipes
       </Link>
-      <article className="mt-4 overflow-hidden rounded-2xl bg-[var(--color-surface)] shadow-[0_18px_50px_-34px_rgba(28,25,23,0.5)] ring-1 ring-[var(--color-border)] sm:mt-8">
+      <article className="neo mt-4 overflow-hidden sm:mt-8">
         <div className="p-5 sm:p-12">
           <h1 className="font-heading text-balance text-3xl font-semibold tracking-tight text-[var(--color-ink)] sm:text-4xl">
             {recipe.title}
@@ -34,15 +34,27 @@ export default async function RecipePage({ params }: Props) {
           <p className="mt-3 text-[var(--color-ink-muted)] leading-relaxed">
             {recipe.description}
           </p>
-          <div className="mt-4 flex flex-wrap gap-2 text-sm text-[var(--color-accent)] sm:gap-4">
-            {recipe.prepTime && <span>Prep: {recipe.prepTime}</span>}
-            {recipe.cookTime && <span>Cook: {recipe.cookTime}</span>}
-            {recipe.servings && <span>Serves: {recipe.servings}</span>}
+          <div className="mt-4 flex flex-wrap gap-2 sm:gap-3">
+            {recipe.prepTime && (
+              <span className="neo-chip !min-h-8 !py-1 text-xs text-[var(--color-accent)]">
+                Prep: {recipe.prepTime}
+              </span>
+            )}
+            {recipe.cookTime && (
+              <span className="neo-chip !min-h-8 !py-1 text-xs text-[var(--color-accent)]">
+                Cook: {recipe.cookTime}
+              </span>
+            )}
+            {recipe.servings && (
+              <span className="neo-chip !min-h-8 !py-1 text-xs text-[var(--color-accent)]">
+                Serves: {recipe.servings}
+              </span>
+            )}
           </div>
         </div>
 
         {recipe.image && (
-          <div className="overflow-hidden border-t border-[var(--color-border)]">
+          <div className="mx-5 overflow-hidden rounded-[var(--neo-radius-sm)] shadow-[var(--neo-shadow-in)] sm:mx-12">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={recipe.image}
@@ -52,8 +64,8 @@ export default async function RecipePage({ params }: Props) {
           </div>
         )}
 
-        <div className="grid gap-8 border-t border-[var(--color-border)] p-5 sm:grid-cols-2 sm:p-12">
-          <div>
+        <div className="grid gap-8 p-5 sm:grid-cols-2 sm:p-12">
+          <div className="neo-inset p-5">
             <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
               Ingredients
             </h2>
@@ -63,7 +75,7 @@ export default async function RecipePage({ params }: Props) {
               ))}
             </ul>
           </div>
-          <div>
+          <div className="neo-inset p-5">
             <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
               Steps
             </h2>

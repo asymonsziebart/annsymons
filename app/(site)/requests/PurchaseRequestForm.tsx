@@ -39,13 +39,12 @@ export default function PurchaseRequestForm() {
     }
   }
 
-  const inputClass =
-    "w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-base text-stone-900 shadow-sm placeholder:text-stone-400 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500";
+  const inputClass = "neo-input text-base";
 
   return (
     <form onSubmit={handleSubmit} className="mt-6 space-y-4">
       <div>
-        <label htmlFor="purchase-item" className="mb-1 block text-sm font-semibold text-stone-800">
+        <label htmlFor="purchase-item" className="mb-1 block text-sm font-semibold text-[var(--color-ink)]">
           What do you want to buy?
         </label>
         <input
@@ -60,7 +59,7 @@ export default function PurchaseRequestForm() {
       </div>
 
       <div>
-        <label htmlFor="purchase-details" className="mb-1 block text-sm font-semibold text-stone-800">
+        <label htmlFor="purchase-details" className="mb-1 block text-sm font-semibold text-[var(--color-ink)]">
           Notes or reason
         </label>
         <textarea
@@ -75,7 +74,7 @@ export default function PurchaseRequestForm() {
       </div>
 
       <div>
-        <label htmlFor="purchase-requested-by" className="mb-1 block text-sm font-semibold text-stone-800">
+        <label htmlFor="purchase-requested-by" className="mb-1 block text-sm font-semibold text-[var(--color-ink)]">
           Requested by
         </label>
         <input
@@ -92,7 +91,7 @@ export default function PurchaseRequestForm() {
         <button
           type="submit"
           disabled={state === "submitting"}
-          className="inline-flex min-h-12 items-center justify-center rounded-xl bg-sky-700 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-sky-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="neo-btn-primary min-h-12 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {state === "submitting" ? "Sending..." : "Submit request"}
         </button>
