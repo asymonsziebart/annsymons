@@ -24,12 +24,12 @@ export default async function VoicesAdminPage() {
     <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-8 sm:py-12">
       <Link
         href="/admin"
-        className="inline-flex min-h-11 items-center text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+        className="neo-link inline-flex min-h-11 items-center text-sm"
       >
         ← Back to Admin
       </Link>
 
-      <div className="mt-4 rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
+      <div className="neo mt-4 p-4 sm:p-6">
         <h1 className="font-heading text-2xl font-semibold text-[var(--color-ink)]">
           Voices
         </h1>
@@ -47,24 +47,24 @@ export default async function VoicesAdminPage() {
             rows={3}
             required
             placeholder="Type a new reminder..."
-            className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 text-[var(--color-ink)] placeholder:text-[var(--color-muted)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+            className="neo-input"
           />
           <button
             type="submit"
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)] sm:w-auto"
+            className="neo-btn-primary w-full sm:w-auto"
           >
             Add to list
           </button>
         </form>
       </div>
 
-      <section className="mt-6 rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
+      <section className="neo mt-6 p-4 sm:p-6">
         <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
           Things he is not allowed to do
         </h2>
 
         {items.length === 0 ? (
-          <p className="mt-4 rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-cream)]/60 px-4 py-6 text-center text-sm text-[var(--color-muted)]">
+          <p className="neo-inset mt-4 px-4 py-6 text-center text-sm text-[var(--color-muted)]">
             Nothing has been added yet.
           </p>
         ) : (
@@ -72,7 +72,7 @@ export default async function VoicesAdminPage() {
             {items.map((item) => (
               <li
                 key={item.id}
-                className="rounded-xl border border-[var(--color-border)] bg-[var(--color-cream)]/60 px-4 py-3"
+                className="neo-sm px-4 py-3"
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
@@ -87,7 +87,7 @@ export default async function VoicesAdminPage() {
                     <input type="hidden" name="id" value={item.id} />
                     <button
                       type="submit"
-                      className="inline-flex min-h-10 w-full items-center justify-center rounded-lg border border-red-200 bg-white px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 sm:w-auto"
+                      className="neo-btn !min-h-10 w-full sm:w-auto"
                     >
                       Remove
                     </button>

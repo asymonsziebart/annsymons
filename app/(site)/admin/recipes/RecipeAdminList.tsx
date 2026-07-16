@@ -35,7 +35,7 @@ export default function RecipeAdminList({ recipes }: Props) {
   }, [query, recipes]);
 
   return (
-    <section className="rounded-2xl bg-[var(--color-surface)] p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.55)] ring-1 ring-[var(--color-border)] sm:p-6">
+    <section className="neo p-4 sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
@@ -52,19 +52,19 @@ export default function RecipeAdminList({ recipes }: Props) {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search recipes..."
-            className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]"
+            className="neo-input"
           />
         </label>
       </div>
 
       {filteredRecipes.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-cream)]/60 p-6 text-center">
+        <div className="neo-inset mt-6 p-6 text-center">
           <p className="text-sm text-[var(--color-muted)]">
             No recipes match that search.
           </p>
           <Link
             href="/admin/recipes/new"
-            className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)]"
+            className="neo-btn-primary mt-4"
           >
             Add a recipe
           </Link>
@@ -74,7 +74,7 @@ export default function RecipeAdminList({ recipes }: Props) {
           {filteredRecipes.map((recipe) => (
             <li
               key={recipe.slug}
-              className="overflow-hidden rounded-2xl bg-[var(--color-cream)]/60 ring-1 ring-[var(--color-border)]"
+              className="neo-sm overflow-hidden card-hover"
             >
               {recipe.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -84,7 +84,7 @@ export default function RecipeAdminList({ recipes }: Props) {
                   className="h-40 w-full object-cover"
                 />
               ) : (
-                <div className="flex h-40 items-center justify-center bg-[var(--color-cream-dark)] text-5xl">
+                <div className="neo-inset flex h-40 items-center justify-center text-5xl text-[var(--color-muted)]">
                   🍳
                 </div>
               )}
@@ -107,15 +107,15 @@ export default function RecipeAdminList({ recipes }: Props) {
                 ) : null}
 
                 <dl className="mt-4 grid grid-cols-3 gap-2 text-xs">
-                  <div className="rounded-xl bg-white/70 px-3 py-2">
+                  <div className="neo-inset px-3 py-2">
                     <dt className="font-semibold text-[var(--color-ink)]">Ingredients</dt>
                     <dd className="mt-1 text-[var(--color-muted)]">{recipe.ingredients.length}</dd>
                   </div>
-                  <div className="rounded-xl bg-white/70 px-3 py-2">
+                  <div className="neo-inset px-3 py-2">
                     <dt className="font-semibold text-[var(--color-ink)]">Steps</dt>
                     <dd className="mt-1 text-[var(--color-muted)]">{recipe.steps.length}</dd>
                   </div>
-                  <div className="rounded-xl bg-white/70 px-3 py-2">
+                  <div className="neo-inset px-3 py-2">
                     <dt className="font-semibold text-[var(--color-ink)]">Serves</dt>
                     <dd className="mt-1 text-[var(--color-muted)]">{recipe.servings || "n/a"}</dd>
                   </div>
@@ -132,13 +132,13 @@ export default function RecipeAdminList({ recipes }: Props) {
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Link
                     href={`/admin/recipes/${recipe.slug}/edit`}
-                    className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)]"
+                    className="neo-btn-primary !min-h-10"
                   >
                     Edit
                   </Link>
                   <Link
                     href={`/recipes/${recipe.slug}`}
-                    className="inline-flex min-h-10 items-center justify-center rounded-xl border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]"
+                    className="neo-btn !min-h-10"
                   >
                     View on site
                   </Link>

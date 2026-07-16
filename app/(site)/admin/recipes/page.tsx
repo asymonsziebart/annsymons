@@ -24,7 +24,7 @@ export default async function AdminRecipesPage() {
         <div>
           <Link
             href="/admin"
-            className="text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+            className="neo-link text-sm"
           >
             ← Admin
           </Link>
@@ -37,7 +37,7 @@ export default async function AdminRecipesPage() {
           </p>
           <p className="mt-2 text-xs text-[var(--color-muted)]">
             Public page:{" "}
-            <Link href="/recipes" className="font-medium text-[var(--color-accent)] hover:underline">
+            <Link href="/recipes" className="neo-link text-xs">
               /recipes
             </Link>
           </p>
@@ -46,13 +46,13 @@ export default async function AdminRecipesPage() {
         <div className="flex flex-wrap gap-3">
           <Link
             href="/recipes"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]"
+            className="neo-btn"
           >
             View public page
           </Link>
           <Link
             href="/admin/recipes/new"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)]"
+            className="neo-btn-primary"
           >
             + Add recipe
           </Link>
@@ -60,14 +60,14 @@ export default async function AdminRecipesPage() {
       </div>
 
       {!dbReady ? (
-        <p className="mb-6 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
+        <p className="neo-inset mb-6 px-4 py-3 text-sm text-[var(--color-ink)]">
           Recipe saving needs the configured site database. The list below is the
           built-in recipe content that the public site can fall back to.
         </p>
       ) : null}
 
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-2xl bg-[var(--color-surface)] p-4 ring-1 ring-[var(--color-border)]">
+        <div className="neo p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">
             Total
           </p>
@@ -75,7 +75,7 @@ export default async function AdminRecipesPage() {
             {recipes.length}
           </p>
         </div>
-        <div className="rounded-2xl bg-[var(--color-surface)] p-4 ring-1 ring-[var(--color-border)]">
+        <div className="neo p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">
             With photos
           </p>
@@ -83,7 +83,7 @@ export default async function AdminRecipesPage() {
             {recipesWithPhotos}
           </p>
         </div>
-        <div className="rounded-2xl bg-[var(--color-surface)] p-4 ring-1 ring-[var(--color-border)]">
+        <div className="neo p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-muted)]">
             With timing
           </p>

@@ -35,7 +35,7 @@ export default async function AdminMoviesPage() {
     <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-8 sm:py-12">
       <Link
         href="/admin"
-        className="inline-flex min-h-11 items-center text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+        className="neo-link inline-flex min-h-11 items-center text-sm"
       >
         ← Back to Admin
       </Link>
@@ -53,8 +53,8 @@ export default async function AdminMoviesPage() {
         </p>
       </header>
 
-      <section className="overflow-hidden rounded-3xl bg-[var(--color-surface)] shadow-[0_24px_60px_-36px_rgba(28,25,23,0.65)] ring-1 ring-[var(--color-border)]">
-        <div className="flex flex-col gap-4 border-b border-[var(--color-border)] bg-[var(--color-cream-dark)]/45 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+      <section className="neo overflow-hidden">
+        <div className="neo-inset m-4 flex flex-col gap-4 p-4 sm:m-5 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div>
             <h2 className="font-heading text-xl font-semibold text-[var(--color-ink)]">
               All movies
@@ -69,7 +69,7 @@ export default async function AdminMoviesPage() {
             href={DRIVE_MOVIES_FOLDER_URL}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--color-accent)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--color-accent-hover)]"
+            className="neo-btn-primary"
           >
             Open in Google Drive
           </a>
@@ -77,12 +77,12 @@ export default async function AdminMoviesPage() {
 
         <div className="p-4 sm:p-5">
           {error ? (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-relaxed text-amber-900">
+            <div className="neo-inset p-4 text-sm leading-relaxed text-[var(--color-ink)]">
               Could not load the movie list from Google Drive. Try opening Drive
               directly, or reload this page. Error: {error}
             </div>
           ) : movies.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-cream)]/60 p-6 text-center text-sm text-[var(--color-muted)]">
+            <div className="neo-inset p-6 text-center text-sm text-[var(--color-muted)]">
               No MP4 movies were found in the Google Drive folder.
             </div>
           ) : (
@@ -91,7 +91,7 @@ export default async function AdminMoviesPage() {
                 <li key={movie.id}>
                   <Link
                     href={`/admin/movies/${movie.id}`}
-                    className="block rounded-2xl border border-[var(--color-border)] bg-[var(--color-cream)]/60 px-4 py-3 transition-colors hover:bg-[var(--color-cream-dark)]/70"
+                    className="neo-sm card-hover block px-4 py-3"
                   >
                     <span className="block text-sm font-semibold text-[var(--color-ink)]">
                       {movie.name}

@@ -60,7 +60,9 @@ export default function ImageUploadField({ folder, value, onChange, label, input
           }
           required={required}
         />
-        <label className="inline-flex min-h-11 cursor-pointer items-center justify-center whitespace-nowrap rounded-lg border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]">
+        <label
+          className={`neo-btn cursor-pointer whitespace-nowrap ${uploading ? "opacity-50" : ""}`}
+        >
           <input
             ref={inputRef}
             type="file"
@@ -73,11 +75,13 @@ export default function ImageUploadField({ folder, value, onChange, label, input
         </label>
       </div>
       {value && (
-        <p className="mt-2 text-sm text-[var(--color-ink-muted)]">
-          Preview: <img src={value} alt="" className="mt-1 max-h-24 rounded object-cover" />
-        </p>
+        <div className="neo-inset mt-2 p-3">
+          <p className="text-sm text-[var(--color-ink-muted)]">Preview:</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={value} alt="" className="mt-1 max-h-24 rounded-[var(--neo-radius-sm)] object-cover" />
+        </div>
       )}
-      {uploadError && <p className="mt-1 text-sm text-red-600">{uploadError}</p>}
+      {uploadError && <p className="mt-1 text-sm text-[var(--color-accent)]">{uploadError}</p>}
     </div>
   );
 }

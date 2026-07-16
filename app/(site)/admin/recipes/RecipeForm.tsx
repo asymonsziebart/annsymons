@@ -75,8 +75,7 @@ export default function RecipeForm(initial: Props) {
     }
   }
 
-  const inputClass =
-    "w-full rounded-lg border border-[var(--color-border)] bg-white px-4 py-2.5 text-[var(--color-ink)] focus:border-[var(--color-accent)] focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]";
+  const inputClass = "neo-input";
 
   return (
     <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -120,12 +119,12 @@ export default function RecipeForm(initial: Props) {
         <textarea value={stepsText} onChange={(e) => setStepsText(e.target.value)} rows={8} className={inputClass} />
       </div>
       <ImageUploadField folder="recipes" value={image} onChange={setImage} label="Recipe image" inputClass={inputClass} />
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-[var(--color-accent)]">{error}</p>}
       <div className="flex flex-col gap-3 sm:flex-row">
-        <button type="submit" disabled={loading} className="min-h-11 rounded-xl bg-[var(--color-accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--color-accent-hover)] disabled:opacity-50">
+        <button type="submit" disabled={loading} className="neo-btn-primary disabled:opacity-50">
           {loading ? "Saving…" : isEdit ? "Update recipe" : "Create recipe"}
         </button>
-        <Link href="/admin/recipes" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream)]">Cancel</Link>
+        <Link href="/admin/recipes" className="neo-btn">Cancel</Link>
       </div>
     </form>
   );

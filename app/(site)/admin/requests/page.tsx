@@ -23,7 +23,7 @@ export default async function AdminPurchaseRequestsPage() {
         <div>
           <Link
             href="/admin"
-            className="text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+            className="neo-link text-sm"
           >
             ← Admin
           </Link>
@@ -35,7 +35,7 @@ export default async function AdminPurchaseRequestsPage() {
           </p>
           <p className="mt-2 text-xs text-[var(--color-muted)]">
             Form link:{" "}
-            <Link href="/requests" className="font-medium text-[var(--color-accent)] hover:underline">
+            <Link href="/requests" className="neo-link text-xs">
               /requests
             </Link>
           </p>
@@ -43,7 +43,7 @@ export default async function AdminPurchaseRequestsPage() {
       </div>
 
       {dbReady && requests.length === 0 ? (
-        <p className="mb-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
+        <p className="neo-inset mb-4 px-4 py-3 text-sm text-[var(--color-ink)]">
           No rows loaded. If this is the first deploy, {PURCHASE_REQUESTS_MIGRATION_HINT}
         </p>
       ) : null}

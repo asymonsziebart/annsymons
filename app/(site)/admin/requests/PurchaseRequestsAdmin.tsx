@@ -18,10 +18,10 @@ const statusLabels: Record<PurchaseRequestStatus, string> = {
   rejected: "Rejected",
 };
 
-const statusClasses: Record<PurchaseRequestStatus, string> = {
-  pending: "bg-amber-50 text-amber-800 ring-amber-200",
-  accepted: "bg-emerald-50 text-emerald-800 ring-emerald-200",
-  rejected: "bg-red-50 text-red-800 ring-red-200",
+const statusTextClasses: Record<PurchaseRequestStatus, string> = {
+  pending: "text-[var(--color-accent)]",
+  accepted: "text-[var(--color-ink)]",
+  rejected: "text-[var(--color-ink-muted)]",
 };
 
 function formatDate(value: string): string {
@@ -92,40 +92,40 @@ export default function PurchaseRequestsAdmin({ initialRequests, dbReady }: Prop
   return (
     <div className="space-y-6">
       {!dbReady ? (
-        <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
+        <p className="neo-inset px-4 py-3 text-sm text-[var(--color-ink)]">
           DATABASE_URL is not set - requests will not load until the database is configured.
         </p>
       ) : null}
 
       {error ? (
-        <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800 ring-1 ring-red-200">
+        <p className="neo-inset px-4 py-3 text-sm text-[var(--color-accent)]">
           {error}
         </p>
       ) : null}
 
       <section className="grid gap-3 sm:grid-cols-4">
-        <div className="rounded-2xl bg-white p-4 ring-1 ring-stone-200">
-          <p className="text-xs font-semibold uppercase tracking-wide text-stone-500">Total</p>
-          <p className="mt-1 text-2xl font-semibold text-stone-950">{counts.total}</p>
+        <div className="neo p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">Total</p>
+          <p className="mt-1 text-2xl font-semibold text-[var(--color-ink)]">{counts.total}</p>
         </div>
-        <div className="rounded-2xl bg-white p-4 ring-1 ring-amber-200">
-          <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">Pending</p>
-          <p className="mt-1 text-2xl font-semibold text-amber-900">{counts.pending}</p>
+        <div className="neo p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-accent)]">Pending</p>
+          <p className="mt-1 text-2xl font-semibold text-[var(--color-ink)]">{counts.pending}</p>
         </div>
-        <div className="rounded-2xl bg-white p-4 ring-1 ring-emerald-200">
-          <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+        <div className="neo p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-ink-muted)]">
             Accepted
           </p>
-          <p className="mt-1 text-2xl font-semibold text-emerald-900">{counts.accepted}</p>
+          <p className="mt-1 text-2xl font-semibold text-[var(--color-ink)]">{counts.accepted}</p>
         </div>
-        <div className="rounded-2xl bg-white p-4 ring-1 ring-red-200">
-          <p className="text-xs font-semibold uppercase tracking-wide text-red-700">Rejected</p>
-          <p className="mt-1 text-2xl font-semibold text-red-900">{counts.rejected}</p>
+        <div className="neo p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">Rejected</p>
+          <p className="mt-1 text-2xl font-semibold text-[var(--color-ink)]">{counts.rejected}</p>
         </div>
       </section>
 
       {requests.length === 0 ? (
-        <section className="rounded-2xl bg-white p-6 text-sm text-stone-600 ring-1 ring-stone-200">
+        <section className="neo p-6 text-sm text-[var(--color-muted)]">
           No requests yet. Use the request form to add one.
         </section>
       ) : (
@@ -133,28 +133,26 @@ export default function PurchaseRequestsAdmin({ initialRequests, dbReady }: Prop
           {requests.map((request) => (
             <article
               key={request.id}
-              className="rounded-2xl bg-white p-4 shadow-[0_16px_42px_-32px_rgba(28,25,23,0.45)] ring-1 ring-stone-200 sm:p-5"
+              className="neo p-4 sm:p-5"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-heading text-xl font-semibold text-stone-950">
+                    <h2 className="font-heading text-xl font-semibold text-[var(--color-ink)]">
                       {request.itemName}
                     </h2>
                     <span
-                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${
-                        statusClasses[request.status]
-                      }`}
+                      className={`neo-chip !min-h-7 !py-0.5 !text-xs ${statusTextClasses[request.status]}`}
                     >
                       {statusLabels[request.status]}
                     </span>
                   </div>
-                  <p className="mt-1 text-xs text-stone-500">
+                  <p className="mt-1 text-xs text-[var(--color-muted)]">
                     Requested {formatDate(request.createdAt)}
                     {request.requestedBy ? ` by ${request.requestedBy}` : ""}
                   </p>
                   {request.details ? (
-                    <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-stone-700">
+                    <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-[var(--color-ink-muted)]">
                       {request.details}
                     </p>
                   ) : null}
@@ -162,7 +160,7 @@ export default function PurchaseRequestsAdmin({ initialRequests, dbReady }: Prop
               </div>
 
               <label className="mt-4 block">
-                <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-500">
+                <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">
                   Decision reason
                 </span>
                 <textarea
@@ -174,7 +172,7 @@ export default function PurchaseRequestsAdmin({ initialRequests, dbReady }: Prop
                     }))
                   }
                   rows={3}
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-900 placeholder:text-stone-400 focus:border-sky-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-sky-500"
+                  className="neo-input"
                   placeholder="Why this was accepted or rejected..."
                 />
               </label>
@@ -184,7 +182,7 @@ export default function PurchaseRequestsAdmin({ initialRequests, dbReady }: Prop
                   type="button"
                   disabled={savingId === request.id}
                   onClick={() => decide(request.id, "accepted")}
-                  className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-60"
+                  className="neo-btn-primary disabled:opacity-60"
                 >
                   Accept
                 </button>
@@ -192,7 +190,7 @@ export default function PurchaseRequestsAdmin({ initialRequests, dbReady }: Prop
                   type="button"
                   disabled={savingId === request.id}
                   onClick={() => decide(request.id, "rejected")}
-                  className="rounded-xl bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-60"
+                  className="neo-btn disabled:opacity-60"
                 >
                   Reject
                 </button>
@@ -200,12 +198,12 @@ export default function PurchaseRequestsAdmin({ initialRequests, dbReady }: Prop
                   type="button"
                   disabled={savingId === request.id}
                   onClick={() => decide(request.id, "pending")}
-                  className="rounded-xl border border-stone-200 bg-white px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50 disabled:opacity-60"
+                  className="neo-btn disabled:opacity-60"
                 >
                   Mark pending
                 </button>
                 {savingId === request.id ? (
-                  <span className="self-center text-sm text-stone-500">Saving...</span>
+                  <span className="self-center text-sm text-[var(--color-muted)]">Saving...</span>
                 ) : null}
               </div>
             </article>

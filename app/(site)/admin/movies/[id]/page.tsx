@@ -28,13 +28,13 @@ export default async function AdminMoviePlayerPage({
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <Link
           href="/admin/movies"
-          className="inline-flex min-h-11 items-center text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+          className="neo-link inline-flex min-h-11 items-center text-sm"
         >
           ← Back to Movies
         </Link>
         <Link
           href="/admin"
-          className="inline-flex min-h-11 items-center text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+          className="neo-link inline-flex min-h-11 items-center text-sm"
         >
           Admin
         </Link>
@@ -53,7 +53,7 @@ export default async function AdminMoviePlayerPage({
         </p>
       </header>
 
-      <section className="overflow-hidden rounded-3xl bg-black shadow-[0_24px_60px_-36px_rgba(28,25,23,0.65)] ring-1 ring-[var(--color-border)]">
+      <section className="overflow-hidden rounded-3xl bg-black">
         <video
           controls
           playsInline
@@ -65,7 +65,7 @@ export default async function AdminMoviePlayerPage({
         </video>
       </section>
 
-      <div className="mt-4 rounded-2xl bg-[var(--color-surface)] p-4 text-sm leading-relaxed text-[var(--color-ink-muted)] ring-1 ring-[var(--color-border)]">
+      <div className="neo mt-4 p-4 text-sm leading-relaxed text-[var(--color-ink-muted)]">
         If playback does not start right away on the Switch, wait a moment for
         the stream to prepare and press play again.
       </div>
