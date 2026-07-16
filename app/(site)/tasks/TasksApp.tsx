@@ -310,8 +310,6 @@ const TASK_TABLE_LABELS: Record<keyof TaskRow, string> = {
 
 const TASK_TABLE_HIDDEN_STORAGE_KEY = "annsymons.tasks.tableHiddenColumns.v1";
 const TASK_FILTERS_COLLAPSED_STORAGE_KEY = "annsymons.tasks.filtersCollapsed.v1";
-const TASK_TOP_CONTROLS_COLLAPSED_STORAGE_KEY =
-  "annsymons.tasks.topControlsCollapsed.v2";
 const TASK_LIST_SORT_STORAGE_KEY = "annsymons.tasks.listSort.v1";
 const TASK_VIEW_MODE_STORAGE_KEY = "annsymons.tasks.viewMode.v1";
 const TASK_VIEW_WEEK_OFFSET_STORAGE_KEY = "annsymons.tasks.weekViewOffset.v1";
@@ -393,19 +391,6 @@ function readFiltersCollapsedPreference(): boolean {
   if (typeof window === "undefined") return false;
   try {
     const raw = localStorage.getItem(TASK_FILTERS_COLLAPSED_STORAGE_KEY);
-    if (raw === "1") return true;
-    if (raw === "0") return false;
-    return window.matchMedia("(max-width: 1023px)").matches;
-  } catch {
-    return false;
-  }
-}
-
-/** Default the dense toolbar closed on mobile/tablet, but respect the user's last choice. */
-function readTopControlsCollapsedPreference(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    const raw = localStorage.getItem(TASK_TOP_CONTROLS_COLLAPSED_STORAGE_KEY);
     if (raw === "1") return true;
     if (raw === "0") return false;
     return window.matchMedia("(max-width: 1023px)").matches;
@@ -740,8 +725,6 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   const [hiddenTaskColumns, setHiddenTaskColumns] = useState<(keyof TaskRow)[]>([]);
   const [taskColumnsHydrated, setTaskColumnsHydrated] = useState(false);
   /** When true on phones, the dense view/action toolbar is tucked away. */
-  const [topControlsCollapsed, setTopControlsCollapsed] = useState(false);
-  const [topControlsHydrated, setTopControlsHydrated] = useState(false);
   /** When true, search + filter row is collapsed so the task list uses more vertical space. */
   const [filtersBarCollapsed, setFiltersBarCollapsed] = useState(false);
   const [filtersBarHydrated, setFiltersBarHydrated] = useState(false);
@@ -902,23 +885,6 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
   useEffect(() => {
     if (taskViewMode === "list") setCalendarDueDropTargetIso(null);
   }, [taskViewMode]);
-
-  useEffect(() => {
-    setTopControlsCollapsed(readTopControlsCollapsedPreference());
-    setTopControlsHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (!topControlsHydrated) return;
-    try {
-      localStorage.setItem(
-        TASK_TOP_CONTROLS_COLLAPSED_STORAGE_KEY,
-        topControlsCollapsed ? "1" : "0"
-      );
-    } catch {
-      /* storage full or disabled */
-    }
-  }, [topControlsCollapsed, topControlsHydrated]);
 
   useEffect(() => {
     setFiltersBarCollapsed(readFiltersCollapsedPreference());
@@ -1514,6 +1480,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
       if (sec) parts.push(sec.name);
     }
     if (filterOverdueOnly) parts.push("Overdue only");
+    if (showCompleted) parts.push("Completed shown");
     if (filterAssignee !== "all") {
       parts.push(filterAssignee === "unassigned" ? "Unassigned" : filterAssignee);
     }
@@ -1526,6 +1493,7 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
     filterSectionId,
     filterOverdueOnly,
     filterAssignee,
+    showCompleted,
     sections,
   ]);
 
@@ -1824,351 +1792,196 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
         {/* List pane — grows to full width when detail pane is minimized */}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <header className="flex shrink-0 flex-col gap-3 border-b border-[var(--color-border)] bg-[var(--neo-bg)] px-4 py-3 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:px-8">
-            <div className="flex min-w-0 items-start justify-between gap-3 lg:items-center">
-              <div className="min-w-0">
-                <h1 className="font-heading text-lg font-semibold text-[var(--color-ink)]">My tasks</h1>
-                <p className="text-xs text-[var(--color-muted)]">
-                  {hasActiveTaskFilters ? (
-                    <>
-                      <span className="font-medium text-[var(--color-ink-muted)]">
-                        {filteredTasks.length} matching
-                      </span>
-                      {" · "}
-                      {visibleTasks.length} in list ·{" "}
-                    </>
-                  ) : null}
-                  {openCount} open ·{" "}
-                  {taskViewMode === "week" ? (
+            <div className="min-w-0">
+              <h1 className="font-heading text-lg font-semibold text-[var(--color-ink)]">My tasks</h1>
+              <p className="text-xs text-[var(--color-muted)]">
+                {hasActiveTaskFilters ? (
+                  <>
+                    <span className="font-medium text-[var(--color-ink-muted)]">
+                      {filteredTasks.length} matching
+                    </span>
+                    {" · "}
+                    {visibleTasks.length} in list ·{" "}
+                  </>
+                ) : null}
+                {openCount} open
+                {taskViewMode === "week" ? (
+                  <>
+                    {" · "}
                     <span className="font-medium text-[var(--color-ink-muted)]">{weekViewLayout.weekLabel}</span>
-                  ) : null}
-                  {taskViewMode === "month" ? (
+                  </>
+                ) : null}
+                {taskViewMode === "month" ? (
+                  <>
+                    {" · "}
                     <span className="font-medium text-[var(--color-ink-muted)]">{monthViewLayout.monthTitle}</span>
-                  ) : null}
-                  {taskViewMode === "year" ? (
+                  </>
+                ) : null}
+                {taskViewMode === "year" ? (
+                  <>
+                    {" · "}
                     <span className="font-medium text-[var(--color-ink-muted)]">{yearViewLayout.yearTitle}</span>
-                  ) : null}
-                  {taskViewMode !== "list" ? " · " : null}
-                  <span className="hidden text-[var(--color-muted)] md:inline">
-                    {taskViewMode !== "list" ? (
-                      <>
-                        Drag a task onto any day to set its due date · Monday-start weeks · Ctrl/⌘+click
-                        or Shift+click to select
-                      </>
-                    ) : (
-                      <>
-                        Order tasks with the list control or by clicking column headers · Ctrl/⌘+click
-                        or Shift+click to select · drag{" "}
-                        <span className="whitespace-nowrap">⋮⋮</span> between sections
-                      </>
-                    )}
-                  </span>
-                  <span className="text-[var(--color-muted)] md:hidden">Tap a task for details</span>
-                </p>
-              </div>
-              <button
-                type="button"
-                className="neo-btn !h-9 !min-h-9 shrink-0 !px-3 !py-0 text-xs lg:hidden"
-                aria-expanded={!topControlsCollapsed}
-                aria-controls="task-top-controls"
-                onClick={() => {
-                  if (!topControlsCollapsed) setColumnsPanelOpen(false);
-                  setTopControlsCollapsed((collapsed) => !collapsed);
-                }}
-              >
-                {topControlsCollapsed ? "Show controls" : "Hide controls"}
-              </button>
+                  </>
+                ) : null}
+              </p>
             </div>
-            <div
-              id="task-top-controls"
-              className={`${
-                topControlsCollapsed ? "hidden" : "flex"
-              } w-full flex-col gap-2 lg:w-auto lg:flex-row lg:flex-wrap lg:items-center lg:justify-end lg:gap-x-2 lg:gap-y-2`}
-            >
-              {selected && selectedTaskIds.length === 1 && detailsMinimized && (
+            <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+              {selected && selectedTaskIds.length === 1 && detailsMinimized ? (
                 <button
                   type="button"
                   onClick={() => setDetailsMinimized(false)}
                   className="neo-btn !h-9 !min-h-9 !px-3 !py-0 text-xs"
                 >
-                  <span className="lg:hidden">Task details</span>
-                  <span className="hidden lg:inline">Show details</span>
+                  Show details
                 </button>
-              )}
-              <div className="flex flex-wrap items-center gap-2">
-                <div
-                  className="neo-sm inline-flex h-9 items-center gap-0.5 p-0.5"
-                  role="group"
-                  aria-label="Task layout"
+              ) : null}
+              <div
+                className="neo-sm inline-flex h-9 items-center gap-0.5 p-0.5"
+                role="group"
+                aria-label="Task layout"
+              >
+                <button
+                  type="button"
+                  onClick={() => setTaskViewMode("list")}
+                  className={`h-8 rounded px-2.5 text-xs font-medium ${
+                    taskViewMode === "list"
+                      ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
+                      : "text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+                  }`}
                 >
+                  List
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTaskViewMode("week")}
+                  className={`h-8 rounded px-2.5 text-xs font-medium ${
+                    taskViewMode === "week"
+                      ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
+                      : "text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+                  }`}
+                >
+                  Week
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTaskViewMode("month")}
+                  className={`h-8 rounded px-2.5 text-xs font-medium ${
+                    taskViewMode === "month"
+                      ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
+                      : "text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+                  }`}
+                >
+                  Month
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTaskViewMode("year")}
+                  className={`h-8 rounded px-2.5 text-xs font-medium ${
+                    taskViewMode === "year"
+                      ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
+                      : "text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+                  }`}
+                >
+                  Year
+                </button>
+              </div>
+              {taskViewMode === "week" ? (
+                <div className="neo-sm inline-flex h-9 items-center gap-0.5 p-0.5">
                   <button
                     type="button"
-                    onClick={() => setTaskViewMode("list")}
-                    className={`h-8 rounded px-2.5 text-xs font-medium ${
-                      taskViewMode === "list"
-                        ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
-                        : "text-[var(--color-muted)] hover:text-[var(--color-ink)]"
-                    }`}
+                    title="Previous week"
+                    aria-label="Previous week"
+                    onClick={() => setWeekOffset((o) => o - 1)}
+                    className="neo-btn !h-8 !min-h-8 !px-2 !py-0 text-xs"
                   >
-                    List
+                    ←
                   </button>
                   <button
                     type="button"
-                    onClick={() => setTaskViewMode("week")}
-                    className={`h-8 rounded px-2.5 text-xs font-medium ${
-                      taskViewMode === "week"
-                        ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
-                        : "text-[var(--color-muted)] hover:text-[var(--color-ink)]"
-                    }`}
+                    title="Jump to this week"
+                    onClick={() => setWeekOffset(0)}
+                    className="neo-btn !h-8 !min-h-8 !px-2.5 !py-0 text-xs"
                   >
-                    Week
+                    This week
                   </button>
                   <button
                     type="button"
-                    onClick={() => setTaskViewMode("month")}
-                    className={`h-8 rounded px-2.5 text-xs font-medium ${
-                      taskViewMode === "month"
-                        ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
-                        : "text-[var(--color-muted)] hover:text-[var(--color-ink)]"
-                    }`}
+                    title="Next week"
+                    aria-label="Next week"
+                    onClick={() => setWeekOffset((o) => o + 1)}
+                    className="neo-btn !h-8 !min-h-8 !px-2 !py-0 text-xs"
                   >
-                    Month
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setTaskViewMode("year")}
-                    className={`h-8 rounded px-2.5 text-xs font-medium ${
-                      taskViewMode === "year"
-                        ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
-                        : "text-[var(--color-muted)] hover:text-[var(--color-ink)]"
-                    }`}
-                  >
-                    Year
+                    →
                   </button>
                 </div>
-                {taskViewMode === "week" ? (
-                  <div className="neo-sm inline-flex h-9 items-center gap-0.5 p-0.5">
-                    <button
-                      type="button"
-                      title="Previous week"
-                      aria-label="Previous week"
-                      onClick={() => setWeekOffset((o) => o - 1)}
-                      className="neo-btn !h-8 !min-h-8 !px-2 !py-0 text-xs"
-                    >
-                      ←
-                    </button>
-                    <button
-                      type="button"
-                      title="Jump to this week"
-                      onClick={() => setWeekOffset(0)}
-                      className="neo-btn !h-8 !min-h-8 !px-2.5 !py-0 text-xs"
-                    >
-                      This week
-                    </button>
-                    <button
-                      type="button"
-                      title="Next week"
-                      aria-label="Next week"
-                      onClick={() => setWeekOffset((o) => o + 1)}
-                      className="neo-btn !h-8 !min-h-8 !px-2 !py-0 text-xs"
-                    >
-                      →
-                    </button>
-                  </div>
-                ) : null}
-                {taskViewMode === "month" ? (
-                  <div className="neo-sm inline-flex h-9 items-center gap-0.5 p-0.5">
-                    <button
-                      type="button"
-                      title="Previous month"
-                      aria-label="Previous month"
-                      onClick={() => setMonthOffset((o) => o - 1)}
-                      className="neo-btn !h-8 !min-h-8 !px-2 !py-0 text-xs"
-                    >
-                      ←
-                    </button>
-                    <button
-                      type="button"
-                      title="Jump to this month"
-                      onClick={() => setMonthOffset(0)}
-                      className="neo-btn !h-8 !min-h-8 !px-2.5 !py-0 text-xs"
-                    >
-                      This month
-                    </button>
-                    <button
-                      type="button"
-                      title="Next month"
-                      aria-label="Next month"
-                      onClick={() => setMonthOffset((o) => o + 1)}
-                      className="neo-btn !h-8 !min-h-8 !px-2 !py-0 text-xs"
-                    >
-                      →
-                    </button>
-                  </div>
-                ) : null}
-                {taskViewMode === "year" ? (
-                  <div className="neo-sm inline-flex h-9 items-center gap-0.5 p-0.5">
-                    <button
-                      type="button"
-                      title="Previous year"
-                      aria-label="Previous year"
-                      onClick={() => setYearOffset((o) => o - 1)}
-                      className="neo-btn !h-8 !min-h-8 !px-2 !py-0 text-xs"
-                    >
-                      ←
-                    </button>
-                    <button
-                      type="button"
-                      title="Jump to this year"
-                      onClick={() => setYearOffset(0)}
-                      className="neo-btn !h-8 !min-h-8 !px-2.5 !py-0 text-xs"
-                    >
-                      This year
-                    </button>
-                    <button
-                      type="button"
-                      title="Next year"
-                      aria-label="Next year"
-                      onClick={() => setYearOffset((o) => o + 1)}
-                      className="neo-btn !h-8 !min-h-8 !px-2 !py-0 text-xs"
-                    >
-                      →
-                    </button>
-                  </div>
-                ) : null}
-                {taskViewMode === "list" ? (
-                  <select
-                    value={listOrderSelectValue === "other" ? "__other__" : listOrderSelectValue}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (v === "section") setTaskTableSort(null);
-                      else if (v === "due_asc") setTaskTableSort({ key: "due_date", dir: "asc" });
-                      else if (v === "due_desc") setTaskTableSort({ key: "due_date", dir: "desc" });
-                    }}
-                    className="neo-input !h-9 !min-h-9 w-full max-w-[14rem] !py-0 text-xs sm:w-[14rem]"
-                    aria-label="Order within section"
-                    title="Order within section"
+              ) : null}
+              {taskViewMode === "month" ? (
+                <div className="neo-sm inline-flex h-9 items-center gap-0.5 p-0.5">
+                  <button
+                    type="button"
+                    title="Previous month"
+                    aria-label="Previous month"
+                    onClick={() => setMonthOffset((o) => o - 1)}
+                    className="neo-btn !h-8 !min-h-8 !px-2 !py-0 text-xs"
                   >
-                    <option value="due_asc">Due date (soonest first)</option>
-                    <option value="due_desc">Due date (latest first)</option>
-                    <option value="section">Section order (saved layout)</option>
-                    {listOrderSelectValue === "other" && taskTableSort ? (
-                      <option value="__other__" disabled>
-                        {TASK_TABLE_LABELS[taskTableSort.key]} (
-                        {taskTableSort.dir === "asc" ? "↑" : "↓"})
-                      </option>
-                    ) : null}
-                  </select>
-                ) : null}
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowCompleted((v) => !v)}
-                  className="neo-btn !h-9 !min-h-9 !px-3 !py-0 text-xs"
-                >
-                  {showCompleted ? "Hide completed" : "Show completed"}
-                </button>
-                {taskViewMode === "list" ? (
-                  <div className="relative" ref={columnsPanelRef}>
-                    <button
-                      type="button"
-                      onClick={() => setColumnsPanelOpen((o) => !o)}
-                      title="Choose which columns appear in the list. Your selection is saved in this browser."
-                      className={`neo-btn !h-9 !min-h-9 !px-3 !py-0 text-xs ${
-                        columnsPanelOpen
-                          ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
-                          : ""
-                      }`}
-                      aria-expanded={columnsPanelOpen}
-                      aria-haspopup="true"
-                    >
-                      Columns
-                    </button>
-                    {columnsPanelOpen ? (
-                      <div
-                        className="neo z-[200] py-2 max-md:fixed max-md:left-2 max-md:right-2 max-md:top-1/2 max-md:mt-0 max-md:w-auto max-md:-translate-y-1/2 md:absolute md:right-0 md:top-full md:mt-1 md:w-[min(100vw-2rem,18rem)] md:translate-y-0"
-                        role="dialog"
-                        aria-label="Choose visible columns"
-                      >
-                        <div className="border-b border-[var(--color-border)] px-3 pb-2">
-                          <p className="text-xs font-medium text-[var(--color-muted)]">Visible fields</p>
-                          <p className="mt-0.5 text-[0.65rem] text-[var(--color-muted)]">
-                            At least one column stays on. “Deselect all” keeps Title only.
-                          </p>
-                          <p className="mt-1.5 text-[0.65rem] text-[var(--color-accent)]/90">
-                            Your choices are saved in this browser and load automatically next time.
-                          </p>
-                        </div>
-                        <ul className="max-h-[min(70vh,22rem)] overflow-y-auto px-2 pt-2 max-md:max-h-[min(55dvh,18rem)]">
-                          {TASK_TABLE_KEYS.map((k) => {
-                            const checked = visibleTaskTableKeys.includes(k);
-                            const onlyOne = visibleTaskTableKeys.length === 1 && checked;
-                            return (
-                              <li key={k}>
-                                <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]">
-                                  <input
-                                    type="checkbox"
-                                    checked={checked}
-                                    disabled={onlyOne}
-                                    onChange={() => toggleTaskColumnVisibility(k)}
-                                    className="rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
-                                  />
-                                  <span className="min-w-0 flex-1">{TASK_TABLE_LABELS[k]}</span>
-                                </label>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                        <div className="flex flex-col gap-1 border-t border-[var(--color-border)] px-2 pt-2">
-                          <button
-                            type="button"
-                            onClick={() => deselectAllTaskTableColumns()}
-                            title={`Hide all columns except ${TASK_TABLE_LABELS[TASK_TABLE_DESELECT_ALL_KEEP]}`}
-                            className="w-full rounded-md py-1.5 text-xs font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]"
-                          >
-                            Deselect all
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              showAllTaskTableColumns();
-                              setColumnsPanelOpen(false);
-                            }}
-                            className="w-full rounded-md py-1.5 text-xs font-medium text-[var(--color-accent)] hover:bg-[var(--color-cream-dark)]"
-                          >
-                            Show all columns
-                          </button>
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
-                ) : null}
-                <button
-                  type="button"
-                  onClick={() => void refresh()}
-                  className="neo-btn !h-9 !min-h-9 !px-3 !py-0 text-xs"
-                >
-                  Refresh
-                </button>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 lg:ml-1">
-                <a
-                  href="https://shl-slc.na2.iiivega.com/portal"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Suburban Library Cooperative Vega portal (Sterling Heights card) — checkouts & due dates (new tab)"
-                  className="neo-btn !h-9 !min-h-9 !px-3 !py-0 text-xs text-[var(--color-accent)]"
-                >
-                  Library account
-                </a>
-                <button
-                  type="button"
-                  onClick={() => void logout()}
-                  className="neo-btn !h-9 !min-h-9 !px-3 !py-0 text-xs"
-                >
-                  Sign out
-                </button>
-              </div>
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    title="Jump to this month"
+                    onClick={() => setMonthOffset(0)}
+                    className="neo-btn !h-8 !min-h-8 !px-2.5 !py-0 text-xs"
+                  >
+                    This month
+                  </button>
+                  <button
+                    type="button"
+                    title="Next month"
+                    aria-label="Next month"
+                    onClick={() => setMonthOffset((o) => o + 1)}
+                    className="neo-btn !h-8 !min-h-8 !px-2 !py-0 text-xs"
+                  >
+                    →
+                  </button>
+                </div>
+              ) : null}
+              {taskViewMode === "year" ? (
+                <div className="neo-sm inline-flex h-9 items-center gap-0.5 p-0.5">
+                  <button
+                    type="button"
+                    title="Previous year"
+                    aria-label="Previous year"
+                    onClick={() => setYearOffset((o) => o - 1)}
+                    className="neo-btn !h-8 !min-h-8 !px-2 !py-0 text-xs"
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    title="Jump to this year"
+                    onClick={() => setYearOffset(0)}
+                    className="neo-btn !h-8 !min-h-8 !px-2.5 !py-0 text-xs"
+                  >
+                    This year
+                  </button>
+                  <button
+                    type="button"
+                    title="Next year"
+                    aria-label="Next year"
+                    onClick={() => setYearOffset((o) => o + 1)}
+                    className="neo-btn !h-8 !min-h-8 !px-2 !py-0 text-xs"
+                  >
+                    →
+                  </button>
+                </div>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => void logout()}
+                className="neo-btn !h-9 !min-h-9 !px-3 !py-0 text-xs"
+              >
+                Sign out
+              </button>
             </div>
           </header>
 
@@ -2192,7 +2005,12 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
             <div className="px-4 py-2 sm:px-6 lg:px-8">
               <button
                 type="button"
-                onClick={() => setFiltersBarCollapsed((c) => !c)}
+                onClick={() => {
+                  setFiltersBarCollapsed((c) => {
+                    if (!c) setColumnsPanelOpen(false);
+                    return !c;
+                  });
+                }}
                 className="flex min-h-10 w-full touch-manipulation items-center gap-2 rounded-md py-1.5 text-left text-sm text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]"
                 aria-expanded={!filtersBarCollapsed}
                 aria-controls="task-filters-panel"
@@ -2342,6 +2160,35 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                       allowCustom={false}
                     />
                   </div>
+                  {taskViewMode === "list" ? (
+                    <div>
+                      <label htmlFor="task-list-order" className={`${label} mb-0.5 block`}>
+                        Order within section
+                      </label>
+                      <select
+                        id="task-list-order"
+                        value={listOrderSelectValue === "other" ? "__other__" : listOrderSelectValue}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          if (v === "section") setTaskTableSort(null);
+                          else if (v === "due_asc") setTaskTableSort({ key: "due_date", dir: "asc" });
+                          else if (v === "due_desc") setTaskTableSort({ key: "due_date", dir: "desc" });
+                        }}
+                        className={filterSelect}
+                        title="Order within section"
+                      >
+                        <option value="due_asc">Due date (soonest first)</option>
+                        <option value="due_desc">Due date (latest first)</option>
+                        <option value="section">Section order (saved layout)</option>
+                        {listOrderSelectValue === "other" && taskTableSort ? (
+                          <option value="__other__" disabled>
+                            {TASK_TABLE_LABELS[taskTableSort.key]} (
+                            {taskTableSort.dir === "asc" ? "↑" : "↓"})
+                          </option>
+                        ) : null}
+                      </select>
+                    </div>
+                  ) : null}
                   <label className="flex cursor-pointer items-center gap-2 pb-0.5 text-sm text-[var(--color-ink-muted)] sm:pb-2">
                     <input
                       type="checkbox"
@@ -2351,6 +2198,88 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     />
                     Overdue only
                   </label>
+                  <label className="flex cursor-pointer items-center gap-2 pb-0.5 text-sm text-[var(--color-ink-muted)] sm:pb-2">
+                    <input
+                      type="checkbox"
+                      checked={showCompleted}
+                      onChange={(e) => setShowCompleted(e.target.checked)}
+                      className="rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
+                    />
+                    Show completed
+                  </label>
+                  {taskViewMode === "list" ? (
+                    <div className="relative pb-0.5 sm:pb-0" ref={columnsPanelRef}>
+                      <span className={`${label} mb-0.5 block`}>List columns</span>
+                      <button
+                        type="button"
+                        onClick={() => setColumnsPanelOpen((o) => !o)}
+                        title="Choose which columns appear in the list. Your selection is saved in this browser."
+                        className={`neo-btn !h-9 !min-h-9 !px-3 !py-0 text-xs ${
+                          columnsPanelOpen
+                            ? "!text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
+                            : ""
+                        }`}
+                        aria-expanded={columnsPanelOpen}
+                        aria-haspopup="true"
+                      >
+                        Columns
+                      </button>
+                      {columnsPanelOpen ? (
+                        <div
+                          className="neo z-[200] py-2 max-md:fixed max-md:left-2 max-md:right-2 max-md:top-1/2 max-md:mt-0 max-md:w-auto max-md:-translate-y-1/2 md:absolute md:left-0 md:top-full md:mt-1 md:w-[min(100vw-2rem,18rem)] md:translate-y-0"
+                          role="dialog"
+                          aria-label="Choose visible columns"
+                        >
+                          <div className="border-b border-[var(--color-border)] px-3 pb-2">
+                            <p className="text-xs font-medium text-[var(--color-muted)]">Visible fields</p>
+                            <p className="mt-0.5 text-[0.65rem] text-[var(--color-muted)]">
+                              At least one column stays on. “Deselect all” keeps Title only.
+                            </p>
+                          </div>
+                          <ul className="max-h-[min(70vh,22rem)] overflow-y-auto px-2 pt-2 max-md:max-h-[min(55dvh,18rem)]">
+                            {TASK_TABLE_KEYS.map((k) => {
+                              const checked = visibleTaskTableKeys.includes(k);
+                              const onlyOne = visibleTaskTableKeys.length === 1 && checked;
+                              return (
+                                <li key={k}>
+                                  <label className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]">
+                                    <input
+                                      type="checkbox"
+                                      checked={checked}
+                                      disabled={onlyOne}
+                                      onChange={() => toggleTaskColumnVisibility(k)}
+                                      className="rounded border-[var(--color-border)] text-[var(--color-accent)] focus:ring-[var(--color-accent)]"
+                                    />
+                                    <span className="min-w-0 flex-1">{TASK_TABLE_LABELS[k]}</span>
+                                  </label>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                          <div className="flex flex-col gap-1 border-t border-[var(--color-border)] px-2 pt-2">
+                            <button
+                              type="button"
+                              onClick={() => deselectAllTaskTableColumns()}
+                              title={`Hide all columns except ${TASK_TABLE_LABELS[TASK_TABLE_DESELECT_ALL_KEEP]}`}
+                              className="w-full rounded-md py-1.5 text-xs font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-cream-dark)]"
+                            >
+                              Deselect all
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                showAllTaskTableColumns();
+                                setColumnsPanelOpen(false);
+                              }}
+                              className="w-full rounded-md py-1.5 text-xs font-medium text-[var(--color-accent)] hover:bg-[var(--color-cream-dark)]"
+                            >
+                              Show all columns
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                   <button
                     type="button"
                     disabled={!hasActiveTaskFilters}
@@ -2358,6 +2287,14 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                     className="neo-btn text-xs disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Clear filters
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void refresh()}
+                    className="neo-btn text-xs"
+                    title="Reload tasks from the server"
+                  >
+                    Refresh
                   </button>
                 </div>
               </div>
