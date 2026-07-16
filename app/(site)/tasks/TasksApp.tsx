@@ -640,7 +640,7 @@ function SortableTaskTh({
     <th
       scope="col"
       aria-sort={ariaSort}
-      className={`relative isolate border-r border-[var(--color-border)] bg-[var(--neo-bg)] ${className ?? ""}`.trim()}
+      className={`group/col relative isolate bg-[var(--neo-bg)] ${className ?? ""}`.trim()}
       style={
         widthPx != null
           ? { width: widthPx, minWidth: widthPx, maxWidth: widthPx, boxSizing: "border-box" }
@@ -666,7 +666,7 @@ function SortableTaskTh({
           e.preventDefault();
           onColumnAutoFit(colKey);
         }}
-        className="pointer-events-auto absolute right-0 top-0 z-[100] w-2 min-h-9 touch-none select-none bg-[var(--color-muted)]/40 hover:bg-[var(--color-accent)]/80"
+        className="pointer-events-auto absolute right-0 top-0 z-[100] w-2 min-h-9 touch-none select-none bg-transparent hover:bg-[var(--color-accent)]/70 group-hover/col:bg-[var(--color-border)]/50"
         style={{
           bottom: 0,
           touchAction: "none",
@@ -2428,15 +2428,15 @@ export default function TasksApp({ initialTasks, initialSections }: Props) {
                   <thead className="sticky top-0 z-20 border-b border-[var(--color-border)] bg-[var(--neo-bg)] text-[var(--color-muted)] shadow-[var(--neo-shadow-out-sm)]">
                     <tr>
                       <th
-                        className="w-9 border-r border-[var(--color-border)] px-2 py-2.5 pl-4 sm:pl-6 lg:pl-8"
+                        className="w-9 px-2 py-2.5 pl-4 sm:pl-6 lg:pl-8"
                         aria-label="Drag"
                       />
                       <th
-                        className="w-12 border-r border-[var(--color-border)] whitespace-nowrap px-0 py-2.5"
+                        className="w-12 whitespace-nowrap px-0 py-2.5"
                         aria-label="Mark done"
                       />
                       <th
-                        className="w-8 border-r border-[var(--color-border)] px-0 py-2.5"
+                        className="w-8 px-0 py-2.5"
                         aria-label="Expand subtasks"
                       />
                       {visibleTaskTableKeys.map((k) => (
