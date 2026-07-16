@@ -94,7 +94,7 @@ export default async function PollenPage() {
           {result.daily.map((day, i) => (
             <section
               key={day.iso || i}
-              className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]/90 p-4 shadow-sm ring-1 ring-black/5 sm:p-5"
+              className="neo p-4 sm:p-5"
             >
               <h2 className="font-heading text-lg font-semibold text-[var(--color-ink)]">
                 {i === 0 ? "Today · " : ""}
