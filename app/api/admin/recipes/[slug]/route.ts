@@ -18,12 +18,30 @@ export async function PUT(
     const sql = getSqlOrThrow();
     const ing = Array.isArray(ingredients) ? ingredients : [];
     const st = Array.isArray(steps) ? steps : [];
+    // Upsert so edits to static-only recipes (not yet in DB) still persist images/fields.
     await sql`
-      UPDATE recipes
-      SET title = ${title}, description = ${description ?? null}, prep_time = ${prepTime ?? null},
-          cook_time = ${cookTime ?? null}, servings = ${servings ?? null},
-          ingredients = ${ing}, steps = ${st}, image = ${image ?? null}, updated_at = NOW()
-      WHERE slug = ${slug}
+      INSERT INTO recipes (slug, title, description, prep_time, cook_time, servings, ingredients, steps, image)
+      VALUES (
+        ${slug},
+        ${title},
+        ${description ?? null},
+        ${prepTime ?? null},
+        ${cookTime ?? null},
+        ${servings ?? null},
+        ${ing},
+        ${st},
+        ${image ?? null}
+      )
+      ON CONFLICT (slug) DO UPDATE SET
+        title = EXCLUDED.title,
+        description = EXCLUDED.description,
+        prep_time = EXCLUDED.prep_time,
+        cook_time = EXCLUDED.cook_time,
+        servings = EXCLUDED.servings,
+        ingredients = EXCLUDED.ingredients,
+        steps = EXCLUDED.steps,
+        image = EXCLUDED.image,
+        updated_at = NOW()
     `;
     return NextResponse.json({ ok: true });
   } catch (e) {

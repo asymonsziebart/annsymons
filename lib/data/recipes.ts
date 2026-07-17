@@ -29,6 +29,12 @@ function toRecipe(r: DbRecipe): Recipe {
   };
 }
 
+/** Prefer DB fields, but keep a static image when the DB row has none. */
+function mergeWithStatic(recipe: Recipe, staticRecipe?: Recipe): Recipe {
+  if (!staticRecipe?.image || recipe.image) return recipe;
+  return { ...recipe, image: staticRecipe.image };
+}
+
 export async function getAllRecipes(): Promise<Recipe[]> {
   const sql = getSql();
   if (!sql) return getStaticRecipes();
@@ -45,7 +51,8 @@ export async function getAllRecipes(): Promise<Recipe[]> {
       }
       for (const row of rows as DbRecipe[]) {
         const recipe = toRecipe(row);
-        recipesBySlug.set(recipe.slug, recipe);
+        const existing = recipesBySlug.get(recipe.slug);
+        recipesBySlug.set(recipe.slug, mergeWithStatic(recipe, existing));
       }
       return Array.from(recipesBySlug.values()).sort((a, b) =>
         a.title.localeCompare(b.title)
@@ -68,7 +75,9 @@ export async function getRecipeBySlug(slug: string): Promise<Recipe | undefined>
       LIMIT 1
     `;
     const row = Array.isArray(rows) ? rows[0] : rows;
-    if (row && typeof row === "object") return toRecipe(row as DbRecipe);
+    if (row && typeof row === "object") {
+      return mergeWithStatic(toRecipe(row as DbRecipe), getStaticRecipeBySlug(slug));
+    }
   } catch {
     // fallback
   }
