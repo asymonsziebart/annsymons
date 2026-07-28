@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 
 type Props = {
-  folder: "recipes" | "blog" | "gallery" | "garage" | "truck-fund";
+  folder: "recipes" | "blog" | "gallery" | "garage" | "truck-fund" | "instagram";
   value: string;
   onChange: (path: string) => void;
   label: string;
@@ -56,7 +56,9 @@ export default function ImageUploadField({ folder, value, onChange, label, input
                 ? "/recipes/photo.webp"
                 : folder === "truck-fund"
                   ? "/truck-fund/maverick.jpg"
-                  : "/gallery/photo.jpg"
+                  : folder === "instagram"
+                    ? "/instagram/photo.jpg"
+                    : "/gallery/photo.jpg"
           }
           required={required}
         />

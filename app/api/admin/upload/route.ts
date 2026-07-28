@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            "Missing file or invalid folder. Use folder: recipes, blog, gallery, garage, truck-fund, or backyard.",
+            "Missing file or invalid folder. Use folder: recipes, blog, gallery, garage, truck-fund, backyard, or instagram.",
         },
         { status: 400 }
       );

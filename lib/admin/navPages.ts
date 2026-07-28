@@ -125,6 +125,12 @@ export const ADMIN_NAV_PAGES: AdminNavPage[] = [
     keywords: ["bow", "target"],
   },
   {
+    href: "/admin/instagram",
+    label: "Instagram",
+    description: "Connect account, queue photos and captions, schedule posts",
+    keywords: ["social", "post", "caption", "schedule", "photo"],
+  },
+  {
     href: "/admin/gallery",
     label: "Gallery",
     description: "Manage gallery items",

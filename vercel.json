@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/tasks-overdue",
       "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/instagram-publish",
+      "schedule": "15 15 * * *"
     }
   ]
 }
