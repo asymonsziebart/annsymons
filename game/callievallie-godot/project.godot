@@ -1,0 +1,40 @@
+; Callie & Vallie — Godot 4 web game
+; Original project and artwork. No Stardew Valley code or assets.
+
+config_version=5
+
+[application]
+
+config/name="Callie & Vallie"
+run/main_scene="res://main.tscn"
+
+[display]
+
+window/size/viewport_width=1152
+window/size/viewport_height=648
+window/size/window_width_override=1152
+window/size/window_height_override=648
+window/stretch/mode="canvas_items"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
+textures/canvas_textures/default_texture_filter=0
+environment/defaults/default_clear_color=Color(0.055, 0.09, 0.071, 1)
+
+[input]
+
+interact={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":69)]
+}
+tool_action={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":32)]
+}
+switch_character={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":81)]
+}
