@@ -6,7 +6,7 @@ import "./callievallie.css";
 export const metadata: Metadata = {
   title: "Callie & Vallie — Ann Symons",
   description:
-    "A cozy two-character farming life sim in a small valley. Design bible and playable prototype.",
+    "A cozy farming life sim in a small valley — farm, fish, cook, and befriend Callie, Vallie, and the townsfolk.",
   robots: { index: true, follow: true },
 };
 

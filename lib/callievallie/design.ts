@@ -1,6 +1,6 @@
 /**
  * Callie & Vallie — living game design bible.
- * Keep this the source of truth while systems are built.
+ * Keep this the source of truth while systems are customized on top of Sunsprout.
  */
 
 export const GAME = {
@@ -14,22 +14,22 @@ export const PILLARS = [
   {
     id: "two-hearts",
     title: "Two hearts, one farm",
-    body: "Callie and Vallie are equal protagonists. You switch between them — each has a tiny specialty, but neither is locked out of the core loop.",
+    body: "Callie and Vallie anchor the valley — hearth and shop. You arrive as the new farmer who ties their world together.",
   },
   {
     id: "small-valley",
     title: "A small valley that feels deep",
-    body: "One compact map first: farm, creek edge, and a path to town. Density over sprawl. Every tile should earn its place.",
+    body: "One compact map: farm, plaza, pond, and cave. Density over sprawl. Every tile should earn its place.",
   },
   {
     id: "gentle-days",
     title: "Gentle days, clear rhythms",
-    body: "Plant → water → sleep → harvest. Time always moves forward, never punishes. Missing a watering day slows growth; it never kills the crop.",
+    body: "Plant → water → sleep → harvest. Time moves forward. Seasons, weather, festivals, and friendships layer on top.",
   },
   {
     id: "hand-made cozy",
     title: "Hand-made cozy, not AAA polish",
-    body: "Chunky tiles, soft palette, readable silhouettes. Art should feel drawn for this valley — not asset-pack generic.",
+    body: "Procedural pixel art, soft palette, readable silhouettes. Built for the browser on Ann's site.",
   },
 ] as const;
 
@@ -38,86 +38,72 @@ export const CHARACTERS = [
     id: "callie",
     name: "Callie",
     accent: "#d45d6a",
-    specialty: "Crops & kitchen",
+    specialty: "Inn & kitchen",
     blurb:
-      "Morning person. Notices when soil is thirsty. Dreams of a market stall that always smells like jam.",
+      "Keeps Callie's Hearth warm. Recipes, soup, and a stool by the fire when the day runs long.",
   },
   {
     id: "vallie",
     name: "Vallie",
     accent: "#3d7ea6",
-    specialty: "Foraging & creatures",
+    specialty: "Shop & seeds",
     blurb:
-      "Night owl. Finds berries off the path. Talks to the creek like it might answer back.",
+      "Runs Vallie's General Goods. Seeds, tools, and the occasional packet slipped into your pocket.",
   },
 ] as const;
 
 export const MVP_LOOP = [
-  "Wake up on the farm (Callie or Vallie).",
-  "Walk the field, hoe empty dirt, plant seeds from the hotbar.",
-  "Water anything growing. Time ticks with each action and as you walk.",
-  "Forage the creek edge for a few wild items.",
-  "Sleep to advance the day. Crops grow overnight when watered.",
-  "Harvest, sell at the honor-box stand, buy more seeds.",
+  "Wake up on the farm and walk the village (WASD).",
+  "Till with T, plant with 1–4, water crops, harvest with E.",
+  "Sell at the village well · buy seeds from Vallie · cook with Callie.",
+  "Sleep at the farmhouse to advance the day — crops grow overnight.",
+  "Fish, mine, gift villagers, and open ? for the full control sheet.",
 ] as const;
 
 export const SYSTEMS_ROADMAP = [
   {
-    phase: "v0 — Shell",
+    phase: "v0 — Sunsprout foundation",
     status: "now",
     items: [
-      "Title screen + design bible on /callievallie",
-      "Playable tile farm prototype (walk, hoe, plant, water, harvest)",
-      "Day counter + localStorage save",
-      "Switch Callie ↔ Vallie",
+      "Vendored MIT Sunsprout engine at /callievallie",
+      "Callie & Vallie re-skin (names, inn, shop, save keys)",
+      "Title screen + design bible wrapper",
+      "Full farm / village / seasons / cooking / fishing / mining loop",
     ],
   },
   {
-    phase: "v1 — Farm feels alive",
+    phase: "v1 — Make it theirs",
     status: "next",
     items: [
-      "Season tint + simple weather (sunny / rain)",
-      "5 crops with distinct grow times & sell prices",
-      "Hotbar + backpack UI",
-      "Sleep cutscene / dawn wipe",
-      "Honor-box shop for seeds",
+      "Deeper Callie & Vallie dialogue + farm lore",
+      "Custom crops / palette tuned to the brand",
+      "Optional character framing (play as Callie or Vallie)",
+      "Nav link from the main site when ready for visitors",
     ],
   },
   {
-    phase: "v2 — Valley opens",
+    phase: "v2 — Valley polish",
     status: "later",
     items: [
-      "Creek forage spots & regenerating wild plants",
-      "One town path + 2 NPCs with short daily dialogue",
-      "Tiny kitchen craft (jam / tea)",
-      "Shared farm progress if both characters are used",
-    ],
-  },
-  {
-    phase: "v3 — Cozy depth",
-    status: "later",
-    items: [
-      "Animals (1 coop or pen)",
-      "Festivals / calendar events",
-      "Music + soft SFX",
-      "Optional cloud save via Neon for logged-in admin",
+      "Audio + soft SFX",
+      "Mobile touch controls",
+      "Cloud save via Neon for admin",
+      "Festivals themed to Ann's life / pets / recipes",
     ],
   },
 ] as const;
 
 export const TECH = {
   host: "Native Next.js route at /callievallie (full-screen, no site chrome) — same pattern as /holo-ttt.",
-  render: "Canvas 2D tile map + React HUD. No Phaser until we need scenes, cameras, or physics beyond tiles.",
-  data: "TypeScript modules for crops, tiles, dialogue. Easy for Cursor to extend.",
-  persist: "localStorage for v0/v1. Neon later if you want cross-device saves.",
-  art: "32×32 (or 16×16 upscaled) tiles. SVG or PNG spritesheet. Palette locked in CSS variables.",
-  input: "Keyboard + on-screen D-pad/buttons for mobile.",
+  render: "Sunsprout Canvas 2D engine (procedural pixels) + React title/design shell.",
+  data: "TypeScript modules under lib/callievallie/sunsprout — crops, NPCs, quests, save.",
+  persist: "localStorage callievallie.save.v1 (MIT Sunsprout persistence, rekeyed).",
+  art: "Procedural pixel art — no external spritesheets required.",
+  input: "Keyboard (full sheet via ?). Touch controls later.",
 } as const;
 
 export const OUT_OF_SCOPE_V0 = [
-  "Multiplayer / real-time co-op",
-  "Combat or mines",
-  "Modding / workshop",
-  "Pixel-perfect Stardew clone mechanics",
-  "Heavy 3D or WebGL world",
+  "Shipping ConcernedApe / Stardew Valley code or assets",
+  "Real-time online co-op server (local ?multiplayer=1 tabs only)",
+  "Native Godot/Unity build — this stays browser-native on Vercel",
 ] as const;

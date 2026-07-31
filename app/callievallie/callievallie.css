@@ -355,15 +355,37 @@ body:has(.cv-root)::before {
   gap: 0.25rem;
 }
 
-.cv-play {
-  min-height: 100dvh;
-  display: grid;
-  grid-template-rows: auto 1fr auto auto;
-  gap: 0.6rem;
-  padding: 0.75rem 0.75rem 1rem;
+.cv-credit {
+  margin: 0;
+  max-width: 32rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: rgba(36, 48, 40, 0.78);
+  text-wrap: balance;
 }
 
-.cv-hud {
+.cv-credit a {
+  color: var(--cv-sage-deep);
+  font-weight: 800;
+}
+
+.cv-note {
+  margin: 0.85rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: rgba(36, 48, 40, 0.78);
+}
+
+.cv-play {
+  min-height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 0.75rem;
+  padding: 0.75rem 0.75rem 1.25rem;
+}
+
+.cv-play-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -371,136 +393,43 @@ body:has(.cv-root)::before {
   gap: 0.5rem;
 }
 
-.cv-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  align-items: center;
-  justify-content: center;
+.cv-play-hint {
+  margin: 0;
+  color: var(--cv-paper);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+  opacity: 0.9;
 }
 
-.cv-stats > span,
-.cv-char-chip {
-  background: var(--cv-panel);
-  border-radius: 999px;
-  padding: 0.4rem 0.75rem;
-  font-size: 0.85rem;
-  font-weight: 800;
-}
-
-.cv-char-chip {
-  border: 0;
-  cursor: pointer;
-  color: #fff;
-  background: var(--char);
+.cv-boot-error {
+  margin: 2rem auto;
+  max-width: 28rem;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  background: #fee2e2;
+  color: #7f1d1d;
+  font-weight: 700;
+  text-align: center;
 }
 
 .cv-stage {
   display: grid;
   place-items: center;
-  overflow: auto;
   min-height: 0;
+  padding: 0.25rem;
 }
 
-.cv-canvas {
-  width: min(100%, 640px);
+.cv-game-canvas {
+  width: min(100%, 960px);
   height: auto;
-  border-radius: 1rem;
-  box-shadow: 0 18px 40px rgba(20, 30, 24, 0.35);
-  background: #2f4f3a;
+  background: #1a1426;
+  border: 2px solid #4a6b52;
+  border-radius: 12px;
+  box-shadow: 0 18px 50px rgba(20, 30, 24, 0.45);
   image-rendering: pixelated;
-}
-
-.cv-toast {
-  margin: 0;
-  text-align: center;
-  color: var(--cv-paper);
-  font-size: 0.85rem;
-  font-weight: 700;
-  opacity: 0.9;
-}
-
-.cv-controls {
-  display: grid;
-  gap: 0.65rem;
-  max-width: 720px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.cv-tools,
-.cv-hotbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  justify-content: center;
-}
-
-.cv-tool,
-.cv-slot {
-  appearance: none;
-  border: 0;
-  border-radius: 0.85rem;
-  padding: 0.55rem 0.8rem;
-  font: inherit;
-  font-weight: 800;
-  font-size: 0.82rem;
-  background: var(--cv-panel);
-  color: var(--cv-ink);
-  cursor: pointer;
-}
-
-.cv-tool.is-active,
-.cv-slot.is-active {
-  outline: 3px solid var(--cv-honey);
-  background: #fff8e8;
-}
-
-.cv-slot {
-  display: grid;
-  gap: 0.1rem;
-  min-width: 6.5rem;
-  text-align: left;
-}
-
-.cv-slot em {
-  font-style: normal;
-  opacity: 0.7;
-  font-size: 0.75rem;
-}
-
-.cv-empty {
-  color: var(--cv-paper);
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-
-.cv-dpad {
-  display: grid;
-  justify-items: center;
-  gap: 0.35rem;
-  margin-top: 0.25rem;
-}
-
-.cv-dpad > div {
-  display: flex;
-  gap: 0.35rem;
-}
-
-.cv-dpad button {
-  width: 3rem;
-  height: 3rem;
-  border: 0;
-  border-radius: 0.9rem;
-  font: inherit;
-  font-weight: 800;
-  background: var(--cv-panel);
-  cursor: pointer;
-}
-
-.cv-dpad .cv-act {
-  width: 4.5rem;
-  background: var(--cv-honey);
+  image-rendering: crisp-edges;
+  outline: none;
 }
 
 @keyframes cv-rise {
