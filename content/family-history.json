@@ -68,15 +68,18 @@
         "705532",
         "730562"
       ],
-      "summary": "Frederick Charles Crosier (29 Sep 1925 \u2013 25 Feb 2020) married Dolores Marie Altz Crosier (22 Oct 1930, Oakland County, MI \u2013 11 Dec 2005, Rochester Hills, MI) on 17 May 1952. Their children include Kathleen Marie, Kenneth Frederick, Kerry Michael, Kevin Jerome, Kristopher J., and Karolyn Crosier. Frederick served in WWII (branch/unit not yet found online). Family-confirmed railroad career: he worked for Penn Central and later Conrail (Conrail took over much of Penn Central in 1976); his last railroad location was Sterling Yard off 16 Mile Road near Van Dyke in Sterling Heights. Public records also associate him with Universal Computer Systems (Rochester Hills area). Dolores worked in a school cafeteria (school unknown) and quilted.",
+      "summary": "Frederick Charles Crosier (29 Sep 1925 \u2013 25 Feb 2020) married Dolores Marie Altz Crosier (22 Oct 1930, Oakland County, MI \u2013 11 Dec 2005, Rochester Hills, MI) on 17 May 1952. Their children include Kathleen Marie, Kenneth Frederick, Kerry Michael, Kevin Jerome, Kristopher J., and Karolyn Crosier. Frederick served in WWII (branch/unit not yet found online). Family-confirmed railroad career: Penn Central and Conrail; last location Sterling Yard (off 16 Mile near Van Dyke, Sterling Heights). Public context: that yard sits on the old Michigan Central Detroit\u2013Bay City line (later New York Central, then Penn Central from 1 Feb 1968, then Conrail from 1 Apr 1976). Sterling Yard\u2019s south end (\u201cWS\u201d) is between 15 and 16 Mile; the yard itself is near 16\u201317 Mile and served heavy auto traffic (Chrysler Sterling Heights assembly/stamping; Ford plants via the Utica Industrial Track / Van Dyke corridor). No public employee roster naming Frederick has been found yet. Later work: Universal Computer Systems (Rochester Hills area, family-confirmed) \u2014 the best-known firm by that name was the Houston auto-dealership software company that merged into Reynolds and Reynolds in 2006 and had Detroit-area field presence; a smaller local shop of the same name is also possible. Dolores worked in a school cafeteria (school unknown) and quilted. Modetz funeral listing confirms dates but has no published career narrative.",
       "highlights": [
         "Married 17 May 1952",
         "Children: Kathleen Marie (Kathy, d. 4 Apr 2009 Troy), Kenneth Frederick (Kenny), Kerry Michael, Kevin Jerome, Kristopher J., Karolyn",
         "Kathy\u2019s son David; granddaughter Samantha",
         "Dolores birth Oakland County / death Rochester Hills (public trees)",
-        "Railroad: Penn Central \u2192 Conrail (family memory; successive companies)",
-        "Last railroad location: Sterling Yard, off 16 Mile near Van Dyke, Sterling Heights",
-        "Later work: Universal Computer Systems (family-confirmed / public email association)",
+        "Railroad employers (family): Penn Central \u2192 Conrail (successive companies, not literally one continuous legal entity)",
+        "Corporate line history at Sterling: Michigan Central \u2192 NYC \u2192 Penn Central (1968) \u2192 Conrail (1976) \u2192 Conrail Shared Assets (post-1999)",
+        "Last railroad location: Sterling Yard, Sterling Heights \u2014 off 16 Mile near Van Dyke (family); WS / south end between 15\u201316 Mile (railroad maps)",
+        "Yard role historically: auto switching for Chrysler Sterling Heights + Ford plants north on Utica Industrial / Van Dyke",
+        "Public search: no named Crosier on Conrail/Penn Central employee lists found yet",
+        "Later work: Universal Computer Systems (Rochester Hills area, family); likely auto-dealer IT / Reynolds lineage or a local firm of that name",
         "Dolores: cafeteria work + quilting (family memory)",
         "Frederick WWII branch/unit: still unknown",
         "Kathy Crosier funeral Mass: St. Elizabeth Ann Seton Church, Troy (2009)"
@@ -99,12 +102,28 @@
           "url": "http://www.knorek.com/RR/SAA/NorthYardSter/NorthYardSterlingIndex.htm"
         },
         {
+          "label": "michiganrailroads.com \u2014 Sterling Heights station / NYC yard photo 1965",
+          "url": "https://www.michiganrailroads.com/stations-locations/114-macomb-county-50/1328-sterling-heights-mi"
+        },
+        {
+          "label": "michiganrailroads.com \u2014 Penn Central Company",
+          "url": "https://michiganrailroads.com/railroads-in-history/484-n-p/3913-penn-central-company"
+        },
+        {
+          "label": "michiganrailroads.com \u2014 Conrail",
+          "url": "https://michiganrailroads.com/railroads-in-history/458-c/3385-conrail-consolidated-rail-corporation"
+        },
+        {
           "label": "Railroadfan \u2014 Conrail Sterling Yard photo",
           "url": "https://ftp.railroadfan.com/gallery/displayimage-1254-42808.html"
         },
         {
           "label": "Penn Central Railroad Online \u2014 Sterling Yard, Sterling Heights",
           "url": "http://pc.railfan.net/pics/northern/index.html"
+        },
+        {
+          "label": "Wikipedia \u2014 Reynolds and Reynolds (UCS merger 2006)",
+          "url": "https://en.wikipedia.org/wiki/Reynolds_and_Reynolds"
         }
       ]
     },
@@ -496,7 +515,8 @@
       "summary": "These details are interesting for the Family History page but are not confirmed from public trees/military pages yet \u2014 family memory or uploads will help.",
       "highlights": [
         "Frederick Crosier WWII branch / unit",
-        "Frederick railroad job title / years at Penn Central\u2013Conrail Sterling Yard",
+        "Frederick railroad job title / years (and whether he started under NYC before Penn Central)",
+        "Frederick Universal Computer Systems role / years (confirm Houston UCS/Reynolds vs local firm)",
         "Otto Krause postwar job / death date",
         "Geraldine\u2019s exact Somerset Collection store name",
         "Which school cafeteria Dolores worked in",
