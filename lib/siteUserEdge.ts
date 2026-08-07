@@ -28,44 +28,61 @@ function parseAllowedPages(value: unknown): string[] {
   return [];
 }
 
-/**
- * Resolve an approved site-user session from the request cookie (Edge-safe).
- */
-export async function resolveSiteUserAccess(
-  cookieHeaderValue: string | undefined,
-  pathname: string
-): Promise<"allow" | "deny" | "none"> {
+export type SiteUserEdgeAccess =
+  | { kind: "owner" }
+  | { kind: "member"; pages: string[] }
+  | { kind: "deny" }
+  | { kind: "none" };
+
+export async function resolveSiteUserSession(
+  cookieHeaderValue: string | undefined
+): Promise<SiteUserEdgeAccess> {
   const parsed = parseSiteUserCookie(cookieHeaderValue);
-  if (!parsed) return "none";
+  if (!parsed) return { kind: "none" };
 
   const url = process.env.DATABASE_URL?.trim();
   if (!url || !(url.startsWith("postgresql://") || url.startsWith("postgres://"))) {
-    return "deny";
+    return { kind: "deny" };
   }
 
   try {
     const sql = neon(url);
     const rows = await sql`
-      SELECT id, password_hash, status, allowed_pages
+      SELECT id, password_hash, status, role, allowed_pages
       FROM site_users
       WHERE id = ${parsed.id}
       LIMIT 1
     `;
     const row = (rows as Record<string, unknown>[])[0];
-    if (!row) return "deny";
-    if (String(row.status ?? "") !== "approved") return "deny";
+    if (!row) return { kind: "deny" };
+    if (String(row.status ?? "") !== "approved") return { kind: "deny" };
 
     const expected = await sha256Hex(
       `${Number(row.id)}:${String(row.password_hash ?? "")}:${SALT}`
     );
-    if (parsed.token !== expected) return "deny";
+    if (parsed.token !== expected) return { kind: "deny" };
+
+    if (String(row.role ?? "") === "owner") {
+      return { kind: "owner" };
+    }
 
     const pages = parseAllowedPages(row.allowed_pages);
-    if (pages.length === 0) return "deny";
-    return pathIsAllowed(pathname, pages) ? "allow" : "deny";
+    if (pages.length === 0) return { kind: "deny" };
+    return { kind: "member", pages };
   } catch {
-    return "deny";
+    return { kind: "deny" };
   }
+}
+
+export async function resolveSiteUserAccess(
+  cookieHeaderValue: string | undefined,
+  pathname: string
+): Promise<"allow" | "deny" | "none"> {
+  const session = await resolveSiteUserSession(cookieHeaderValue);
+  if (session.kind === "none") return "none";
+  if (session.kind === "deny") return "deny";
+  if (session.kind === "owner") return "allow";
+  return pathIsAllowed(pathname, session.pages) ? "allow" : "deny";
 }
 
 export { SITE_USER_COOKIE };

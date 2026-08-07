@@ -164,6 +164,7 @@ export default function ManageUsersClient({
 
       <ul className="space-y-6">
         {users.map((user) => {
+          const isOwnerRow = user.role === "owner";
           const draft = drafts[user.id] ?? {
             status: user.status,
             allowedPages: user.allowedPages,
@@ -175,6 +176,11 @@ export default function ManageUsersClient({
                 <div>
                   <h2 className="font-heading text-xl font-semibold text-[var(--color-ink)]">
                     {user.name}
+                    {isOwnerRow ? (
+                      <span className="ml-2 text-xs font-bold uppercase tracking-wider text-[var(--color-accent)]">
+                        Super admin
+                      </span>
+                    ) : null}
                   </h2>
                   <p className="text-sm text-[var(--color-muted)]">{user.email}</p>
                   <p className="mt-1 text-xs text-[var(--color-muted)]">
@@ -182,95 +188,105 @@ export default function ManageUsersClient({
                     {user.decidedAt ? ` · Updated ${user.decidedAt.slice(0, 10)}` : ""}
                   </p>
                 </div>
-                <label className="mt-3 flex items-center gap-2 text-sm sm:mt-0">
-                  <span className="text-[var(--color-muted)]">Status</span>
-                  <select
-                    className="neo-input !w-auto !py-1.5"
-                    value={draft.status}
-                    onChange={(e) =>
-                      setDrafts((prev) => ({
-                        ...prev,
-                        [user.id]: {
-                          ...draft,
-                          status: e.target.value as SiteUserStatus,
-                        },
-                      }))
-                    }
-                  >
-                    {STATUS_OPTIONS.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                {isOwnerRow ? (
+                  <p className="mt-3 text-sm text-[var(--color-accent)] sm:mt-0">
+                    Full access · cannot be edited here
+                  </p>
+                ) : (
+                  <label className="mt-3 flex items-center gap-2 text-sm sm:mt-0">
+                    <span className="text-[var(--color-muted)]">Status</span>
+                    <select
+                      className="neo-input !w-auto !py-1.5"
+                      value={draft.status}
+                      onChange={(e) =>
+                        setDrafts((prev) => ({
+                          ...prev,
+                          [user.id]: {
+                            ...draft,
+                            status: e.target.value as SiteUserStatus,
+                          },
+                        }))
+                      }
+                    >
+                      {STATUS_OPTIONS.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
               </div>
 
-              <fieldset className="mt-5">
-                <legend className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--color-muted)]">
-                  Pages they can see
-                </legend>
-                <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                  {GRANTABLE_ADMIN_PAGES.map((page) => {
-                    const checked = draft.allowedPages.includes(page.href);
-                    return (
-                      <label
-                        key={page.href}
-                        className="flex cursor-pointer items-start gap-2 rounded-xl px-2 py-1.5 text-sm hover:shadow-[var(--neo-shadow-out-sm)]"
-                      >
-                        <input
-                          type="checkbox"
-                          className="mt-1"
-                          checked={checked}
-                          onChange={() => togglePage(user.id, page.href)}
-                        />
-                        <span>
-                          <span className="font-medium text-[var(--color-ink)]">
-                            {page.label}
-                          </span>
-                          <span className="block text-xs text-[var(--color-muted)]">
-                            {page.href}
-                          </span>
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </fieldset>
+              {isOwnerRow ? null : (
+                <>
+                  <fieldset className="mt-5">
+                    <legend className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--color-muted)]">
+                      Pages they can see
+                    </legend>
+                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                      {GRANTABLE_ADMIN_PAGES.map((page) => {
+                        const checked = draft.allowedPages.includes(page.href);
+                        return (
+                          <label
+                            key={page.href}
+                            className="flex cursor-pointer items-start gap-2 rounded-xl px-2 py-1.5 text-sm hover:shadow-[var(--neo-shadow-out-sm)]"
+                          >
+                            <input
+                              type="checkbox"
+                              className="mt-1"
+                              checked={checked}
+                              onChange={() => togglePage(user.id, page.href)}
+                            />
+                            <span>
+                              <span className="font-medium text-[var(--color-ink)]">
+                                {page.label}
+                              </span>
+                              <span className="block text-xs text-[var(--color-muted)]">
+                                {page.href}
+                              </span>
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </fieldset>
 
-              <label className="mt-4 block text-sm">
-                <span className="text-[var(--color-muted)]">Note (optional)</span>
-                <input
-                  className="neo-input mt-1"
-                  value={draft.adminNote}
-                  onChange={(e) =>
-                    setDrafts((prev) => ({
-                      ...prev,
-                      [user.id]: { ...draft, adminNote: e.target.value },
-                    }))
-                  }
-                  placeholder="Why approved / which access"
-                />
-              </label>
+                  <label className="mt-4 block text-sm">
+                    <span className="text-[var(--color-muted)]">Note (optional)</span>
+                    <input
+                      className="neo-input mt-1"
+                      value={draft.adminNote}
+                      onChange={(e) =>
+                        setDrafts((prev) => ({
+                          ...prev,
+                          [user.id]: { ...draft, adminNote: e.target.value },
+                        }))
+                      }
+                      placeholder="Why approved / which access"
+                    />
+                  </label>
 
-              <div className="mt-4 flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  className="neo-btn-primary !min-h-10 !px-4 !py-2 disabled:opacity-50"
-                  disabled={pending}
-                  onClick={() => saveUser(user.id)}
-                >
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className="neo-btn !min-h-10 !px-4 !py-2 disabled:opacity-50"
-                  disabled={pending}
-                  onClick={() => removeUser(user.id)}
-                >
-                  Delete
-                </button>
-              </div>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      className="neo-btn-primary !min-h-10 !px-4 !py-2 disabled:opacity-50"
+                      disabled={pending}
+                      onClick={() => saveUser(user.id)}
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      className="neo-btn !min-h-10 !px-4 !py-2 disabled:opacity-50"
+                      disabled={pending}
+                      onClick={() => removeUser(user.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </>
+              )}
             </li>
           );
         })}

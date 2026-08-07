@@ -5,9 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function AdminLoginForm({ nextPath = "/admin" }: { nextPath?: string }) {
-  const [mode, setMode] = useState<"password" | "account">("password");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -20,13 +19,11 @@ export default function AdminLoginForm({ nextPath = "/admin" }: { nextPath?: str
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          mode === "account" ? { email, password } : { password }
-        ),
+        body: JSON.stringify({ username, password }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Invalid login");
+        setError(data.error || "Invalid username or password");
         return;
       }
       const dest =
@@ -44,51 +41,30 @@ export default function AdminLoginForm({ nextPath = "/admin" }: { nextPath?: str
 
   return (
     <div className="mt-6">
-      <div className="mb-4 flex gap-2 text-sm">
-        <button
-          type="button"
-          className={`rounded-xl px-3 py-1.5 ${
-            mode === "password"
-              ? "font-semibold text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
-              : "text-[var(--color-muted)]"
-          }`}
-          onClick={() => setMode("password")}
-        >
-          Admin password
-        </button>
-        <button
-          type="button"
-          className={`rounded-xl px-3 py-1.5 ${
-            mode === "account"
-              ? "font-semibold text-[var(--color-accent)] shadow-[var(--neo-shadow-in-sm)]"
-              : "text-[var(--color-muted)]"
-          }`}
-          onClick={() => setMode("account")}
-        >
-          Email login
-        </button>
-      </div>
-
       <form onSubmit={handleSubmit} className="space-y-4">
-        {mode === "account" ? (
-          <div>
-            <label htmlFor="email" className="sr-only">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              className="neo-input"
-              autoComplete="username"
-              required
-            />
-          </div>
-        ) : null}
         <div>
-          <label htmlFor="password" className="sr-only">
+          <label
+            htmlFor="username"
+            className="mb-1 block text-sm text-[var(--color-muted)]"
+          >
+            Username
+          </label>
+          <input
+            id="username"
+            type="email"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Email"
+            className="neo-input"
+            autoComplete="username"
+            required
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="password"
+            className="mb-1 block text-sm text-[var(--color-muted)]"
+          >
             Password
           </label>
           <input
@@ -98,15 +74,15 @@ export default function AdminLoginForm({ nextPath = "/admin" }: { nextPath?: str
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
             className="neo-input"
-            autoComplete={mode === "account" ? "current-password" : "current-password"}
+            autoComplete="current-password"
             required
           />
         </div>
-        {error && (
+        {error ? (
           <p className="text-sm text-red-600" role="alert">
             {error}
           </p>
-        )}
+        ) : null}
         <button
           type="submit"
           disabled={loading}
@@ -116,12 +92,12 @@ export default function AdminLoginForm({ nextPath = "/admin" }: { nextPath?: str
         </button>
       </form>
 
-      <p className="mt-4 text-center text-xs text-[var(--color-muted)]">
-        Need access?{" "}
-        <Link href="/request-access" className="neo-link text-xs">
-          Request a login
-        </Link>
-      </p>
+      <Link
+        href="/request-access"
+        className="neo-btn mt-3 flex w-full items-center justify-center !min-h-11"
+      >
+        Create account
+      </Link>
     </div>
   );
 }

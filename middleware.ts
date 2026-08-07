@@ -4,6 +4,7 @@ import { isLinkPreviewBot } from "@/lib/linkPreviewBots";
 import { getAllAdminPasswords, getAllTasksPasswords } from "@/lib/tasksPassword";
 import {
   resolveSiteUserAccess,
+  resolveSiteUserSession,
   SITE_USER_COOKIE,
 } from "@/lib/siteUserEdge";
 
@@ -112,22 +113,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Manage Users: owner (ADMIN_PASSWORD) only — never Tim or site users.
+  // Manage Users: owner account only (Ann’s email login).
   if (path === "/admin/users" || path.startsWith("/admin/users/")) {
-    const adminPassword = process.env.ADMIN_PASSWORD?.trim() ?? "";
-    const cookie = request.cookies.get(ADMIN_COOKIE)?.value;
-    if (
-      adminPassword &&
-      cookie &&
-      cookie === (await sha256(adminPassword + ADMIN_SALT))
-    ) {
-      return NextResponse.next();
-    }
-    if (await hasSharedAdminSession(request)) {
+    const siteCookie = request.cookies.get(SITE_USER_COOKIE)?.value;
+    const session = await resolveSiteUserSession(siteCookie);
+    if (session.kind === "owner") return NextResponse.next();
+    if (session.kind === "member" || (await hasSharedAdminSession(request))) {
       return forbiddenRedirect(request);
     }
-    const siteCookie = request.cookies.get(SITE_USER_COOKIE)?.value;
-    if (siteCookie) return forbiddenRedirect(request);
     return loginRedirect(request, path);
   }
 

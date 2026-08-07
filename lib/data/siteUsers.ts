@@ -1,6 +1,7 @@
 import { getSql, getSqlOrThrow } from "@/lib/db";
 import { hashPassword, verifyPassword } from "@/lib/passwordHash";
 import { normalizeAllowedPages } from "@/lib/admin/pageAccess";
+import { getOwnerEmail } from "@/lib/ownerAccount";
 
 export const SITE_USER_STATUSES = [
   "pending",
@@ -9,12 +10,16 @@ export const SITE_USER_STATUSES = [
   "disabled",
 ] as const;
 
+export const SITE_USER_ROLES = ["owner", "member"] as const;
+
 export type SiteUserStatus = (typeof SITE_USER_STATUSES)[number];
+export type SiteUserRole = (typeof SITE_USER_ROLES)[number];
 
 export type SiteUserRow = {
   id: number;
   name: string;
   email: string;
+  role: SiteUserRole;
   status: SiteUserStatus;
   allowedPages: string[];
   adminNote: string | null;
@@ -30,11 +35,23 @@ export type SiteUserAuthRow = SiteUserRow & {
 export const SITE_USERS_MIGRATION_HINT =
   "Run db/site-users.sql on the Neon database to enable account requests.";
 
+const SELECT_USER_COLS = `
+  id, name, email, role, password_hash, status, allowed_pages, admin_note,
+  created_at::text AS created_at,
+  decided_at::text AS decided_at,
+  updated_at::text AS updated_at
+`;
+
 function normalizeStatus(value: unknown): SiteUserStatus {
   const s = typeof value === "string" ? value.trim().toLowerCase() : "";
   return (SITE_USER_STATUSES as readonly string[]).includes(s)
     ? (s as SiteUserStatus)
     : "pending";
+}
+
+function normalizeRole(value: unknown): SiteUserRole {
+  const s = typeof value === "string" ? value.trim().toLowerCase() : "";
+  return s === "owner" ? "owner" : "member";
 }
 
 function normalizeEmail(value: unknown): string | null {
@@ -68,6 +85,7 @@ function mapRow(row: Record<string, unknown>): SiteUserRow {
     id: Number(row.id),
     name: String(row.name ?? ""),
     email: String(row.email ?? ""),
+    role: normalizeRole(row.role),
     status: normalizeStatus(row.status),
     allowedPages: parseAllowedPagesColumn(row.allowed_pages),
     adminNote: row.admin_note != null ? String(row.admin_note) : null,
@@ -89,12 +107,13 @@ export async function listSiteUsers(): Promise<SiteUserRow[]> {
   if (!sql) return [];
   try {
     const rows = await sql`
-      SELECT id, name, email, status, allowed_pages, admin_note,
+      SELECT id, name, email, role, status, allowed_pages, admin_note,
              created_at::text AS created_at,
              decided_at::text AS decided_at,
              updated_at::text AS updated_at
       FROM site_users
       ORDER BY
+        CASE role WHEN 'owner' THEN 0 ELSE 1 END,
         CASE status
           WHEN 'pending' THEN 0
           WHEN 'approved' THEN 1
@@ -115,7 +134,7 @@ export async function getSiteUserById(id: number): Promise<SiteUserAuthRow | nul
   if (!sql || !Number.isFinite(id) || id < 1) return null;
   try {
     const rows = await sql`
-      SELECT id, name, email, password_hash, status, allowed_pages, admin_note,
+      SELECT id, name, email, role, password_hash, status, allowed_pages, admin_note,
              created_at::text AS created_at,
              decided_at::text AS decided_at,
              updated_at::text AS updated_at
@@ -138,7 +157,7 @@ export async function getSiteUserByEmail(
   if (!sql || !email) return null;
   try {
     const rows = await sql`
-      SELECT id, name, email, password_hash, status, allowed_pages, admin_note,
+      SELECT id, name, email, role, password_hash, status, allowed_pages, admin_note,
              created_at::text AS created_at,
              decided_at::text AS decided_at,
              updated_at::text AS updated_at
@@ -167,6 +186,12 @@ export async function createSiteUserRequest(
   const password = typeof input.password === "string" ? input.password : "";
   if (!name) return { ok: false, error: "Name is required." };
   if (!email) return { ok: false, error: "A valid email is required." };
+  if (email === getOwnerEmail()) {
+    return {
+      ok: false,
+      error: "That email is reserved for the site owner. Sign in on the admin login page.",
+    };
+  }
   if (password.length < 8) {
     return { ok: false, error: "Password must be at least 8 characters." };
   }
@@ -186,9 +211,9 @@ export async function createSiteUserRequest(
     const sql = getSqlOrThrow();
     const passwordHash = hashPassword(password);
     const rows = await sql`
-      INSERT INTO site_users (name, email, password_hash, status, allowed_pages)
-      VALUES (${name}, ${email}, ${passwordHash}, 'pending', '[]')
-      RETURNING id, name, email, status, allowed_pages, admin_note,
+      INSERT INTO site_users (name, email, password_hash, role, status, allowed_pages)
+      VALUES (${name}, ${email}, ${passwordHash}, 'member', 'pending', '[]')
+      RETURNING id, name, email, role, status, allowed_pages, admin_note,
                 created_at::text AS created_at,
                 decided_at::text AS decided_at,
                 updated_at::text AS updated_at
@@ -219,9 +244,9 @@ export async function authenticateSiteUser(
   | { ok: false; error: string }
 > {
   const user = await getSiteUserByEmail(emailRaw);
-  if (!user) return { ok: false, error: "Invalid email or password." };
+  if (!user) return { ok: false, error: "Invalid username or password." };
   if (!verifyPassword(password, user.passwordHash)) {
-    return { ok: false, error: "Invalid email or password." };
+    return { ok: false, error: "Invalid username or password." };
   }
   if (user.status === "pending") {
     return {
@@ -235,7 +260,7 @@ export async function authenticateSiteUser(
   if (user.status === "disabled") {
     return { ok: false, error: "This account has been disabled." };
   }
-  if (user.allowedPages.length === 0) {
+  if (user.role !== "owner" && user.allowedPages.length === 0) {
     return {
       ok: false,
       error: "Your account is approved but has no page access yet.",
@@ -256,6 +281,9 @@ export async function updateSiteUser(
 ): Promise<SiteUserRow | null> {
   const current = await getSiteUserById(id);
   if (!current) return null;
+  if (current.role === "owner") {
+    throw new Error("The owner account cannot be edited here.");
+  }
 
   const status = input.status ? normalizeStatus(input.status) : current.status;
   const allowedPages =
@@ -281,8 +309,8 @@ export async function updateSiteUser(
           admin_note = ${adminNote},
           decided_at = NOW(),
           updated_at = NOW()
-        WHERE id = ${id}
-        RETURNING id, name, email, status, allowed_pages, admin_note,
+        WHERE id = ${id} AND role = 'member'
+        RETURNING id, name, email, role, status, allowed_pages, admin_note,
                   created_at::text AS created_at,
                   decided_at::text AS decided_at,
                   updated_at::text AS updated_at
@@ -294,8 +322,8 @@ export async function updateSiteUser(
           allowed_pages = ${allowedPagesJson},
           admin_note = ${adminNote},
           updated_at = NOW()
-        WHERE id = ${id}
-        RETURNING id, name, email, status, allowed_pages, admin_note,
+        WHERE id = ${id} AND role = 'member'
+        RETURNING id, name, email, role, status, allowed_pages, admin_note,
                   created_at::text AS created_at,
                   decided_at::text AS decided_at,
                   updated_at::text AS updated_at
@@ -305,9 +333,14 @@ export async function updateSiteUser(
 }
 
 export async function deleteSiteUser(id: number): Promise<boolean> {
+  const current = await getSiteUserById(id);
+  if (!current) return false;
+  if (current.role === "owner") {
+    throw new Error("The owner account cannot be deleted.");
+  }
   const sql = getSqlOrThrow();
   const rows = await sql`
-    DELETE FROM site_users WHERE id = ${id} RETURNING id
+    DELETE FROM site_users WHERE id = ${id} AND role = 'member' RETURNING id
   `;
   return (rows as unknown[]).length > 0;
 }
@@ -317,7 +350,9 @@ export async function countPendingSiteUsers(): Promise<number> {
   if (!sql) return 0;
   try {
     const rows = await sql`
-      SELECT COUNT(*)::int AS count FROM site_users WHERE status = 'pending'
+      SELECT COUNT(*)::int AS count
+      FROM site_users
+      WHERE status = 'pending' AND role = 'member'
     `;
     return Number((rows as Record<string, unknown>[])[0]?.count ?? 0);
   } catch {

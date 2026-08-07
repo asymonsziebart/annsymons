@@ -1,49 +1,66 @@
 import { NextResponse } from "next/server";
-import { setAdminSession, clearAdminSession } from "@/lib/auth";
+import { clearAdminSession, setAdminSession } from "@/lib/auth";
 import { setTasksSession } from "@/lib/tasksAuth";
-import { getAllAdminPasswords } from "@/lib/tasksPassword";
+import { getAdminPassword, getTimPassword } from "@/lib/tasksPassword";
 import { clearSiteUserSession, loginSiteUser } from "@/lib/siteUserAuth";
 import { firstAllowedPath } from "@/lib/admin/pageAccess";
+import { getOwnerEmail } from "@/lib/ownerAccount";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const username = String(body?.username ?? body?.email ?? "").trim();
     const password = String(body?.password ?? "");
-    const email = String(body?.email ?? "").trim();
 
-    // Account login (email + password)
-    if (email) {
-      const result = await loginSiteUser(email, password);
-      if (!result.ok) {
-        return NextResponse.json({ error: result.error }, { status: 401 });
-      }
+    if (!username || !password) {
+      return NextResponse.json(
+        { error: "Username and password are required." },
+        { status: 400 }
+      );
+    }
+
+    // Primary path: email account (including Ann’s owner email)
+    const result = await loginSiteUser(username, password);
+    if (result.ok) {
       await clearAdminSession();
+      // Owner also unlocks /tasks with the env admin password when they used it
+      const adminPassword = getAdminPassword();
+      if (result.user.role === "owner" && adminPassword) {
+        await setTasksSession(adminPassword);
+      }
       return NextResponse.json({
         ok: true,
-        kind: "site-user",
-        next: firstAllowedPath(result.user.allowedPages),
+        kind: result.user.role === "owner" ? "owner" : "site-user",
+        next:
+          result.user.role === "owner"
+            ? "/admin"
+            : firstAllowedPath(result.user.allowedPages),
       });
     }
 
-    // Shared admin password (Ann / Tim)
-    const valid = getAllAdminPasswords();
-    if (valid.length === 0) {
-      return NextResponse.json(
-        {
-          error:
-            "Admin login is not configured. Set ADMIN_PASSWORD (and optionally TASKS_PASSWORD_TIM) in your environment (e.g. Vercel).",
-        },
-        { status: 500 }
-      );
+    // Optional Tim bridge: username "tim" + TASKS_PASSWORD_TIM (full admin, not owner)
+    const timPassword = getTimPassword();
+    if (
+      timPassword &&
+      password === timPassword &&
+      ["tim", "timothy", "timothy.symons"].includes(username.toLowerCase())
+    ) {
+      await clearSiteUserSession();
+      await setAdminSession(timPassword);
+      await setTasksSession(timPassword);
+      return NextResponse.json({ ok: true, kind: "shared-admin", next: "/admin" });
     }
-    const match = valid.find((p) => p === password.trim());
-    if (match == null) {
-      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
-    }
-    await clearSiteUserSession();
-    await setAdminSession(match);
-    await setTasksSession(match);
-    return NextResponse.json({ ok: true, kind: "admin", next: "/admin" });
+
+    return NextResponse.json(
+      {
+        error: result.error,
+        hint:
+          username.toLowerCase() === getOwnerEmail()
+            ? "Use your owner email and ADMIN_PASSWORD (or your saved owner password)."
+            : undefined,
+      },
+      { status: 401 }
+    );
   } catch {
     return NextResponse.json(
       { error: "Something went wrong" },

@@ -24,7 +24,7 @@ function getValidAdminSessionTokenSet(): Set<string> {
   return s;
 }
 
-/** Set session after login with the exact password entered (so Tim vs primary hash differs). */
+/** Legacy shared-password session (Tim / transitional). Prefer email logins. */
 export async function setAdminSession(plainPassword: string): Promise<void> {
   const token = sessionTokenForPassword(plainPassword);
   if (!token) return;
@@ -33,7 +33,7 @@ export async function setAdminSession(plainPassword: string): Promise<void> {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7, // 1 week
+    maxAge: 60 * 60 * 24 * 7,
     path: "/",
   });
 }
@@ -43,7 +43,7 @@ export async function clearAdminSession(): Promise<void> {
   c.delete(COOKIE_NAME);
 }
 
-/** Shared-password admin (Ann ADMIN_PASSWORD or Tim TASKS_PASSWORD_TIM). */
+/** Shared-password admin cookie (Tim TASKS_PASSWORD_TIM, or legacy ADMIN_PASSWORD cookie). */
 export async function isSharedAdmin(): Promise<boolean> {
   const c = await cookies();
   const cookie = c.get(COOKIE_NAME)?.value;
@@ -51,36 +51,29 @@ export async function isSharedAdmin(): Promise<boolean> {
   return getValidAdminSessionTokenSet().has(cookie);
 }
 
-/**
- * True for shared-password admins OR an approved site-user account.
- * Use for showing admin chrome; use canAccessPath for page gates.
- */
 export async function isAdmin(): Promise<boolean> {
+  if (await isOwner()) return true;
   if (await isSharedAdmin()) return true;
   const user = await getSiteUserSession();
   return user != null;
 }
 
-/** Only Ann’s ADMIN_PASSWORD session (not Tim, not site users). */
+/** Super admin: approved site user with role=owner (Ann’s email account). */
 export async function isOwner(): Promise<boolean> {
-  const adminPassword = getAdminPassword();
-  if (!adminPassword) return false;
-  const c = await cookies();
-  const cookie = c.get(COOKIE_NAME)?.value;
-  if (!cookie) return false;
-  return cookie === sessionTokenForPassword(adminPassword);
+  const user = await getSiteUserSession();
+  return user?.role === "owner";
 }
 
 export type AccessContext =
-  | { kind: "owner" }
+  | { kind: "owner"; user: SiteUserRow }
   | { kind: "shared-admin" }
   | { kind: "site-user"; user: SiteUserRow }
   | { kind: "none" };
 
 export async function getAccessContext(): Promise<AccessContext> {
-  if (await isOwner()) return { kind: "owner" };
-  if (await isSharedAdmin()) return { kind: "shared-admin" };
   const user = await getSiteUserSession();
+  if (user?.role === "owner") return { kind: "owner", user };
+  if (await isSharedAdmin()) return { kind: "shared-admin" };
   if (user) return { kind: "site-user", user };
   return { kind: "none" };
 }
@@ -94,7 +87,6 @@ export async function canAccessPath(pathname: string): Promise<boolean> {
   return false;
 }
 
-/** Pages the current viewer may see in nav / dashboard. null = all grantable pages. */
 export async function getVisibleAdminHrefs(): Promise<string[] | null> {
   const ctx = await getAccessContext();
   if (ctx.kind === "owner" || ctx.kind === "shared-admin") return null;
@@ -102,18 +94,15 @@ export async function getVisibleAdminHrefs(): Promise<string[] | null> {
   return [];
 }
 
-/**
- * API gate for a private page area.
- * Shared-password admins pass; approved site users need that page in their allowlist.
- */
 export async function canUseAdminApi(pageHref: string): Promise<boolean> {
+  if (await isOwner()) return true;
   if (await isSharedAdmin()) return true;
   const user = await getSiteUserSession();
   if (!user) return false;
   return user.allowedPages.includes(pageHref);
 }
 
-/** @deprecated prefer getAllAdminPasswords + per-password tokens; kept for edge tooling */
+/** @deprecated */
 export function getAdminTokenForMiddleware(): string {
   return sessionTokenForPassword(getAdminPassword());
 }

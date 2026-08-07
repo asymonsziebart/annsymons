@@ -37,12 +37,12 @@ export default async function ManageUsersPage() {
           Manage Users
         </h1>
         <p className="mt-3 max-w-2xl text-pretty text-sm leading-relaxed text-[var(--color-ink-muted)] sm:text-base">
-          People can request a login at{" "}
+          People can create an account from the admin login page or{" "}
           <Link href="/request-access" className="neo-link">
             /request-access
           </Link>
           . Approve them here and pick exactly which private pages they can open.
-          Tim and other shared-password logins cannot see this page.
+          Only your super admin login can open this page.
         </p>
       </header>
 

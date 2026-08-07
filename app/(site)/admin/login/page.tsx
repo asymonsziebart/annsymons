@@ -20,7 +20,7 @@ export default async function AdminLoginPage({
           Admin login
         </h1>
         <p className="mt-2 text-sm text-[var(--color-muted)]">
-          Use the admin password, or an approved email login.
+          Enter your username (email) and password to continue.
         </p>
         <AdminLoginForm nextPath={nextPath} />
       </div>
