@@ -423,7 +423,7 @@
         "265809",
         "543356"
       ],
-      "summary": "Ann\u2019s older siblings (family-confirmed). All four Krause kids attended Sterling Heights High School (Warren Consolidated Schools). Emily and Ann were also selected into the Macomb Mathematics Science Technology Center (MMSTC) at Butcher Educational Center in Warren \u2014 a competitive half-day math/science/tech magnet; home-school courses stayed at Sterling Heights. Approximate ages from people-search: Jeremy ~39, Emily ~37, Elizabeth ~34 (Ann b. 1997). Jeremy \u2014 Target backroom trainer (15 Mile & Dequindre) since 2008; Baker College B.B.A. ~2010\u20132016 (likely the Baker memory earlier attributed to Gerald). Emily \u2014 Sterling Heights valedictorian, strong track athlete, full-ride to Central Michigan University; CMU triple-major B.S. in Statistics, Mathematics, and Actuarial Science (~2007\u20132011), then M.A. Mathematics (~2011\u20132012); grad teaching assistant for Intermediate Algebra; co-author of SIAM Undergraduate Research Online \u201cSpread of a Rumor\u201d (2013); Dialer Analyst at Credit Acceptance (Southfield) from ~2015; spouse Kwame Larry. Elizabeth Ann \u2014 Saginaw Valley State University teaching degree, then an online master\u2019s in teaching (program/school still open).",
+      "summary": "Ann\u2019s older siblings (family-confirmed). All four Krause kids attended Sterling Heights High School (Warren Consolidated Schools). Emily and Ann were also selected into the Macomb Mathematics Science Technology Center (MMSTC) at Butcher Educational Center in Warren \u2014 a competitive half-day math/science/tech magnet; home-school courses stayed at Sterling Heights. Approximate ages from people-search: Jeremy ~39, Emily ~37, Elizabeth ~34 (Ann b. 1997). Jeremy \u2014 Target backroom trainer (15 Mile & Dequindre) since 2008; Baker College B.B.A. ~2010\u20132016 (likely the Baker memory earlier attributed to Gerald). Emily \u2014 Sterling Heights valedictorian, strong track athlete, full-ride to Central Michigan University; CMU triple-major B.S. in Statistics, Mathematics, and Actuarial Science (~2007\u20132011), then M.A. Mathematics (~2011\u20132012); grad teaching assistant for Intermediate Algebra; co-author of SIAM Undergraduate Research Online \u201cSpread of a Rumor\u201d (2013); Dialer Analyst at Credit Acceptance (Southfield) from ~2015; spouse Kwame Larry. Elizabeth Ann \u2014 Saginaw Valley State University teaching degree, then an online master\u2019s in teaching (program/school still open). Ann also attended SVSU (Computer & Information Sciences, ~2016\u20132020).",
       "highlights": [
         "Birth order / approx ages (people-search): Jeremy (~1987), Emily (~1989), Elizabeth (~1992), Ann (1997)",
         "Home high school (all four siblings): Sterling Heights High School (Stallions)",
@@ -490,16 +490,26 @@
       "personIds": [
         "543356"
       ],
-      "summary": "Ann Symons (born Ann Emily Krause, 5 Oct 1997) married Timothy Symons. Parents: Gerald Francis Krause (b. 20 Dec 1953) and Karolyn Dolores Crosier (b. 1 May 1959). Siblings: Jeremy Francis, Emily Elizabeth, and Elizabeth Ann Krause. All four attended Sterling Heights High School; Ann and Emily also attended MMSTC at Butcher Educational Center. Paternal grandparents: Otto Krause & Geraldine Staub. Maternal grandparents: Frederick Charles Crosier & Dolores Marie Altz Crosier. Gerald\u2019s brothers: Jay, Denny, Brian, Eric. Tim\u2019s parents: Jeffrey & Elizabeth Symons; Jeffrey\u2019s parents John & Treva Symons; Elizabeth\u2019s parents Heisperadis Kokx (b. 2 Nov 1924) & Lucia Kokx (b. 1928).",
+      "summary": "Ann Symons (born Ann Emily Krause, 5 Oct 1997) married Timothy Symons. Parents: Gerald Francis Krause (b. 20 Dec 1953) and Karolyn Dolores Crosier (b. 1 May 1959). Siblings: Jeremy Francis, Emily Elizabeth, and Elizabeth Ann Krause. All four attended Sterling Heights High School; Ann and Emily also attended MMSTC at Butcher Educational Center. College: Saginaw Valley State University, Bachelor\u2019s in Computer and Information Sciences (~2016\u20132020) \u2014 same university as sister Elizabeth (teaching) and, if confirmed, Tim\u2019s SVSU football years. Paternal grandparents: Otto Krause & Geraldine Staub. Maternal grandparents: Frederick Charles Crosier & Dolores Marie Altz Crosier. Gerald\u2019s brothers: Jay, Denny, Brian, Eric. Tim\u2019s parents: Jeffrey & Elizabeth Symons; Jeffrey\u2019s parents John & Treva Symons; Elizabeth\u2019s parents Heisperadis Kokx (b. 2 Nov 1924) & Lucia Kokx (b. 1928).",
       "highlights": [
         "Focus person: Ann Emily Krause Symons (b. 5 Oct 1997)",
         "Spouse: Timothy Symons",
-        "Schools: Sterling Heights High School; MMSTC at Butcher Educational Center (with Emily)",
+        "HS: Sterling Heights High School; MMSTC at Butcher Educational Center (with Emily)",
+        "College: Saginaw Valley State University \u2014 B.S. Computer and Information Sciences (~2016\u20132020)",
         "Siblings: Jeremy Francis, Emily Elizabeth, Elizabeth Ann (see siblings section)",
         "Krause uncles: Jay, Denny, Brian, Eric",
         "Symons: Jeffrey & Elizabeth; John & Treva; Heisperadis & Lucia Kokx"
       ],
-      "sources": []
+      "sources": [
+        {
+          "label": "LinkedIn \u2014 Ann Krause (SVSU Computer & Information Sciences, Troy)",
+          "url": "https://www.linkedin.com/in/ann-krause-30b806162"
+        },
+        {
+          "label": "Saginaw Valley State University \u2014 Computer Science & Information Systems",
+          "url": "https://www.svsu.edu/csis/"
+        }
+      ]
     },
     {
       "id": "open-questions",
@@ -523,6 +533,7 @@
         "Josephine Crosier\u2019s maiden surname",
         "Gerald college / high school (Baker memory now attributed to Jeremy)",
         "Elizabeth Ann online teaching master\u2019s school/program; where she teaches (if applicable)",
+        "Confirm Timothy Symons = Lake Fenton HS / SVSU football / US Signal profiles",
         "Exact birth dates for Jeremy, Emily, Elizabeth",
         "Gerald & Karolyn exact marriage date/year (Ann does not remember; ask parents)",
         "Which church they married in (Ann does not know; ask parents)"
