@@ -1,7 +1,7 @@
 {
   "title": "Family History",
   "updatedAt": "2026-08-07",
-  "note": "Public genealogy trees that match Ann’s known family lines are treated as confirmed unless they conflict with family memory. Story details that need family knowledge (jobs, photos, unit/branch unknown online) stay marked needs_review. Aug 2026 digs add Civil War Crosiers, Carmoney sister marriages, Canada-born Marion Maher, Lozon WWI color, Altz Rochester/Joseph millwright finds, Otto SSDI dates + Rhine mission, Geraldine Staub natal family, and a women-focused pass on Magdeleine Maillet’s parents, Minerva Howard, Mary Carmoney’s daughters, and Jerome’s California sisters Rose Mary & Annetta. Sources are public web records.",
+  "note": "Public genealogy trees that match Ann’s known family lines are treated as confirmed unless they conflict with family memory. Story details that need family knowledge (jobs, photos, unit/branch unknown online) stay marked needs_review. Aug 2026 digs add Civil War Crosiers, Carmoney sister marriages, Canada-born Marion Maher, Lozon WWI color, Altz Rochester/Joseph millwright finds, Otto SSDI dates + Rhine mission, Geraldine Staub natal family, and a women-focused pass on Magdeleine Maillet’s parents, Minerva Howard, Mary Carmoney’s daughters, and Jerome’s California sisters Rose Mary & Annetta. Sources are public web records. Also adds Dolores Crosier death-notice detail and great-aunt Zoa Cubba (La Pan), named in Dolores’s 2005 notice.",
   "sections": [
     {
       "id": "otto-wwii",
@@ -96,22 +96,18 @@
         "705532",
         "730562"
       ],
-      "summary": "Frederick Charles Crosier (29 Sep 1925 – 25 Feb 2020), of Rochester Hills, married Dolores Marie Altz Crosier (22 Oct 1930, Oakland County, MI – 11 Dec 2005, Rochester Hills, MI) on 17 May 1952. Their six children — Kathleen Marie, Kenneth Frederick, Kerry Michael, Kevin Jerome, Kristopher J., and Karolyn — appear in public death notices (they are children, not siblings). Modetz fullDescription (page metadata) is family-only: late wife Dolores; late daughter Kathleen; sons Kenneth, Kerry (Dawn), Kevin, Kristopher; daughter Karolyn (Gerald) Krause; grandchildren Jeremy/Emily/Elizabeth/Ann Krause, David (Char) Crosier, Nathan Crosier; great-granddaughter Samantha — no WWII, railroad, or UCS text. WWII branch/unit/ship: not found in free public indexes (NARA AAD blocked from this environment; no Fold3/Ancestry free snippet; no Michigan veterans hit). Railroad (Penn Central/Conrail Sterling Yard) remains family-confirmed only; no named employee roster found. UCS: family-confirmed; soft public corroboration via people-finder email domain @universalcomputersys.com matching Houston UCS (merged into Reynolds and Reynolds 2006). Dolores death notice (michigan.com via classypages): Mt. Avon interment; cafeteria/quilting are family memory only.",
+      "summary": "Frederick Charles Crosier (29 Sep 1925 – 25 Feb 2020), of Rochester Hills, married Dolores Marie Altz Crosier (22 Oct 1930, Oakland County, MI – 11 Dec 2005, Rochester Hills, MI) on 17 May 1952. Their six children — Kathleen Marie, Kenneth Frederick, Kerry Michael, Kevin Jerome, Kristopher J., and Karolyn — appear in public death notices. Dolores’s michigan.com death notice (12 Dec 2005, classypages extract) is the best public life sketch found: age 75, of Rochester Hills; loving wife of Frederick; mother of Kathleen, Kenneth, Kerry (Dawn), Kevin Crosier, Karolyn (Gerald) Krause, and Kristopher Crosier; grandmother of David, Jeremy, Emily, Elizabeth, Ann, and Nathan; great-grandmother of Samantha; sister of Jeanette (Charles) Benedict, Barbara (Gino) Tonin, Norman (Carol) Altz, Donna (Dan) Griffiths, Linda (Jerry) Griffin, Mary (Danny) Griffin, and Joseph (Rusty) Altz; and niece of Zoa Cubba. Funeral Mass 14 Dec 2005 at St. Mary’s of the Hills Catholic Church, 2675 John R Rd., Rochester Hills; visitation at Potere-Modetz Funeral Home, Rochester; interment Mt. Avon Cemetery (Find A Grave #22581260 in trees). Modetz fullDescription for Frederick is family-only (late wife Dolores; late daughter Kathleen; sons/daughter as above). WWII branch/unit/ship for Frederick and railroad/UCS remain as previously documented. Cafeteria work and quilting remain family memory only — not named in the paid death notice text retrieved.",
       "highlights": [
-        "Modetz confirmed: b. 29 Sep 1925; d. 25 Feb 2020 age 94; Rochester Hills; Potere-Modetz handling",
-        "Married 17 May 1952 (classypages event list; marriage place not in free public clip)",
-        "Children (NOT siblings): Kathleen Marie (Kathy, 25 Mar 1953 – 4 Apr 2009 Troy), Kenneth Frederick (Kenny), Kerry Michael (Dawn), Kevin Jerome, Kristopher J., Karolyn (Gerald Krause)",
-        "Kathy’s son David; granddaughter Samantha (named in 2005/2009/2020 notices)",
-        "Dolores: b. 22 Oct 1930 Oakland Co.; d. 11 Dec 2005 Rochester Hills; funeral St. Mary’s of the Hills; interment Mt. Avon (Find A Grave #22581260)",
-        "Kathy burial: Mt. Avon Cemetery (Find A Grave #134601775); Mass St. Elizabeth Ann Seton, Troy",
-        "Frederick burial location: NOT stated in Modetz text (speculative Mt. Avon with Dolores/Kathy/Josephine)",
-        "WWII: no public enlistment, draft-card image, unit, ship, or Michigan veterans listing found this pass",
-        "Railroad employers (family only): Penn Central → Conrail; last location Sterling Yard off 16 Mile near Van Dyke",
-        "Corporate line history at Sterling (public context, not naming him): Michigan Central → NYC → Penn Central (1968) → Conrail (1976) → Conrail Shared Assets (post-1999)",
-        "Public search: no named Crosier on Conrail/Penn Central employee lists found",
-        "UCS: family; soft public email @universalcomputersys.com (PeopleWin) matching Houston UCS domain in 2005–06 press releases",
-        "Dolores: cafeteria work + quilting (family memory only)",
-        "1948 Rochester MI directory lists “Crosier, Fred J.” at house #312 — identity vs Frederick Charles NOT confirmed (wrong middle initial)"
+        "Married 17 May 1952; six children Kathleen, Kenneth, Kerry (Dawn), Kevin, Kristopher, Karolyn (Gerald) Krause",
+        "Dolores: 22 Oct 1930 Oakland Co. – 11 Dec 2005 Rochester Hills (age 75)",
+        "Death notice grandchildren: David, Jeremy, Emily, Elizabeth, Ann, Nathan; great-grandchild Samantha",
+        "Dolores’s siblings listed in her notice: Jeanette Benedict, Barbara Tonin, Norman Altz, Donna Griffiths, Linda Griffin, Mary Griffin, Joseph Altz",
+        "Death notice names Dolores as niece of Zoa Cubba (great-aunt Zoe on the La Pan side)",
+        "Funeral Mass St. Mary’s of the Hills (2675 John R, Rochester Hills), 14 Dec 2005",
+        "Burial Mt. Avon Cemetery, Rochester (trees: FAG #22581260)",
+        "Visitation Potere-Modetz Funeral Home, 339 Walnut Blvd., Rochester",
+        "Cafeteria work + quilting: family memory only (not in published death notice)",
+        "Frederick railroad / UCS / WWII: see prior highlights — still thin online"
       ],
       "sources": [
         {
@@ -181,6 +177,10 @@
         {
           "label": "Wikipedia — Reynolds and Reynolds (UCS merger 2006)",
           "url": "https://en.wikipedia.org/wiki/Reynolds_and_Reynolds"
+        },
+        {
+          "label": "St. Mary of the Hills Catholic Church (Rochester Hills)",
+          "url": "https://smoth.org/"
         }
       ]
     },
@@ -404,12 +404,13 @@
         "1011292",
         "826851"
       ],
-      "summary": "Dolores Marie Altz (1930 Oakland County – 2005 Rochester Hills) was a daughter of Norman Joseph Altz and Rena Margaret La Pan. Her 2005 death notice lists siblings Jeanette (Charles) Benedict, Barbara (Gino) Tonin, Norman (Carol) Altz, Donna (Dan) Griffiths, Linda (Jerry) Griffin, Mary (Danny) Griffin, and Joseph (Rusty) Altz. Funeral Mass was at St. Mary’s of the Hills, Rochester Hills; burial Mt. Avon Cemetery.",
+      "summary": "Dolores Marie Altz (1930 Oakland County – 2005 Rochester Hills) was a daughter of Norman Joseph Altz and Rena Margaret La Pan. Her 2005 death notice lists siblings Jeanette (Charles) Benedict, Barbara (Gino) Tonin, Norman (Carol) Altz, Donna (Dan) Griffiths, Linda (Jerry) Griffin, Mary (Danny) Griffin, and Joseph (Rusty) Altz, and names her as niece of Zoa Cubba. Funeral Mass was at St. Mary’s of the Hills, Rochester Hills; burial Mt. Avon Cemetery. Rena’s Pinconning-area La Pan kin include sister Rosalle (Lapan) Dore (mother of William “Bill” Dore of Kawkawlin/Pinconning) — confirming the La Pan sisters clustered in Bay County before the Altz branch settled Rochester.",
       "highlights": [
         "Parents: Norman Joseph Altz & Rena Margaret La Pan",
-        "Siblings (with spouses from Dolores obituary): Jeanette (Charles) Benedict, Barbara (Gino) Tonin, Norman (Carol) Altz, Donna (Dan) Griffiths, Linda (Jerry) Griffin, Mary (Danny) Griffin, Joseph (Rusty) Altz",
-        "Dolores funeral: St. Mary’s of the Hills, Rochester Hills; interment Mt. Avon Cemetery",
-        "Grandchildren named in notice: David, Jeremy, Emily, Elizabeth, Ann, Nathan"
+        "Siblings (Dolores death notice): Jeanette Benedict, Barbara Tonin, Norman Altz, Donna Griffiths, Linda Griffin, Mary Griffin, Joseph Altz",
+        "Niece of Zoa Cubba (La Pan aunt — see Zoa section)",
+        "Funeral Mass St. Mary’s of the Hills; burial Mt. Avon",
+        "La Pan sister Rosalle (Lapan) Dore of Pinconning/Kawkawlin (Bill Dore 2021 obit)"
       ],
       "sources": [
         {
@@ -419,6 +420,10 @@
         {
           "label": "Trees of Ancestry source — Dolores Crosier death notice",
           "url": "http://classypages.com/img/oxygen/src73.htm"
+        },
+        {
+          "label": "Pinconning Journal — William “Bill” Dore (mother Rosalle Lapan Dore)",
+          "url": "https://www.pinconningjournal.com/obituaries/william-%E2%80%9Cbill%E2%80%9D-dore"
         }
       ]
     },
@@ -925,14 +930,14 @@
         "826851",
         "730562"
       ],
-      "summary": "Norman Altz appears in the 1948 Rochester (Avon Twp.) street directory alongside other residents at the 1421 address cluster — placing Dolores’s parents in Rochester when she was a teenager. Son Joseph Edward Altz (28 Nov 1951 Rochester – 23 Sep 2025 Lapeer), Dolores’s youngest brother, worked 20+ years as a millwright at American Axle in Detroit, later at Pontiac Truck and Bus and Bosch (Lake Orion). He collected Pontiac Fieros and model locomotives, volunteered at Holy Cross Youth Center (Saginaw) and Lapeer Hospital, and was buried from St. Lawrence Catholic Church, Utica. His 2025 obituary reconfirms parents Norman & Rena Altz and sisters including Dolores Crosier. Public trees still do not name Norman’s or Rena La Pan’s parents — that generation remains open.",
+      "summary": "Norman Altz appears in the 1948 Rochester (Avon Twp.) street directory alongside other residents at the 1421 address cluster — placing Dolores’s parents in Rochester when she was a teenager. Son Joseph Edward Altz (28 Nov 1951 Rochester – 23 Sep 2025 Lapeer), Dolores’s youngest brother, worked 20+ years as a millwright at American Axle in Detroit, later at Pontiac Truck and Bus and Bosch (Lake Orion). His 2025 obituary reconfirms parents Norman & Rena Altz and sisters including Dolores Crosier. A Cross in the Woods (Indian River) paver reads “IN MEMORY OF NORMAN AND RENA ALTZ.” Rena Margaret La Pan’s sisters include Zoa Cubba (named in Dolores’s 2005 notice) and Rosalle (Lapan) Dore of the Pinconning/Kawkawlin Sacred Heart farm community. Parents of Norman and Rena beyond those sibling links remain open in free sources.",
       "highlights": [
         "Norman Altz in 1948 Rochester/Avon directory (1421 address cluster)",
         "Joseph Edward Altz — millwright, American Axle Detroit; later Pontiac Truck & Bus / Bosch Lake Orion",
-        "Passions: Pontiac Fieros, model locomotives; GM retiree breakfasts",
-        "Funeral Mass St. Lawrence Catholic Church, Utica; burial Stiles Cemetery",
         "Obituary confirms Norman & Rena; sisters Barbara Tonin, Jeanette Benedict, Dolores Crosier",
-        "Still open: Norman Joseph Altz and Rena Margaret La Pan parents / immigration"
+        "Cross in the Woods paver: IN MEMORY OF NORMAN AND RENA ALTZ",
+        "Rena’s sisters: Zoa Cubba; Rosalle (Lapan) Dore (Pinconning area)",
+        "Still open: Norman Joseph Altz and Rena Margaret La Pan parents’ full names / earlier generations"
       ],
       "sources": [
         {
@@ -946,6 +951,14 @@
         {
           "label": "Trees of Ancestry — Altz × La Pan children",
           "url": "https://classypages.com/img/oxygen/asc70.htm"
+        },
+        {
+          "label": "Cross in the Woods paver database — Norman and Rena Altz",
+          "url": "https://crossinthewoods.com/paver-database/"
+        },
+        {
+          "label": "classypages — Dolores death notice (niece of Zoa Cubba)",
+          "url": "http://classypages.com/img/oxygen/src73.htm"
         }
       ]
     },
@@ -1100,6 +1113,78 @@
       "sources": []
     },
     {
+      "id": "dolores-altz-crosier",
+      "title": "Dolores Marie Altz Crosier — Ann’s grandmother",
+      "line": "Crosier",
+      "status": "confirmed",
+      "personIds": [
+        "730562",
+        "705532",
+        "fh-rena-lapan",
+        "fh-norman-altz"
+      ],
+      "summary": "Dolores Marie Altz Crosier (22 Oct 1930, Oakland County – 11 Dec 2005, Rochester Hills) is Karolyn’s mother and Ann’s maternal grandmother. She married Frederick Charles Crosier on 17 May 1952 and raised six children in the Rochester Hills area. The fullest public text is her michigan.com death notice (published 12 Dec 2005): it lists her husband, all six children (with Dawn and Gerald named as in-laws), six grandchildren including Ann, great-granddaughter Samantha, seven surviving siblings with spouses, and aunt Zoa Cubba. Catholic funeral rites were at St. Mary’s of the Hills on John R in Rochester Hills (parish founded 1989; Dolores’s funeral was 14 Dec 2005), with burial at historic Mount Avon Cemetery in Rochester. Family memory adds cafeteria work and quilting; those details do not appear in the published notice, so which school cafeteria and any quilting-group name are still open.",
+      "highlights": [
+        "Birth / death: 22 Oct 1930 Oakland Co. – 11 Dec 2005 Rochester Hills (age 75)",
+        "Married Frederick Charles Crosier 17 May 1952",
+        "Children: Kathleen, Kenneth, Kerry (Dawn), Kevin, Karolyn (Gerald) Krause, Kristopher",
+        "Grandchildren named in notice: David, Jeremy, Emily, Elizabeth, Ann, Nathan",
+        "Great-grandchild Samantha (named 2005)",
+        "Parents: Norman Joseph Altz & Rena Margaret La Pan",
+        "Funeral Mass St. Mary’s of the Hills, 2675 John R Rd., Rochester Hills (14 Dec 2005)",
+        "Burial Mount Avon Cemetery, Rochester",
+        "Niece of Zoa Cubba (see great-aunt Zoa section)",
+        "Family memory only: school cafeteria work; quilting (school/group names open)"
+      ],
+      "sources": [
+        {
+          "label": "classypages — Dolores Marie Altz Crosier michigan.com death notice",
+          "url": "http://classypages.com/img/oxygen/src73.htm"
+        },
+        {
+          "label": "Potere-Modetz — Dolores Crosier (22 Oct 1930 – 11 Dec 2005)",
+          "url": "https://www.modetzfuneralhomes.com/obituaries/Dolores-Crosier?obId=21349"
+        },
+        {
+          "label": "Trees of Ancestry — Dolores Marie Altz family",
+          "url": "http://classypages.com/img/oxygen/n370.htm"
+        },
+        {
+          "label": "St. Mary of the Hills Catholic Church",
+          "url": "https://smoth.org/"
+        }
+      ]
+    },
+    {
+      "id": "zoa-cubba-lapan",
+      "title": "Great-aunt Zoa Cubba (La Pan)",
+      "line": "Crosier",
+      "status": "confirmed",
+      "personIds": [
+        "fh-zoa-cubba",
+        "fh-rena-lapan",
+        "730562"
+      ],
+      "summary": "Ann’s great-aunt Zoe is Zoa Cubba on the La Pan side. Dolores Marie Altz Crosier’s 2005 death notice explicitly lists Dolores as “Niece of Zoa Cubba,” so Zoa was a sister (or sister-in-law treated as aunt) of Dolores’s mother Rena Margaret La Pan Altz — family usage and the Pinconning La Pan cluster make Rena’s sister the strong reading. Another La Pan sister, Rosalle (Lapan) Dore, raised a large Catholic farm family next to Sacred Heart Church in the Pinconning/Kawkawlin area (son William “Bill” Dore’s 2021 obituary). Ann remembers Zoa living to about 104 and doing community work; a free full obituary with exact birth/death dates and a community-work résumé was not retrieved this pass, so those details stay family-confirmed pending a funeral-home clip.",
+      "highlights": [
+        "Named in Dolores Crosier’s 2005 death notice: “Niece of Zoa Cubba”",
+        "Relationship: La Pan aunt to Dolores → great-aunt to Karolyn’s children (Ann)",
+        "Sister cluster: Rena Margaret La Pan Altz; Rosalle (Lapan) Dore (Pinconning/Kawkawlin); Zoa Cubba",
+        "Family memory: lived to ~104; community work (specific orgs/roles still open online)",
+        "Exact birth/death dates & burial: free full obituary not retrieved this pass"
+      ],
+      "sources": [
+        {
+          "label": "classypages — Dolores death notice naming Zoa Cubba",
+          "url": "http://classypages.com/img/oxygen/src73.htm"
+        },
+        {
+          "label": "Pinconning Journal — William “Bill” Dore (mother Rosalle Lapan Dore)",
+          "url": "https://www.pinconningjournal.com/obituaries/william-%E2%80%9Cbill%E2%80%9D-dore"
+        }
+      ]
+    },
+    {
       "id": "open-questions",
       "title": "Still needs family memory (not found cleanly online)",
       "line": "Research",
@@ -1122,7 +1207,6 @@
         "Frederick burial plot (Modetz text silent; check Mt. Avon / Rochester Hills clerk)",
         "Madeline Phoebe Lozon Crosier Michigan death certificate (cause; same-day birth link)",
         "Confirm or reject 1948 “Fred J. Crosier” directory hit as Frederick Charles",
-        "Which school cafeteria Dolores worked in",
         "Josephine Crosier’s maiden surname (stepmother who raised Frederick)",
         "Gerald college / high school (Baker memory now attributed to Jeremy)",
         "Elizabeth Ann online teaching master’s school/program",
@@ -1133,8 +1217,12 @@
         "Alexandre Lauzon × Magdeleine Maillet marriage year (1842 vs 1846) — pull parish image",
         "Mary Veronica Gore parents (still blank in public trees)",
         "Rose Ann Bowles parents / exact birth–death dates (Marion Maher’s mother)",
-        "Norman Joseph Altz & Rena Margaret La Pan parents / earlier generations",
-        "Adolphus Lozon death date (Peter 1918 NOK = mother Mary)"
+        "Adolphus Lozon death date (Peter 1918 NOK = mother Mary)",
+        "Which school cafeteria Dolores worked in (family memory; not in 2005 death notice)",
+        "Dolores quilting group / church guild name (family memory)",
+        "Zoa Cubba (La Pan) full obituary — exact dates, husband/children, community organizations",
+        "Rena Margaret La Pan & Norman Joseph Altz parents’ names (Pinconning generation)",
+        "Confirm Zoa Cubba birth/death dates (~104–107 longevity) from funeral-home notice"
       ],
       "sources": []
     }
