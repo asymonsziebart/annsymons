@@ -89,6 +89,21 @@ export const ADMIN_NAV_PAGES: AdminNavPage[] = [
     keywords: ["genealogy", "relatives", "ftz", "ancestry", "krause", "symons"],
   },
   {
+    href: "/admin/family-history",
+    label: "Family History",
+    description: "Confirmed stories and public-record research",
+    keywords: [
+      "genealogy",
+      "wwii",
+      "otto",
+      "krause",
+      "crosier",
+      "lozon",
+      "history",
+      "research",
+    ],
+  },
+  {
     href: "/admin/voices",
     label: "Voices",
     description: "Things he is not allowed to do",

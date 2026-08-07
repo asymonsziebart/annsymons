@@ -104,7 +104,7 @@
       "y": 0.0,
       "surname": "Krause",
       "given": "Otto",
-      "middle": null,
+      "middle": "J",
       "birth": null,
       "death": null,
       "gender": "male"
@@ -342,8 +342,8 @@
       "x": 0.0,
       "y": 0.0,
       "surname": "Crosier",
-      "given": "Fredrick",
-      "middle": null,
+      "given": "Frederick",
+      "middle": "Charles",
       "birth": {
         "year": 1925,
         "month": 9,
@@ -366,7 +366,7 @@
       "y": 0.0,
       "surname": "Altz",
       "given": "Dolores",
-      "middle": null,
+      "middle": "Marie",
       "birth": {
         "year": 1930,
         "month": 10,
@@ -903,7 +903,7 @@
       "y": 0.0,
       "surname": "Altz",
       "given": "Norman",
-      "middle": null,
+      "middle": "Joseph",
       "birth": {
         "year": 1904,
         "month": 3,
@@ -924,9 +924,9 @@
       "siblingOrder": 0,
       "x": 0.0,
       "y": 0.0,
-      "surname": "Lepan",
+      "surname": "La Pan",
       "given": "Rena",
-      "middle": null,
+      "middle": "Margaret",
       "birth": {
         "year": 1910,
         "month": null,
@@ -1348,10 +1348,20 @@
       "x": 0.0,
       "y": 0.0,
       "surname": "Crosier",
-      "given": "Fredrick",
-      "middle": null,
-      "birth": null,
-      "death": null,
+      "given": "Jerome",
+      "middle": "Frederick",
+      "birth": {
+        "year": 1898,
+        "month": 1,
+        "day": 31,
+        "known": true
+      },
+      "death": {
+        "year": 1983,
+        "month": 10,
+        "day": 28,
+        "known": true
+      },
       "gender": "male"
     },
     {
@@ -1362,9 +1372,19 @@
       "y": 0.0,
       "surname": "Crosier",
       "given": "Josephine",
-      "middle": null,
-      "birth": null,
-      "death": null,
+      "middle": "C",
+      "birth": {
+        "year": 1905,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "death": {
+        "year": 1997,
+        "month": null,
+        "day": null,
+        "known": true
+      },
       "gender": "female"
     },
     {
@@ -2388,6 +2408,147 @@
       "birth": null,
       "death": null,
       "gender": "female"
+    },
+    {
+      "id": "fh-madeline-lozon",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Lozon",
+      "given": "Madeline",
+      "middle": "Phoebe",
+      "birth": {
+        "year": 1894,
+        "month": 2,
+        "day": 9,
+        "known": true
+      },
+      "death": {
+        "year": 1925,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "gender": "female"
+    },
+    {
+      "id": "fh-albert-crosier",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Crosier",
+      "given": "Albert",
+      "middle": "David",
+      "birth": {
+        "year": 1865,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "death": {
+        "year": 1942,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "gender": "male"
+    },
+    {
+      "id": "fh-marion-maher",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Maher",
+      "given": "Marion",
+      "middle": "A",
+      "birth": {
+        "year": 1865,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "death": {
+        "year": 1951,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "gender": "female"
+    },
+    {
+      "id": "fh-adolphus-lozon",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Lozon",
+      "given": "Adolphus",
+      "middle": null,
+      "birth": {
+        "year": 1861,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "death": null,
+      "gender": "male"
+    },
+    {
+      "id": "fh-mary-gore",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Gore",
+      "given": "Mary",
+      "middle": "Veronica",
+      "birth": {
+        "year": 1863,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "death": null,
+      "gender": "female"
+    },
+    {
+      "id": "fh-solomon-lozon",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Lozon",
+      "given": "Solomon",
+      "middle": "Alex",
+      "birth": {
+        "year": 1891,
+        "month": 11,
+        "day": 6,
+        "known": true
+      },
+      "death": null,
+      "gender": "male"
+    },
+    {
+      "id": "fh-peter-lozon",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Lozon",
+      "given": "Peter",
+      "middle": "Adolphus",
+      "birth": {
+        "year": 1896,
+        "month": 8,
+        "day": 29,
+        "known": true
+      },
+      "death": null,
+      "gender": "male"
     }
   ],
   "families": [

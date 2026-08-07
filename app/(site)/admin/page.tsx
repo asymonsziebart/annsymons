@@ -37,6 +37,9 @@ export default async function AdminDashboardPage() {
           <Link href="/admin/family-tree" className="neo-btn !min-h-10 !px-4 !py-2">
             Family Tree
           </Link>
+          <Link href="/admin/family-history" className="neo-btn !min-h-10 !px-4 !py-2">
+            Family History
+          </Link>
           <Link href="/admin/dogs" className="neo-btn !min-h-10 !px-4 !py-2">
             Puppy Ranch
           </Link>
