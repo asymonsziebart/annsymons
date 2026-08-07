@@ -84,6 +84,7 @@ export function parseFttText(raw: string, sourceFilename: string | null = null):
       birth: parseDate(cols[16], cols[17], cols[18], cols[19]),
       death: parseDate(cols[20], cols[21], cols[22], cols[23]),
       gender: parseGender(cols[24]),
+      photoUrl: null,
     });
   }
 

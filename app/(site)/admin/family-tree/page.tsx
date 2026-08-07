@@ -26,8 +26,8 @@ export default async function FamilyTreeAdminPage() {
           Family Tree
         </h1>
         <p className="mt-3 max-w-2xl text-pretty text-sm leading-relaxed text-[var(--color-ink-muted)] sm:text-base">
-          Private genealogy from your Quick Family Tree export. Only admin sessions can open this
-          page — upload a .ftz anytime to refresh the tree.
+          Private genealogy canvas from your Quick Family Tree export. Tap someone to center their
+          branch, zoom, and switch child / grandchild depth. Only admin sessions can open this page.
         </p>
       </header>
 

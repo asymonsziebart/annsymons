@@ -90,6 +90,27 @@ export async function getFamilyTree(): Promise<FamilyTreeData> {
   return mapRow(rows[0] as Record<string, unknown>);
 }
 
+/** Keep custom photos when a new .ftz re-import replaces the tree. */
+export function mergePreservedPhotos(
+  incoming: FamilyTreeData,
+  previous: FamilyTreeData | null
+): FamilyTreeData {
+  if (!previous?.people?.length) return incoming;
+  const photos = new Map(
+    previous.people
+      .filter((p) => p.photoUrl)
+      .map((p) => [p.id, p.photoUrl as string])
+  );
+  if (photos.size === 0) return incoming;
+  return {
+    ...incoming,
+    people: incoming.people.map((person) => ({
+      ...person,
+      photoUrl: photos.get(person.id) ?? person.photoUrl ?? null,
+    })),
+  };
+}
+
 export async function saveFamilyTree(data: FamilyTreeData): Promise<FamilyTreeData> {
   const sql = getSqlOrThrow();
   await ensureFamilyTreeTable(sql);

@@ -17,7 +17,12 @@ export type FamilyTreePerson = {
   birth: FamilyTreeDate | null;
   death: FamilyTreeDate | null;
   gender: "male" | "female" | "unknown";
+  /** Optional custom portrait URL (uploaded later). */
+  photoUrl?: string | null;
 };
+
+/** How deep to expand descendants from the focused person. */
+export type FamilyTreeViewMode = "child" | "child_spouse" | "grandchild" | "unlimited";
 
 export type FamilyTreeFamily = {
   id: string;

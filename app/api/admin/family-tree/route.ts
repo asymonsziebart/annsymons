@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/auth";
-import { getFamilyTree, saveFamilyTree } from "@/lib/data/familyTree";
+import { getFamilyTree, mergePreservedPhotos, saveFamilyTree } from "@/lib/data/familyTree";
 import { parseFamilyTreeFile } from "@/lib/familyTree/parseFtz";
 
 export const runtime = "nodejs";
@@ -37,7 +37,13 @@ export async function POST(request: Request) {
 
     const bytes = await file.arrayBuffer();
     const parsed = await parseFamilyTreeFile(bytes, file.name || "FamilyTree.ftz");
-    const tree = await saveFamilyTree(parsed);
+    let previous = null;
+    try {
+      previous = await getFamilyTree();
+    } catch {
+      previous = null;
+    }
+    const tree = await saveFamilyTree(mergePreservedPhotos(parsed, previous));
     return NextResponse.json({
       ok: true,
       tree,
