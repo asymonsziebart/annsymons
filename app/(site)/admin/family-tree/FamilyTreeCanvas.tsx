@@ -242,7 +242,7 @@ export default function FamilyTreeCanvas({
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    onSelectPerson(node.id);
+                    onSelectPerson(node.person.id);
                   }}
                 >
                   <defs>

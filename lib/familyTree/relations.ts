@@ -24,17 +24,39 @@ export function lifespanLabel(person: FamilyTreePerson): string {
   return "";
 }
 
+/** One partnership and the children born to that specific couple. */
+export type FamilyUnion = {
+  familyId: string;
+  spouse: FamilyTreePerson | null;
+  children: FamilyTreePerson[];
+};
+
 export type PersonRelations = {
   person: FamilyTreePerson;
   parents: FamilyTreePerson[];
+  /** Same two parents (same parental family id). */
   siblings: FamilyTreePerson[];
+  /** Share exactly one parent. */
+  halfSiblings: FamilyTreePerson[];
   spouses: FamilyTreePerson[];
+  /** All children across every union. */
   children: FamilyTreePerson[];
+  /** Children grouped by the partner they were born with. */
+  unions: FamilyUnion[];
   parentFamilies: string[];
 };
 
+function parentIdsFor(person: FamilyTreePerson, data: FamilyTreeData): string[] {
+  if (!person.familyId) return [];
+  const family = data.families.find((f) => f.id === person.familyId);
+  if (!family) return [];
+  return [family.partner1Id, family.partner2Id].filter((id): id is string => Boolean(id));
+}
+
 export function buildRelationIndex(data: FamilyTreeData) {
   const byId = new Map(data.people.map((p) => [p.id, p]));
+  const familyById = new Map(data.families.map((f) => [f.id, f]));
+
   const childrenByFamily = new Map<string, FamilyTreePerson[]>();
   for (const person of data.people) {
     if (!person.familyId) continue;
@@ -43,7 +65,11 @@ export function buildRelationIndex(data: FamilyTreeData) {
     childrenByFamily.set(person.familyId, list);
   }
   for (const [, list] of childrenByFamily) {
-    list.sort((a, b) => a.siblingOrder - b.siblingOrder || personDisplayName(a).localeCompare(personDisplayName(b)));
+    list.sort(
+      (a, b) =>
+        a.siblingOrder - b.siblingOrder ||
+        personDisplayName(a).localeCompare(personDisplayName(b))
+    );
   }
 
   const familiesByPartner = new Map<string, string[]>();
@@ -56,19 +82,29 @@ export function buildRelationIndex(data: FamilyTreeData) {
     }
   }
 
+  // Children of each adult (across all their unions).
+  const childrenByParent = new Map<string, FamilyTreePerson[]>();
+  for (const family of data.families) {
+    const kids = childrenByFamily.get(family.id) ?? [];
+    for (const partnerId of [family.partner1Id, family.partner2Id]) {
+      if (!partnerId) continue;
+      const list = childrenByParent.get(partnerId) ?? [];
+      for (const kid of kids) {
+        if (!list.some((p) => p.id === kid.id)) list.push(kid);
+      }
+      childrenByParent.set(partnerId, list);
+    }
+  }
+
   function getRelations(personId: string): PersonRelations | null {
     const person = byId.get(personId);
     if (!person) return null;
 
     const parents: FamilyTreePerson[] = [];
-    if (person.familyId) {
-      const family = data.families.find((f) => f.id === person.familyId);
-      if (family?.partner1Id && byId.has(family.partner1Id)) {
-        parents.push(byId.get(family.partner1Id)!);
-      }
-      if (family?.partner2Id && byId.has(family.partner2Id)) {
-        parents.push(byId.get(family.partner2Id)!);
-      }
+    const ownParentIds = parentIdsFor(person, data);
+    for (const pid of ownParentIds) {
+      const parent = byId.get(pid);
+      if (parent) parents.push(parent);
     }
 
     const siblings =
@@ -76,11 +112,32 @@ export function buildRelationIndex(data: FamilyTreeData) {
         ? (childrenByFamily.get(person.familyId) ?? []).filter((p) => p.id !== person.id)
         : [];
 
+    // Half-siblings: share exactly one parent, not already a full sibling.
+    const halfSiblingMap = new Map<string, FamilyTreePerson>();
+    for (const parentId of ownParentIds) {
+      for (const candidate of childrenByParent.get(parentId) ?? []) {
+        if (candidate.id === person.id) continue;
+        if (siblings.some((s) => s.id === candidate.id)) continue;
+        const candidateParentIds = parentIdsFor(candidate, data);
+        const shared = candidateParentIds.filter((id) => ownParentIds.includes(id));
+        if (shared.length === 1) {
+          halfSiblingMap.set(candidate.id, candidate);
+        }
+      }
+    }
+    const halfSiblings = [...halfSiblingMap.values()].sort(
+      (a, b) =>
+        a.siblingOrder - b.siblingOrder ||
+        personDisplayName(a).localeCompare(personDisplayName(b))
+    );
+
     const parentFamilies = familiesByPartner.get(person.id) ?? [];
     const spouses: FamilyTreePerson[] = [];
     const children: FamilyTreePerson[] = [];
+    const unions: FamilyUnion[] = [];
+
     for (const familyId of parentFamilies) {
-      const family = data.families.find((f) => f.id === familyId);
+      const family = familyById.get(familyId);
       if (!family) continue;
       const spouseId =
         family.partner1Id === person.id
@@ -88,16 +145,42 @@ export function buildRelationIndex(data: FamilyTreeData) {
           : family.partner2Id === person.id
             ? family.partner1Id
             : null;
-      if (spouseId && byId.has(spouseId) && !spouses.some((s) => s.id === spouseId)) {
-        spouses.push(byId.get(spouseId)!);
+      const spouse = spouseId && byId.has(spouseId) ? byId.get(spouseId)! : null;
+      if (spouse && !spouses.some((s) => s.id === spouse.id)) {
+        spouses.push(spouse);
       }
-      for (const child of childrenByFamily.get(familyId) ?? []) {
+      const unionChildren = childrenByFamily.get(familyId) ?? [];
+      for (const child of unionChildren) {
         if (!children.some((c) => c.id === child.id)) children.push(child);
       }
+      unions.push({
+        familyId,
+        spouse,
+        children: unionChildren,
+      });
     }
 
-    return { person, parents, siblings, spouses, children, parentFamilies };
+    // Prefer unions that have children first, then by spouse name for stable layout.
+    unions.sort((a, b) => {
+      const ac = a.children.length > 0 ? 0 : 1;
+      const bc = b.children.length > 0 ? 0 : 1;
+      if (ac !== bc) return ac - bc;
+      const an = a.spouse ? personDisplayName(a.spouse) : "";
+      const bn = b.spouse ? personDisplayName(b.spouse) : "";
+      return an.localeCompare(bn);
+    });
+
+    return {
+      person,
+      parents,
+      siblings,
+      halfSiblings,
+      spouses,
+      children,
+      unions,
+      parentFamilies,
+    };
   }
 
-  return { byId, childrenByFamily, getRelations };
+  return { byId, childrenByFamily, familiesByPartner, getRelations };
 }
