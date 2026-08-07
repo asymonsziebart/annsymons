@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { FamilyTreeViewMode } from "@/lib/familyTree/types";
+import type { FamilyTreePerson, FamilyTreeViewMode } from "@/lib/familyTree/types";
 import {
   buildTreeLayout,
   NODE_RADIUS,
   shortDisplayName,
 } from "@/lib/familyTree/layout";
 import type { buildRelationIndex } from "@/lib/familyTree/relations";
+import PersonContextMenu, { type ContextMenuAction } from "./PersonContextMenu";
 
 type Index = ReturnType<typeof buildRelationIndex>;
 
@@ -17,6 +18,7 @@ type Props = {
   viewMode: FamilyTreeViewMode;
   onSelectPerson: (id: string) => void;
   onViewModeChange: (mode: FamilyTreeViewMode) => void;
+  onPersonAction: (person: FamilyTreePerson, action: ContextMenuAction) => void;
 };
 
 const MIN_SCALE = 0.35;
@@ -63,6 +65,7 @@ export default function FamilyTreeCanvas({
   viewMode,
   onSelectPerson,
   onViewModeChange,
+  onPersonAction,
 }: Props) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
@@ -76,8 +79,30 @@ export default function FamilyTreeCanvas({
     origTx: number;
     origTy: number;
   } | null>(null);
+  const longPressRef = useRef<{
+    personId: string;
+    timer: ReturnType<typeof setTimeout>;
+    x: number;
+    y: number;
+  } | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [menu, setMenu] = useState<{
+    person: FamilyTreePerson;
+    x: number;
+    y: number;
+  } | null>(null);
+
+  function openMenu(person: FamilyTreePerson, clientX: number, clientY: number) {
+    setMenu({ person, x: clientX, y: clientY });
+  }
+
+  function clearLongPress() {
+    if (longPressRef.current) {
+      clearTimeout(longPressRef.current.timer);
+      longPressRef.current = null;
+    }
+  }
 
   const layout = useMemo(
     () => buildTreeLayout(index, focusId, viewMode),
@@ -200,6 +225,7 @@ export default function FamilyTreeCanvas({
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
+        onContextMenu={(e) => e.preventDefault()}
       >
         <svg className="absolute inset-0 h-full w-full" aria-label="Family tree">
           <g transform={`translate(${tx} ${ty}) scale(${scale})`}>
@@ -239,10 +265,44 @@ export default function FamilyTreeCanvas({
                   onPointerDown={(e) => {
                     // Don't start a canvas drag when tapping a person.
                     e.stopPropagation();
+                    if (e.button === 2) return;
+                    clearLongPress();
+                    longPressRef.current = {
+                      personId: node.person.id,
+                      x: e.clientX,
+                      y: e.clientY,
+                      timer: setTimeout(() => {
+                        if (!longPressRef.current) return;
+                        openMenu(node.person, longPressRef.current.x, longPressRef.current.y);
+                        longPressRef.current = null;
+                      }, 520),
+                    };
                   }}
+                  onPointerMove={(e) => {
+                    const lp = longPressRef.current;
+                    if (!lp || lp.personId !== node.person.id) return;
+                    if (
+                      Math.abs(e.clientX - lp.x) > 8 ||
+                      Math.abs(e.clientY - lp.y) > 8
+                    ) {
+                      clearLongPress();
+                    }
+                  }}
+                  onPointerUp={() => clearLongPress()}
+                  onPointerCancel={() => clearLongPress()}
                   onClick={(e) => {
                     e.stopPropagation();
+                    if (menu) {
+                      setMenu(null);
+                      return;
+                    }
                     onSelectPerson(node.person.id);
+                  }}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    clearLongPress();
+                    openMenu(node.person, e.clientX, e.clientY);
                   }}
                 >
                   <defs>
@@ -409,6 +469,16 @@ export default function FamilyTreeCanvas({
           </div>
         ) : null}
       </div>
+
+      {menu ? (
+        <PersonContextMenu
+          person={menu.person}
+          x={menu.x}
+          y={menu.y}
+          onClose={() => setMenu(null)}
+          onAction={(action) => onPersonAction(menu.person, action)}
+        />
+      ) : null}
     </div>
   );
 }
