@@ -5,39 +5,43 @@
   "sections": [
     {
       "id": "otto-wwii",
-      "title": "Otto J. Krause — WWII B-17 navigator",
+      "title": "Otto J. Krause \u2014 WWII B-17 navigator",
       "line": "Krause",
       "status": "confirmed",
-      "personIds": ["961427"],
-      "summary": "Otto J. Krause of Detroit served as a navigator with the 91st Bomb Group, 324th Bomb Squadron, Eighth Air Force, based at RAF Bassingbourn. He flew mostly on B-17 Mah Ideel (43-37993 DF-N) with Lt. William Laws’ crew, earned the Air Medal with oak leaf clusters, and finished as a First Lieutenant. He married Geraldine Staub around 1945.",
+      "personIds": [
+        "961427"
+      ],
+      "summary": "Otto J. Krause of Detroit served as a navigator with the 91st Bomb Group, 324th Bomb Squadron, Eighth Air Force, based at RAF Bassingbourn. He flew mostly on B-17 Mah Ideel (43-37993 DF-N) with Lt. William Laws\u2019 crew, earned the Air Medal with oak leaf clusters, and finished as a First Lieutenant. He married Geraldine Staub around 1945.",
       "highlights": [
         "Unit: 91st Bomb Group / 324th BS / 8th Air Force",
         "Aircraft: Mah Ideel (serial 43-37993, DF-N), ~72 missions; returned to the U.S. June 1945",
-        "Crew: Lt. William V. Laws (pilot); co-pilot Bernard “Ed” Goldstein was KIA 30 Nov 1944 while flying with another crew",
+        "Crew: Lt. William V. Laws (pilot); co-pilot Bernard \u201cEd\u201d Goldstein was KIA 30 Nov 1944 while flying with another crew",
         "Awards: Air Medal + oak leaf clusters (orders in late 1944)",
         "Wartime photo FRE 5634 by Dale Darling shows Otto with a B-17"
       ],
       "sources": [
         {
-          "label": "91st Bomb Group — Mah Ideel crew",
+          "label": "91st Bomb Group \u2014 Mah Ideel crew",
           "url": "http://www.91stbombgroup.com/crewphotos/mah_ideel_crew.html"
         },
         {
-          "label": "8th Air Force — Otto Krause awards",
+          "label": "8th Air Force \u2014 Otto Krause awards",
           "url": "https://www.8af.org/krause-otto-k3109-91bg.cfm"
         },
         {
-          "label": "IWM American Archive — FRE 5634 (Otto Krause)",
+          "label": "IWM American Archive \u2014 FRE 5634 (Otto Krause)",
           "url": "https://americanarchive.iwm.org.uk/archive/media/media-388068jpg"
         }
       ]
     },
     {
       "id": "geraldine-somerset",
-      "title": "Geraldine Staub Krause — Somerset Collection",
+      "title": "Geraldine Staub Krause \u2014 Somerset Collection",
       "line": "Krause",
       "status": "confirmed",
-      "personIds": ["313589"],
+      "personIds": [
+        "313589"
+      ],
       "summary": "Geraldine sold clothes at the Somerset Collection (old/south side) in Troy, Michigan. The exact store name has not been confirmed from public records.",
       "highlights": [
         "Workplace: Somerset Collection, Troy, MI (south/old side)",
@@ -50,17 +54,20 @@
       "title": "Frederick Charles Crosier & Dolores Marie Altz",
       "line": "Crosier",
       "status": "confirmed",
-      "personIds": ["705532", "730562"],
-      "summary": "Frederick Charles Crosier (29 Sep 1925 – 25 Feb 2020) married Dolores Marie Altz Crosier (22 Oct 1930 – 11 Dec 2005) on 17 May 1952. Their children include Kathy, Kenny, Kerry, Kevin, Kris, and Karolyn Crosier. Frederick served in WWII (branch/unit not yet confirmed). Family memory points to railroad work after the war (not yet verified in public records). Dolores worked in a school cafeteria (school unknown) and quilted.",
+      "personIds": [
+        "705532",
+        "730562"
+      ],
+      "summary": "Frederick Charles Crosier (29 Sep 1925 \u2013 25 Feb 2020) married Dolores Marie Altz Crosier (22 Oct 1930 \u2013 11 Dec 2005) on 17 May 1952. Their children include Kathy, Kenny, Kerry, Kevin, Kris, and Karolyn Crosier. Frederick served in WWII (branch/unit not yet confirmed). Family memory points to railroad work after the war (not yet verified in public records). Dolores worked in a school cafeteria (school unknown) and quilted.",
       "highlights": [
         "Married 17 May 1952",
         "Children: Kathy (d. 4 Apr 2009, Troy), Kenny, Kerry, Kevin, Kris, Karolyn",
-        "Kathy’s son David; granddaughter Samantha",
+        "Kathy\u2019s son David; granddaughter Samantha",
         "Dolores: cafeteria work + quilting"
       ],
       "sources": [
         {
-          "label": "Trees of Ancestry — Crosier / Altz",
+          "label": "Trees of Ancestry \u2014 Crosier / Altz",
           "url": "https://classypages.com/img/oxygen/asc1499.htm"
         }
       ]
@@ -70,22 +77,33 @@
       "title": "Jerome Frederick Crosier & Madeline Phoebe Lozon",
       "line": "Crosier",
       "status": "confirmed",
-      "personIds": ["581371", "fh-madeline-lozon", "fh-albert-crosier", "fh-marion-maher", "932453"],
-      "summary": "Jerome Frederick Crosier (31 Jan 1898, Lansing, MI – 28 Oct 1983, Avon, MI), son of Albert David Crosier and Marion A. Maher, married Madeline Phoebe Lozon on 25 Nov 1924 in Wallaceburg, Ontario. Madeline (b. 9 Feb 1894, Wallaceburg) died in 1925 when their son Frederick was a baby. Jerome later remarried Josephine C. (c. 1905–1997), who raised Frederick as his stepmother.",
+      "personIds": [
+        "581371",
+        "fh-madeline-lozon",
+        "fh-albert-crosier",
+        "fh-marion-maher",
+        "932453"
+      ],
+      "summary": "Jerome Frederick Crosier (31 Jan 1898, Lansing, MI \u2013 28 Oct 1983, Avon, MI), son of Albert David Crosier and Marion A. Maher, married Madeline Phoebe Lozon on 25 Nov 1924 in Wallaceburg, Ontario. Madeline (b. 9 Feb 1894, Wallaceburg) died 29 Sep 1925 in Detroit \u2014 the same day their son Frederick Charles was born. Jerome later remarried Josephine C. (c. 1905\u20131997), who raised Frederick as his stepmother.",
       "highlights": [
         "Marriage: 25 Nov 1924, Wallaceburg, Ontario",
-        "Madeline died 1925 (Detroit area in public trees)",
-        "Stepmother: Josephine C. Crosier (c. 1905–1997)",
-        "Jerome’s parents: Albert David Crosier (1865–1942) & Marion A. Maher (1865–1951)"
+        "Madeline died 29 Sep 1925 in Detroit, the day Frederick was born",
+        "Stepmother: Josephine C. Crosier (c. 1905\u20131997)",
+        "Jerome\u2019s parents: Albert David Crosier (1865\u20131942) & Marion A. Maher (1865\u20131951)",
+        "Jerome birth/death: 31 Jan 1898 Lansing \u2013 28 Oct 1983 Avon, MI"
       ],
       "sources": [
         {
-          "label": "Trees of Ancestry — Jerome Frederick Crosier",
+          "label": "Trees of Ancestry \u2014 Jerome Frederick Crosier",
           "url": "https://classypages.com/img/oxygen/n362.htm"
         },
         {
-          "label": "Wallaceburg events — marriage & Madeline birth",
+          "label": "Wallaceburg events \u2014 marriage & Madeline birth",
           "url": "https://classypages.com/img/oxygen/evp189.htm"
+        },
+        {
+          "label": "Trees of Ancestry \u2014 Madeline death 29 Sep 1925 Detroit",
+          "url": "https://classypages.com/img/oxygen/evp40.htm"
         }
       ]
     },
@@ -94,8 +112,14 @@
       "title": "Adolphus Lozon & Mary Veronica Gore",
       "line": "Crosier",
       "status": "confirmed",
-      "personIds": ["fh-adolphus-lozon", "fh-mary-gore", "fh-madeline-lozon", "fh-solomon-lozon", "fh-peter-lozon"],
-      "summary": "Madeline’s parents were Adolphus Lozon (b. ~1861) and Mary Veronica Gore (b. ~1863) of the Wallaceburg / Chatham, Ontario area. They married 8 Jan 1883. Known children include Madeline Phoebe, Peter Adolphus, Aubrey Samuel, Roy Clarence, Wilfred Joseph, and an infant who died in 1903. Canadian service records also list Solomon Alex Lozon (b. 6 Nov 1891, Wallaceburg) as a son of Adolphus.",
+      "personIds": [
+        "fh-adolphus-lozon",
+        "fh-mary-gore",
+        "fh-madeline-lozon",
+        "fh-solomon-lozon",
+        "fh-peter-lozon"
+      ],
+      "summary": "Madeline\u2019s parents were Adolphus Lozon (b. ~1861) and Mary Veronica Gore (b. ~1863) of the Wallaceburg / Chatham, Ontario area. They married 8 Jan 1883. Known children include Madeline Phoebe, Peter Adolphus, Aubrey Samuel, Roy Clarence, Wilfred Joseph, and an infant who died in 1903. Canadian service records also list Solomon Alex Lozon (b. 6 Nov 1891, Wallaceburg) as a son of Adolphus.",
       "highlights": [
         "Married 8 Jan 1883",
         "Home area: Wallaceburg / Chatham, Kent County, Ontario",
@@ -103,48 +127,55 @@
       ],
       "sources": [
         {
-          "label": "Trees of Ancestry — Lozon / Gore children",
+          "label": "Trees of Ancestry \u2014 Lozon / Gore children",
           "url": "https://classypages.com/img/oxygen/asc3822.htm"
         },
         {
-          "label": "Gathering Our Heroes — Solomon Alex Lozon",
+          "label": "Gathering Our Heroes \u2014 Solomon Alex Lozon",
           "url": "https://www.gatheringourheroes.ca/hero/lozon-s-a/"
         }
       ]
     },
     {
       "id": "lozon-wwi",
-      "title": "Lozon brothers — WWI Canadian service",
+      "title": "Lozon brothers \u2014 WWI Canadian service",
       "line": "Crosier",
       "status": "confirmed",
-      "personIds": ["fh-solomon-lozon", "fh-peter-lozon"],
-      "summary": "Two of Madeline’s brothers appear in Canadian WWI records from Wallaceburg. Solomon Alex Lozon (sapper #3131895) enlisted Feb 1918 with the 1st Western Ontario Regiment, sailed to England May 1918, and served in France before returning in 1919. Peter Adolphus (Dulphy) Lozon (#3134471), born 29 Aug 1896, enlisted July 1918 and was discharged early 1919.",
+      "personIds": [
+        "fh-solomon-lozon",
+        "fh-peter-lozon"
+      ],
+      "summary": "Two of Madeline\u2019s brothers appear in Canadian WWI records from Wallaceburg. Solomon Alex Lozon (sapper #3131895) enlisted Feb 1918 with the 1st Western Ontario Regiment, sailed to England May 1918, and served in France before returning in 1919. Peter Adolphus (Dulphy) Lozon (#3134471), born 29 Aug 1896, enlisted July 1918 and was discharged early 1919.",
       "highlights": [
-        "Solomon Alex Lozon — Spr., CEF 3131895; overseas England/France 1918–19",
-        "Peter Adolphus Lozon — 1st WOR 3134471; enlisted 1918, demobilized 1919",
+        "Solomon Alex Lozon \u2014 Spr., CEF 3131895; overseas England/France 1918\u201319",
+        "Peter Adolphus Lozon \u2014 1st WOR 3134471; enlisted 1918, demobilized 1919",
         "Both listed with Adolphus/Mary Lozon of R.R. #2 Wallaceburg area"
       ],
       "sources": [
         {
-          "label": "Gathering Our Heroes — Solomon Alex Lozon",
+          "label": "Gathering Our Heroes \u2014 Solomon Alex Lozon",
           "url": "https://www.gatheringourheroes.ca/hero/lozon-s-a/"
         },
         {
-          "label": "IWM Lives of the First World War — Soloman Alex Lozon",
+          "label": "IWM Lives of the First World War \u2014 Soloman Alex Lozon",
           "url": "https://livesofthefirstworldwar.iwm.org.uk/lifestory/6017455"
         },
         {
-          "label": "Gathering Our Heroes — Peter Dulphy Lozon",
+          "label": "Gathering Our Heroes \u2014 Peter Dulphy Lozon",
           "url": "https://www.gatheringourheroes.ca/hero/lozon-p-d/"
         }
       ]
     },
     {
       "id": "altz-siblings",
-      "title": "Dolores Altz — brothers and sisters",
+      "title": "Dolores Altz \u2014 brothers and sisters",
       "line": "Crosier",
       "status": "confirmed",
-      "personIds": ["730562", "1011292", "826851"],
+      "personIds": [
+        "730562",
+        "1011292",
+        "826851"
+      ],
       "summary": "Dolores Marie Altz was a daughter of Norman Joseph Altz and Rena Margaret La Pan. Her siblings (from public trees, family-confirmed) include Barbara Marie, Donna Jean, Jeanette Catherine, Joseph Edwards, Linda Rosalle, Mary Elizabeth, and Norman Anthony.",
       "highlights": [
         "Parents: Norman Joseph Altz & Rena Margaret La Pan",
@@ -152,18 +183,20 @@
       ],
       "sources": [
         {
-          "label": "Trees of Ancestry — Altz children",
+          "label": "Trees of Ancestry \u2014 Altz children",
           "url": "https://classypages.com/img/oxygen/asc70.htm"
         }
       ]
     },
     {
       "id": "immediate-family",
-      "title": "Ann’s immediate family (baseline)",
+      "title": "Ann\u2019s immediate family (baseline)",
       "line": "Core",
       "status": "confirmed",
-      "personIds": ["543356"],
-      "summary": "Ann Symons (born Ann Krause, 5 Oct 1997) married Timothy Symons. Parents: Gerald Krause (b. 20 Dec 1953) and Karolyn Crosier (b. 1 May 1959). Siblings: Jeremy, Emily, and Elizabeth Krause. Paternal grandparents: Otto Krause & Geraldine Staub. Maternal grandparents: Frederick Charles Crosier & Dolores Marie Altz Crosier. Gerald’s brothers: Jay, Denny, Brian, Eric. Tim’s parents: Jeffrey & Elizabeth Symons; Jeffrey’s parents John & Treva Symons; Elizabeth’s parents Heisperadis Kokx (b. 2 Nov 1924) & Lucia Kokx (b. 1928).",
+      "personIds": [
+        "543356"
+      ],
+      "summary": "Ann Symons (born Ann Krause, 5 Oct 1997) married Timothy Symons. Parents: Gerald Krause (b. 20 Dec 1953) and Karolyn Crosier (b. 1 May 1959). Siblings: Jeremy, Emily, and Elizabeth Krause. Paternal grandparents: Otto Krause & Geraldine Staub. Maternal grandparents: Frederick Charles Crosier & Dolores Marie Altz Crosier. Gerald\u2019s brothers: Jay, Denny, Brian, Eric. Tim\u2019s parents: Jeffrey & Elizabeth Symons; Jeffrey\u2019s parents John & Treva Symons; Elizabeth\u2019s parents Heisperadis Kokx (b. 2 Nov 1924) & Lucia Kokx (b. 1928).",
       "highlights": [
         "Focus person: Ann Krause Symons (b. 5 Oct 1997)",
         "Spouse: Timothy Symons",

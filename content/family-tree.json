@@ -2426,8 +2426,8 @@
       },
       "death": {
         "year": 1925,
-        "month": null,
-        "day": null,
+        "month": 9,
+        "day": 29,
         "known": true
       },
       "gender": "female"
