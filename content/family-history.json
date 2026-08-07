@@ -520,7 +520,9 @@
         "Siblings: Jeremy Francis, Emily Elizabeth, Elizabeth Ann (see siblings section)",
         "Krause uncles: Jay, Denny, Brian, Eric",
         "Symons: Jeffrey & Elizabeth; John & Treva; Heisperadis & Lucia Kokx",
-        "Lucia Kokx journal: Rotterdam 1939–May 1940 bombing (word-for-word; see Lucia Kokx section)"
+        "Lucia Kokx journal: Rotterdam 1939–May 1940 bombing (word-for-word; see Lucia Kokx section)",
+        "Tim’s mother (people-search cluster matching Jeffrey + Timothy): Elizabeth Nellie Symons of Fenton area; AKA Elizabeth N Singer (maiden/previous name needs family confirm)",
+        "Likely Tim sibling (people-search / LFHS alumni): Jennifer Symons, Lake Fenton class of 2006 — confirm with family"
       ],
       "sources": [
         {
@@ -565,16 +567,48 @@
       "personIds": [
         "600043"
       ],
-      "summary": "Tim’s maternal grandmother Lucia Kokx (b. 15 Aug 1928; birthday confirmed from her own journal) wrote these recollections of Rotterdam from summer 1939 through the German bombing of 14 May 1940. Text below is transcribed word for word from the family copy as provided; spelling and wording are preserved. The provided transcript ends mid-sentence.",
+      "summary": "Tim’s maternal grandmother Lucia Kokx (b. 15 Aug 1928; birthday confirmed from her own journal) wrote these recollections of Rotterdam from summer 1939 through the German bombing of 14 May 1940. Text below is transcribed word for word from the family copy as provided; spelling and wording are preserved. The provided transcript ends mid-sentence. Public research note: Rotterdam civil birth certificates are sealed for 100 years, so a 15 Aug 1928 birth act is not expected to appear in Stadsarchief / WieWasWie indexes until about 2028. No clean public match yet for Lucia under Kokx in Michigan people-search or for husband Heisperadis Kokx (unusual given name; spelling may vary). Journal details that do match well-documented public history are listed in highlights with sources.",
       "highlights": [
-        "Author: Lucia Kokx (Tim Symons’s mother’s mother)",
+        "Author: Lucia Kokx (Tim Symons’s mother’s mother) — family-confirmed",
         "Birthday in journal: August 15; turning 11 in 1939 → birth 15 Aug 1928",
-        "Setting: Rotterdam; vacation cabin near Hoek van Holland",
-        "Family in journal: mom, dad (postman), grandpa (lived with them after grandma died), younger sister Nel (~10 in May 1940), younger brother Jerry (~6 in May 1940)",
-        "Bombing of Rotterdam: 14 May 1940 (also grandpa’s birthday in the journal)",
+        "Childhood home: Rotterdam (upstairs flat); dad worked downtown as a postman",
+        "Vacation: train to Hoek van Holland, then ~1 hour walk with baggage to ocean cabin (two weeks, summer 1939)",
+        "Household in journal (1939–40): mother; father (postman); grandpa living with them after grandma died; younger sister Nel (~10 in May 1940); younger brother Jerry (~6 in May 1940); Lucia (~11)",
+        "Public history match — Dutch general mobilization: preliminary 24 Aug 1939, full mobilization 28 Aug 1939 (~280,000 men); matches journal’s second vacation week when “all the young men” were called and dad was ordered back to Rotterdam",
+        "Public history match — Polish campaign / Warsaw (journal “Warchan”) bombed Sept 1939; Netherlands still hoping for WWI-style neutrality",
+        "Public history match — German invasion of the Netherlands 10 May 1940; Rotterdam Blitz 14 May 1940 ~1:20–1:40 pm (journal: “It was 1 pm”)",
+        "Public history match — civilians often sheltered on stairways when living upstairs; eyewitness collections titled Onder de trap (“Under the Stairs”); journal family sat on the stairs per radio advice",
+        "Bomb across the street; front door blown off; glass cuts to Nel’s head and Lucia’s hands; grandpa injured on stairs; then bakery 2 blocks away before shelter",
+        "Journal typo note: “Leptenber” almost certainly September (Dutch: september)",
+        "Research limit: no digitized personal birth/marriage/immigration record found yet under Lucia Kokx + Heisperadis; HAL passenger lists searchable at Rotterdam City Archives once maiden/married spellings known",
         "Transcript status: ends mid-sentence as received — more pages welcome"
       ],
-      "sources": [],
+      "sources": [
+        {
+          "label": "Wikipedia — German bombing of Rotterdam (14 May 1940)",
+          "url": "https://en.wikipedia.org/wiki/German_bombing_of_Rotterdam"
+        },
+        {
+          "label": "Maritiem Museum Rotterdam — Bombardment of Rotterdam",
+          "url": "https://maritiemmuseum.nl/en/stories/bombardement"
+        },
+        {
+          "label": "Soldaat Sikke Hiemstra — Netherlands mobilizes (Aug 1939)",
+          "url": "https://soldaatsikkehiemstra.com/english/the-dutch-mobilisation/the-netherlands-mobilizes/"
+        },
+        {
+          "label": "Vandaag en Morgen — Onder de trap Rotterdam eyewitness podcasts",
+          "url": "https://www.vandaagenmorgen.nl/nieuws/5705/bombardement-rotterdam-podcast-track-1-van-8"
+        },
+        {
+          "label": "Stadsarchief Rotterdam — Genealogy privacy windows (births 100 years)",
+          "url": "https://stadsarchief.rotterdam.nl/en/genealogy"
+        },
+        {
+          "label": "Holland America Line passenger lists (1900–1969) via Rotterdam City Archives",
+          "url": "https://www.hollandamerica.com/en/us/newsroom/newsfeed/holland-america-line-passenger-lists-dating-back-to-1900-now-available"
+        }
+      ],
       "verbatimEntries": [
         {
           "title": "Rotterdam, July 1939",
@@ -597,7 +631,9 @@
         "705532",
         "730562",
         "961427",
-        "313589"
+        "313589",
+        "600043",
+        "146573"
       ],
       "summary": "These details are interesting for the Family History page but are not confirmed from public trees/military pages yet — family memory or uploads will help.",
       "highlights": [
@@ -613,7 +649,14 @@
         "Ann Krause 2016 All-County tennis Macomb Daily clip (digitized copy)",
         "Exact birth dates for Jeremy, Emily, Elizabeth",
         "Gerald & Karolyn exact marriage date/year (Ann does not remember; ask parents)",
-        "Which church they married in (Ann does not know; ask parents)"
+        "Which church they married in (Ann does not know; ask parents)",
+        "Lucia Kokx maiden surname (and parents’ full names — journal dad was a Rotterdam postman)",
+        "Lucia siblings Nel and Jerry — full Dutch names / what became of them",
+        "When / how Lucia and Heisperadis Kokx emigrated to the U.S. (ship/year); confirm spelling of Heisperadis",
+        "Lucia marriage date/place; later U.S. residences; whether still living / burial place",
+        "Rest of Lucia’s Rotterdam journal (transcript cuts off mid-sentence)",
+        "Confirm whether Tim’s mother Elizabeth’s AKA “Singer” is maiden name, prior marriage, or people-search noise",
+        "Confirm Jennifer Symons (LFHS ’06) as Tim’s sister"
       ],
       "sources": []
     }
