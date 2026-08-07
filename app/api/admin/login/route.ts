@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { clearAdminSession, setAdminSession } from "@/lib/auth";
 import { setTasksSession } from "@/lib/tasksAuth";
-import { getAdminPassword, getTimPassword } from "@/lib/tasksPassword";
+import { getTimPassword } from "@/lib/tasksPassword";
 import { clearSiteUserSession, loginSiteUser } from "@/lib/siteUserAuth";
 import { firstAllowedPath } from "@/lib/admin/pageAccess";
-import { getOwnerEmail } from "@/lib/ownerAccount";
+import { getOwnerEmail, getOwnerLoginPassword } from "@/lib/ownerAccount";
 
 export async function POST(request: Request) {
   try {
@@ -23,10 +23,9 @@ export async function POST(request: Request) {
     const result = await loginSiteUser(username, password);
     if (result.ok) {
       await clearAdminSession();
-      // Owner also unlocks /tasks with the env admin password when they used it
-      const adminPassword = getAdminPassword();
-      if (result.user.role === "owner" && adminPassword) {
-        await setTasksSession(adminPassword);
+      const ownerPassword = getOwnerLoginPassword();
+      if (result.user.role === "owner" && ownerPassword) {
+        await setTasksSession(ownerPassword);
       }
       return NextResponse.json({
         ok: true,
@@ -35,6 +34,23 @@ export async function POST(request: Request) {
           result.user.role === "owner"
             ? "/admin"
             : firstAllowedPath(result.user.allowedPages),
+      });
+    }
+
+    // Owner email + env password: always let Ann in even if DB setup failed.
+    const ownerPassword = getOwnerLoginPassword();
+    if (
+      ownerPassword &&
+      password === ownerPassword &&
+      username.toLowerCase() === getOwnerEmail()
+    ) {
+      await clearSiteUserSession();
+      await setAdminSession(ownerPassword);
+      await setTasksSession(ownerPassword);
+      return NextResponse.json({
+        ok: true,
+        kind: "owner-env",
+        next: "/admin",
       });
     }
 
@@ -53,10 +69,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        error: result.error,
+        error: result.error || "Invalid username or password.",
         hint:
           username.toLowerCase() === getOwnerEmail()
-            ? "Use your owner email and ADMIN_PASSWORD (or your saved owner password)."
+            ? "Use a.krause10597@gmail.com and your ADMIN_PASSWORD (or TASKS_PASSWORD if that is what you use)."
             : undefined,
       },
       { status: 401 }

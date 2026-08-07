@@ -2,6 +2,7 @@ import { getSql, getSqlOrThrow } from "@/lib/db";
 import { hashPassword, verifyPassword } from "@/lib/passwordHash";
 import { normalizeAllowedPages } from "@/lib/admin/pageAccess";
 import { getOwnerEmail } from "@/lib/ownerAccount";
+import { ensureSiteUsersSchema } from "@/lib/data/ensureSiteUsersSchema";
 
 export const SITE_USER_STATUSES = [
   "pending",
@@ -208,6 +209,10 @@ export async function createSiteUserRequest(
   }
 
   try {
+    const schemaOk = await ensureSiteUsersSchema();
+    if (!schemaOk) {
+      return { ok: false, error: SITE_USERS_MIGRATION_HINT };
+    }
     const sql = getSqlOrThrow();
     const passwordHash = hashPassword(password);
     const rows = await sql`

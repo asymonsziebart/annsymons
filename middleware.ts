@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { isLinkPreviewBot } from "@/lib/linkPreviewBots";
-import { getAllAdminPasswords, getAllTasksPasswords } from "@/lib/tasksPassword";
+import {
+  getAdminPassword,
+  getAllAdminPasswords,
+  getAllTasksPasswords,
+} from "@/lib/tasksPassword";
 import {
   resolveSiteUserAccess,
   resolveSiteUserSession,
@@ -36,6 +40,15 @@ async function cookieMatchesAnyPassword(
 async function hasSharedAdminSession(request: NextRequest): Promise<boolean> {
   const cookie = request.cookies.get(ADMIN_COOKIE)?.value;
   return cookieMatchesAnyPassword(cookie, getAllAdminPasswords(), ADMIN_SALT);
+}
+
+/** Ann’s env owner password only (not Tim’s TASKS_PASSWORD_TIM). */
+async function hasOwnerEnvAdminSession(request: NextRequest): Promise<boolean> {
+  const cookie = request.cookies.get(ADMIN_COOKIE)?.value;
+  const ownerPassword =
+    getAdminPassword() || process.env.TASKS_PASSWORD?.trim() || "";
+  if (!ownerPassword) return false;
+  return cookieMatchesAnyPassword(cookie, [ownerPassword], ADMIN_SALT);
 }
 
 async function allowProtectedPath(
@@ -113,11 +126,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Manage Users: owner account only (Ann’s email login).
+  // Manage Users: owner email session, or Ann’s ADMIN_PASSWORD cookie (not Tim).
   if (path === "/admin/users" || path.startsWith("/admin/users/")) {
     const siteCookie = request.cookies.get(SITE_USER_COOKIE)?.value;
     const session = await resolveSiteUserSession(siteCookie);
     if (session.kind === "owner") return NextResponse.next();
+    if (await hasOwnerEnvAdminSession(request)) return NextResponse.next();
     if (session.kind === "member" || (await hasSharedAdminSession(request))) {
       return forbiddenRedirect(request);
     }

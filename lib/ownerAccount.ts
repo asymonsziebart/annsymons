@@ -2,6 +2,7 @@ import { getAdminPassword } from "@/lib/tasksPassword";
 import { GRANTABLE_ADMIN_PAGES } from "@/lib/admin/pageAccess";
 import { hashPassword } from "@/lib/passwordHash";
 import { getSql } from "@/lib/db";
+import { ensureSiteUsersSchema } from "@/lib/data/ensureSiteUsersSchema";
 
 /** Ann’s super-admin login email (override with OWNER_EMAIL if needed). */
 export const DEFAULT_OWNER_EMAIL = "a.krause10597@gmail.com";
@@ -11,20 +12,33 @@ export function getOwnerEmail(): string {
   return fromEnv || DEFAULT_OWNER_EMAIL;
 }
 
+/**
+ * Password that unlocks Ann’s owner account.
+ * Prefers ADMIN_PASSWORD; falls back to TASKS_PASSWORD if only that is set.
+ */
+export function getOwnerLoginPassword(): string {
+  const admin = getAdminPassword();
+  if (admin) return admin;
+  return process.env.TASKS_PASSWORD?.trim() ?? "";
+}
+
 export function allGrantablePageHrefs(): string[] {
   return GRANTABLE_ADMIN_PAGES.map((p) => p.href);
 }
 
 /**
  * Ensure the owner row exists for Ann’s email.
- * New installs seed password from ADMIN_PASSWORD.
- * Existing owner rows keep their password_hash (login can refresh it when ADMIN_PASSWORD is used).
+ * New installs seed password from ADMIN_PASSWORD (or TASKS_PASSWORD).
+ * Existing owner rows keep their password_hash (login can refresh it when that password is used).
  */
-export async function ensureOwnerAccount(): Promise<void> {
+export async function ensureOwnerAccount(): Promise<boolean> {
   const sql = getSql();
   const email = getOwnerEmail();
-  const adminPassword = getAdminPassword();
-  if (!sql || !email || !adminPassword) return;
+  const ownerPassword = getOwnerLoginPassword();
+  if (!sql || !email || !ownerPassword) return false;
+
+  const schemaOk = await ensureSiteUsersSchema();
+  if (!schemaOk) return false;
 
   const pagesJson = JSON.stringify(allGrantablePageHrefs());
   try {
@@ -42,10 +56,10 @@ export async function ensureOwnerAccount(): Promise<void> {
           updated_at = NOW()
         WHERE lower(email) = ${email}
       `;
-      return;
+      return true;
     }
 
-    const passwordHash = hashPassword(adminPassword);
+    const passwordHash = hashPassword(ownerPassword);
     await sql`
       INSERT INTO site_users (
         name, email, password_hash, role, status, allowed_pages, admin_note, decided_at
@@ -57,22 +71,24 @@ export async function ensureOwnerAccount(): Promise<void> {
         'owner',
         'approved',
         ${pagesJson},
-        'Super admin (linked to ADMIN_PASSWORD on first create)',
+        'Super admin (linked to ADMIN_PASSWORD / TASKS_PASSWORD on first create)',
         NOW()
       )
     `;
+    return true;
   } catch {
-    /* table may not exist yet */
+    return false;
   }
 }
 
-export async function syncOwnerPasswordFromAdminEnv(): Promise<void> {
+export async function syncOwnerPasswordFromAdminEnv(): Promise<boolean> {
   const sql = getSql();
   const email = getOwnerEmail();
-  const adminPassword = getAdminPassword();
-  if (!sql || !email || !adminPassword) return;
+  const ownerPassword = getOwnerLoginPassword();
+  if (!sql || !email || !ownerPassword) return false;
   try {
-    const passwordHash = hashPassword(adminPassword);
+    await ensureSiteUsersSchema();
+    const passwordHash = hashPassword(ownerPassword);
     const pagesJson = JSON.stringify(allGrantablePageHrefs());
     await sql`
       UPDATE site_users
@@ -84,7 +100,8 @@ export async function syncOwnerPasswordFromAdminEnv(): Promise<void> {
         updated_at = NOW()
       WHERE lower(email) = ${email}
     `;
+    return true;
   } catch {
-    /* ignore */
+    return false;
   }
 }

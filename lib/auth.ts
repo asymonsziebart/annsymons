@@ -7,6 +7,7 @@ import {
 import { getSiteUserSession } from "@/lib/siteUserAuth";
 import { pathIsAllowed } from "@/lib/admin/pageAccess";
 import type { SiteUserRow } from "@/lib/data/siteUsers";
+import { getOwnerLoginPassword } from "@/lib/ownerAccount";
 
 const COOKIE_NAME = "admin_session";
 const SALT = "annsymons-admin";
@@ -58,10 +59,19 @@ export async function isAdmin(): Promise<boolean> {
   return user != null;
 }
 
-/** Super admin: approved site user with role=owner (Ann’s email account). */
+/**
+ * Super admin: approved site user with role=owner (Ann’s email account),
+ * or the ADMIN_PASSWORD / owner-env cookie as a fallback when the DB row isn’t ready.
+ */
 export async function isOwner(): Promise<boolean> {
   const user = await getSiteUserSession();
-  return user?.role === "owner";
+  if (user?.role === "owner") return true;
+
+  const ownerPassword = getOwnerLoginPassword();
+  if (!ownerPassword) return false;
+  const c = await cookies();
+  const cookie = c.get(COOKIE_NAME)?.value;
+  return Boolean(cookie && cookie === sessionTokenForPassword(ownerPassword));
 }
 
 export type AccessContext =
@@ -73,6 +83,24 @@ export type AccessContext =
 export async function getAccessContext(): Promise<AccessContext> {
   const user = await getSiteUserSession();
   if (user?.role === "owner") return { kind: "owner", user };
+  // Owner env-password cookie (no DB row yet) still counts as owner for nav/APIs.
+  if (await isOwner()) {
+    return {
+      kind: "owner",
+      user: user ?? {
+        id: 0,
+        name: "Ann",
+        email: "",
+        role: "owner",
+        status: "approved",
+        allowedPages: [],
+        adminNote: null,
+        createdAt: "",
+        decidedAt: null,
+        updatedAt: "",
+      },
+    };
+  }
   if (await isSharedAdmin()) return { kind: "shared-admin" };
   if (user) return { kind: "site-user", user };
   return { kind: "none" };

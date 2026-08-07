@@ -11,10 +11,11 @@ import {
   SITE_USER_COOKIE,
 } from "@/lib/siteUserSessionToken";
 import { parseSiteUserCookie } from "@/lib/siteUserCookieParse";
-import { getAdminPassword } from "@/lib/tasksPassword";
+import { getSql } from "@/lib/db";
 import {
   ensureOwnerAccount,
   getOwnerEmail,
+  getOwnerLoginPassword,
   syncOwnerPasswordFromAdminEnv,
 } from "@/lib/ownerAccount";
 
@@ -51,34 +52,68 @@ export async function getSiteUserSession(): Promise<SiteUserRow | null> {
 
 /**
  * Email + password login for site accounts.
- * Owner email also accepts ADMIN_PASSWORD and refreshes the stored hash.
+ * Owner email also accepts ADMIN_PASSWORD (or TASKS_PASSWORD) and refreshes the stored hash.
  */
 export async function loginSiteUser(
   email: string,
   password: string
 ): Promise<
   | { ok: true; user: SiteUserRow }
-  | { ok: false; error: string }
+  | { ok: false; error: string; fallbackOwnerEnv?: boolean }
 > {
-  await ensureOwnerAccount();
-
   const normalized = email.trim().toLowerCase();
-  const adminPassword = getAdminPassword();
-  if (normalized === getOwnerEmail() && adminPassword && password === adminPassword) {
-    await syncOwnerPasswordFromAdminEnv();
+  const isOwnerEmail = normalized === getOwnerEmail();
+  const ownerPassword = getOwnerLoginPassword();
+  const ownerPasswordMatches =
+    isOwnerEmail && Boolean(ownerPassword) && password === ownerPassword;
+
+  if (isOwnerEmail) {
+    if (!getSql()) {
+      return {
+        ok: false,
+        error: "Database is not configured (DATABASE_URL). Ask for help setting Neon.",
+        fallbackOwnerEnv: ownerPasswordMatches,
+      };
+    }
+    if (!ownerPassword) {
+      return {
+        ok: false,
+        error: "ADMIN_PASSWORD is not set on the server.",
+      };
+    }
+
+    const ensured = await ensureOwnerAccount();
+    if (ownerPasswordMatches) {
+      await syncOwnerPasswordFromAdminEnv();
+    }
+
+    let result = await authenticateSiteUser(email, password);
+    if (!result.ok && ownerPasswordMatches) {
+      await ensureOwnerAccount();
+      await syncOwnerPasswordFromAdminEnv();
+      result = await authenticateSiteUser(email, password);
+    }
+
+    if (result.ok) {
+      await setSiteUserSession(result.user);
+      const { passwordHash: _pw, ...safe } = result.user;
+      return { ok: true, user: safe };
+    }
+
+    if (ownerPasswordMatches) {
+      return {
+        ok: false,
+        error: ensured
+          ? "Owner account could not be signed in from the database."
+          : "Could not set up the owner account in the database. Check Neon.",
+        fallbackOwnerEnv: true,
+      };
+    }
+
+    return result;
   }
 
-  let result = await authenticateSiteUser(email, password);
-  if (
-    !result.ok &&
-    normalized === getOwnerEmail() &&
-    adminPassword &&
-    password === adminPassword
-  ) {
-    await syncOwnerPasswordFromAdminEnv();
-    result = await authenticateSiteUser(email, password);
-  }
-
+  const result = await authenticateSiteUser(email, password);
   if (!result.ok) return result;
   await setSiteUserSession(result.user);
   const { passwordHash: _pw, ...safe } = result.user;
