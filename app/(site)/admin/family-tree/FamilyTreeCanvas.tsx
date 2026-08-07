@@ -48,6 +48,11 @@ function Silhouette() {
 const VIEW_MODES: Array<{ id: FamilyTreeViewMode; label: string; hint: string }> = [
   { id: "child", label: "Child", hint: "Kids only" },
   { id: "child_spouse", label: "Child & spouse", hint: "Kids + their partners" },
+  {
+    id: "siblings_child_spouse",
+    label: "Siblings + child & spouse",
+    hint: "Siblings, kids, and kids' partners",
+  },
   { id: "grandchild", label: "Grandchild", hint: "Two generations" },
   { id: "unlimited", label: "Unlimited", hint: "All descendants" },
 ];
@@ -303,7 +308,7 @@ export default function FamilyTreeCanvas({
               type="button"
               title={mode.hint}
               onClick={() => onViewModeChange(mode.id)}
-              className={`min-h-11 min-w-[7.5rem] px-3 text-left text-xs font-bold uppercase tracking-wide transition ${
+              className={`min-h-11 min-w-[9.5rem] max-w-[11rem] px-3 text-left text-[10px] font-bold uppercase leading-snug tracking-wide transition sm:text-xs ${
                 active
                   ? "bg-[#c45f1a] text-white"
                   : "bg-[#e0894a] text-white/95 hover:bg-[#d47a38]"

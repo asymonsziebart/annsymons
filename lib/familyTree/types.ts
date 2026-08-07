@@ -21,8 +21,13 @@ export type FamilyTreePerson = {
   photoUrl?: string | null;
 };
 
-/** How deep to expand descendants from the focused person. */
-export type FamilyTreeViewMode = "child" | "child_spouse" | "grandchild" | "unlimited";
+/** How deep / wide to expand from the focused person. */
+export type FamilyTreeViewMode =
+  | "child"
+  | "child_spouse"
+  | "siblings_child_spouse"
+  | "grandchild"
+  | "unlimited";
 
 export type FamilyTreeFamily = {
   id: string;

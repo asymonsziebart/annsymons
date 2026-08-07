@@ -43,15 +43,27 @@ export type TreeLayout = {
 
 type Index = ReturnType<typeof buildRelationIndex>;
 
+function showsSiblings(mode: FamilyTreeViewMode): boolean {
+  return mode === "siblings_child_spouse";
+}
+
 function maxDescendantDepth(mode: FamilyTreeViewMode): number {
-  if (mode === "child" || mode === "child_spouse") return 1;
+  if (
+    mode === "child" ||
+    mode === "child_spouse" ||
+    mode === "siblings_child_spouse"
+  ) {
+    return 1;
+  }
   if (mode === "grandchild") return 2;
   return Number.POSITIVE_INFINITY;
 }
 
 function includeChildSpouses(mode: FamilyTreeViewMode, depthFromFocus: number): boolean {
   if (mode === "child") return false;
-  if (mode === "child_spouse") return depthFromFocus === 1;
+  if (mode === "child_spouse" || mode === "siblings_child_spouse") {
+    return depthFromFocus === 1;
+  }
   // grandchild + unlimited: spouses at every shown generation
   return true;
 }
@@ -90,47 +102,35 @@ function measureSubtree(
   return Math.max(selfWidth, kidsWidth);
 }
 
-function placeSubtree(
-  index: Index,
-  personId: string,
-  mode: FamilyTreeViewMode,
-  depthFromFocus: number,
+function placePersonOrCouple(
+  rel: PersonRelations,
   centerX: number,
   y: number,
+  withSpouse: boolean,
+  isFocus: boolean,
   peopleOut: LayoutPerson[],
   marriagesOut: LayoutMarriage[],
   edgesOut: LayoutEdge[],
-  placedIds: Set<string>,
-  isFocus: boolean
-): void {
-  const rel = index.getRelations(personId);
-  if (!rel) return;
-
-  const showSpouse = depthFromFocus === 0 || includeChildSpouses(mode, depthFromFocus);
-  const spouse = showSpouse ? rel.spouses[0] : undefined;
-
-  let personX = centerX;
-  let marriageX = centerX;
-  let marriageY = y;
+  placedIds: Set<string>
+): { marriageX: number; personX: number } {
+  const spouse = withSpouse ? rel.spouses[0] : undefined;
+  const personId = rel.person.id;
 
   if (spouse) {
-    const leftIsFocus = true; // keep primary person on the left of the couple
-    const left = leftIsFocus ? rel.person : spouse;
-    const right = leftIsFocus ? spouse : rel.person;
     const leftX = centerX - (NODE_RADIUS + COUPLE_GAP / 2);
     const rightX = centerX + (NODE_RADIUS + COUPLE_GAP / 2);
-    personX = left.id === personId ? leftX : rightX;
-    const spouseX = left.id === personId ? rightX : leftX;
+    const personX = leftX;
+    const spouseX = rightX;
 
-    if (!placedIds.has(rel.person.id)) {
+    if (!placedIds.has(personId)) {
       peopleOut.push({
-        id: rel.person.id,
+        id: personId,
         person: rel.person,
         x: personX,
         y,
         isFocus,
       });
-      placedIds.add(rel.person.id);
+      placedIds.add(personId);
     }
     if (!placedIds.has(spouse.id)) {
       peopleOut.push({
@@ -143,14 +143,12 @@ function placeSubtree(
       placedIds.add(spouse.id);
     }
 
-    marriageX = centerX;
-    marriageY = y;
-    const marriageId = `m-${rel.person.id}-${spouse.id}`;
+    const marriageId = `m-${personId}-${spouse.id}`;
     marriagesOut.push({
       id: marriageId,
-      x: marriageX,
-      y: marriageY,
-      partnerIds: [rel.person.id, spouse.id],
+      x: centerX,
+      y,
+      partnerIds: [personId, spouse.id],
     });
     edgesOut.push({
       id: `e-couple-${marriageId}`,
@@ -159,16 +157,36 @@ function placeSubtree(
         { x: rightX, y },
       ],
     });
-  } else if (!placedIds.has(rel.person.id)) {
+    return { marriageX: centerX, personX };
+  }
+
+  if (!placedIds.has(personId)) {
     peopleOut.push({
-      id: rel.person.id,
+      id: personId,
       person: rel.person,
-      x: personX,
+      x: centerX,
       y,
       isFocus,
     });
-    placedIds.add(rel.person.id);
+    placedIds.add(personId);
   }
+  return { marriageX: centerX, personX: centerX };
+}
+
+function placeDescendants(
+  index: Index,
+  personId: string,
+  mode: FamilyTreeViewMode,
+  depthFromFocus: number,
+  marriageX: number,
+  y: number,
+  peopleOut: LayoutPerson[],
+  marriagesOut: LayoutMarriage[],
+  edgesOut: LayoutEdge[],
+  placedIds: Set<string>
+): void {
+  const rel = index.getRelations(personId);
+  if (!rel) return;
 
   const maxDepth = maxDescendantDepth(mode);
   if (depthFromFocus >= maxDepth || rel.children.length === 0) return;
@@ -180,7 +198,7 @@ function placeSubtree(
   const totalKids =
     childWidths.reduce((a, b) => a + b, 0) + SIBLING_GAP * Math.max(0, rel.children.length - 1);
 
-  let cursor = centerX - totalKids / 2;
+  let cursor = marriageX - totalKids / 2;
   const childCenters: number[] = [];
 
   for (let i = 0; i < rel.children.length; i++) {
@@ -204,7 +222,6 @@ function placeSubtree(
     cursor += w + SIBLING_GAP;
   }
 
-  // Connector from marriage/person down to children
   const dropFromY = y + NODE_RADIUS + 8;
   const busY = y + GENERATION_GAP / 2;
   const dropToY = childY - NODE_RADIUS - LABEL_HEIGHT + 4;
@@ -248,8 +265,50 @@ function placeSubtree(
   }
 }
 
-function placeParents(
+function placeSubtree(
   index: Index,
+  personId: string,
+  mode: FamilyTreeViewMode,
+  depthFromFocus: number,
+  centerX: number,
+  y: number,
+  peopleOut: LayoutPerson[],
+  marriagesOut: LayoutMarriage[],
+  edgesOut: LayoutEdge[],
+  placedIds: Set<string>,
+  isFocus: boolean
+): void {
+  const rel = index.getRelations(personId);
+  if (!rel) return;
+
+  const showSpouse = depthFromFocus === 0 || includeChildSpouses(mode, depthFromFocus);
+  const { marriageX } = placePersonOrCouple(
+    rel,
+    centerX,
+    y,
+    showSpouse,
+    isFocus,
+    peopleOut,
+    marriagesOut,
+    edgesOut,
+    placedIds
+  );
+
+  placeDescendants(
+    index,
+    personId,
+    mode,
+    depthFromFocus,
+    marriageX,
+    y,
+    peopleOut,
+    marriagesOut,
+    edgesOut,
+    placedIds
+  );
+}
+
+function placeParentsOnly(
   rel: PersonRelations,
   focusX: number,
   focusY: number,
@@ -257,8 +316,8 @@ function placeParents(
   marriagesOut: LayoutMarriage[],
   edgesOut: LayoutEdge[],
   placedIds: Set<string>
-): void {
-  if (rel.parents.length === 0) return;
+): number | null {
+  if (rel.parents.length === 0) return null;
 
   const parentY = focusY - GENERATION_GAP;
   let marriageX = focusX;
@@ -305,19 +364,71 @@ function placeParents(
     });
   }
 
+  return marriageX;
+}
+
+function connectParentsToChildren(
+  parentMarriageX: number,
+  parentY: number,
+  childCenters: number[],
+  childY: number,
+  edgeId: string,
+  edgesOut: LayoutEdge[]
+): void {
+  if (childCenters.length === 0) return;
+
   const dropFromY = parentY + NODE_RADIUS + 8;
   const busY = parentY + GENERATION_GAP / 2;
-  const dropToY = focusY - NODE_RADIUS - LABEL_HEIGHT + 4;
+  const dropToY = childY - NODE_RADIUS - LABEL_HEIGHT + 4;
 
   edgesOut.push({
-    id: `e-parents-drop-${rel.person.id}`,
+    id: `${edgeId}-drop`,
     points: [
-      { x: marriageX, y: dropFromY },
-      { x: marriageX, y: busY },
-      { x: focusX, y: busY },
-      { x: focusX, y: dropToY },
+      { x: parentMarriageX, y: dropFromY },
+      { x: parentMarriageX, y: busY },
     ],
   });
+
+  if (childCenters.length === 1) {
+    edgesOut.push({
+      id: `${edgeId}-child`,
+      points: [
+        { x: parentMarriageX, y: busY },
+        { x: childCenters[0], y: busY },
+        { x: childCenters[0], y: dropToY },
+      ],
+    });
+    return;
+  }
+
+  const minX = Math.min(...childCenters);
+  const maxX = Math.max(...childCenters);
+  edgesOut.push({
+    id: `${edgeId}-bus`,
+    points: [
+      { x: minX, y: busY },
+      { x: maxX, y: busY },
+    ],
+  });
+  // Also connect parent drop into the bus if parent isn't already on it
+  if (parentMarriageX < minX || parentMarriageX > maxX) {
+    edgesOut.push({
+      id: `${edgeId}-to-bus`,
+      points: [
+        { x: parentMarriageX, y: busY },
+        { x: Math.min(Math.max(parentMarriageX, minX), maxX), y: busY },
+      ],
+    });
+  }
+  for (let i = 0; i < childCenters.length; i++) {
+    edgesOut.push({
+      id: `${edgeId}-child-${i}`,
+      points: [
+        { x: childCenters[i], y: busY },
+        { x: childCenters[i], y: dropToY },
+      ],
+    });
+  }
 }
 
 export function buildTreeLayout(
@@ -335,21 +446,116 @@ export function buildTreeLayout(
 
   const focusX = 0;
   const focusY = 0;
+  const parentY = focusY - GENERATION_GAP;
 
-  placeParents(index, rel, focusX, focusY, peopleOut, marriagesOut, edgesOut, placedIds);
-  placeSubtree(
-    index,
-    focusId,
-    mode,
-    0,
+  const parentMarriageX = placeParentsOnly(
+    rel,
     focusX,
     focusY,
     peopleOut,
     marriagesOut,
     edgesOut,
-    placedIds,
-    true
+    placedIds
   );
+
+  if (showsSiblings(mode)) {
+    // Focus generation: siblings (+ spouses) in a row, focus unit centered at 0.
+    const peers = [rel.person, ...rel.siblings].sort(
+      (a, b) =>
+        a.siblingOrder - b.siblingOrder ||
+        personDisplayName(a).localeCompare(personDisplayName(b))
+    );
+
+    const peerWidths = peers.map((peer) => {
+      const peerRel = index.getRelations(peer.id);
+      const hasSpouse = Boolean(peerRel?.spouses[0]);
+      return unitWidth(hasSpouse);
+    });
+
+    const focusIndex = peers.findIndex((p) => p.id === focusId);
+    let before = 0;
+    for (let i = 0; i < focusIndex; i++) {
+      before += peerWidths[i] + SIBLING_GAP;
+    }
+    const focusUnitWidth = peerWidths[focusIndex] ?? unitWidth(Boolean(rel.spouses[0]));
+    // Left edge of focus unit should be at -focusUnitWidth/2 so center is 0
+    const rowLeft = -focusUnitWidth / 2 - before;
+
+    const peerCenters: number[] = [];
+    let cursor = rowLeft;
+    let focusMarriageX = focusX;
+
+    for (let i = 0; i < peers.length; i++) {
+      const peer = peers[i];
+      const peerRel = index.getRelations(peer.id);
+      const w = peerWidths[i];
+      const center = cursor + w / 2;
+      peerCenters.push(center);
+      if (peerRel) {
+        const { marriageX } = placePersonOrCouple(
+          peerRel,
+          center,
+          focusY,
+          true,
+          peer.id === focusId,
+          peopleOut,
+          marriagesOut,
+          edgesOut,
+          placedIds
+        );
+        if (peer.id === focusId) focusMarriageX = marriageX;
+      }
+      cursor += w + SIBLING_GAP;
+    }
+
+    if (parentMarriageX != null) {
+      connectParentsToChildren(
+        parentMarriageX,
+        parentY,
+        peerCenters,
+        focusY,
+        `e-parents-${focusId}`,
+        edgesOut
+      );
+    }
+
+    placeDescendants(
+      index,
+      focusId,
+      mode,
+      0,
+      focusMarriageX,
+      focusY,
+      peopleOut,
+      marriagesOut,
+      edgesOut,
+      placedIds
+    );
+  } else {
+    if (parentMarriageX != null) {
+      connectParentsToChildren(
+        parentMarriageX,
+        parentY,
+        [focusX],
+        focusY,
+        `e-parents-${focusId}`,
+        edgesOut
+      );
+    }
+    placeSubtree(
+      index,
+      focusId,
+      mode,
+      0,
+      focusX,
+      focusY,
+      peopleOut,
+      marriagesOut,
+      edgesOut,
+      placedIds,
+      true
+    );
+  }
 
   let minX = Infinity;
   let maxX = -Infinity;
