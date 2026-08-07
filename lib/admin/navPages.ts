@@ -83,6 +83,12 @@ export const ADMIN_NAV_PAGES: AdminNavPage[] = [
     keywords: ["film", "watch", "drive"],
   },
   {
+    href: "/admin/family-tree",
+    label: "Family Tree",
+    description: "Private genealogy from your .ftz export",
+    keywords: ["genealogy", "relatives", "ftz", "ancestry", "krause", "symons"],
+  },
+  {
     href: "/admin/voices",
     label: "Voices",
     description: "Things he is not allowed to do",
