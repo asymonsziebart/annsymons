@@ -1,7 +1,7 @@
 {
   "title": "Family History",
   "updatedAt": "2026-08-07",
-  "note": "Public genealogy trees that match Ann’s known family lines are treated as confirmed unless they conflict with family memory. Story details that need family knowledge (jobs, photos, unit/branch unknown online) stay marked needs_review. Sources are public web records.",
+  "note": "Public genealogy trees that match Ann’s known family lines are treated as confirmed unless they conflict with family memory. Story details that need family knowledge (jobs, photos, unit/branch unknown online) stay marked needs_review. New Aug 2026 dig adds Civil War Crosiers, Carmoney sister marriages, Canada-born Marion Maher, Lozon WWI color, and Altz Rochester/Joseph millwright finds. Sources are public web records.",
   "sections": [
     {
       "id": "otto-wwii",
@@ -68,34 +68,63 @@
         "705532",
         "730562"
       ],
-      "summary": "Frederick Charles Crosier (29 Sep 1925 – 25 Feb 2020) married Dolores Marie Altz Crosier (22 Oct 1930, Oakland County, MI – 11 Dec 2005, Rochester Hills, MI) on 17 May 1952. Their children include Kathleen Marie, Kenneth Frederick, Kerry Michael, Kevin Jerome, Kristopher J., and Karolyn Crosier. Frederick served in WWII (branch/unit not yet found online). Family-confirmed railroad career: Penn Central and Conrail; last location Sterling Yard (off 16 Mile near Van Dyke, Sterling Heights). Public context: that yard sits on the old Michigan Central Detroit–Bay City line (later New York Central, then Penn Central from 1 Feb 1968, then Conrail from 1 Apr 1976). Sterling Yard’s south end (“WS”) is between 15 and 16 Mile; the yard itself is near 16–17 Mile and served heavy auto traffic (Chrysler Sterling Heights assembly/stamping; Ford plants via the Utica Industrial Track / Van Dyke corridor). No public employee roster naming Frederick has been found yet. Later work: Universal Computer Systems (Rochester Hills area, family-confirmed) — the best-known firm by that name was the Houston auto-dealership software company that merged into Reynolds and Reynolds in 2006 and had Detroit-area field presence; a smaller local shop of the same name is also possible. Dolores worked in a school cafeteria (school unknown) and quilted. Modetz funeral listing confirms dates but has no published career narrative.",
+      "summary": "Frederick Charles Crosier (29 Sep 1925 – 25 Feb 2020), of Rochester Hills, married Dolores Marie Altz Crosier (22 Oct 1930, Oakland County, MI – 11 Dec 2005, Rochester Hills, MI) on 17 May 1952. Their six children — Kathleen Marie, Kenneth Frederick, Kerry Michael, Kevin Jerome, Kristopher J., and Karolyn — appear in public death notices (they are children, not siblings). Modetz fullDescription (page metadata) is family-only: late wife Dolores; late daughter Kathleen; sons Kenneth, Kerry (Dawn), Kevin, Kristopher; daughter Karolyn (Gerald) Krause; grandchildren Jeremy/Emily/Elizabeth/Ann Krause, David (Char) Crosier, Nathan Crosier; great-granddaughter Samantha — no WWII, railroad, or UCS text. WWII branch/unit/ship: not found in free public indexes (NARA AAD blocked from this environment; no Fold3/Ancestry free snippet; no Michigan veterans hit). Railroad (Penn Central/Conrail Sterling Yard) remains family-confirmed only; no named employee roster found. UCS: family-confirmed; soft public corroboration via people-finder email domain @universalcomputersys.com matching Houston UCS (merged into Reynolds and Reynolds 2006). Dolores death notice (michigan.com via classypages): Mt. Avon interment; cafeteria/quilting are family memory only.",
       "highlights": [
-        "Married 17 May 1952",
-        "Children: Kathleen Marie (Kathy, d. 4 Apr 2009 Troy), Kenneth Frederick (Kenny), Kerry Michael, Kevin Jerome, Kristopher J., Karolyn",
-        "Kathy’s son David; granddaughter Samantha",
-        "Dolores birth Oakland County / death Rochester Hills (public trees)",
-        "Railroad employers (family): Penn Central → Conrail (successive companies, not literally one continuous legal entity)",
-        "Corporate line history at Sterling: Michigan Central → NYC → Penn Central (1968) → Conrail (1976) → Conrail Shared Assets (post-1999)",
-        "Last railroad location: Sterling Yard, Sterling Heights — off 16 Mile near Van Dyke (family); WS / south end between 15–16 Mile (railroad maps)",
-        "Yard role historically: auto switching for Chrysler Sterling Heights + Ford plants north on Utica Industrial / Van Dyke",
-        "Public search: no named Crosier on Conrail/Penn Central employee lists found yet",
-        "Later work: Universal Computer Systems (Rochester Hills area, family); likely auto-dealer IT / Reynolds lineage or a local firm of that name",
-        "Dolores: cafeteria work + quilting (family memory)",
-        "Frederick WWII branch/unit: still unknown",
-        "Kathy Crosier funeral Mass: St. Elizabeth Ann Seton Church, Troy (2009)"
+        "Modetz confirmed: b. 29 Sep 1925; d. 25 Feb 2020 age 94; Rochester Hills; Potere-Modetz handling",
+        "Married 17 May 1952 (classypages event list; marriage place not in free public clip)",
+        "Children (NOT siblings): Kathleen Marie (Kathy, 25 Mar 1953 – 4 Apr 2009 Troy), Kenneth Frederick (Kenny), Kerry Michael (Dawn), Kevin Jerome, Kristopher J., Karolyn (Gerald Krause)",
+        "Kathy’s son David; granddaughter Samantha (named in 2005/2009/2020 notices)",
+        "Dolores: b. 22 Oct 1930 Oakland Co.; d. 11 Dec 2005 Rochester Hills; funeral St. Mary’s of the Hills; interment Mt. Avon (Find A Grave #22581260)",
+        "Kathy burial: Mt. Avon Cemetery (Find A Grave #134601775); Mass St. Elizabeth Ann Seton, Troy",
+        "Frederick burial location: NOT stated in Modetz text (speculative Mt. Avon with Dolores/Kathy/Josephine)",
+        "WWII: no public enlistment, draft-card image, unit, ship, or Michigan veterans listing found this pass",
+        "Railroad employers (family only): Penn Central → Conrail; last location Sterling Yard off 16 Mile near Van Dyke",
+        "Corporate line history at Sterling (public context, not naming him): Michigan Central → NYC → Penn Central (1968) → Conrail (1976) → Conrail Shared Assets (post-1999)",
+        "Public search: no named Crosier on Conrail/Penn Central employee lists found",
+        "UCS: family; soft public email @universalcomputersys.com (PeopleWin) matching Houston UCS domain in 2005–06 press releases",
+        "Dolores: cafeteria work + quilting (family memory only)",
+        "1948 Rochester MI directory lists “Crosier, Fred J.” at house #312 — identity vs Frederick Charles NOT confirmed (wrong middle initial)"
       ],
       "sources": [
         {
-          "label": "Trees of Ancestry — Crosier / Altz",
-          "url": "https://classypages.com/img/oxygen/asc1499.htm"
-        },
-        {
-          "label": "Kathy Crosier death notice (via Trees of Ancestry source)",
-          "url": "http://classypages.com/img/oxygen/src15.htm"
-        },
-        {
-          "label": "Modetz Funeral Homes — Frederick Charles Crosier",
+          "label": "Modetz Funeral Homes — Frederick Charles Crosier (fullDescription in page JSON)",
           "url": "https://www.modetzfuneralhomes.com/obituaries/Frederick-Charles-Crosier?obId=11944174"
+        },
+        {
+          "label": "Modetz — Dolores Crosier (22 Oct 1930 – 11 Dec 2005)",
+          "url": "https://www.modetzfuneralhomes.com/obituaries/Dolores-Crosier?obId=21349"
+        },
+        {
+          "label": "Trees of Ancestry — Frederick Charles Crosier / Altz children",
+          "url": "https://classypages.com/img/oxygen/n345.htm"
+        },
+        {
+          "label": "Trees of Ancestry — marriage 17 May 1952 event",
+          "url": "http://classypages.com/img/oxygen/evp213.htm"
+        },
+        {
+          "label": "Kathy Crosier death notice (miobituaries + classypages src15)",
+          "url": "http://miobituaries.blogspot.com/2009/04/michigan-obituaries-40709.html"
+        },
+        {
+          "label": "Dolores Crosier death notice (michigan.com via classypages src73)",
+          "url": "http://classypages.com/img/oxygen/src73.htm"
+        },
+        {
+          "label": "Find A Grave #22581260 — Dolores Marie Altz Crosier, Mt. Avon",
+          "url": "https://www.findagrave.com/memorial/22581260"
+        },
+        {
+          "label": "Find A Grave #134601775 — Kathleen Marie Crosier, Mt. Avon",
+          "url": "https://www.findagrave.com/memorial/134601775"
+        },
+        {
+          "label": "PeopleWin — Fred C Crosier Rochester Hills / universalcomputersys.com email",
+          "url": "https://peoplewin.com/Fred-Crosier"
+        },
+        {
+          "label": "GlobeNewswire — UCS domain UniversalComputerSys.com (2006)",
+          "url": "https://www.globenewswire.com/news-release/2006/05/31/343965/1626/en/Over-140-Vendors-Now-Supported-by-UCS-Business-Connexion-Program.html"
         },
         {
           "label": "Knorek — North Yard Branch & Sterling Secondary / Sterling Yard",
@@ -210,12 +239,14 @@
         "fh-james-maher",
         "fh-rose-bowles"
       ],
-      "summary": "Albert David Crosier was born 28 Dec 1865 in Michigan and died 18 Jun 1942 in San Francisco. He married Marion A. Maher on 24 Feb 1897 in Jackson, Michigan. His parents were Charles Crosier (1838–1917) and Mary M. Carmoney (1844–1932). Marion’s parents appear in the same trees as James Maher and Rose Ann Bowles.",
+      "summary": "Albert David Crosier was born 28 Dec 1865 in Michigan and died 18 Jun 1942 in San Francisco. He married Marion A. Maher on 24 Feb 1897 in Jackson, Michigan. His parents were Charles Crosier (1838–1917) and Mary M. Carmoney (1844–1932). Marion’s parents appear in the same trees as James Maher and Rose Ann Bowles. Marion was born in Canada (6 Jul 1865); the couple later died in San Francisco (Albert 1942, Marion 1951). See California migration and Civil War sections for deeper story.",
       "highlights": [
         "Albert David Crosier: 28 Dec 1865 MI – 18 Jun 1942 San Francisco",
         "Married Marion A. Maher 24 Feb 1897, Jackson, MI",
         "Parents: Charles Crosier & Mary M. Carmoney",
-        "Marion’s parents: James Maher & Rose Ann Bowles"
+        "Marion’s parents: James Maher & Rose Ann Bowles",
+        "Marion A. Maher born Canada 6 Jul 1865 (immigration to Michigan before 1897 marriage)",
+        "Albert & Marion later died in San Francisco (1942 / 1951)"
       ],
       "sources": [
         {
@@ -589,6 +620,280 @@
       ]
     },
     {
+      "id": "crosier-civil-war",
+      "title": "Crosier brothers — Civil War (Charlotte / Carmel)",
+      "line": "Crosier",
+      "status": "confirmed",
+      "personIds": [
+        "fh-charles-crosier",
+        "fh-stephen-p-crosier",
+        "fh-mary-carmoney",
+        "fh-albert-crosier"
+      ],
+      "summary": "Ann’s 3×-great-grandfather Charles Crosier (1838 Sullivan, OH – 1917 Charlotte, MI) and his older brother Stephen P. Crosier (1827 Somerset, VT – 1891 Charlotte) are both marked Civil War veterans in the Maple Hill Cemetery index, Charlotte. Stephen P. is confirmed on the roster of Company H, 12th Michigan Infantry, home Carmel, age 37 — the same company that includes George H. Carmoney of Florence (very likely the Carmoney brothers-in-law connection; see Carmoney sisters section). The 12th Michigan left the state in March 1862 and fought at Shiloh (6–7 Apr 1862) in Peabody’s Brigade, Prentiss’ Division; the regiment later served at Vicksburg and in Arkansas and mustered out in 1866. Charles is listed among Sullivan Township (Ashland Co., OH) Civil War volunteers and appears as “Crozier, Charles” on the Company H, 42nd Ohio Volunteer Infantry roster raised in Ashland County (Camp Chase, Nov 1861; mustered out Dec 1864) — a strong match for the Sullivan-born Charles who married Mary Carmoney in Eaton County on 18 Jan 1865, weeks after that muster-out, but a pension/service-file name match would lock the unit. Charles appears again among Charlotte 3rd Ward Civil War veterans in the 1894 Michigan state census.",
+      "highlights": [
+        "Maple Hill Cemetery index: Crosier Charles CW; Crosier Stephen P. CW (confirmed veteran markers)",
+        "Stephen P. Crosier — Co. H, 12th Michigan Infantry; home Carmel; age 37 (confirmed roster)",
+        "Same Co. H roster: George H. Carmoney of Florence (probable Carmoney in-law serving beside Stephen)",
+        "12th Michigan: Shiloh (Apr 1862), later Vicksburg / Arkansas; mustered out 1866",
+        "Charles Crosier listed Sullivan Township Ashland Co. OH volunteers",
+        "Probable unit for Charles: Co. H, 42nd OVI (“Crozier, Charles”); Garfield’s regiment; mustered out 2 Dec 1864",
+        "Timeline fit: Charles × Mary Carmoney married 18 Jan 1865 Eaton MI",
+        "1894 MI census: Charles Crosier among Charlotte 3rd Ward Civil War veterans"
+      ],
+      "sources": [
+        {
+          "label": "Maple Hill Cemetery Index (Crosier Charles CW / Stephen P. CW)",
+          "url": "https://www.miegs.org/CemeteryIndex/MapleHillWeb.pdf"
+        },
+        {
+          "label": "12th Michigan Infantry Co. H roster — Stephen P. Crosier",
+          "url": "https://www.migenweb.org/michiganinthewar/infantry/12comph.htm"
+        },
+        {
+          "label": "HMDB — 12th Michigan Infantry at Shiloh marker",
+          "url": "https://www.hmdb.org/m.asp?m=38279"
+        },
+        {
+          "label": "Civil War Index — 12th Michigan Infantry history",
+          "url": "https://civilwarindex.com/armymi/12th_mi_infantry.html"
+        },
+        {
+          "label": "Ashland Co. OH — 42nd OVI Co. H (Crozier, Charles)",
+          "url": "https://www.ohiogenealogyexpress.com/ashland/military/ashlandco_42ndRegOVI.htm"
+        },
+        {
+          "label": "GenealogyTrails — Ashland Co. Sullivan Twp volunteers (Crosier, Charles)",
+          "url": "https://genealogytrails.com/ohio/ashland/history1863_pg2.html"
+        },
+        {
+          "label": "1894 MI census — Eaton Co. Charlotte 3rd Ward veterans (Charles Crosier)",
+          "url": "https://accessgenealogy.com/michigan/1894-michigan-state-census-eaton-county.htm"
+        },
+        {
+          "label": "Trees of Ancestry — Charles Crosier × Mary Carmoney",
+          "url": "https://classypages.com/img/oxygen/n321.htm"
+        }
+      ]
+    },
+    {
+      "id": "carmoney-sisters",
+      "title": "Carmoney sisters married Crosier brothers",
+      "line": "Crosier",
+      "status": "confirmed",
+      "personIds": [
+        "fh-mary-carmoney",
+        "fh-charles-crosier",
+        "fh-stephen-p-crosier",
+        "fh-albert-crosier"
+      ],
+      "summary": "Two daughters of John Henry Carmoney and Catherine Bair married two sons of Stephen Park Crosier and Minerva Lucy Howard. Sarah Ann Carmoney (11 Feb 1835 OH – 28 Jan 1911 Charlotte) married Stephen P. Crosier on 4 Jul 1854 in Eaton County. Her younger sister Mary M. Carmoney (9 Mar 1844 Mercer Co., OH – 13 May 1932 Charlotte) married Charles Crosier on 18 Jan 1865 in Eaton County — Ann’s direct line. Both couples settled in Charlotte; Maple Hill holds Crosier/Carmoney stones including Mary M., Sarah A., Stephen P., Freddie, Ada, Halbert, and an infant. Catherine Carmoney is also indexed at Maple Hill. The Ohio→Michigan Carmoney move and the Crosier Vermont→New York→Ohio→Michigan trail (Halifax/Somerset VT → Bainbridge NY → Sullivan OH → Charlotte MI) are the family’s mid-19th-century migration story.",
+      "highlights": [
+        "Sarah Ann Carmoney × Stephen P. Crosier — 4 Jul 1854 Eaton MI",
+        "Mary M. Carmoney × Charles Crosier — 18 Jan 1865 Eaton MI (Ann’s line)",
+        "Parents: John Henry Carmoney & Catherine Bair; Stephen Park Crosier & Minerva Lucy Howard",
+        "Maple Hill: Mary M., Sarah A., Stephen P., Freddie, Ada B., Halbert B., infant Crosier; Catherine Carmoney",
+        "Migration: Crosiers VT → NY → Ashland Co. OH → Eaton Co. MI; Carmoneys OH → MI"
+      ],
+      "sources": [
+        {
+          "label": "Trees of Ancestry — Mary M. Carmoney / Sarah Ann Carmoney",
+          "url": "https://classypages.com/img/oxygen/n214.htm"
+        },
+        {
+          "label": "Trees of Ancestry — Stephen P. Crosier × Sarah Ann",
+          "url": "http://classypages.com/img/oxygen/n403.htm"
+        },
+        {
+          "label": "Descendants of John Crosier PDF (Stephen Park line)",
+          "url": "http://www.classypages.com/FranksGenealogyPage/DescendantFiles/Descendants%20of%20John%20Crosier%20-%201737.pdf"
+        },
+        {
+          "label": "Find A Grave — Stephen Park Crosier, Southview Cemetery Sullivan OH #41145544",
+          "url": "https://www.findagrave.com/memorial/41145544/stephen-park-crosier"
+        },
+        {
+          "label": "Maple Hill Cemetery Index",
+          "url": "https://www.miegs.org/CemeteryIndex/MapleHillWeb.pdf"
+        }
+      ]
+    },
+    {
+      "id": "crosier-california-migration",
+      "title": "Albert & Marion Crosier — Michigan to San Francisco",
+      "line": "Crosier",
+      "status": "confirmed",
+      "personIds": [
+        "fh-albert-crosier",
+        "fh-marion-maher",
+        "581371",
+        "fh-albert-june-crosier",
+        "fh-francis-dewitt-crosier",
+        "fh-rose-mary-crosier",
+        "fh-annetta-mary-crosier"
+      ],
+      "summary": "Marion A. Maher was born in Canada (6 Jul 1865; parents James Maher & Rose Ann Bowles) and married Albert David Crosier in Jackson, Michigan, on 24 Feb 1897 — a Canada→Michigan immigration on Ann’s paternal grandmother’s side of this couple. Albert (28 Dec 1865 MI – 18 Jun 1942 San Francisco) and Marion (d. 21 Apr 1951 San Francisco) later moved west. Their children mostly followed California: Albert June (d. 1952 Los Angeles), Francis DeWitt (m. Josephine Elizabeth Ragsdale 9 Jul 1937 Watsonville; d. 2000 San Rafael at 96), Rose Mary (d. 2000 San Francisco; m. Louis Francis Armone), and Annetta Mary (d. 1985 Wofford Heights, Kern Co.). Jerome Frederick stayed in Michigan (Avon), the branch that leads to Ann. Story angle: one Crosier brother remains in Michigan while parents and siblings remake the family as a California clan.",
+      "highlights": [
+        "Marion A. Maher born Canada 6 Jul 1865; parents James Maher & Rose Ann Bowles",
+        "Married Albert David Crosier 24 Feb 1897 Jackson MI",
+        "Albert d. 18 Jun 1942 San Francisco; Marion d. 21 Apr 1951 San Francisco",
+        "Francis DeWitt × Josephine E. Ragsdale — 9 Jul 1937 Watsonville CA; lived to 96 in San Rafael",
+        "Rose Mary Crosier Armone — San Francisco line; children Louis, Charles Bryan, Alma Rose",
+        "Jerome Frederick stayed in Michigan (Avon) — Ann’s direct Crosier line"
+      ],
+      "sources": [
+        {
+          "label": "Trees of Ancestry — Marion A. Maher (Canada birth / SF death)",
+          "url": "http://classypages.com/img/oxygen/n854.htm"
+        },
+        {
+          "label": "Trees of Ancestry — Albert David Crosier family",
+          "url": "https://classypages.com/img/oxygen/n307.htm"
+        },
+        {
+          "label": "Trees of Ancestry — Francis DeWitt Crosier × Ragsdale",
+          "url": "http://classypages.com/img/oxygen/n342.htm"
+        },
+        {
+          "label": "Trees of Ancestry — Rose Mary Crosier Armone",
+          "url": "https://classypages.com/img/oxygen/n398.htm"
+        }
+      ]
+    },
+    {
+      "id": "lozon-wwi-details",
+      "title": "Solomon Lozon — sapper details & Order of Foresters",
+      "line": "Crosier",
+      "status": "confirmed",
+      "personIds": [
+        "fh-solomon-lozon",
+        "fh-peter-lozon",
+        "fh-adolphus-lozon",
+        "fh-mary-gore"
+      ],
+      "summary": "Beyond the basic enlistment already documented: Solomon Alex Lozon (b. 6 Nov 1891 Wallaceburg) was a single labourer on his father’s R.R. #2 Becher/Wallaceburg farm when he attested 26 Feb 1918 at London, ON, to the 1st Western Ontario Regiment (sapper #3131895). Physical description from the file: 5′3″, dark complexion, brown eyes, black hair, small scar on the right wrist; he carried a CEF crest tattoo reading “S. A. Lozon.” He was insured with the Independent Order of Foresters. He embarked 10 May 1918 on S.S. Runio, reached England 24 May, went to the CE pool at Seaford and on to France (Aug–Sep 1918), and returned via Southampton March 1919; medical notes mention prior typhoid (fully recovered, no disability). Brother Peter Dulphy Lozon (#3134471), a single farmer, attested 9 Jul 1918 listing mother Mary Lozon of R.R. #2 Wallaceburg as next of kin (not father) — suggesting Adolphus may already have been dead or absent by mid-1918 (speculative timing; Solomon’s Feb 1918 paper still named father Adolphus). Peter’s enlistment was cancelled/discharged in the demobilization wave (discharged 25 Jan 1919) without the same overseas story.",
+      "highlights": [
+        "Solomon: Spr. 3131895; labourer on Adolphus’s Becher farm; Order of Foresters insured",
+        "Description: 5′3″, dark/brown/black; CEF crest tattoo “S. A. Lozon”; wrist scar",
+        "Overseas: S.S. Runio May 1918 → England → France Aug/Sep 1918 → Canada Mar 1919",
+        "Medical note: prior typhoid, fully recovered",
+        "Peter Jul 1918 paper lists mother Mary as NOK (father absent/dead? — speculative)",
+        "LAC refs: RG 150 Acc. 1992-93/166 Box 5777-4 (Solomon) / 5777-3 (Peter)"
+      ],
+      "sources": [
+        {
+          "label": "Gathering Our Heroes — Solomon Alex Lozon (full file abstract)",
+          "url": "https://www.gatheringourheroes.ca/hero/lozon-s-a/"
+        },
+        {
+          "label": "Gathering Our Heroes — Peter Dulphy Lozon",
+          "url": "https://www.gatheringourheroes.ca/hero/lozon-p-d/"
+        },
+        {
+          "label": "IWM Lives of the First World War — Soloman Alex Lozon",
+          "url": "https://livesofthefirstworldwar.iwm.org.uk/lifestory/6017455"
+        },
+        {
+          "label": "LAC — Personnel Records of the First World War (search CEF files)",
+          "url": "https://www.canada.ca/en/library-archives/collection/research-help/military-history/first-world-war/fww-personnel.html"
+        }
+      ]
+    },
+    {
+      "id": "lauzon-maillet-kent",
+      "title": "Lauzon / Maillet — French Kent County roots",
+      "line": "Crosier",
+      "status": "confirmed",
+      "personIds": [
+        "fh-alexandre-lauzon",
+        "fh-magdeleine-maillet",
+        "fh-adolphus-lozon"
+      ],
+      "summary": "Adolphus Lozon’s parents Alexandre Lauzon (~1827) and Magdeleine Maillet (b. 11 Apr 1826) married in the St. Pierre / Raleigh–Tilbury East French Catholic corridor of Kent County, Ontario. Trees of Ancestry give the marriage as 1 Jun 1842 at St. Peter Tilbury; MesAieux / YourFolks indexes the same couple as Alexandre Lauson × Magdeleine Maillet in 1846 at Raleigh, ON — treat the year as unresolved between sources until a parish image is pulled. The Lozon/Lauzon spelling shift is normal in this border French community (Wallaceburg, Dover, Tilbury, Grande Pointe). A related Wallaceburg marriage (David Luzon, son of “Alex Luzon and Adeline Myers,” 1879) shows the same parental names anglicized (Myers ≈ Maillet), reinforcing that Adolphus’s generation sat inside a dense French-Ontarian kinship network rather than an isolated English farm family. Do not confuse this Alexandre (~1827) with the better-documented Alexandre Lauzon (1814–1893) of Sandwich/Grande Pointe who married Marie Catherine Martin — a different man in the same surname cluster.",
+      "highlights": [
+        "Alexandre Lauzon (~1827) × Magdeleine Maillet (b. 11 Apr 1826)",
+        "Marriage place: St. Pierre Tilbury / Raleigh Kent Co. corridor",
+        "Date conflict: trees say 1 Jun 1842; MesAieux indexes 1846 Raleigh — unresolved",
+        "Lozon/Lauzon/Luzon and Maillet/Myers spelling variants in Kent records",
+        "French Catholic Kent community: Wallaceburg, Dover, Tilbury, Grande Pointe",
+        "Not the same person as Alexandre Lauzon (1814–1893) × Marie Catherine Martin"
+      ],
+      "sources": [
+        {
+          "label": "Trees of Ancestry — Magdeleine Maillet × Alexandre Lauzon",
+          "url": "http://classypages.com/img/oxygen/n854.htm"
+        },
+        {
+          "label": "MesAieux — Alexandre Lauson × Magdeleine Maillet, Raleigh 1846",
+          "url": "https://www.mesaieux.com/an/canada/ontario/raleigh/marriages"
+        },
+        {
+          "label": "WikiTree caution — Alexandre Lauzon 1814–1893 (different man)",
+          "url": "https://www.wikitree.com/wiki/Lauzon-1285"
+        },
+        {
+          "label": "WikiTree — David Lozon × Rosalie Hébert (Alex Luzon / Adeline Myers parents)",
+          "url": "https://www.wikitree.com/wiki/Hebert-8276"
+        }
+      ]
+    },
+    {
+      "id": "altz-rochester-joseph",
+      "title": "Altz family — Rochester roots & Joseph’s millwright story",
+      "line": "Crosier",
+      "status": "confirmed",
+      "personIds": [
+        "1011292",
+        "826851",
+        "730562"
+      ],
+      "summary": "Norman Altz appears in the 1948 Rochester (Avon Twp.) street directory alongside other residents at the 1421 address cluster — placing Dolores’s parents in Rochester when she was a teenager. Son Joseph Edward Altz (28 Nov 1951 Rochester – 23 Sep 2025 Lapeer), Dolores’s youngest brother, worked 20+ years as a millwright at American Axle in Detroit, later at Pontiac Truck and Bus and Bosch (Lake Orion). He collected Pontiac Fieros and model locomotives, volunteered at Holy Cross Youth Center (Saginaw) and Lapeer Hospital, and was buried from St. Lawrence Catholic Church, Utica. His 2025 obituary reconfirms parents Norman & Rena Altz and sisters including Dolores Crosier. Public trees still do not name Norman’s or Rena La Pan’s parents — that generation remains open.",
+      "highlights": [
+        "Norman Altz in 1948 Rochester/Avon directory (1421 address cluster)",
+        "Joseph Edward Altz — millwright, American Axle Detroit; later Pontiac Truck & Bus / Bosch Lake Orion",
+        "Passions: Pontiac Fieros, model locomotives; GM retiree breakfasts",
+        "Funeral Mass St. Lawrence Catholic Church, Utica; burial Stiles Cemetery",
+        "Obituary confirms Norman & Rena; sisters Barbara Tonin, Jeanette Benedict, Dolores Crosier",
+        "Still open: Norman Joseph Altz and Rena Margaret La Pan parents / immigration"
+      ],
+      "sources": [
+        {
+          "label": "1948 Rochester Directory by Address (RAHS) — Altz, Norman",
+          "url": "http://rochesteravonhistoricalsociety.org/files/research/directories/1948%20Rochester%20Directory%20by%20Address.pdf"
+        },
+        {
+          "label": "The County Press — Joseph Edward Altz obituary (2025)",
+          "url": "https://countypress.com/articles/obituaries/joseph-edward-altz/"
+        },
+        {
+          "label": "Trees of Ancestry — Altz × La Pan children",
+          "url": "https://classypages.com/img/oxygen/asc70.htm"
+        }
+      ]
+    },
+    {
+      "id": "fred-crosier-1948-directory",
+      "title": "Fred J. Crosier — 1948 Rochester directory (probable Frederick)",
+      "line": "Crosier",
+      "status": "needs_review",
+      "personIds": [
+        "705532",
+        "581371"
+      ],
+      "summary": "The same 1948 Rochester address directory lists “Crosier, Fred J.” at house number 312 on a street block whose name is unclear in the OCR extract (near Burgoyne/Butler pages). Frederick Charles Crosier would have been about 23 and living in the Rochester/Avon area with Jerome — so this is a plausible hit for Frederick (or another local Fred Crosier). Treat as speculative until a clearer street reading or city directory occupation line is confirmed. Jerome himself was not spotted under that spelling in the OCR pass of this particular directory.",
+      "highlights": [
+        "1948 Rochester directory: Crosier, Fred J. at #312 (street name unclear in OCR)",
+        "Age/place fit Frederick Charles (~23, Avon/Rochester area) — not proven",
+        "Jerome F. Crosier not clearly listed in this OCR extract"
+      ],
+      "sources": [
+        {
+          "label": "1948 Rochester Directory by Address (RAHS)",
+          "url": "http://rochesteravonhistoricalsociety.org/files/research/directories/1948%20Rochester%20Directory%20by%20Address.pdf"
+        }
+      ]
+    },
+    {
       "id": "open-questions",
       "title": "Still needs family memory (not found cleanly online)",
       "line": "Research",
@@ -613,7 +918,14 @@
         "Ann Krause 2016 All-County tennis Macomb Daily clip (digitized copy)",
         "Exact birth dates for Jeremy, Emily, Elizabeth",
         "Gerald & Karolyn exact marriage date/year (Ann does not remember; ask parents)",
-        "Which church they married in (Ann does not know; ask parents)"
+        "Which church they married in (Ann does not know; ask parents)",
+        "Charles Crosier — confirm 42nd OVI Co. H (“Crozier”) via pension/service file",
+        "Alexandre Lauzon × Magdeleine Maillet marriage year (1842 vs 1846) — pull parish image",
+        "Mary Veronica Gore parents (still blank in public trees)",
+        "Norman Joseph Altz & Rena Margaret La Pan parents / earlier generations",
+        "Otto J. Krause parents / birth date / postwar job (beyond WWII navigator record)",
+        "Geraldine Staub parents",
+        "Adolphus Lozon death date (Peter 1918 NOK = mother Mary)"
       ],
       "sources": []
     }
