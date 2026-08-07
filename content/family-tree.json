@@ -2549,6 +2549,98 @@
       },
       "death": null,
       "gender": "male"
+    },
+    {
+      "id": "fh-albert-june-crosier",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Crosier",
+      "given": "Albert",
+      "middle": "June",
+      "birth": {
+        "year": 1901,
+        "month": 6,
+        "day": 30,
+        "known": true
+      },
+      "death": {
+        "year": 1952,
+        "month": 9,
+        "day": 5,
+        "known": true
+      },
+      "gender": "male"
+    },
+    {
+      "id": "fh-francis-dewitt-crosier",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Crosier",
+      "given": "Francis",
+      "middle": "DeWitt",
+      "birth": {
+        "year": 1903,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "death": {
+        "year": 2000,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "gender": "male"
+    },
+    {
+      "id": "fh-rose-mary-crosier",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Crosier",
+      "given": "Rose",
+      "middle": "Mary",
+      "birth": {
+        "year": 1908,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "death": {
+        "year": 2000,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "gender": "female"
+    },
+    {
+      "id": "fh-annetta-mary-crosier",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Crosier",
+      "given": "Annetta",
+      "middle": "Mary",
+      "birth": {
+        "year": 1910,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "death": {
+        "year": 1985,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "gender": "female"
     }
   ],
   "families": [
