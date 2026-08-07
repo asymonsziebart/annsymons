@@ -1,7 +1,7 @@
 {
   "title": "Family History",
   "updatedAt": "2026-08-07",
-  "note": "Public genealogy trees that match Ann’s known family lines are treated as confirmed unless they conflict with family memory. Story details that need family knowledge (jobs, photos, unit/branch unknown online) stay marked needs_review. Aug 2026 digs add Civil War Crosiers, Carmoney sister marriages, Canada-born Marion Maher, Lozon WWI color, Altz Rochester/Joseph millwright finds, Otto SSDI dates + Rhine mission, Geraldine Staub natal family, and a women-focused pass on Magdeleine Maillet’s parents, Minerva Howard, Mary Carmoney’s daughters, and Jerome’s California sisters Rose Mary & Annetta. Sources are public web records. Also adds Dolores Crosier’s 2005 michigan.com death notice and great-aunt Zoa Cubba’s full 2021 Sullivan funeral-home obituary (Wayback), which locks La Pan parents John & Delia and Zoa’s Hamlin Elementary cook role.",
+  "note": "Public genealogy trees that match Ann’s known family lines are treated as confirmed unless they conflict with family memory. Story details that need family knowledge (jobs, photos, unit/branch unknown online) stay marked needs_review. Aug 2026 digs add Civil War Crosiers, Carmoney sister marriages, Canada-born Marion Maher, Lozon WWI color, Altz Rochester/Joseph millwright finds, Otto SSDI dates + Rhine mission, Geraldine Staub natal family, and a women-focused pass on Magdeleine Maillet’s parents, Minerva Howard, Mary Carmoney’s daughters, and Jerome’s California sisters Rose Mary & Annetta. Sources are public web records. Also adds Dolores Crosier’s 2005 michigan.com death notice, great-aunt Zoa Cubba’s 2021 Sullivan obituary, Delia Salois LaPan’s Québec→Bay County Salois/Forcier line (likely AncestryDNA French/Michigan settler community), and the Eaton County Crosier–Carmoney 1850s pioneer path.",
   "sections": [
     {
       "id": "otto-wwii",
@@ -404,9 +404,9 @@
         "1011292",
         "826851"
       ],
-      "summary": "Dolores Marie Altz (1930 Oakland County – 2005 Rochester Hills) was a daughter of Norman Joseph Altz and Rena Margaret La Pan. Her 2005 death notice lists siblings Jeanette (Charles) Benedict, Barbara (Gino) Tonin, Norman (Carol) Altz, Donna (Dan) Griffiths, Linda (Jerry) Griffin, Mary (Danny) Griffin, and Joseph (Rusty) Altz, and names her as niece of Zoa Cubba. Funeral Mass was at St. Mary’s of the Hills, Rochester Hills; burial Mt. Avon Cemetery. Rena’s Pinconning-area La Pan kin include sister Rosalle (Lapan) Dore (mother of William “Bill” Dore of Kawkawlin/Pinconning) — confirming the La Pan sisters clustered in Bay County before the Altz branch settled Rochester.",
+      "summary": "Dolores Marie Altz (1930 Oakland County – 2005 Rochester Hills) was a daughter of Norman Joseph Altz and Rena Margaret La Pan (parents of Rena: John and Delia LaPan, per Zoa’s 2021 obituary). Her 2005 death notice lists siblings Jeanette (Charles) Benedict, Barbara (Gino) Tonin, Norman (Carol) Altz, Donna (Dan) Griffiths, Linda (Jerry) Griffin, Mary (Danny) Griffin, and Joseph (Rusty) Altz, and names her as niece of Zoa Cubba. Funeral Mass was at St. Mary’s of the Hills, Rochester Hills; burial Mt. Avon Cemetery. Rena’s Pinconning-area La Pan kin include sisters Zoa Cubba and Rosalle (Lapan) Dore (mother of William “Bill” Dore of Kawkawlin/Pinconning) and brother Joseph LaPan — confirming the La Pan siblings clustered in Bay County before the Altz branch settled Rochester.",
       "highlights": [
-        "Parents: Norman Joseph Altz & Rena Margaret La Pan",
+        "Parents: Norman Joseph Altz & Rena Margaret La Pan (maternal grandparents John & Delia LaPan)",
         "Siblings (Dolores death notice): Jeanette Benedict, Barbara Tonin, Norman Altz, Donna Griffiths, Linda Griffin, Mary Griffin, Joseph Altz",
         "Niece of Zoa Cubba (La Pan aunt — see Zoa section)",
         "Funeral Mass St. Mary’s of the Hills; burial Mt. Avon",
@@ -937,8 +937,9 @@
         "Obituary confirms Norman & Rena; sisters Barbara Tonin, Jeanette Benedict, Dolores Crosier",
         "Cross in the Woods paver: IN MEMORY OF NORMAN AND RENA ALTZ",
         "Rena’s siblings: Zoa Cubba; Rosalle/Rosalie (Lapan) Dore; Joseph LaPan",
-        "Rena’s parents (from Zoa’s 2021 obit): John and Delia LaPan of the Pinconning generation",
-        "Still open: Norman Joseph Altz parents’ full names / earlier generations"
+        "Rena’s parents: John LaPan (1875–1954) × Delia Salois (1874–1952), Pinconning",
+        "Rena’s maternal grandparents: Antoine Salois × Zoé Forcier (Québec → Kawkawlin ~1879)",
+        "Still open: Norman Joseph Altz parents’ full names; John LaPan’s parents"
       ],
       "sources": [
         {
@@ -1170,7 +1171,8 @@
       "summary": "Ann’s great-aunt Zoe is Zoa Cubba (née LaPan), confirmed sister of Rena Margaret La Pan Altz. Dolores’s 2005 death notice named Dolores as “Niece of Zoa Cubba.” The full Sullivan Funeral Directors obituary (archived Jan 2022 on Wayback) locks the biography: born 24 Jul 1914 in Pinconning to John and Delia LaPan; died 12 Aug 2021 in Rochester Hills at age 107; sisters late Rosalie Dore and late Rena Altz; brother late Joseph LaPan; wife of the late Sam Cubba (d. 1991); mother of Louis (Rae) Cubba, Zoa Scott, the late Michael Cubba, and the late Samuel (late Barbara) Cubba; many grandchildren and 27 great-grandchildren. Life sketch: strong Catholic faith; sewing, tatting, gardening, canning; church volunteering and election-poll work; cook for Rochester School Systems at Hamlin Elementary. Services: visitation 17 Aug 2021 at Wm. Sullivan & Son, Utica; funeral Mass 18 Aug 2021 at St. Lawrence Catholic Church, Utica; burial St. Lawrence Cemetery. Memorials to American Diabetes Association. That funeral-home text is the newspaper-style notice Ann may have seen in Aug 2021 local death columns (Macomb/Oakland papers often reprint Sullivan notices); Dolores’s 2005 notice is the other free newspaper hit that names her.",
       "highlights": [
         "24 Jul 1914 Pinconning – 12 Aug 2021 Rochester Hills (age 107)",
-        "Parents: John and Delia LaPan (also Rena’s parents)",
+        "Parents: John LaPan (1875–1954) & Delia Salois LaPan (1874–1952), Pinconning / St. Michaels",
+        "Maternal grandparents: Antoine (Anthony) Salois × Zoé Forcier — Québec → Kawkawlin ~1879",
         "Siblings: Rosalie/Rosalle Dore; Rena Altz; Joseph LaPan",
         "Husband: Sam Cubba (d. 1991); children Louis (Rae), Zoa Scott, Michael (late), Samuel (late)",
         "Cook for Rochester Schools at Hamlin Elementary",
@@ -1194,6 +1196,63 @@
         {
           "label": "Pinconning Journal — William “Bill” Dore (mother Rosalle Lapan Dore)",
           "url": "https://www.pinconningjournal.com/obituaries/william-%E2%80%9Cbill%E2%80%9D-dore"
+        },
+        {
+          "label": "Find A Grave — Delia Salois LaPan (parents Anthony Salois & Zoe Forcia)",
+          "url": "https://www.findagrave.com/memorial/172783389/delia-lapan"
+        }
+      ]
+    },
+    {
+      "id": "michigan-settlers-dna",
+      "title": "AncestryDNA “Michigan / original settlers” — which lines?",
+      "line": "Research",
+      "status": "confirmed",
+      "personIds": [
+        "fh-rena-lapan",
+        "730562",
+        "fh-zoa-cubba",
+        "fh-magdeleine-maillet"
+      ],
+      "summary": "Ann’s AncestryDNA kit flagged a community about coming from the original / early settlers of Michigan. That usually maps to one of two Ancestry genetic-community stories — French Canadians of the Great Lakes (often labeled near “French Settlers of Montreal & Metro Detroit” or similar), or Yankee Midwestern pioneers who poured into Michigan after the Erie Canal (1830s–1860s). Both appear on Ann’s tree. The strongest French-Canadian “original settler” DNA path is maternal through Rena La Pan: Delia Salois (1874 Canada – 1952 Pinconning) married John LaPan (1875–1954) at Linwood, Bay Co., 14 Jul 1897; Delia’s parents Antoine (Anthony) Salois (bapt. Yamaska 1831; imm. ~1879; d. 1916 Kawkawlin) and Zoé Forcier (c.1831–1918) were Québec farmers who joined the post–Civil War French-Canadian lumber/farm wave into Bay County (Kawkawlin / Pinconning). WikiTree carries the Salois line through Pierre Salois × Marie Benoit into St-François-du-Lac / Yamaska parish generations in Nouvelle-France, and the surname itself is documented from Claude Salois of Lille, France, who married Anne Mabille at Québec City c.1666 — the classic “fille du roi / early Québec” depth Ancestry communities pick up. A parallel French-Canadian cluster is the Lozon/Lauzon–Maillet line (Wallaceburg / Kent Co., Ontario; Magdeleine Maillet’s mother Charlotte Emery b. St-Joachim, Châteauguay, Québec), which contributes FC DNA even though their Michigan foothold was brief (Madeline Lozon Crosier died Detroit 1925). Separately, the Crosier–Carmoney line is classic inland Michigan pioneer stock: Stephen P. Crosier × Sarah Ann Carmoney married Eaton Co. 1854; Charles Crosier × Mary Carmoney 1865 Charlotte — Vermont/Ohio Yankees in the pioneer wave after statehood (1837), not French colonial Detroit. Krause, Staub, and Altz look like later Metro Detroit German-American / 20th-century families and are unlikely to drive an “original Michigan settlers” community.",
+      "highlights": [
+        "Best match for French / “original” settler DNA: Salois → Delia → Rena La Pan → Dolores → Karolyn → Ann",
+        "Antoine Salois × Zoé Forcier: Québec (Yamaska) → Kawkawlin/Bay Co. ~1879 lumber-era FC migration",
+        "Salois surname: Claude Salois × Anne Mabille, Québec City c.1666 (Dictionary of American Family Names / FamilySearch)",
+        "WikiTree Salois-67: parents Pierre Salois × Marie Benoit; Yamaska / St-François-du-Lac Nouvelle-France depth; some Acadian great-grandparent links noted",
+        "Parallel FC DNA: Lozon/Lauzon–Maillet (Ontario) with Québec Emery root",
+        "Yankee Michigan pioneer path: Crosier–Carmoney in Eaton Co. by 1854 / Charlotte by 1865",
+        "Unlikely drivers: Krause, Staub, Altz (later Detroit-area families)",
+        "Ask Ann for the exact Ancestry community name on her DNA results page to lock which story Ancestry meant"
+      ],
+      "sources": [
+        {
+          "label": "Find A Grave — Delia Salois LaPan (1874–1952), St. Michaels, Pinconning",
+          "url": "https://www.findagrave.com/memorial/172783389/delia-lapan"
+        },
+        {
+          "label": "FamilySearch — Delia Salois (m. John LaPan 14 Jul 1897 Linwood)",
+          "url": "https://ancestors.familysearch.org/en/LBY1-97H/delia-salois-1874-1952"
+        },
+        {
+          "label": "WikiTree — Antoine Salois (Yamaska → Kawkawlin)",
+          "url": "https://www.wikitree.com/wiki/Salois-67"
+        },
+        {
+          "label": "WikiTree — Zoé Marie Forcier Salois",
+          "url": "https://www.wikitree.com/wiki/Forcier-130"
+        },
+        {
+          "label": "Find A Grave — Anthony Salois (1829–1916), Calvary, Kawkawlin",
+          "url": "https://www.findagrave.com/memorial/48010109/anthony-salois"
+        },
+        {
+          "label": "Genealogy Trails — Bay County history (French Canadian pioneers)",
+          "url": "https://genealogytrails.com/mich/bay/books/History_of_Bay_ch6.html"
+        },
+        {
+          "label": "AncestryDNA genetic communities list (French Settlers of Montreal & Metro Detroit)",
+          "url": "https://thegeneticgenealogist.com/wp-content/uploads/2017/03/AncestryDNA_Genetic_Communities.pdf"
         }
       ]
     },
@@ -1233,7 +1292,9 @@
         "Adolphus Lozon death date (Peter 1918 NOK = mother Mary)",
         "Which school cafeteria Dolores worked in (family memory; aunt Zoa cooked at Hamlin Elementary — ask if same school)",
         "Dolores quilting group / church guild name (family memory)",
-        "Norman Joseph Altz parents’ names (Rena’s parents locked as John & Delia LaPan via Zoa’s 2021 obit)",
+        "Norman Joseph Altz parents’ names (Rena’s parents = John LaPan × Delia Salois; Delia’s parents Antoine Salois × Zoé Forcier locked)",
+        "John LaPan (1875–1954) parents / birthplace (paternal La Pan line still thin)",
+        "Exact AncestryDNA community name on Ann’s kit (French Settler vs Michigan pioneer wording)",
         "Whether Zoa’s Aug 2021 notice also ran in Macomb Daily / Oakland Press print death columns (Ann’s clip)"
       ],
       "sources": []
