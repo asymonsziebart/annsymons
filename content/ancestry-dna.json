@@ -1,0 +1,104 @@
+{
+  "title": "AncestryDNA",
+  "personName": "Ann Symons",
+  "updatedAt": "2026-08-07",
+  "note": "Ethnicity estimate and ancestral journeys from Ann’s AncestryDNA export. Percentages are estimates and can shift when Ancestry updates its reference panels. Journeys are genetic communities that point to shared migration stories — they line up with French-Canadian Lozon/Salois/La Pan lines and Crosier–Carmoney Ohio–Michigan settlers on the Family History page.",
+  "regions": [
+    {
+      "id": "celtic-gaelic",
+      "label": "Celtic & Gaelic",
+      "percent": 28,
+      "color": "#1d4ed8",
+      "subregions": [
+        { "label": "Munster, Ireland", "percent": 26 },
+        { "label": "Central Scotland & Northern Ireland", "percent": 2 }
+      ]
+    },
+    {
+      "id": "england",
+      "label": "England",
+      "percent": 28,
+      "color": "#0f766e",
+      "subregions": [
+        { "label": "Southeastern England & Northwestern Europe", "percent": 21 },
+        { "label": "East Midlands", "percent": 4 },
+        { "label": "Devon & Somerset", "percent": 3 }
+      ]
+    },
+    {
+      "id": "french-canada",
+      "label": "French Canada",
+      "percent": 18,
+      "color": "#b45309",
+      "subregions": [
+        { "label": "Quebec", "percent": 14 },
+        { "label": "Acadia", "percent": 4 }
+      ]
+    },
+    {
+      "id": "central-eastern-europe",
+      "label": "Central & Eastern Europe",
+      "percent": 12,
+      "color": "#be123c",
+      "subregions": [
+        { "label": "North Central Europe", "percent": 10 },
+        { "label": "Russia", "percent": 2 }
+      ]
+    },
+    {
+      "id": "western-europe",
+      "label": "Western Europe",
+      "percent": 11,
+      "color": "#4338ca",
+      "subregions": [
+        { "label": "Southern Germanic Europe", "percent": 10 },
+        { "label": "Northwestern Germany", "percent": 1 }
+      ]
+    },
+    {
+      "id": "southeastern-europe",
+      "label": "Southeastern Europe",
+      "percent": 2,
+      "color": "#a16207",
+      "subregions": [{ "label": "Northwestern Balkans", "percent": 2 }]
+    },
+    {
+      "id": "nordic",
+      "label": "Nordic",
+      "percent": 1,
+      "color": "#0369a1",
+      "subregions": [{ "label": "Sweden", "percent": 1 }]
+    }
+  ],
+  "journeys": [
+    {
+      "id": "eastern-michigan-french",
+      "label": "Eastern Michigan & Southeastern Missouri French Settlers",
+      "subregions": [
+        "Detroit | Chatham | St. Clair",
+        "Lake St. Clair Area"
+      ]
+    },
+    {
+      "id": "ohio-indiana",
+      "label": "Ohio & Indiana Settlers",
+      "subregions": [
+        "Northwestern Ohio & Michigan Border",
+        "Ohio, Indiana & Northern Kentucky"
+      ]
+    },
+    {
+      "id": "sw-quebec",
+      "label": "Southwestern Quebec French Settlers",
+      "subregions": []
+    },
+    {
+      "id": "sw-quebec-ny-vt",
+      "label": "Southwestern Quebec, New York & Vermont French Settlers",
+      "subregions": [
+        "Montérégie, Quebec, Northeastern New York & Northwestern Vermont French Settlers",
+        "Montérégie, Quebec & Lake St. Clair, Ontario French Settlers"
+      ]
+    }
+  ]
+}

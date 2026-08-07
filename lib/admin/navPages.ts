@@ -104,6 +104,21 @@ export const ADMIN_NAV_PAGES: AdminNavPage[] = [
     ],
   },
   {
+    href: "/admin/ancestry",
+    label: "AncestryDNA",
+    description: "Ethnicity estimate and ancestral journeys",
+    keywords: [
+      "dna",
+      "ethnicity",
+      "ancestry",
+      "french canada",
+      "michigan",
+      "settlers",
+      "quebec",
+      "ireland",
+    ],
+  },
+  {
     href: "/admin/users",
     label: "Manage Users",
     description: "Approve logins and choose which pages people can see",

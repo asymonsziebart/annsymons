@@ -71,6 +71,11 @@ export default async function AdminDashboardPage({
               Family History
             </Link>
           ) : null}
+          {can("/admin/ancestry") ? (
+            <Link href="/admin/ancestry" className="neo-btn !min-h-10 !px-4 !py-2">
+              AncestryDNA
+            </Link>
+          ) : null}
           {owner ? (
             <Link href="/admin/users" className="neo-btn-primary !min-h-10 !px-4 !py-2">
               Users{pendingUsers > 0 ? ` (${pendingUsers})` : ""}
