@@ -119,9 +119,19 @@
       "y": 0.0,
       "surname": "Krause",
       "given": "Otto",
-      "middle": "J",
-      "birth": null,
-      "death": null,
+      "middle": "Joseph",
+      "birth": {
+        "year": 1922,
+        "month": 5,
+        "day": 20,
+        "known": true
+      },
+      "death": {
+        "year": 1999,
+        "month": 5,
+        "day": 6,
+        "known": true
+      },
       "gender": "male"
     },
     {
@@ -133,7 +143,12 @@
       "surname": "Staub",
       "given": "Geraldine",
       "middle": null,
-      "birth": null,
+      "birth": {
+        "year": 1922,
+        "month": null,
+        "day": null,
+        "known": false
+      },
       "death": null,
       "gender": "female"
     },

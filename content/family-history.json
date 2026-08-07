@@ -1,25 +1,30 @@
 {
   "title": "Family History",
   "updatedAt": "2026-08-07",
-  "note": "Public genealogy trees that match Ann’s known family lines are treated as confirmed unless they conflict with family memory. Story details that need family knowledge (jobs, photos, unit/branch unknown online) stay marked needs_review. New Aug 2026 dig adds Civil War Crosiers, Carmoney sister marriages, Canada-born Marion Maher, Lozon WWI color, and Altz Rochester/Joseph millwright finds. Sources are public web records.",
+  "note": "Public genealogy trees that match Ann’s known family lines are treated as confirmed unless they conflict with family memory. Story details that need family knowledge (jobs, photos, unit/branch unknown online) stay marked needs_review. Aug 2026 digs add Civil War Crosiers, Carmoney sister marriages, Canada-born Marion Maher, Lozon WWI color, Altz Rochester/Joseph millwright finds, Otto SSDI dates + Rhine mission, and Geraldine Staub natal family. Sources are public web records.",
   "sections": [
     {
       "id": "otto-wwii",
-      "title": "Otto J. Krause — WWII B-17 navigator",
+      "title": "Otto Joseph Krause — WWII B-17 navigator",
       "line": "Krause",
       "status": "confirmed",
       "personIds": [
         "961427"
       ],
-      "summary": "Otto J. Krause of Detroit served as a navigator with the 91st Bomb Group, 324th Bomb Squadron, Eighth Air Force, based at RAF Bassingbourn. He flew mostly on B-17 Mah Ideel (43-37993 DF-N) with Lt. William Laws’ crew, earned the Air Medal with oak leaf clusters, and finished as a First Lieutenant. He married Geraldine Staub around 1945.",
+      "summary": "Otto Joseph Krause (20 May 1922 – 6 May 1999; SSDI last residence Rochester, MI 48307) of Detroit served as a navigator with the 91st Bomb Group, 324th Bomb Squadron, Eighth Air Force, based at RAF Bassingbourn. He flew mostly on B-17 Mah Ideel (43-37993 DF-N) with Lt. William Laws’ crew, earned the Air Medal with oak leaf clusters (orders Oct–Dec 1944; advanced 2LT → 1LT), and finished as a First Lieutenant. American Air Museum narrative (details from grandson Chris Krause): on 6 Jan 1945 over the Rhine, flying near Balaban’s B-17 Little Miss Mischief when that ship was hit by flak; Krause directed the damaged bomber to an airfield at Merville, France, where it landed safely for repairs. American Air Museum lists death as 15 Apr 1999 (secondary); SSDI extract gives 6 May 1999 — prefer SSDI until an obituary is found. He married Geraldine Staub around 1945. Postwar job and burial still open.",
       "highlights": [
+        "Full name: Otto Joseph Krause (people-search / military Otto J.)",
+        "Birth / death (SSDI): 20 May 1922 – 6 May 1999; last residence Rochester MI 48307 (SSN 365-16-6750)",
+        "Death date note: AAM lists 15 Apr 1999 (grandson-submitted); SSDI 6 May 1999 preferred pending obituary",
         "Unit: 91st Bomb Group / 324th BS / 8th Air Force, RAF Bassingbourn",
         "Aircraft: Mah Ideel B-17G 43-37993 (codes LL-U then DF-N); ~72 missions; returned USA 11 Jun 1945; scrapped Kingman AZ Dec 1945",
         "Laws crew (Otto navigator): mostly Mah Ideel; co-pilot Bernard “Ed” Goldstein KIA 30 Nov 1944 on another crew",
         "Sample Mah Ideel missions (Halpert list): Ludwigshafen, Schweinfurt, Merseburg/Leuna, Cologne, Berlin (3 Feb 1945)",
-        "Awards: Air Medal + oak leaf clusters (late 1944 orders)",
-        "Wartime photo FRE 5634 by Dale Darling shows Otto with a B-17",
-        "Married Geraldine Staub ~1945"
+        "Awards: Air Medal GO 421 (13 Oct 1944) + OLCs GO 512 / 570 / 641 (Nov–Dec 1944)",
+        "6 Jan 1945 Rhine mission: helped Little Miss Mischief divert to Merville, France after flak damage (AAM / Chris Krause)",
+        "Wartime photo FRE 5634 by Dale Darling shows Otto with a B-17; also photographed with officers by Round Trip Topsy",
+        "Married Geraldine Staub ~1945",
+        "Postwar job / burial: still not found cleanly online"
       ],
       "sources": [
         {
@@ -41,23 +46,46 @@
         {
           "label": "91st BG — Mah Ideel mission list (Halpert)",
           "url": "http://www.91stbombgroup.com/crewphotos/mahideel.html"
+        },
+        {
+          "label": "SSDI extract — Otto J Krause (365-16-6750), Rochester MI",
+          "url": "https://www.locateancestors.com/otto-krause/"
+        },
+        {
+          "label": "American Air Museum — Otto J Krause (Rhine / Little Miss Mischief)",
+          "url": "https://www.americanairmuseum.com/archive/person/otto-j-krause"
         }
       ]
     },
     {
       "id": "geraldine-somerset",
-      "title": "Geraldine Staub Krause — Somerset Collection",
+      "title": "Geraldine “Jeri” Staub Krause",
       "line": "Krause",
       "status": "confirmed",
       "personIds": [
         "313589"
       ],
-      "summary": "Geraldine sold clothes at the Somerset Collection (old/south side) in Troy, Michigan. The exact store name has not been confirmed from public records.",
+      "summary": "Geraldine Staub Krause (aka Jeri / Gerry) married Otto Joseph Krause around 1945 and later sold clothes at the Somerset Collection (old/south side) in Troy, Michigan — exact store name still open. Public records: parents Ralph T. Staub and Helen C. Staub; 1940 household at 739 Eastlawn Ave, Detroit, with siblings Kathleen (“Kay”), Edward (“Ed”), Rosemary, and John F. Sister Rosemary A. Jensen (née Staub; 6 Apr 1926 – 19 Aug 2022) worked 15 years at Grosse Pointe Farms City Hall; her obituary lists sister Gerry among the predeceased. Brother John Francis Staub (10 Aug 1929 – 31 Jan 2018) was EVP of St. John Health System. Exact Geraldine death date not found in a free obituary (predeceased Rosemary by Aug 2022; some trees say ~2017).",
       "highlights": [
-        "Workplace: Somerset Collection, Troy, MI (south/old side)",
-        "Role: clothing sales"
+        "Workplace (family): Somerset Collection, Troy, MI (south/old side) — clothing sales; store name open",
+        "Parents: Ralph T. Staub & Helen C. Staub (Detroit)",
+        "1940 home: 739 Eastlawn Ave, Detroit",
+        "Siblings: Kathleen (“Kay”), Edward (“Ed”), Rosemary A. Jensen, John Francis Staub",
+        "Rosemary Jensen obit (2022): predeceased by sister Gerry — confirms Geraldine’s nickname in the Staub family",
+        "John F. Staub: U. of Detroit Jesuit HS + U. of Detroit; EVP St. John Health System (Grosse Pointe News obit)",
+        "Married Otto Joseph Krause ~1945; later Rochester Hills / Troy area addresses in people-search",
+        "Death: before 19 Aug 2022; exact date still open"
       ],
-      "sources": []
+      "sources": [
+        {
+          "label": "Grosse Pointe News — Rosemary A. Jensen (née Staub) obituary",
+          "url": "https://www.grossepointenews.com/articles/rosemary-a-jensen/"
+        },
+        {
+          "label": "Grosse Pointe News — John Francis Staub obituary",
+          "url": "https://www.grossepointenews.com/articles/john-francis-staub/"
+        }
+      ]
     },
     {
       "id": "frederick-dolores",
@@ -920,13 +948,15 @@
       ],
       "summary": "These details are interesting for the Family History page but are not confirmed from public trees/military pages yet — family memory or uploads will help.",
       "highlights": [
+        "Otto Krause parents / siblings (still blank beyond Geraldine’s Staub natal family)",
+        "Geraldine Staub Krause exact death date / obituary / Somerset store name",
+        "Otto Krause postwar job / burial place (SSDI death 6 May 1999 locked; AAM 15 Apr conflict)",
         "Frederick Crosier WWII: draft card / Army or Navy enlistment / unit / ship / discharge (NARA AAD, Fold3, Ancestry, NPRC)",
         "Frederick railroad job title / years (and whether he started under NYC before Penn Central)",
         "Frederick Universal Computer Systems role / years (confirm Houston UCS/Reynolds vs local firm)",
         "Frederick burial plot (Modetz text silent; check Mt. Avon / Rochester Hills clerk)",
         "Madeline Phoebe Lozon Crosier Michigan death certificate (cause; same-day birth link)",
         "Confirm or reject 1948 “Fred J. Crosier” directory hit as Frederick Charles",
-        "Otto Krause postwar job / death date",
         "Geraldine’s exact Somerset Collection store name",
         "Which school cafeteria Dolores worked in",
         "Josephine Crosier’s maiden surname",
@@ -940,8 +970,6 @@
         "Alexandre Lauzon × Magdeleine Maillet marriage year (1842 vs 1846) — pull parish image",
         "Mary Veronica Gore parents (still blank in public trees)",
         "Norman Joseph Altz & Rena Margaret La Pan parents / earlier generations",
-        "Otto J. Krause parents / birth date / postwar job (beyond WWII navigator record)",
-        "Geraldine Staub parents",
         "Adolphus Lozon death date (Peter 1918 NOK = mother Mary)"
       ],
       "sources": []
