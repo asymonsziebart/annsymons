@@ -6,6 +6,11 @@ export type FamilyHistorySource = {
   url: string;
 };
 
+export type FamilyHistoryVerbatimEntry = {
+  title: string;
+  paragraphs: string[];
+};
+
 export type FamilyHistorySection = {
   id: string;
   title: string;
@@ -15,6 +20,8 @@ export type FamilyHistorySection = {
   summary: string;
   highlights: string[];
   sources: FamilyHistorySource[];
+  /** Word-for-word family writings (journals, letters). Preserved as submitted. */
+  verbatimEntries?: FamilyHistoryVerbatimEntry[];
 };
 
 export type FamilyHistoryData = {

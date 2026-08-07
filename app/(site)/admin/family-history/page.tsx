@@ -69,6 +69,31 @@ export default async function FamilyHistoryAdminPage() {
               </ul>
             ) : null}
 
+            {section.verbatimEntries && section.verbatimEntries.length > 0 ? (
+              <div className="mt-6 space-y-8">
+                {section.verbatimEntries.map((entry) => (
+                  <blockquote
+                    key={entry.title}
+                    className="border-l-2 border-[var(--color-ink)]/20 pl-4 sm:pl-5"
+                  >
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--color-muted)]">
+                      Journal — word for word
+                    </p>
+                    <h3 className="mt-2 font-heading text-xl font-semibold tracking-tight text-[var(--color-ink)]">
+                      {entry.title}
+                    </h3>
+                    <div className="mt-4 space-y-4 text-sm leading-relaxed text-[var(--color-ink)] sm:text-base">
+                      {entry.paragraphs.map((paragraph, index) => (
+                        <p key={`${entry.title}-${index}`} className="text-pretty whitespace-pre-wrap">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  </blockquote>
+                ))}
+              </div>
+            ) : null}
+
             {section.sources.length > 0 ? (
               <div className="mt-5">
                 <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--color-muted)]">

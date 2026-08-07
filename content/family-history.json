@@ -1,21 +1,21 @@
 {
   "title": "Family History",
   "updatedAt": "2026-08-07",
-  "note": "Public genealogy trees that match Ann\u2019s known family lines are treated as confirmed unless they conflict with family memory. Story details that need family knowledge (jobs, photos, unit/branch unknown online) stay marked needs_review. Sources are public web records.",
+  "note": "Public genealogy trees that match Ann’s known family lines are treated as confirmed unless they conflict with family memory. Story details that need family knowledge (jobs, photos, unit/branch unknown online) stay marked needs_review. Sources are public web records.",
   "sections": [
     {
       "id": "otto-wwii",
-      "title": "Otto J. Krause \u2014 WWII B-17 navigator",
+      "title": "Otto J. Krause — WWII B-17 navigator",
       "line": "Krause",
       "status": "confirmed",
       "personIds": [
         "961427"
       ],
-      "summary": "Otto J. Krause of Detroit served as a navigator with the 91st Bomb Group, 324th Bomb Squadron, Eighth Air Force, based at RAF Bassingbourn. He flew mostly on B-17 Mah Ideel (43-37993 DF-N) with Lt. William Laws\u2019 crew, earned the Air Medal with oak leaf clusters, and finished as a First Lieutenant. He married Geraldine Staub around 1945.",
+      "summary": "Otto J. Krause of Detroit served as a navigator with the 91st Bomb Group, 324th Bomb Squadron, Eighth Air Force, based at RAF Bassingbourn. He flew mostly on B-17 Mah Ideel (43-37993 DF-N) with Lt. William Laws’ crew, earned the Air Medal with oak leaf clusters, and finished as a First Lieutenant. He married Geraldine Staub around 1945.",
       "highlights": [
         "Unit: 91st Bomb Group / 324th BS / 8th Air Force, RAF Bassingbourn",
         "Aircraft: Mah Ideel B-17G 43-37993 (codes LL-U then DF-N); ~72 missions; returned USA 11 Jun 1945; scrapped Kingman AZ Dec 1945",
-        "Laws crew (Otto navigator): mostly Mah Ideel; co-pilot Bernard \u201cEd\u201d Goldstein KIA 30 Nov 1944 on another crew",
+        "Laws crew (Otto navigator): mostly Mah Ideel; co-pilot Bernard “Ed” Goldstein KIA 30 Nov 1944 on another crew",
         "Sample Mah Ideel missions (Halpert list): Ludwigshafen, Schweinfurt, Merseburg/Leuna, Cologne, Berlin (3 Feb 1945)",
         "Awards: Air Medal + oak leaf clusters (late 1944 orders)",
         "Wartime photo FRE 5634 by Dale Darling shows Otto with a B-17",
@@ -23,30 +23,30 @@
       ],
       "sources": [
         {
-          "label": "91st Bomb Group \u2014 Mah Ideel crew",
+          "label": "91st Bomb Group — Mah Ideel crew",
           "url": "http://www.91stbombgroup.com/crewphotos/mah_ideel_crew.html"
         },
         {
-          "label": "8th Air Force \u2014 Otto Krause awards",
+          "label": "8th Air Force — Otto Krause awards",
           "url": "https://www.8af.org/krause-otto-k3109-91bg.cfm"
         },
         {
-          "label": "IWM American Archive \u2014 FRE 5634 (Otto Krause)",
+          "label": "IWM American Archive — FRE 5634 (Otto Krause)",
           "url": "https://americanarchive.iwm.org.uk/archive/media/media-388068jpg"
         },
         {
-          "label": "B-17 archive \u2014 Mah Ideel 43-37993",
+          "label": "B-17 archive — Mah Ideel 43-37993",
           "url": "https://b17flyingfortress.de/en/b17/43-37993-mah-ideel/"
         },
         {
-          "label": "91st BG \u2014 Mah Ideel mission list (Halpert)",
+          "label": "91st BG — Mah Ideel mission list (Halpert)",
           "url": "http://www.91stbombgroup.com/crewphotos/mahideel.html"
         }
       ]
     },
     {
       "id": "geraldine-somerset",
-      "title": "Geraldine Staub Krause \u2014 Somerset Collection",
+      "title": "Geraldine Staub Krause — Somerset Collection",
       "line": "Krause",
       "status": "confirmed",
       "personIds": [
@@ -68,15 +68,15 @@
         "705532",
         "730562"
       ],
-      "summary": "Frederick Charles Crosier (29 Sep 1925 \u2013 25 Feb 2020) married Dolores Marie Altz Crosier (22 Oct 1930, Oakland County, MI \u2013 11 Dec 2005, Rochester Hills, MI) on 17 May 1952. Their children include Kathleen Marie, Kenneth Frederick, Kerry Michael, Kevin Jerome, Kristopher J., and Karolyn Crosier. Frederick served in WWII (branch/unit not yet found online). Family-confirmed railroad career: Penn Central and Conrail; last location Sterling Yard (off 16 Mile near Van Dyke, Sterling Heights). Public context: that yard sits on the old Michigan Central Detroit\u2013Bay City line (later New York Central, then Penn Central from 1 Feb 1968, then Conrail from 1 Apr 1976). Sterling Yard\u2019s south end (\u201cWS\u201d) is between 15 and 16 Mile; the yard itself is near 16\u201317 Mile and served heavy auto traffic (Chrysler Sterling Heights assembly/stamping; Ford plants via the Utica Industrial Track / Van Dyke corridor). No public employee roster naming Frederick has been found yet. Later work: Universal Computer Systems (Rochester Hills area, family-confirmed) \u2014 the best-known firm by that name was the Houston auto-dealership software company that merged into Reynolds and Reynolds in 2006 and had Detroit-area field presence; a smaller local shop of the same name is also possible. Dolores worked in a school cafeteria (school unknown) and quilted. Modetz funeral listing confirms dates but has no published career narrative.",
+      "summary": "Frederick Charles Crosier (29 Sep 1925 – 25 Feb 2020) married Dolores Marie Altz Crosier (22 Oct 1930, Oakland County, MI – 11 Dec 2005, Rochester Hills, MI) on 17 May 1952. Their children include Kathleen Marie, Kenneth Frederick, Kerry Michael, Kevin Jerome, Kristopher J., and Karolyn Crosier. Frederick served in WWII (branch/unit not yet found online). Family-confirmed railroad career: Penn Central and Conrail; last location Sterling Yard (off 16 Mile near Van Dyke, Sterling Heights). Public context: that yard sits on the old Michigan Central Detroit–Bay City line (later New York Central, then Penn Central from 1 Feb 1968, then Conrail from 1 Apr 1976). Sterling Yard’s south end (“WS”) is between 15 and 16 Mile; the yard itself is near 16–17 Mile and served heavy auto traffic (Chrysler Sterling Heights assembly/stamping; Ford plants via the Utica Industrial Track / Van Dyke corridor). No public employee roster naming Frederick has been found yet. Later work: Universal Computer Systems (Rochester Hills area, family-confirmed) — the best-known firm by that name was the Houston auto-dealership software company that merged into Reynolds and Reynolds in 2006 and had Detroit-area field presence; a smaller local shop of the same name is also possible. Dolores worked in a school cafeteria (school unknown) and quilted. Modetz funeral listing confirms dates but has no published career narrative.",
       "highlights": [
         "Married 17 May 1952",
         "Children: Kathleen Marie (Kathy, d. 4 Apr 2009 Troy), Kenneth Frederick (Kenny), Kerry Michael, Kevin Jerome, Kristopher J., Karolyn",
-        "Kathy\u2019s son David; granddaughter Samantha",
+        "Kathy’s son David; granddaughter Samantha",
         "Dolores birth Oakland County / death Rochester Hills (public trees)",
-        "Railroad employers (family): Penn Central \u2192 Conrail (successive companies, not literally one continuous legal entity)",
-        "Corporate line history at Sterling: Michigan Central \u2192 NYC \u2192 Penn Central (1968) \u2192 Conrail (1976) \u2192 Conrail Shared Assets (post-1999)",
-        "Last railroad location: Sterling Yard, Sterling Heights \u2014 off 16 Mile near Van Dyke (family); WS / south end between 15\u201316 Mile (railroad maps)",
+        "Railroad employers (family): Penn Central → Conrail (successive companies, not literally one continuous legal entity)",
+        "Corporate line history at Sterling: Michigan Central → NYC → Penn Central (1968) → Conrail (1976) → Conrail Shared Assets (post-1999)",
+        "Last railroad location: Sterling Yard, Sterling Heights — off 16 Mile near Van Dyke (family); WS / south end between 15–16 Mile (railroad maps)",
         "Yard role historically: auto switching for Chrysler Sterling Heights + Ford plants north on Utica Industrial / Van Dyke",
         "Public search: no named Crosier on Conrail/Penn Central employee lists found yet",
         "Later work: Universal Computer Systems (Rochester Hills area, family); likely auto-dealer IT / Reynolds lineage or a local firm of that name",
@@ -86,7 +86,7 @@
       ],
       "sources": [
         {
-          "label": "Trees of Ancestry \u2014 Crosier / Altz",
+          "label": "Trees of Ancestry — Crosier / Altz",
           "url": "https://classypages.com/img/oxygen/asc1499.htm"
         },
         {
@@ -94,35 +94,35 @@
           "url": "http://classypages.com/img/oxygen/src15.htm"
         },
         {
-          "label": "Modetz Funeral Homes \u2014 Frederick Charles Crosier",
+          "label": "Modetz Funeral Homes — Frederick Charles Crosier",
           "url": "https://www.modetzfuneralhomes.com/obituaries/Frederick-Charles-Crosier?obId=11944174"
         },
         {
-          "label": "Knorek \u2014 North Yard Branch & Sterling Secondary / Sterling Yard",
+          "label": "Knorek — North Yard Branch & Sterling Secondary / Sterling Yard",
           "url": "http://www.knorek.com/RR/SAA/NorthYardSter/NorthYardSterlingIndex.htm"
         },
         {
-          "label": "michiganrailroads.com \u2014 Sterling Heights station / NYC yard photo 1965",
+          "label": "michiganrailroads.com — Sterling Heights station / NYC yard photo 1965",
           "url": "https://www.michiganrailroads.com/stations-locations/114-macomb-county-50/1328-sterling-heights-mi"
         },
         {
-          "label": "michiganrailroads.com \u2014 Penn Central Company",
+          "label": "michiganrailroads.com — Penn Central Company",
           "url": "https://michiganrailroads.com/railroads-in-history/484-n-p/3913-penn-central-company"
         },
         {
-          "label": "michiganrailroads.com \u2014 Conrail",
+          "label": "michiganrailroads.com — Conrail",
           "url": "https://michiganrailroads.com/railroads-in-history/458-c/3385-conrail-consolidated-rail-corporation"
         },
         {
-          "label": "Railroadfan \u2014 Conrail Sterling Yard photo",
+          "label": "Railroadfan — Conrail Sterling Yard photo",
           "url": "https://ftp.railroadfan.com/gallery/displayimage-1254-42808.html"
         },
         {
-          "label": "Penn Central Railroad Online \u2014 Sterling Yard, Sterling Heights",
+          "label": "Penn Central Railroad Online — Sterling Yard, Sterling Heights",
           "url": "http://pc.railfan.net/pics/northern/index.html"
         },
         {
-          "label": "Wikipedia \u2014 Reynolds and Reynolds (UCS merger 2006)",
+          "label": "Wikipedia — Reynolds and Reynolds (UCS merger 2006)",
           "url": "https://en.wikipedia.org/wiki/Reynolds_and_Reynolds"
         }
       ]
@@ -139,32 +139,32 @@
         "fh-marion-maher",
         "932453"
       ],
-      "summary": "Jerome Frederick Crosier (31 Jan 1898, Lansing, MI \u2013 28 Oct 1983, Avon, MI), son of Albert David Crosier and Marion A. Maher (married 24 Feb 1897, Jackson, MI), married Madeline Phoebe Lozon on 25 Nov 1924 in Wallaceburg, Ontario. Madeline (b. 9 Feb 1894, Wallaceburg) died 29 Sep 1925 in Detroit \u2014 the same day their son Frederick Charles was born. Jerome later remarried Josephine C. (c. 1905\u20131997), who raised Frederick as his stepmother.",
+      "summary": "Jerome Frederick Crosier (31 Jan 1898, Lansing, MI – 28 Oct 1983, Avon, MI), son of Albert David Crosier and Marion A. Maher (married 24 Feb 1897, Jackson, MI), married Madeline Phoebe Lozon on 25 Nov 1924 in Wallaceburg, Ontario. Madeline (b. 9 Feb 1894, Wallaceburg) died 29 Sep 1925 in Detroit — the same day their son Frederick Charles was born. Jerome later remarried Josephine C. (c. 1905–1997), who raised Frederick as his stepmother.",
       "highlights": [
-        "Albert David \u00d7 Marion A. Maher married 24 Feb 1897, Jackson, MI",
-        "Jerome birth/death: 31 Jan 1898 Lansing \u2013 28 Oct 1983 Avon, MI",
+        "Albert David × Marion A. Maher married 24 Feb 1897, Jackson, MI",
+        "Jerome birth/death: 31 Jan 1898 Lansing – 28 Oct 1983 Avon, MI",
         "Marriage to Madeline: 25 Nov 1924, Wallaceburg, Ontario",
         "Madeline died 29 Sep 1925 in Detroit, the day Frederick was born",
-        "Stepmother: Josephine C. Crosier (c. 1905\u20131997)"
+        "Stepmother: Josephine C. Crosier (c. 1905–1997)"
       ],
       "sources": [
         {
-          "label": "Trees of Ancestry \u2014 Jerome Frederick Crosier",
+          "label": "Trees of Ancestry — Jerome Frederick Crosier",
           "url": "https://classypages.com/img/oxygen/n362.htm"
         },
         {
-          "label": "Wallaceburg events \u2014 marriage & Madeline birth",
+          "label": "Wallaceburg events — marriage & Madeline birth",
           "url": "https://classypages.com/img/oxygen/evp189.htm"
         },
         {
-          "label": "Trees of Ancestry \u2014 Madeline death 29 Sep 1925 Detroit",
+          "label": "Trees of Ancestry — Madeline death 29 Sep 1925 Detroit",
           "url": "https://classypages.com/img/oxygen/evp40.htm"
         }
       ]
     },
     {
       "id": "jerome-siblings",
-      "title": "Jerome Crosier \u2014 brothers and sisters",
+      "title": "Jerome Crosier — brothers and sisters",
       "line": "Crosier",
       "status": "confirmed",
       "personIds": [
@@ -181,18 +181,18 @@
         "fh-cora-crosier",
         "fh-fred-b-crosier"
       ],
-      "summary": "Jerome Frederick Crosier\u2019s siblings (children of Albert David Crosier and Marion A. Maher) were Albert June Crosier (30 Jun 1901 Jackson \u2013 5 Sep 1952 Los Angeles), Francis DeWitt Crosier (1903\u20132000), Rose Mary Crosier (1908\u20132000), and Annetta Mary Crosier (1910\u20131985). Albert David\u2019s own siblings included Ada Isabel, Cora Estelle, and Fred B. Crosier; his parents were Charles Crosier (1838\u20131917) and Mary M. Carmoney (1844\u20131932).",
+      "summary": "Jerome Frederick Crosier’s siblings (children of Albert David Crosier and Marion A. Maher) were Albert June Crosier (30 Jun 1901 Jackson – 5 Sep 1952 Los Angeles), Francis DeWitt Crosier (1903–2000), Rose Mary Crosier (1908–2000), and Annetta Mary Crosier (1910–1985). Albert David’s own siblings included Ada Isabel, Cora Estelle, and Fred B. Crosier; his parents were Charles Crosier (1838–1917) and Mary M. Carmoney (1844–1932).",
       "highlights": [
-        "Albert June Crosier (30 Jun 1901 \u2013 5 Sep 1952)",
-        "Francis DeWitt Crosier (1903\u20132000)",
-        "Rose Mary Crosier (1908\u20132000)",
-        "Annetta Mary Crosier (1910\u20131985)",
+        "Albert June Crosier (30 Jun 1901 – 5 Sep 1952)",
+        "Francis DeWitt Crosier (1903–2000)",
+        "Rose Mary Crosier (1908–2000)",
+        "Annetta Mary Crosier (1910–1985)",
         "Great-grandparents: Charles Crosier & Mary M. Carmoney",
         "Albert David siblings: Ada Isabel, Cora Estelle, Fred B."
       ],
       "sources": [
         {
-          "label": "Trees of Ancestry \u2014 Albert David Crosier family",
+          "label": "Trees of Ancestry — Albert David Crosier family",
           "url": "https://classypages.com/img/oxygen/n307.htm"
         }
       ]
@@ -210,16 +210,16 @@
         "fh-james-maher",
         "fh-rose-bowles"
       ],
-      "summary": "Albert David Crosier was born 28 Dec 1865 in Michigan and died 18 Jun 1942 in San Francisco. He married Marion A. Maher on 24 Feb 1897 in Jackson, Michigan. His parents were Charles Crosier (1838\u20131917) and Mary M. Carmoney (1844\u20131932). Marion\u2019s parents appear in the same trees as James Maher and Rose Ann Bowles.",
+      "summary": "Albert David Crosier was born 28 Dec 1865 in Michigan and died 18 Jun 1942 in San Francisco. He married Marion A. Maher on 24 Feb 1897 in Jackson, Michigan. His parents were Charles Crosier (1838–1917) and Mary M. Carmoney (1844–1932). Marion’s parents appear in the same trees as James Maher and Rose Ann Bowles.",
       "highlights": [
-        "Albert David Crosier: 28 Dec 1865 MI \u2013 18 Jun 1942 San Francisco",
+        "Albert David Crosier: 28 Dec 1865 MI – 18 Jun 1942 San Francisco",
         "Married Marion A. Maher 24 Feb 1897, Jackson, MI",
         "Parents: Charles Crosier & Mary M. Carmoney",
-        "Marion\u2019s parents: James Maher & Rose Ann Bowles"
+        "Marion’s parents: James Maher & Rose Ann Bowles"
       ],
       "sources": [
         {
-          "label": "Trees of Ancestry \u2014 Albert David Crosier",
+          "label": "Trees of Ancestry — Albert David Crosier",
           "url": "https://classypages.com/img/oxygen/n307.htm"
         }
       ]
@@ -242,35 +242,35 @@
         "fh-alexandre-lauzon",
         "fh-magdeleine-maillet"
       ],
-      "summary": "Madeline\u2019s parents were Adolphus Lozon (b. ~1861, Chatham, Kent, Ontario) and Mary Veronica Gore (b. ~1863). They married 8 Jan 1883 in Wallaceburg, Ontario. Adolphus was a son of Alexandre Lauzon (b. ~1827) and Magdeleine Maillet (b. 11 Apr 1826; married 1 Jun 1842, St. Peter Tilbury, Ontario). Known children: Solomon Alex (b. 6 Nov 1891), Madeline Phoebe, Peter Adolphus (b. 29 Aug 1896), Aubrey Samuel (~1898), Roy Clarence (b. 8 Oct 1899), an infant who died 5 Jul 1903, and Wilfred Joseph.",
+      "summary": "Madeline’s parents were Adolphus Lozon (b. ~1861, Chatham, Kent, Ontario) and Mary Veronica Gore (b. ~1863). They married 8 Jan 1883 in Wallaceburg, Ontario. Adolphus was a son of Alexandre Lauzon (b. ~1827) and Magdeleine Maillet (b. 11 Apr 1826; married 1 Jun 1842, St. Peter Tilbury, Ontario). Known children: Solomon Alex (b. 6 Nov 1891), Madeline Phoebe, Peter Adolphus (b. 29 Aug 1896), Aubrey Samuel (~1898), Roy Clarence (b. 8 Oct 1899), an infant who died 5 Jul 1903, and Wilfred Joseph.",
       "highlights": [
-        "Adolphus \u00d7 Mary Veronica married 8 Jan 1883, Wallaceburg",
+        "Adolphus × Mary Veronica married 8 Jan 1883, Wallaceburg",
         "Grandparents: Alexandre Lauzon & Magdeleine Maillet (m. 1 Jun 1842 Tilbury)",
         "Children: Solomon Alex, Madeline, Peter Adolphus, Aubrey Samuel, Roy Clarence, infant 1903, Wilfred Joseph",
-        "Farm / R.R. #2 Wallaceburg\u2013Becher area in WWI attestation papers"
+        "Farm / R.R. #2 Wallaceburg–Becher area in WWI attestation papers"
       ],
       "sources": [
         {
-          "label": "Trees of Ancestry \u2014 Lozon / Gore children",
+          "label": "Trees of Ancestry — Lozon / Gore children",
           "url": "https://classypages.com/img/oxygen/asc3822.htm"
         },
         {
-          "label": "Gathering Our Heroes \u2014 Solomon Alex Lozon",
+          "label": "Gathering Our Heroes — Solomon Alex Lozon",
           "url": "https://www.gatheringourheroes.ca/hero/lozon-s-a/"
         },
         {
-          "label": "Trees of Ancestry \u2014 Magdeleine Maillet / Alexandre Lauzon",
+          "label": "Trees of Ancestry — Magdeleine Maillet / Alexandre Lauzon",
           "url": "http://classypages.com/img/oxygen/n854.htm"
         },
         {
-          "label": "Wallaceburg marriage event \u2014 Lozon \u00d7 Gore 1883",
+          "label": "Wallaceburg marriage event — Lozon × Gore 1883",
           "url": "https://classypages.com/FranksGenealogyPage/oxygen/evp36.htm"
         }
       ]
     },
     {
       "id": "lozon-wwi",
-      "title": "Lozon brothers \u2014 WWI Canadian service",
+      "title": "Lozon brothers — WWI Canadian service",
       "line": "Crosier",
       "status": "confirmed",
       "personIds": [
@@ -280,30 +280,30 @@
         "fh-roy-lozon",
         "fh-wilfred-lozon"
       ],
-      "summary": "Two of Madeline\u2019s brothers appear in Canadian WWI records from Wallaceburg. Solomon Alex Lozon (sapper #3131895) enlisted Feb 1918 with the 1st Western Ontario Regiment, sailed to England May 1918, and served in France before returning in 1919. Peter Adolphus (Dulphy) Lozon (#3134471), born 29 Aug 1896, enlisted July 1918 and was discharged early 1919.",
+      "summary": "Two of Madeline’s brothers appear in Canadian WWI records from Wallaceburg. Solomon Alex Lozon (sapper #3131895) enlisted Feb 1918 with the 1st Western Ontario Regiment, sailed to England May 1918, and served in France before returning in 1919. Peter Adolphus (Dulphy) Lozon (#3134471), born 29 Aug 1896, enlisted July 1918 and was discharged early 1919.",
       "highlights": [
-        "Solomon Alex Lozon \u2014 Spr., CEF 3131895; overseas England/France 1918\u201319",
-        "Peter Adolphus Lozon \u2014 1st WOR 3134471; enlisted 1918, demobilized 1919",
+        "Solomon Alex Lozon — Spr., CEF 3131895; overseas England/France 1918–19",
+        "Peter Adolphus Lozon — 1st WOR 3134471; enlisted 1918, demobilized 1919",
         "Both listed with Adolphus/Mary Lozon of R.R. #2 Wallaceburg area"
       ],
       "sources": [
         {
-          "label": "Gathering Our Heroes \u2014 Solomon Alex Lozon",
+          "label": "Gathering Our Heroes — Solomon Alex Lozon",
           "url": "https://www.gatheringourheroes.ca/hero/lozon-s-a/"
         },
         {
-          "label": "IWM Lives of the First World War \u2014 Soloman Alex Lozon",
+          "label": "IWM Lives of the First World War — Soloman Alex Lozon",
           "url": "https://livesofthefirstworldwar.iwm.org.uk/lifestory/6017455"
         },
         {
-          "label": "Gathering Our Heroes \u2014 Peter Dulphy Lozon",
+          "label": "Gathering Our Heroes — Peter Dulphy Lozon",
           "url": "https://www.gatheringourheroes.ca/hero/lozon-p-d/"
         }
       ]
     },
     {
       "id": "altz-siblings",
-      "title": "Dolores Altz \u2014 brothers and sisters",
+      "title": "Dolores Altz — brothers and sisters",
       "line": "Crosier",
       "status": "confirmed",
       "personIds": [
@@ -311,20 +311,20 @@
         "1011292",
         "826851"
       ],
-      "summary": "Dolores Marie Altz (1930 Oakland County \u2013 2005 Rochester Hills) was a daughter of Norman Joseph Altz and Rena Margaret La Pan. Her 2005 death notice lists siblings Jeanette (Charles) Benedict, Barbara (Gino) Tonin, Norman (Carol) Altz, Donna (Dan) Griffiths, Linda (Jerry) Griffin, Mary (Danny) Griffin, and Joseph (Rusty) Altz. Funeral Mass was at St. Mary\u2019s of the Hills, Rochester Hills; burial Mt. Avon Cemetery.",
+      "summary": "Dolores Marie Altz (1930 Oakland County – 2005 Rochester Hills) was a daughter of Norman Joseph Altz and Rena Margaret La Pan. Her 2005 death notice lists siblings Jeanette (Charles) Benedict, Barbara (Gino) Tonin, Norman (Carol) Altz, Donna (Dan) Griffiths, Linda (Jerry) Griffin, Mary (Danny) Griffin, and Joseph (Rusty) Altz. Funeral Mass was at St. Mary’s of the Hills, Rochester Hills; burial Mt. Avon Cemetery.",
       "highlights": [
         "Parents: Norman Joseph Altz & Rena Margaret La Pan",
         "Siblings (with spouses from Dolores obituary): Jeanette (Charles) Benedict, Barbara (Gino) Tonin, Norman (Carol) Altz, Donna (Dan) Griffiths, Linda (Jerry) Griffin, Mary (Danny) Griffin, Joseph (Rusty) Altz",
-        "Dolores funeral: St. Mary\u2019s of the Hills, Rochester Hills; interment Mt. Avon Cemetery",
+        "Dolores funeral: St. Mary’s of the Hills, Rochester Hills; interment Mt. Avon Cemetery",
         "Grandchildren named in notice: David, Jeremy, Emily, Elizabeth, Ann, Nathan"
       ],
       "sources": [
         {
-          "label": "Trees of Ancestry \u2014 Altz children",
+          "label": "Trees of Ancestry — Altz children",
           "url": "https://classypages.com/img/oxygen/asc70.htm"
         },
         {
-          "label": "Trees of Ancestry source \u2014 Dolores Crosier death notice",
+          "label": "Trees of Ancestry source — Dolores Crosier death notice",
           "url": "http://classypages.com/img/oxygen/src73.htm"
         }
       ]
@@ -343,26 +343,26 @@
         "19175",
         "999755"
       ],
-      "summary": "Gerald Francis Krause (b. 20 Dec 1953), son of Otto J. Krause and Geraldine Staub, married Karolyn Dolores Crosier (b. 1 May 1959), daughter of Frederick Charles Crosier and Dolores Marie Altz. They have been married at least 40 years (church wedding; exact date/place still open). Their children are Jeremy Francis, Emily Elizabeth, Elizabeth Ann, and Ann Emily Krause. Public death notices for Dolores (2005) and Kathleen (2009) name Karolyn (Gerald) Krause. Family memory: Karolyn worked briefly for Rochester Avon Recreation Authority (RARA), then was a stay-at-home mom; Gerald put himself through college while living in a trailer park (school still open; an earlier \u201cBaker\u201d guess likely refers to son Jeremy\u2019s Baker College degree); Gerald taught history in Detroit at Greenfield Union Elementary-Middle School (420 W. 7 Mile Rd.), near the 8 Mile area, roughly from the late 1980s through the mid-2010s. That school\u2019s former principal Beverly Campbell was among the educators charged in the 2015\u201316 DPS Norman Shy kickback scandal. Rochester school years (family memory): Karolyn attended Rochester Adams High School and went to school with Madonna\u2019s sister (Paula Mae Ciccone, b. 22 Aug 1959 \u2014 same birth year as Karolyn). Madonna (b. 16 Aug 1958) was a little older, graduated Adams in 1976, and once went on a date with Gerald\u2019s brother Eric. People-search records place Karolyn D. Krause in Troy, Michigan.",
+      "summary": "Gerald Francis Krause (b. 20 Dec 1953), son of Otto J. Krause and Geraldine Staub, married Karolyn Dolores Crosier (b. 1 May 1959), daughter of Frederick Charles Crosier and Dolores Marie Altz. They have been married at least 40 years (church wedding; exact date/place still open). Their children are Jeremy Francis, Emily Elizabeth, Elizabeth Ann, and Ann Emily Krause. Public death notices for Dolores (2005) and Kathleen (2009) name Karolyn (Gerald) Krause. Family memory: Karolyn worked briefly for Rochester Avon Recreation Authority (RARA), then was a stay-at-home mom; Gerald put himself through college while living in a trailer park (school still open; an earlier “Baker” guess likely refers to son Jeremy’s Baker College degree); Gerald taught history in Detroit at Greenfield Union Elementary-Middle School (420 W. 7 Mile Rd.), near the 8 Mile area, roughly from the late 1980s through the mid-2010s. That school’s former principal Beverly Campbell was among the educators charged in the 2015–16 DPS Norman Shy kickback scandal. Rochester school years (family memory): Karolyn attended Rochester Adams High School and went to school with Madonna’s sister (Paula Mae Ciccone, b. 22 Aug 1959 — same birth year as Karolyn). Madonna (b. 16 Aug 1958) was a little older, graduated Adams in 1976, and once went on a date with Gerald’s brother Eric. People-search records place Karolyn D. Krause in Troy, Michigan.",
       "highlights": [
-        "Gerald Francis Krause \u2014 b. 20 Dec 1953; parents Otto J. Krause & Geraldine Staub",
-        "Karolyn Dolores Crosier Krause \u2014 b. 1 May 1959; parents Frederick Charles Crosier & Dolores Marie Altz",
+        "Gerald Francis Krause — b. 20 Dec 1953; parents Otto J. Krause & Geraldine Staub",
+        "Karolyn Dolores Crosier Krause — b. 1 May 1959; parents Frederick Charles Crosier & Dolores Marie Altz",
         "Children: Jeremy Francis, Emily Elizabeth, Elizabeth Ann, Ann Emily (Ann Symons, b. 5 Oct 1997)",
         "Marriage: church wedding; married at least ~40 years as of 2026 (exact date/church still open)",
         "Karolyn work: brief job at Rochester Avon Recreation Authority (RARA); then stay-at-home mom",
         "Gerald education (family memory): put himself through college while living in a trailer park (school still open)",
-        "Gerald work: history teacher at Greenfield Union Elementary-Middle School, Detroit (420 W. 7 Mile Rd.), roughly late 1980s\u2013mid-2010s",
-        "Context: Greenfield Union former principal Beverly Campbell charged in 2015\u201316 DPS Norman Shy ~$2.7M kickback scheme",
-        "Karolyn school: Rochester Adams High School; classmate of Madonna\u2019s sister Paula Ciccone (both b. 1959)",
+        "Gerald work: history teacher at Greenfield Union Elementary-Middle School, Detroit (420 W. 7 Mile Rd.), roughly late 1980s–mid-2010s",
+        "Context: Greenfield Union former principal Beverly Campbell charged in 2015–16 DPS Norman Shy ~$2.7M kickback scheme",
+        "Karolyn school: Rochester Adams High School; classmate of Madonna’s sister Paula Ciccone (both b. 1959)",
         "Family memory: Madonna (Adams class of 1976) was a bit older and dated uncle Eric Krause once",
         "Named as Karolyn (Gerald) Krause in Dolores Crosier 2005 and Kathleen Crosier 2009 death notices",
         "Troy / Rochester Hills family area",
-        "Gerald\u2019s brothers: Jay, Denny, Brian, Eric Krause",
-        "Karolyn\u2019s siblings: Kathleen Marie, Kenneth Frederick, Kerry Michael, Kevin Jerome, Kristopher J."
+        "Gerald’s brothers: Jay, Denny, Brian, Eric Krause",
+        "Karolyn’s siblings: Kathleen Marie, Kenneth Frederick, Kerry Michael, Kevin Jerome, Kristopher J."
       ],
       "sources": [
         {
-          "label": "Trees of Ancestry \u2014 Karolyn Crosier \u00d7 Gerald Krause",
+          "label": "Trees of Ancestry — Karolyn Crosier × Gerald Krause",
           "url": "http://classypages.com/img/oxygen/n369.htm"
         },
         {
@@ -378,7 +378,7 @@
           "url": "https://rararecreation.org/how_do_i/read_view/about_us.php"
         },
         {
-          "label": "CBS Detroit \u2014 DPS principals charged in $2.7M kickback scheme",
+          "label": "CBS Detroit — DPS principals charged in $2.7M kickback scheme",
           "url": "https://www.cbsnews.com/detroit/news/13-detroit-schools-principals-face-federal-charges-in-kickback-scheme-worth-millions/"
         },
         {
@@ -386,19 +386,19 @@
           "url": "https://greenfieldunion.detroitk12.org/"
         },
         {
-          "label": "Deadline Detroit \u2014 DPS principals in kickback scheme (incl. Beverly Campbell / Greenfield Union)",
+          "label": "Deadline Detroit — DPS principals in kickback scheme (incl. Beverly Campbell / Greenfield Union)",
           "url": "https://deadlinedetroit.com/articles/14626/update_12_current_and_ex-detroit_principals_charged_in_bribery-kickback_scheme"
         },
         {
-          "label": "Getty Images \u2014 Madonna senior yearbook photo, Adams High School, Rochester MI (1976)",
+          "label": "Getty Images — Madonna senior yearbook photo, Adams High School, Rochester MI (1976)",
           "url": "https://www.gettyimages.com/detail/news-photo/madonna-poses-for-her-senior-year-book-photo-at-adams-high-news-photo/108291522"
         },
         {
-          "label": "People \u2014 Madonna\u2019s siblings (Rochester Hills / Paula Ciccone)",
+          "label": "People — Madonna’s siblings (Rochester Hills / Paula Ciccone)",
           "url": "https://people.com/all-about-madonna-siblings-7973699"
         },
         {
-          "label": "IMDb \u2014 Paula Mae Ciccone biography (b. 22 Aug 1959)",
+          "label": "IMDb — Paula Mae Ciccone biography (b. 22 Aug 1959)",
           "url": "https://www.imdb.com/name/nm0162005/bio/"
         },
         {
@@ -406,7 +406,7 @@
           "url": "https://ahs.rochester.k12.mi.us/about"
         },
         {
-          "label": "Baker College \u2014 history",
+          "label": "Baker College — history",
           "url": "https://www.baker.edu/about/get-to-know-us/history/"
         }
       ]
@@ -423,39 +423,39 @@
         "265809",
         "543356"
       ],
-      "summary": "Ann\u2019s older siblings (family-confirmed). All four Krause kids attended Sterling Heights High School (Warren Consolidated Schools). Emily and Ann were also selected into the Macomb Mathematics Science Technology Center (MMSTC) at Butcher Educational Center in Warren \u2014 a competitive half-day math/science/tech magnet; home-school courses stayed at Sterling Heights. Approximate ages from people-search: Jeremy ~39, Emily ~37, Elizabeth ~34 (Ann b. 1997). Jeremy \u2014 Target backroom trainer (15 Mile & Dequindre) since 2008; Baker College B.B.A. ~2010\u20132016 (likely the Baker memory earlier attributed to Gerald). Emily \u2014 Sterling Heights valedictorian, strong track athlete, full-ride to Central Michigan University; CMU triple-major B.S. in Statistics, Mathematics, and Actuarial Science (~2007\u20132011), then M.A. Mathematics (~2011\u20132012); grad teaching assistant for Intermediate Algebra; co-author of SIAM Undergraduate Research Online \u201cSpread of a Rumor\u201d (2013); Dialer Analyst at Credit Acceptance (Southfield) from ~2015; spouse Kwame Larry. Elizabeth Ann \u2014 Saginaw Valley State University teaching degree, then an online master\u2019s in teaching (program/school still open); teaches gym and art at Holly Elementary (Holly Area Schools); lives in Pontiac; single. A Holly Area Schools elementary art page lists Miss Krause among teacher contacts, matching family memory. Ann also attended SVSU (Computer & Information Sciences, ~2016\u20132020), overlapping the SVSU years with Tim (football) and Elizabeth (teaching).",
+      "summary": "Ann’s older siblings (family-confirmed). All four Krause kids attended Sterling Heights High School (Warren Consolidated Schools). Emily and Ann were also selected into the Macomb Mathematics Science Technology Center (MMSTC) at Butcher Educational Center in Warren — a competitive half-day math/science/tech magnet; home-school courses stayed at Sterling Heights. Approximate ages from people-search: Jeremy ~39, Emily ~37, Elizabeth ~34 (Ann b. 1997). Jeremy — Target backroom trainer (15 Mile & Dequindre) since 2008; Baker College B.B.A. ~2010–2016 (likely the Baker memory earlier attributed to Gerald). Emily — Sterling Heights valedictorian, strong track athlete, full-ride to Central Michigan University; CMU triple-major B.S. in Statistics, Mathematics, and Actuarial Science (~2007–2011), then M.A. Mathematics (~2011–2012); grad teaching assistant for Intermediate Algebra; co-author of SIAM Undergraduate Research Online “Spread of a Rumor” (2013); Dialer Analyst at Credit Acceptance (Southfield) from ~2015; spouse Kwame Larry. Elizabeth Ann — Saginaw Valley State University teaching degree, then an online master’s in teaching (program/school still open); teaches gym and art at Holly Elementary (Holly Area Schools); lives in Pontiac; single. A Holly Area Schools elementary art page lists Miss Krause among teacher contacts, matching family memory. Ann also attended SVSU (Computer & Information Sciences, ~2016–2020), overlapping the SVSU years with Tim (football) and Elizabeth (teaching).",
       "highlights": [
         "Birth order / approx ages (people-search): Jeremy (~1987), Emily (~1989), Elizabeth (~1992), Ann (1997)",
         "Home high school (all four siblings): Sterling Heights High School (Stallions)",
         "MMSTC / Butcher Educational Center (Warren): Emily and Ann selected into Macomb Mathematics Science Technology Center",
         "Jeremy: Target backroom trainer, Troy MI area (15 & Dequindre), since Aug 2008",
-        "Jeremy education: Baker College \u2014 Bachelor\u2019s in Business Administration & Management (~2010\u20132016)",
-        "Note: earlier \u201cGerald maybe Baker\u201d memory likely refers to Jeremy\u2019s Baker degree",
+        "Jeremy education: Baker College — Bachelor’s in Business Administration & Management (~2010–2016)",
+        "Note: earlier “Gerald maybe Baker” memory likely refers to Jeremy’s Baker degree",
         "Emily HS: Sterling Heights valedictorian; full-ride scholarship to CMU; strong track athlete; MMSTC",
-        "Emily undergrad: CMU triple major \u2014 Statistics, Mathematics, and Actuarial Science (~2007\u20132011)",
-        "Emily grad: CMU M.A. Mathematics (~2011\u20132012); taught MTH 105 as grad assistant",
-        "Emily research: co-author, \u201cSpread of a Rumor,\u201d SIAM Undergraduate Research Online (2013)",
+        "Emily undergrad: CMU triple major — Statistics, Mathematics, and Actuarial Science (~2007–2011)",
+        "Emily grad: CMU M.A. Mathematics (~2011–2012); taught MTH 105 as grad assistant",
+        "Emily research: co-author, “Spread of a Rumor,” SIAM Undergraduate Research Online (2013)",
         "Emily work: Dialer Analyst, Credit Acceptance (Southfield), from ~May 2015",
         "Emily spouse: Kwame Larry (tree); people-search AKA Emily Elizabeth Larry",
-        "Elizabeth: Sterling Heights HS \u2192 Saginaw Valley State University teaching degree \u2192 online master\u2019s in teaching",
+        "Elizabeth: Sterling Heights HS → Saginaw Valley State University teaching degree → online master’s in teaching",
         "Elizabeth work: gym and art teacher, Holly Elementary (Holly Area Schools, Holly MI)",
         "Elizabeth home: Pontiac, MI; single"
       ],
       "sources": [
         {
-          "label": "LinkedIn \u2014 Jeremy Krause (Target / Baker College, Troy)",
+          "label": "LinkedIn — Jeremy Krause (Target / Baker College, Troy)",
           "url": "https://www.linkedin.com/in/jeremy-krause-46248511a"
         },
         {
-          "label": "LinkedIn \u2014 Emily Krause (Credit Acceptance / CMU, Troy)",
+          "label": "LinkedIn — Emily Krause (Credit Acceptance / CMU, Troy)",
           "url": "https://www.linkedin.com/in/emily-krause-1055106a"
         },
         {
-          "label": "SIAM Undergraduate Research Online \u2014 Spread of a Rumor (Fedewa, Krause, Sisson)",
+          "label": "SIAM Undergraduate Research Online — Spread of a Rumor (Fedewa, Krause, Sisson)",
           "url": "https://doi.org/10.1137/12s011829"
         },
         {
-          "label": "Spokeo cluster \u2014 Emily Elizabeth Krause related to Gerald, Jeremy, Elizabeth, Ann",
+          "label": "Spokeo cluster — Emily Elizabeth Krause related to Gerald, Jeremy, Elizabeth, Ann",
           "url": "https://www.spokeo.com/Emily-Krause/Michigan"
         },
         {
@@ -463,11 +463,11 @@
           "url": "https://www.wcskids.net/sterlingheights/"
         },
         {
-          "label": "MMSTC / Butcher Educational Center \u2014 school information",
+          "label": "MMSTC / Butcher Educational Center — school information",
           "url": "http://mmstc.wcskids.com/school_information"
         },
         {
-          "label": "Saginaw Valley State University \u2014 Teacher Education",
+          "label": "Saginaw Valley State University — Teacher Education",
           "url": "https://www.svsu.edu/"
         },
         {
@@ -483,76 +483,108 @@
           "url": "https://www.creditacceptance.com/"
         },
         {
-          "label": "Holly Elementary \u2014 Holly Area Schools",
+          "label": "Holly Elementary — Holly Area Schools",
           "url": "https://www.hask12.org/schools/holly-elementary/"
         },
         {
-          "label": "Holly Area Art Room \u2014 teacher contacts (Miss Krause)",
+          "label": "Holly Area Art Room — teacher contacts (Miss Krause)",
           "url": "https://hollyartroom.wordpress.com/"
         }
       ]
     },
     {
       "id": "immediate-family",
-      "title": "Ann\u2019s immediate family (baseline)",
+      "title": "Ann’s immediate family (baseline)",
       "line": "Core",
       "status": "confirmed",
       "personIds": [
         "543356",
         "882783"
       ],
-      "summary": "Ann Symons (born Ann Emily Krause, 5 Oct 1997) married Timothy Symons (b. 13 Apr 1996). Parents: Gerald Francis Krause (b. 20 Dec 1953) and Karolyn Dolores Crosier (b. 1 May 1959). Siblings: Jeremy Francis, Emily Elizabeth, and Elizabeth Ann Krause. All four Krause kids attended Sterling Heights High School; Ann and Emily also attended MMSTC at Butcher Educational Center. Ann\u2019s college: Saginaw Valley State University, Bachelor\u2019s in Computer and Information Sciences (~2016\u20132020). Ann also played Sterling Heights girls tennis as No. 1 singles, earned All-County in 2016, and was the first girl in a while that year to earn a four-year varsity letter in tennis; she played trombone in marching band (family memory; digitized tennis clip search ongoing). Tim: Lake Fenton High School class of 2014 \u2014 three-year varsity football starter (#8), team captain; First Team All-Conference as DE (soph) and LB (junior/senior); senior year First Team All-Area (Flint) and Second Team All-State (Div. 3 & 4) as linebacker despite playing through a high ankle sprain; senior stats include 91 tackles, 4 sacks, 11 TFL, 3 INT (Flint Journal Dream Team); also punter/gunner on special teams; track First/Second Team All-Conference in 110 high hurdles; FIRST Robotics Team 2145 (Safety Captain, World Championship top-80); marching/symphonic band (mellophone/French horn) \u2014 featured in Flint Journal and Fox Sports Detroit for marching at halftime in football gear; drama (Footloose); honored by Lake Fenton School Board for football and robotics. SVSU Cardinals football linebacker (2014\u201315). Career: US Signal Technical Support Engineer then Junior Network Security Engineer (Grand Rapids); Cisco verified achievement. Ann and Tim overlapped at SVSU; Elizabeth also attended SVSU for teaching. Paternal grandparents: Otto Krause & Geraldine Staub. Maternal grandparents: Frederick Charles Crosier & Dolores Marie Altz Crosier. Gerald\u2019s brothers: Jay, Denny, Brian, Eric. Tim\u2019s parents: Jeffrey & Elizabeth Symons; Jeffrey\u2019s parents John & Treva Symons; Elizabeth\u2019s parents Heisperadis Kokx (b. 2 Nov 1924) & Lucia Kokx (b. 1928).",
+      "summary": "Ann Symons (born Ann Emily Krause, 5 Oct 1997) married Timothy Symons (b. 13 Apr 1996). Parents: Gerald Francis Krause (b. 20 Dec 1953) and Karolyn Dolores Crosier (b. 1 May 1959). Siblings: Jeremy Francis, Emily Elizabeth, and Elizabeth Ann Krause. All four Krause kids attended Sterling Heights High School; Ann and Emily also attended MMSTC at Butcher Educational Center. Ann’s college: Saginaw Valley State University, Bachelor’s in Computer and Information Sciences (~2016–2020). Ann also played Sterling Heights girls tennis as No. 1 singles, earned All-County in 2016, and was the first girl in a while that year to earn a four-year varsity letter in tennis; she played trombone in marching band (family memory; digitized tennis clip search ongoing). Tim: Lake Fenton High School class of 2014 — three-year varsity football starter (#8), team captain; First Team All-Conference as DE (soph) and LB (junior/senior); senior year First Team All-Area (Flint) and Second Team All-State (Div. 3 & 4) as linebacker despite playing through a high ankle sprain; senior stats include 91 tackles, 4 sacks, 11 TFL, 3 INT (Flint Journal Dream Team); also punter/gunner on special teams; track First/Second Team All-Conference in 110 high hurdles; FIRST Robotics Team 2145 (Safety Captain, World Championship top-80); marching/symphonic band (mellophone/French horn) — featured in Flint Journal and Fox Sports Detroit for marching at halftime in football gear; drama (Footloose); honored by Lake Fenton School Board for football and robotics. SVSU Cardinals football linebacker (2014–15). Career: US Signal Technical Support Engineer then Junior Network Security Engineer (Grand Rapids); Cisco verified achievement. Ann and Tim overlapped at SVSU; Elizabeth also attended SVSU for teaching. Paternal grandparents: Otto Krause & Geraldine Staub. Maternal grandparents: Frederick Charles Crosier & Dolores Marie Altz Crosier. Gerald’s brothers: Jay, Denny, Brian, Eric. Tim’s parents: Jeffrey & Elizabeth Symons; Jeffrey’s parents John & Treva Symons; Elizabeth’s parents Heisperadis Kokx (b. 2 Nov 1924) & Lucia Kokx (b. 15 Aug 1928; Rotterdam WWII journal).",
       "highlights": [
         "Focus person: Ann Emily Krause Symons (b. 5 Oct 1997)",
         "Spouse: Timothy Symons (b. 13 Apr 1996)",
         "Ann HS: Sterling Heights High School; MMSTC at Butcher Educational Center (with Emily)",
-        "Ann college: SVSU \u2014 B.S. Computer and Information Sciences (~2016\u20132020)",
+        "Ann college: SVSU — B.S. Computer and Information Sciences (~2016–2020)",
         "Ann tennis: Sterling Heights No. 1 singles; All-County 2016; four-year varsity letter (first girl in a while that year)",
-        "Ann band: SHHS marching band \u2014 trombone",
+        "Ann band: SHHS marching band — trombone",
         "Tim HS football: 3-year varsity starter, captain; 1st Team All-Conference; 1st Team All-Area; 2nd Team All-State LB (2013)",
-        "Tim senior year (injured ankle, still played every game): 91 tackles, 4 sacks, 11 TFL, 3 INT \u2014 Flint Journal Dream Team defense",
+        "Tim senior year (injured ankle, still played every game): 91 tackles, 4 sacks, 11 TFL, 3 INT — Flint Journal Dream Team defense",
         "Tim track: All-Conference 110 high hurdles (1st Team soph, 2nd Team junior)",
         "Tim robotics: FIRST Team 2145 Safety Captain (2 yrs); World Championship top ~80 of 5,000+",
-        "Tim band/media: mellophone at halftime in football cleats \u2014 Flint Journal + Fox Sports Detroit",
-        "Tim also: Footloose drama; School Board honor for football & robotics; youth soccer K\u20136",
-        "Tim college athletics: SVSU football linebacker (2014\u201315)",
-        "Tim work: US Signal \u2014 Technical Support (~2021\u201322) \u2192 Junior Network Security Engineer (from ~2022); Cisco cert",
+        "Tim band/media: mellophone at halftime in football cleats — Flint Journal + Fox Sports Detroit",
+        "Tim also: Footloose drama; School Board honor for football & robotics; youth soccer K–6",
+        "Tim college athletics: SVSU football linebacker (2014–15)",
+        "Tim work: US Signal — Technical Support (~2021–22) → Junior Network Security Engineer (from ~2022); Cisco cert",
         "Siblings: Jeremy Francis, Emily Elizabeth, Elizabeth Ann (see siblings section)",
         "Krause uncles: Jay, Denny, Brian, Eric",
-        "Symons: Jeffrey & Elizabeth; John & Treva; Heisperadis & Lucia Kokx"
+        "Symons: Jeffrey & Elizabeth; John & Treva; Heisperadis & Lucia Kokx",
+        "Lucia Kokx journal: Rotterdam 1939–May 1940 bombing (word-for-word; see Lucia Kokx section)"
       ],
       "sources": [
         {
-          "label": "LinkedIn \u2014 Ann Krause (SVSU Computer & Information Sciences, Troy)",
+          "label": "LinkedIn — Ann Krause (SVSU Computer & Information Sciences, Troy)",
           "url": "https://www.linkedin.com/in/ann-krause-30b806162"
         },
         {
-          "label": "Saginaw Valley State University \u2014 Computer Science & Information Systems",
+          "label": "Saginaw Valley State University — Computer Science & Information Systems",
           "url": "https://www.svsu.edu/csis/"
         },
         {
-          "label": "LinkedIn \u2014 Timothy Symons (US Signal)",
+          "label": "LinkedIn — Timothy Symons (US Signal)",
           "url": "https://www.linkedin.com/in/timothy-symons-5ab4ab162"
         },
         {
-          "label": "NCSA Recruiting \u2014 Timothy Symons \u201914 Lake Fenton football profile",
+          "label": "NCSA Recruiting — Timothy Symons ’14 Lake Fenton football profile",
           "url": "https://www.ncsasports.org/football-recruiting/michigan/linden/lake-fenton-high-school/timothy-symons"
         },
         {
-          "label": "MLive \u2014 Lake Fenton football player Tim Symons marches to his own tune (2011)",
+          "label": "MLive — Lake Fenton football player Tim Symons marches to his own tune (2011)",
           "url": "https://www.mlive.com/highschoolsports/article/lake-fenton-football-player-tim-symons-marches-to-his-own-tune/"
         },
         {
-          "label": "MLive / Flint Journal \u2014 2013 Football Dream Team defense (Tim Symons)",
+          "label": "MLive / Flint Journal — 2013 Football Dream Team defense (Tim Symons)",
           "url": "https://www.mlive.com/highschoolsports/article/the-flint-journal-announces-2013-football-dream-team-for-defense/"
         },
         {
-          "label": "SVSU Athletics \u2014 Timothy Symons football bio (2014\u201315)",
+          "label": "SVSU Athletics — Timothy Symons football bio (2014–15)",
           "url": "https://www.svsucardinals.com/sports/fball/2014-15/bios/symons_timothy_wpzs"
         },
         {
-          "label": "Lake Fenton HS alumni \u2014 Timothy Symons class of 2014",
+          "label": "Lake Fenton HS alumni — Timothy Symons class of 2014",
           "url": "https://www.alumniclass.com/lake-fenton-high-school-blue-devils-linden-mi/profile/timothy-symons/11580156/"
+        }
+      ]
+    },
+    {
+      "id": "lucia-kokx-journal",
+      "title": "Lucia Kokx — Rotterdam journal (1939–1940)",
+      "line": "Symons",
+      "status": "confirmed",
+      "personIds": [
+        "600043"
+      ],
+      "summary": "Tim’s maternal grandmother Lucia Kokx (b. 15 Aug 1928; birthday confirmed from her own journal) wrote these recollections of Rotterdam from summer 1939 through the German bombing of 14 May 1940. Text below is transcribed word for word from the family copy as provided; spelling and wording are preserved. The provided transcript ends mid-sentence.",
+      "highlights": [
+        "Author: Lucia Kokx (Tim Symons’s mother’s mother)",
+        "Birthday in journal: August 15; turning 11 in 1939 → birth 15 Aug 1928",
+        "Setting: Rotterdam; vacation cabin near Hoek van Holland",
+        "Family in journal: mom, dad (postman), grandpa (lived with them after grandma died), younger sister Nel (~10 in May 1940), younger brother Jerry (~6 in May 1940)",
+        "Bombing of Rotterdam: 14 May 1940 (also grandpa’s birthday in the journal)",
+        "Transcript status: ends mid-sentence as received — more pages welcome"
+      ],
+      "sources": [],
+      "verbatimEntries": [
+        {
+          "title": "Rotterdam, July 1939",
+          "paragraphs": [
+            "I was skipping home from school. Our last day, the whole month of August off. I was happy because my parents, for the first time, rented a cabin for the two whole weeks. We have been there before, but only one week. It was right by the ocean and I was Really looking forward to that. Then I had a birthday coming up. August 15. 11 years old, that sounded a lot more than 10. There was one dark note. We heard the grown-ups talking about bad times, a war was coming. In Spain, they were fighting and there were Jewish people rounded up in Germany. But today, I was thinking about our vacation. There were six of our us going, my mom and dad, then there was my grandpa, he lived with us after my grandma died. Then there was my younger sister and brother and me. Mother was already packing things when I got home. We still had a couple of days. But there was a lot to pack.",
+            "Finally, the day came, first to the railroad station, then with the train to Hoek van Holland. First from there we had to walk plus or -1 hour with all our baggage. And there we were, our little house for the next two weeks. That first week was beautiful. the weather was perfect. Every day we walked to the beach. We swam and my Dad fished, we picked flowers. Small yellow ones they smelled so good. But everyday on the radio there were those gloomy broadcasts. The adults were nervously talking about war. But holland was a neutral country. That could not happen. The last war we stayed neutral (ww1) but in our second week things started to happen. All the young men had to report for active duty in the service. My dad was a postman and he got ordered back to Rotterdam. We did stay the rest of that week with my mom and grandpa, but it was not the same. School started again in Leptenber. I liked school and saw all my friends again. But things were",
+            "Fast changing in Europe. Germany had invaded several countries in the east including Poland. Warchan was bombed and Jews were rounded up. That winter in 1939-1940 was tense. We, as children, had a very normal winter except for bits and pieces of conversation from the adults. It was a cold winter, but finely spring came. We could play outside again. Jump rope, marbles, stilts, hop skotch. Then, May 10 the Germans had invaded Holland. Children had to stay home from school. My dad went to work as usually. We heard airplanes going over our house and the sirens went off. The sound wailing up and down for danger and one tone of everything was safe again. The radio was constantly warning to heed the sirens. There were rumors of Germans parachuting behind the lines of Duch soldiers. Then came May 14 my grandpas birthday. The morning started the same as those last 5 days. Warnings on the radio, my dad went to work. We needed a few",
+            "Things from the corner store. So my mother gave me a bag and some money and off I went, only to the corner, not even a block, come right back, she said. I just had paid and got my stuff and the sirens went of again. We heard for of airplanes. The lady from the store said, go home fast! I ran home and found my mother in panick. They (the Germans) were bombing Rotterdam, down town where my dad was. We heard the explosions. The radio station was still on the air telling people “safe” places to go. There were shelters, but the closest to us was 2-3 blocks away. They said, if you live upstairs, go sit on the stairway. So we all sat on the stairs, I was still clutching the bag with the few things from the store, Mom had put her bill fold in there too. We were scarred stiff. We heard the bombs go over with a wishing sound and then we waited for the explosion. And than it happened.",
+            "The wisheling was real loud and the explosion was there at ones. Everything turned dark, people on top of the stairs started to shout, out! Out! We stumbled down it was dark and hard to breed. It was 1 pm. We finally made it outside, the front door was gone , now we had to find each other. When we were all together again. We started to run  for the shelter. The dust lifted some and we saw the that the bomb had hit right across the street from our house. Later we found out that duch people had died there. But for now we were on our way to the shelter, but before we got there we were led into a bakery 2 blocks away. It was full of people. For the first time we had a good look at each other. Mom and my little brother, Jerry 6 years old were fine, my sister nel 10 years old had a cut on her head and was bleeding. I had some cut on my hands. All from flying glass. My grandpa was complaining of pain everywere. He sat on the bottom of the stairs and when every body was trying"
+          ]
         }
       ]
     },
@@ -567,17 +599,17 @@
         "961427",
         "313589"
       ],
-      "summary": "These details are interesting for the Family History page but are not confirmed from public trees/military pages yet \u2014 family memory or uploads will help.",
+      "summary": "These details are interesting for the Family History page but are not confirmed from public trees/military pages yet — family memory or uploads will help.",
       "highlights": [
         "Frederick Crosier WWII branch / unit",
         "Frederick railroad job title / years (and whether he started under NYC before Penn Central)",
         "Frederick Universal Computer Systems role / years (confirm Houston UCS/Reynolds vs local firm)",
         "Otto Krause postwar job / death date",
-        "Geraldine\u2019s exact Somerset Collection store name",
+        "Geraldine’s exact Somerset Collection store name",
         "Which school cafeteria Dolores worked in",
-        "Josephine Crosier\u2019s maiden surname",
+        "Josephine Crosier’s maiden surname",
         "Gerald college / high school (Baker memory now attributed to Jeremy)",
-        "Elizabeth Ann online teaching master\u2019s school/program",
+        "Elizabeth Ann online teaching master’s school/program",
         "Ann Krause 2016 All-County tennis Macomb Daily clip (digitized copy)",
         "Exact birth dates for Jeremy, Emily, Elizabeth",
         "Gerald & Karolyn exact marriage date/year (Ann does not remember; ask parents)",
