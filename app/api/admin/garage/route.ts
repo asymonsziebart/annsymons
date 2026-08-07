@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { canUseAdminApi } from "@/lib/auth";
 import { getGarageBins, upsertGarageBin } from "@/lib/data/garage";
 
 export async function GET() {
-  const ok = await isAdmin();
+  const ok = await canUseAdminApi("/admin/garage");
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const bins = await getGarageBins();
@@ -17,7 +17,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const ok = await isAdmin();
+  const ok = await canUseAdminApi("/admin/garage");
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const body = (await request.json()) as Record<string, unknown>;

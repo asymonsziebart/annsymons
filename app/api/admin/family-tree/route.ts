@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { canUseAdminApi } from "@/lib/auth";
 import { getFamilyTree, mergePreservedPhotos, saveFamilyTree } from "@/lib/data/familyTree";
 import { parseFamilyTreeFile } from "@/lib/familyTree/parseFtz";
 
@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 const MAX_BYTES = 25 * 1024 * 1024;
 
 export async function GET() {
-  const ok = await isAdmin();
+  const ok = await canUseAdminApi("/admin/family-tree");
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const tree = await getFamilyTree();
@@ -22,7 +22,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const ok = await isAdmin();
+  const ok = await canUseAdminApi("/admin/family-tree");
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {

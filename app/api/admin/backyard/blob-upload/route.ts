@@ -1,6 +1,6 @@
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { canUseAdminApi } from "@/lib/auth";
 import { BACKYARD_MAX_UPLOAD_BYTES } from "@/lib/admin/uploadLimits";
 
 /**
@@ -8,7 +8,7 @@ import { BACKYARD_MAX_UPLOAD_BYTES } from "@/lib/admin/uploadLimits";
  * avoiding Vercel's ~4.5 MB serverless request body limit.
  */
 export async function POST(request: Request): Promise<NextResponse> {
-  const ok = await isAdmin();
+  const ok = await canUseAdminApi("/admin/backyard");
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   if (!process.env.BLOB_READ_WRITE_TOKEN) {

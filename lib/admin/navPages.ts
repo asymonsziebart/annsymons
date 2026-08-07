@@ -104,6 +104,20 @@ export const ADMIN_NAV_PAGES: AdminNavPage[] = [
     ],
   },
   {
+    href: "/admin/users",
+    label: "Manage Users",
+    description: "Approve logins and choose which pages people can see",
+    keywords: [
+      "accounts",
+      "access",
+      "approve",
+      "permissions",
+      "signup",
+      "login",
+      "owner",
+    ],
+  },
+  {
     href: "/admin/voices",
     label: "Voices",
     description: "Things he is not allowed to do",
@@ -178,7 +192,8 @@ export const ADMIN_PRIVATE_PAGES: AdminNavPage[] = ADMIN_NAV_PAGES.filter(
     page.href !== "/admin/truck-fund" &&
     page.href !== "/admin/gallery" &&
     page.href !== "/admin/posts/new" &&
-    page.href !== "/admin/recipes/new"
+    page.href !== "/admin/recipes/new" &&
+    page.href !== "/admin/users"
 );
 
 export function searchableAdminPageText(page: AdminNavPage): string {

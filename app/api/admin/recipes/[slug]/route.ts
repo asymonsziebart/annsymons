@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { canUseAdminApi } from "@/lib/auth";
 import { getSqlOrThrow } from "@/lib/db";
 
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  const ok = await isAdmin();
+  const ok = await canUseAdminApi("/admin/recipes");
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { slug } = await params;
   try {

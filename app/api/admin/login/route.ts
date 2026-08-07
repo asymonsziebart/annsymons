@@ -1,12 +1,31 @@
 import { NextResponse } from "next/server";
-import { setAdminSession } from "@/lib/auth";
+import { setAdminSession, clearAdminSession } from "@/lib/auth";
 import { setTasksSession } from "@/lib/tasksAuth";
 import { getAllAdminPasswords } from "@/lib/tasksPassword";
+import { clearSiteUserSession, loginSiteUser } from "@/lib/siteUserAuth";
+import { firstAllowedPath } from "@/lib/admin/pageAccess";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const password = String(body?.password ?? "").trim();
+    const password = String(body?.password ?? "");
+    const email = String(body?.email ?? "").trim();
+
+    // Account login (email + password)
+    if (email) {
+      const result = await loginSiteUser(email, password);
+      if (!result.ok) {
+        return NextResponse.json({ error: result.error }, { status: 401 });
+      }
+      await clearAdminSession();
+      return NextResponse.json({
+        ok: true,
+        kind: "site-user",
+        next: firstAllowedPath(result.user.allowedPages),
+      });
+    }
+
+    // Shared admin password (Ann / Tim)
     const valid = getAllAdminPasswords();
     if (valid.length === 0) {
       return NextResponse.json(
@@ -17,14 +36,14 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
-    const match = valid.find((p) => p === password);
+    const match = valid.find((p) => p === password.trim());
     if (match == null) {
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
+    await clearSiteUserSession();
     await setAdminSession(match);
-    // Same password unlocks /tasks without a second sign-in.
     await setTasksSession(match);
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, kind: "admin", next: "/admin" });
   } catch {
     return NextResponse.json(
       { error: "Something went wrong" },

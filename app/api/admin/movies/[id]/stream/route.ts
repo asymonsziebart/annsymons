@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { canUseAdminApi } from "@/lib/auth";
 import { fetchDriveMovieStream, isDriveFileId } from "@/lib/googleDriveMovies";
 
 export const runtime = "nodejs";
@@ -8,7 +8,7 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const ok = await isAdmin();
+  const ok = await canUseAdminApi("/admin/movies");
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;

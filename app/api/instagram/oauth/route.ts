@@ -1,6 +1,6 @@
 import { randomBytes } from "crypto";
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { isSharedAdmin } from "@/lib/auth";
 import { buildAuthorizeUrl } from "@/lib/instagram/client";
 import { getSiteOrigin, isInstagramConfigured } from "@/lib/instagram/config";
 
@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   const requestOrigin = new URL(request.url).origin;
   const siteOrigin = getSiteOrigin();
 
-  const ok = await isAdmin();
+  const ok = await isSharedAdmin();
   if (!ok) {
     return NextResponse.redirect(
       new URL("/admin/login?next=/admin/instagram", requestOrigin)

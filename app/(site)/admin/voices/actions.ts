@@ -1,14 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { isAdmin } from "@/lib/auth";
+import { canUseAdminApi } from "@/lib/auth";
 import {
   addVoiceItem as addVoiceItemToStore,
   deleteVoiceItem as deleteVoiceItemFromStore,
 } from "@/lib/data/voices";
 
 export async function addVoiceItem(formData: FormData) {
-  if (!(await isAdmin())) {
+  if (!(await canUseAdminApi("/admin/voices"))) {
     throw new Error("Unauthorized");
   }
   const text = String(formData.get("text") ?? "").trim();
@@ -18,7 +18,7 @@ export async function addVoiceItem(formData: FormData) {
 }
 
 export async function deleteVoiceItem(formData: FormData) {
-  if (!(await isAdmin())) {
+  if (!(await canUseAdminApi("/admin/voices"))) {
     throw new Error("Unauthorized");
   }
   const id = Number(formData.get("id"));

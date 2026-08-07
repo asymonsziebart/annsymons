@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { canUseAdminApi } from "@/lib/auth";
 import { getSqlOrThrow } from "@/lib/db";
 
 export async function POST(request: Request) {
-  const ok = await isAdmin();
+  const ok = await canUseAdminApi("/admin/gallery");
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const body = await request.json();

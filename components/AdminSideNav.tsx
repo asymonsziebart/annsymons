@@ -13,7 +13,16 @@ function isActivePath(pathname: string | null, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export default function AdminSideNav() {
+type Props = {
+  /** null = full shared-admin access; array = approved account allowlist */
+  allowedHrefs?: string[] | null;
+  showManageUsers?: boolean;
+};
+
+export default function AdminSideNav({
+  allowedHrefs = null,
+  showManageUsers = false,
+}: Props) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [ready, setReady] = useState(false);
@@ -57,12 +66,19 @@ export default function AdminSideNav() {
     });
   }
 
-  const sidebarPages = ADMIN_NAV_PAGES.filter(
-    (page) =>
-      page.href !== "/admin/posts/new" &&
-      page.href !== "/admin/recipes/new" &&
-      page.href !== "/admin/gallery"
-  );
+  const sidebarPages = ADMIN_NAV_PAGES.filter((page) => {
+    if (
+      page.href === "/admin/posts/new" ||
+      page.href === "/admin/recipes/new" ||
+      page.href === "/admin/gallery"
+    ) {
+      return false;
+    }
+    if (page.href === "/admin/users") return showManageUsers;
+    if (allowedHrefs == null) return true;
+    if (page.href === "/admin") return allowedHrefs.length > 0;
+    return allowedHrefs.includes(page.href);
+  });
 
   const nav = (
     <nav className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto overscroll-contain px-2 py-3" aria-label="Admin pages">

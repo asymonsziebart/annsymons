@@ -1,6 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { canUseAdminApi } from "@/lib/auth";
 import {
   createBackyardPhoto,
   createPlantPin,
@@ -10,7 +10,7 @@ import {
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const ok = await isAdmin();
+  const ok = await canUseAdminApi("/admin/backyard");
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const data = await getBackyardData();
@@ -24,7 +24,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const ok = await isAdmin();
+  const ok = await canUseAdminApi("/admin/backyard");
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const body = (await request.json()) as Record<string, unknown>;

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { isSharedAdmin } from "@/lib/auth";
 import {
   deleteInstagramPost,
   updateInstagramPost,
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 type Ctx = { params: Promise<{ id: string }> };
 
 export async function PUT(request: Request, ctx: Ctx) {
-  const ok = await isAdmin();
+  const ok = await isSharedAdmin();
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id: idRaw } = await ctx.params;
@@ -39,7 +39,7 @@ export async function PUT(request: Request, ctx: Ctx) {
 }
 
 export async function DELETE(_request: Request, ctx: Ctx) {
-  const ok = await isAdmin();
+  const ok = await isSharedAdmin();
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id: idRaw } = await ctx.params;

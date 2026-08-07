@@ -18,6 +18,10 @@ type Props = {
   posts: Array<{ slug: string; title: string }>;
   recipes: Array<{ slug: string; title: string }>;
   purchaseRequestCounts: { pending: number; total: number };
+  /** null = full access; array = allowlist */
+  allowedHrefs?: string[] | null;
+  showManageUsers?: boolean;
+  pendingUserCount?: number;
 };
 
 function matchesQuery(haystack: string, terms: string[]): boolean {
@@ -28,6 +32,9 @@ export default function AdminDashboardClient({
   posts,
   recipes,
   purchaseRequestCounts,
+  allowedHrefs = null,
+  showManageUsers = false,
+  pendingUserCount = 0,
 }: Props) {
   const [query, setQuery] = useState("");
 
@@ -41,12 +48,31 @@ export default function AdminDashboardClient({
     [query]
   );
 
+  const visiblePages = useMemo(() => {
+    const pages = ADMIN_PRIVATE_PAGES.filter((page) => {
+      if (allowedHrefs == null) return true;
+      return allowedHrefs.includes(page.href);
+    });
+    if (showManageUsers) {
+      pages.unshift({
+        href: "/admin/users",
+        label:
+          pendingUserCount > 0
+            ? `Manage Users (${pendingUserCount} pending)`
+            : "Manage Users",
+        description: "Approve logins and choose which pages people can see",
+        keywords: ["accounts", "access", "approve", "permissions"],
+      });
+    }
+    return pages;
+  }, [allowedHrefs, showManageUsers, pendingUserCount]);
+
   const filteredPages = useMemo(() => {
-    if (terms.length === 0) return ADMIN_PRIVATE_PAGES;
-    return ADMIN_PRIVATE_PAGES.filter((page) =>
+    if (terms.length === 0) return visiblePages;
+    return visiblePages.filter((page) =>
       matchesQuery(searchableAdminPageText(page), terms)
     );
-  }, [terms]);
+  }, [terms, visiblePages]);
 
   const contentHits = useMemo(() => {
     if (terms.length === 0) return [] as ContentHit[];

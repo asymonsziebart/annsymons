@@ -1,10 +1,10 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { canUseAdminApi } from "@/lib/auth";
 import { getTruckFundSettings, upsertTruckFundSettings } from "@/lib/data/truckFund";
 
 export async function GET() {
-  const ok = await isAdmin();
+  const ok = await canUseAdminApi("/admin/truck-fund");
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const settings = await getTruckFundSettings();
@@ -19,7 +19,7 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  const ok = await isAdmin();
+  const ok = await canUseAdminApi("/admin/truck-fund");
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const body = await request.json();

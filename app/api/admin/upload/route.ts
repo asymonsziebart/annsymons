@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { isSharedAdmin } from "@/lib/auth";
 import {
   ADMIN_UPLOAD_FOLDERS,
   storeAdminImageFile,
@@ -7,7 +7,7 @@ import {
 } from "@/lib/admin/fileStorage";
 
 export async function POST(request: Request) {
-  const ok = await isAdmin();
+  const ok = await isSharedAdmin();
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {

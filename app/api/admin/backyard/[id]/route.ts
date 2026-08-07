@@ -1,6 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { canUseAdminApi } from "@/lib/auth";
 import {
   deleteBackyardPhoto,
   deletePlantPin,
@@ -11,7 +11,7 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const ok = await isAdmin();
+  const ok = await canUseAdminApi("/admin/backyard");
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id: idText } = await params;
   const id = Number(idText);
@@ -48,7 +48,7 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const ok = await isAdmin();
+  const ok = await canUseAdminApi("/admin/backyard");
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id: idText } = await params;
   const id = Number(idText);

@@ -1,6 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { canUseAdminApi } from "@/lib/auth";
 import {
   decidePurchaseRequest,
   normalizePurchaseRequestStatus,
@@ -11,7 +11,7 @@ type Params = {
 };
 
 export async function PATCH(request: Request, { params }: Params) {
-  const ok = await isAdmin();
+  const ok = await canUseAdminApi("/admin/requests");
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {

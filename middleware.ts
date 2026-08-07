@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { isLinkPreviewBot } from "@/lib/linkPreviewBots";
 import { getAllAdminPasswords, getAllTasksPasswords } from "@/lib/tasksPassword";
+import {
+  resolveSiteUserAccess,
+  SITE_USER_COOKIE,
+} from "@/lib/siteUserEdge";
 
 const ADMIN_COOKIE = "admin_session";
 const ADMIN_SALT = "annsymons-admin";
@@ -28,9 +32,32 @@ async function cookieMatchesAnyPassword(
   return false;
 }
 
-async function hasAdminSession(request: NextRequest): Promise<boolean> {
+async function hasSharedAdminSession(request: NextRequest): Promise<boolean> {
   const cookie = request.cookies.get(ADMIN_COOKIE)?.value;
   return cookieMatchesAnyPassword(cookie, getAllAdminPasswords(), ADMIN_SALT);
+}
+
+async function allowProtectedPath(
+  request: NextRequest,
+  pathname: string
+): Promise<"allow" | "login" | "forbidden"> {
+  if (await hasSharedAdminSession(request)) return "allow";
+
+  const siteCookie = request.cookies.get(SITE_USER_COOKIE)?.value;
+  const site = await resolveSiteUserAccess(siteCookie, pathname);
+  if (site === "allow") return "allow";
+  if (site === "deny") return "forbidden";
+  return "login";
+}
+
+function loginRedirect(request: NextRequest, pathname: string) {
+  const loginUrl = new URL("/admin/login", request.url);
+  loginUrl.searchParams.set("next", `${pathname}${request.nextUrl.search}`);
+  return NextResponse.redirect(loginUrl);
+}
+
+function forbiddenRedirect(request: NextRequest) {
+  return NextResponse.redirect(new URL("/admin?denied=1", request.url));
 }
 
 export async function middleware(request: NextRequest) {
@@ -40,9 +67,16 @@ export async function middleware(request: NextRequest) {
     if (path === "/tasks/login") {
       return NextResponse.next();
     }
-    if (await hasAdminSession(request)) {
+    if (await hasSharedAdminSession(request)) {
       return NextResponse.next();
     }
+    const site = await resolveSiteUserAccess(
+      request.cookies.get(SITE_USER_COOKIE)?.value,
+      path
+    );
+    if (site === "allow") return NextResponse.next();
+    if (site === "deny") return forbiddenRedirect(request);
+
     const passwords = getAllTasksPasswords();
     if (passwords.length === 0) {
       return NextResponse.redirect(new URL("/tasks/login", request.url));
@@ -55,19 +89,17 @@ export async function middleware(request: NextRequest) {
   }
 
   if (path.startsWith("/statephotos") || path.startsWith("/archery")) {
-    if (!(await hasAdminSession(request))) {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
-    }
-    return NextResponse.next();
+    const decision = await allowProtectedPath(request, path);
+    if (decision === "allow") return NextResponse.next();
+    if (decision === "forbidden") return forbiddenRedirect(request);
+    return loginRedirect(request, path);
   }
 
   if (path.startsWith("/blog")) {
-    if (!(await hasAdminSession(request))) {
-      const loginUrl = new URL("/admin/login", request.url);
-      loginUrl.searchParams.set("next", `${request.nextUrl.pathname}${request.nextUrl.search}`);
-      return NextResponse.redirect(loginUrl);
-    }
-    return NextResponse.next();
+    const decision = await allowProtectedPath(request, path);
+    if (decision === "allow") return NextResponse.next();
+    if (decision === "forbidden") return forbiddenRedirect(request);
+    return loginRedirect(request, path);
   }
 
   if (!path.startsWith("/admin") || path === "/admin/login") {
@@ -79,12 +111,30 @@ export async function middleware(request: NextRequest) {
   ) {
     return NextResponse.next();
   }
-  if (!(await hasAdminSession(request))) {
-    const loginUrl = new URL("/admin/login", request.url);
-    loginUrl.searchParams.set("next", `${request.nextUrl.pathname}${request.nextUrl.search}`);
-    return NextResponse.redirect(loginUrl);
+
+  // Manage Users: owner (ADMIN_PASSWORD) only — never Tim or site users.
+  if (path === "/admin/users" || path.startsWith("/admin/users/")) {
+    const adminPassword = process.env.ADMIN_PASSWORD?.trim() ?? "";
+    const cookie = request.cookies.get(ADMIN_COOKIE)?.value;
+    if (
+      adminPassword &&
+      cookie &&
+      cookie === (await sha256(adminPassword + ADMIN_SALT))
+    ) {
+      return NextResponse.next();
+    }
+    if (await hasSharedAdminSession(request)) {
+      return forbiddenRedirect(request);
+    }
+    const siteCookie = request.cookies.get(SITE_USER_COOKIE)?.value;
+    if (siteCookie) return forbiddenRedirect(request);
+    return loginRedirect(request, path);
   }
-  return NextResponse.next();
+
+  const decision = await allowProtectedPath(request, path);
+  if (decision === "allow") return NextResponse.next();
+  if (decision === "forbidden") return forbiddenRedirect(request);
+  return loginRedirect(request, path);
 }
 
 export const config = {

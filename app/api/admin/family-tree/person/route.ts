@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { canUseAdminApi } from "@/lib/auth";
 import { storeAdminImageFile } from "@/lib/admin/fileStorage";
 import { getFamilyTree, saveFamilyTree } from "@/lib/data/familyTree";
 import {
@@ -38,7 +38,7 @@ function parseGender(value: unknown): FamilyTreePerson["gender"] | undefined {
 }
 
 export async function PATCH(request: Request) {
-  const ok = await isAdmin();
+  const ok = await canUseAdminApi("/admin/family-tree");
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {

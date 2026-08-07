@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { isSharedAdmin } from "@/lib/auth";
 import {
   createInstagramPost,
   listInstagramPosts,
@@ -8,7 +8,7 @@ import {
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const ok = await isAdmin();
+  const ok = await isSharedAdmin();
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const posts = await listInstagramPosts();
@@ -16,7 +16,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const ok = await isAdmin();
+  const ok = await isSharedAdmin();
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {

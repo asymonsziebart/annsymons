@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { isSharedAdmin } from "@/lib/auth";
 import { getSqlOrThrow } from "@/lib/db";
 import { posts as staticPosts } from "@/lib/posts";
 import { recipes as staticRecipes } from "@/lib/recipes";
 
 export async function POST() {
-  const ok = await isAdmin();
+  const ok = await isSharedAdmin();
   if (!ok) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

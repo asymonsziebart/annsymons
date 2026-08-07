@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { canUseAdminApi } from "@/lib/auth";
 
 type OpenAIContent = {
   type: "input_text" | "input_image";
@@ -24,7 +24,7 @@ function fallbackInventory(binCode: string): string {
 }
 
 export async function POST(request: Request) {
-  const ok = await isAdmin();
+  const ok = await canUseAdminApi("/admin/garage");
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = (await request.json()) as Record<string, unknown>;

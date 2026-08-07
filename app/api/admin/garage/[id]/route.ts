@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { canUseAdminApi } from "@/lib/auth";
 import { deleteGarageBin } from "@/lib/data/garage";
 
 export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const ok = await isAdmin();
+  const ok = await canUseAdminApi("/admin/garage");
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id: idText } = await params;
   const id = Number(idText);

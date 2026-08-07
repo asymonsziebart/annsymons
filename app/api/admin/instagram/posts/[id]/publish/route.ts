@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdmin } from "@/lib/auth";
+import { isSharedAdmin } from "@/lib/auth";
 import { publishInstagramPostNow } from "@/lib/data/instagram";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +8,7 @@ type Ctx = { params: Promise<{ id: string }> };
 
 /** Publish a draft/scheduled/failed post immediately. */
 export async function POST(_request: Request, ctx: Ctx) {
-  const ok = await isAdmin();
+  const ok = await isSharedAdmin();
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id: idRaw } = await ctx.params;
