@@ -77,12 +77,21 @@
         "Work: Universal Computer Systems (family-confirmed / public email association)",
         "Possible earlier railroad work (family memory; not yet verified online)",
         "Dolores: cafeteria work + quilting (family memory)",
-        "Frederick WWII branch/unit: still unknown"
+        "Frederick WWII branch/unit: still unknown",
+        "Kathy Crosier funeral Mass: St. Elizabeth Ann Seton Church, Troy (2009)"
       ],
       "sources": [
         {
           "label": "Trees of Ancestry \u2014 Crosier / Altz",
           "url": "https://classypages.com/img/oxygen/asc1499.htm"
+        },
+        {
+          "label": "Kathy Crosier death notice (via Trees of Ancestry source)",
+          "url": "http://classypages.com/img/oxygen/src15.htm"
+        },
+        {
+          "label": "Modetz Funeral Homes \u2014 Frederick Charles Crosier",
+          "url": "https://www.modetzfuneralhomes.com/obituaries/Frederick-Charles-Crosier?obId=11944174"
         }
       ]
     },
@@ -270,15 +279,60 @@
         "1011292",
         "826851"
       ],
-      "summary": "Dolores Marie Altz (1930 Oakland County \u2013 2005 Rochester Hills) was a daughter of Norman Joseph Altz and Rena Margaret La Pan. Her siblings (public trees / family-confirmed) include Barbara Marie, Donna Jean, Jeanette Catherine, Joseph Edwards, Linda Rosalle, Mary Elizabeth, and Norman Anthony.",
+      "summary": "Dolores Marie Altz (1930 Oakland County \u2013 2005 Rochester Hills) was a daughter of Norman Joseph Altz and Rena Margaret La Pan. Her 2005 death notice lists siblings Jeanette (Charles) Benedict, Barbara (Gino) Tonin, Norman (Carol) Altz, Donna (Dan) Griffiths, Linda (Jerry) Griffin, Mary (Danny) Griffin, and Joseph (Rusty) Altz. Funeral Mass was at St. Mary\u2019s of the Hills, Rochester Hills; burial Mt. Avon Cemetery.",
       "highlights": [
         "Parents: Norman Joseph Altz & Rena Margaret La Pan",
-        "Siblings: Barbara, Donna, Jeanette, Joseph, Linda, Mary, Norman Anthony"
+        "Siblings (with spouses from Dolores obituary): Jeanette (Charles) Benedict, Barbara (Gino) Tonin, Norman (Carol) Altz, Donna (Dan) Griffiths, Linda (Jerry) Griffin, Mary (Danny) Griffin, Joseph (Rusty) Altz",
+        "Dolores funeral: St. Mary\u2019s of the Hills, Rochester Hills; interment Mt. Avon Cemetery",
+        "Grandchildren named in notice: David, Jeremy, Emily, Elizabeth, Ann, Nathan"
       ],
       "sources": [
         {
           "label": "Trees of Ancestry \u2014 Altz children",
           "url": "https://classypages.com/img/oxygen/asc70.htm"
+        },
+        {
+          "label": "Trees of Ancestry source \u2014 Dolores Crosier death notice",
+          "url": "http://classypages.com/img/oxygen/src73.htm"
+        }
+      ]
+    },
+    {
+      "id": "parents-gerald-karolyn",
+      "title": "Gerald Krause & Karolyn Crosier Krause",
+      "line": "Core",
+      "status": "confirmed",
+      "personIds": [
+        "244669",
+        "994169",
+        "543356",
+        "465748",
+        "301493",
+        "19175"
+      ],
+      "summary": "Gerald Krause (b. 20 Dec 1953), son of Otto J. Krause and Geraldine Staub, married Karolyn Crosier (b. 1 May 1959), daughter of Frederick Charles Crosier and Dolores Marie Altz. Their children are Jeremy, Emily, Elizabeth, and Ann Krause. Public death notices for Dolores (2005) and Kathleen (2009) name Karolyn (Gerald) Krause. People-search records place Karolyn D. Krause in Troy, Michigan (Camilla Dr area) and note college education. Career details for Gerald and Karolyn are not clearly published online.",
+      "highlights": [
+        "Gerald Krause \u2014 b. 20 Dec 1953; parents Otto J. Krause & Geraldine Staub",
+        "Karolyn Crosier Krause \u2014 b. 1 May 1959; parents Frederick Charles Crosier & Dolores Marie Altz",
+        "Children: Jeremy, Emily, Elizabeth, Ann (Ann Symons, b. 5 Oct 1997)",
+        "Named as Karolyn (Gerald) Krause in Dolores Crosier 2005 and Kathleen Crosier 2009 death notices",
+        "Troy / Rochester Hills family area (Troy address in public people-search for Karolyn D. Krause)",
+        "Gerald\u2019s brothers: Jay, Denny, Brian, Eric Krause",
+        "Karolyn\u2019s siblings: Kathleen Marie, Kenneth Frederick, Kerry Michael, Kevin Jerome, Kristopher J.",
+        "Work/career and marriage date: still need family memory (not found cleanly online)"
+      ],
+      "sources": [
+        {
+          "label": "Trees of Ancestry \u2014 Karolyn Crosier \u00d7 Gerald Krause",
+          "url": "http://classypages.com/img/oxygen/n369.htm"
+        },
+        {
+          "label": "Dolores Crosier death notice (Karolyn (Gerald) Krause)",
+          "url": "http://classypages.com/img/oxygen/src73.htm"
+        },
+        {
+          "label": "Kathleen Crosier death notice (Karolyn (Gerald) Krause)",
+          "url": "http://classypages.com/img/oxygen/src15.htm"
         }
       ]
     },
@@ -317,7 +371,10 @@
         "Otto Krause postwar job / death date",
         "Geraldine\u2019s exact Somerset Collection store name",
         "Which school cafeteria Dolores worked in",
-        "Josephine Crosier\u2019s maiden surname"
+        "Josephine Crosier\u2019s maiden surname",
+        "Gerald Krause career / workplace",
+        "Karolyn Krause career / workplace",
+        "Gerald & Karolyn marriage date/place"
       ],
       "sources": []
     }
