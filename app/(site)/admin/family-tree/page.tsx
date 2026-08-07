@@ -26,9 +26,9 @@ export default async function FamilyTreeAdminPage() {
           Family Tree
         </h1>
         <p className="mt-3 max-w-2xl text-pretty text-sm leading-relaxed text-[var(--color-ink-muted)] sm:text-base">
-          Private genealogy canvas from your Quick Family Tree export. Right-click or press-and-hold
-          a circle to edit, add parents/spouse/child, link, unlink, change photo, or delete. Only
-          admin sessions can open this page.
+          Private genealogy canvas from your Quick Family Tree export. Use fullscreen for a larger
+          view (Esc to exit). Right-click or press-and-hold a circle for the action list. Only admin
+          sessions can open this page.
         </p>
       </header>
 

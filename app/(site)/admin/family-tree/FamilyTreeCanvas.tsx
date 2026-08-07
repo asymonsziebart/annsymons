@@ -89,6 +89,7 @@ export default function FamilyTreeCanvas({
   } | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [menu, setMenu] = useState<{
     person: FamilyTreePerson;
     x: number;
@@ -98,6 +99,26 @@ export default function FamilyTreeCanvas({
   function openMenu(person: FamilyTreePerson, clientX: number, clientY: number) {
     setMenu({ person, x: clientX, y: clientY });
   }
+
+  useEffect(() => {
+    if (!isFullscreen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "Escape") return;
+      // Context menu owns the first Escape; a second Escape exits fullscreen.
+      if (menu) return;
+      e.preventDefault();
+      setIsFullscreen(false);
+    }
+
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [isFullscreen, menu]);
 
   function clearLongPress() {
     if (longPressRef.current) {
@@ -219,12 +240,22 @@ export default function FamilyTreeCanvas({
   }
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-[var(--color-ink)]/10 bg-[#f3efe6] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
+    <>
+    {isFullscreen ? (
+      <div className="h-[min(72vh,40rem)] w-full" aria-hidden />
+    ) : null}
+    <div
+      className={`relative overflow-hidden border border-[var(--color-ink)]/10 bg-[#f3efe6] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] ${
+        isFullscreen
+          ? "fixed inset-0 z-[70] rounded-none border-0"
+          : "rounded-2xl"
+      }`}
+    >
       <div
         ref={viewportRef}
-        className={`relative h-[min(72vh,40rem)] w-full touch-none ${
-          linkMode ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"
-        }`}
+        className={`relative w-full touch-none ${
+          isFullscreen ? "h-dvh" : "h-[min(72vh,40rem)]"
+        } ${linkMode ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -421,17 +452,48 @@ export default function FamilyTreeCanvas({
       </div>
 
       <div className="pointer-events-auto absolute right-3 top-3 flex flex-col items-end gap-2">
-        <button
-          type="button"
-          aria-label="Search people"
-          className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-[#e0894a] text-white shadow-lg hover:bg-[#d47a38]"
-          onClick={() => setSearchOpen((v) => !v)}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="2" />
-            <path d="M16 16l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            title={isFullscreen ? "Exit fullscreen (Esc)" : "Fullscreen"}
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-[#e0894a] text-white shadow-lg hover:bg-[#d47a38]"
+            onClick={() => setIsFullscreen((v) => !v)}
+          >
+            {isFullscreen ? (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <path
+                  d="M8 3v5H3M16 3v5h5M8 21v-5H3M16 21v-5h5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            ) : (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <path
+                  d="M3 8V3h5M16 3h5v5M21 16v5h-5M8 21H3v-5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            )}
+          </button>
+          <button
+            type="button"
+            aria-label="Search people"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-[#e0894a] text-white shadow-lg hover:bg-[#d47a38]"
+            onClick={() => setSearchOpen((v) => !v)}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="2" />
+              <path d="M16 16l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
         {searchOpen ? (
           <div className="w-[min(18rem,calc(100vw-2rem))] rounded-xl border border-black/10 bg-white/95 p-2 shadow-xl backdrop-blur">
             <input
@@ -484,5 +546,6 @@ export default function FamilyTreeCanvas({
         />
       ) : null}
     </div>
+    </>
   );
 }
