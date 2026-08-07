@@ -1,7 +1,7 @@
 {
   "title": "Family History",
   "updatedAt": "2026-08-07",
-  "note": "Public genealogy trees that match Ann’s known family lines are treated as confirmed unless they conflict with family memory. Story details that need family knowledge (jobs, photos, unit/branch unknown online) stay marked needs_review. Aug 2026 digs add Civil War Crosiers, Carmoney sister marriages, Canada-born Marion Maher, Lozon WWI color, Altz Rochester/Joseph millwright finds, Otto SSDI dates + Rhine mission, Geraldine Staub natal family, and a women-focused pass on Magdeleine Maillet’s parents, Minerva Howard, Mary Carmoney’s daughters, and Jerome’s California sisters Rose Mary & Annetta. Sources are public web records. Also adds Dolores Crosier’s 2005 michigan.com death notice, great-aunt Zoa Cubba’s 2021 Sullivan obituary, Delia Salois LaPan’s Québec→Bay County Salois/Forcier line (likely AncestryDNA French/Michigan settler community), and the Eaton County Crosier–Carmoney 1850s pioneer path.",
+  "note": "Public genealogy trees that match Ann’s known family lines are treated as confirmed unless they conflict with family memory. Story details that need family knowledge (jobs, photos, unit/branch unknown online) stay marked needs_review. Aug 2026 digs add Civil War Crosiers, Carmoney sister marriages, Canada-born Marion Maher, Lozon WWI color, Altz Rochester/Joseph millwright finds, Otto SSDI dates + Rhine mission, Geraldine Staub natal family, and a women-focused pass on Magdeleine Maillet’s parents, Minerva Howard, Mary Carmoney’s daughters, and Jerome’s California sisters Rose Mary & Annetta. Sources are public web records. Also adds Dolores Crosier’s 2005 michigan.com death notice, Zoa Cubba’s 2021 Sullivan obituary, Delia Salois LaPan’s Québec→Bay County Salois/Forcier line, and a locked mapping of Ann’s AncestryDNA export (Eastern Michigan French Settlers + SW Quebec journeys + Ohio & Indiana Settlers) onto the tree.",
   "sections": [
     {
       "id": "otto-wwii",
@@ -1205,25 +1205,26 @@
     },
     {
       "id": "michigan-settlers-dna",
-      "title": "AncestryDNA “Michigan / original settlers” — which lines?",
+      "title": "AncestryDNA export — journeys mapped to the tree",
       "line": "Research",
       "status": "confirmed",
       "personIds": [
         "fh-rena-lapan",
         "730562",
         "fh-zoa-cubba",
-        "fh-magdeleine-maillet"
+        "fh-magdeleine-maillet",
+        "fh-madeline-lozon"
       ],
-      "summary": "Ann’s AncestryDNA kit flagged a community about coming from the original / early settlers of Michigan. That usually maps to one of two Ancestry genetic-community stories — French Canadians of the Great Lakes (often labeled near “French Settlers of Montreal & Metro Detroit” or similar), or Yankee Midwestern pioneers who poured into Michigan after the Erie Canal (1830s–1860s). Both appear on Ann’s tree. The strongest French-Canadian “original settler” DNA path is maternal through Rena La Pan: Delia Salois (1874 Canada – 1952 Pinconning) married John LaPan (1875–1954) at Linwood, Bay Co., 14 Jul 1897; Delia’s parents Antoine (Anthony) Salois (bapt. Yamaska 1831; imm. ~1879; d. 1916 Kawkawlin) and Zoé Forcier (c.1831–1918) were Québec farmers who joined the post–Civil War French-Canadian lumber/farm wave into Bay County (Kawkawlin / Pinconning). WikiTree carries the Salois line through Pierre Salois × Marie Benoit into St-François-du-Lac / Yamaska parish generations in Nouvelle-France, and the surname itself is documented from Claude Salois of Lille, France, who married Anne Mabille at Québec City c.1666 — the classic “fille du roi / early Québec” depth Ancestry communities pick up. A parallel French-Canadian cluster is the Lozon/Lauzon–Maillet line (Wallaceburg / Kent Co., Ontario; Magdeleine Maillet’s mother Charlotte Emery b. St-Joachim, Châteauguay, Québec), which contributes FC DNA even though their Michigan foothold was brief (Madeline Lozon Crosier died Detroit 1925). Separately, the Crosier–Carmoney line is classic inland Michigan pioneer stock: Stephen P. Crosier × Sarah Ann Carmoney married Eaton Co. 1854; Charles Crosier × Mary Carmoney 1865 Charlotte — Vermont/Ohio Yankees in the pioneer wave after statehood (1837), not French colonial Detroit. Krause, Staub, and Altz look like later Metro Detroit German-American / 20th-century families and are unlikely to drive an “original Michigan settlers” community.",
+      "summary": "Ann’s AncestryDNA export (Aug 2026) locks the “original Michigan settlers” hint as the ancestral journey Eastern Michigan & Southeastern Missouri French Settlers, with sub-regions Detroit | Chatham | St. Clair and Lake St. Clair Area. That journey lines up with the French-Canadian Crosier–Lozon / La Pan–Salois cluster, not the later German Krause/Altz/Staub families. Ethnicity estimate: French Canada 18% (Québec 14% + Acadia 4%), England 28%, Celtic & Gaelic 28% (Munster Ireland 26%), Western Europe / Southern Germanic 11%, Central & Eastern Europe 12%, plus small Balkan/Nordic slices. Journey map: (1) Eastern Michigan French Settlers → Lozon/Lauzon of Chatham–Wallaceburg, Kent Co., Ontario (Adolphus Lozon b. ~1861 Chatham; Madeline married into Michigan and died Detroit 1925) plus the Bay County Salois→La Pan French-Canadian farm/lumber settlement (Antoine Salois × Zoé Forcier imm. ~1879 Kawkawlin; Delia → Rena → Dolores). (2) Southwestern Quebec French Settlers + Southwestern Quebec, New York & Vermont French Settlers (Montérégie; Montérégie & Lake St. Clair, Ontario) → Salois/Forcier Yamaska–St-François-du-Lac / Sorel depth and Magdeleine Maillet’s mother Charlotte Emery (b. St-Joachim, Châteauguay — Montérégie), feeding the same Lake St. Clair Ontario Lozon cluster. (3) Ohio & Indiana Settlers (Northwestern Ohio & Michigan Border) → Crosier (Sullivan, Ashland Co., OH) and Carmoney (Ohio → Eaton Co., MI by 1854). Acadia 4% matches WikiTree notes of Acadian great-grandparents on the Salois line (Grand-Pré / Pisiguit). Munster Ireland 26% is still unplaced in a locked ancestor — Maher/Bowles/Gore and Helen Staub’s possible Collins line are the open Irish leads.",
       "highlights": [
-        "Best match for French / “original” settler DNA: Salois → Delia → Rena La Pan → Dolores → Karolyn → Ann",
-        "Antoine Salois × Zoé Forcier: Québec (Yamaska) → Kawkawlin/Bay Co. ~1879 lumber-era FC migration",
-        "Salois surname: Claude Salois × Anne Mabille, Québec City c.1666 (Dictionary of American Family Names / FamilySearch)",
-        "WikiTree Salois-67: parents Pierre Salois × Marie Benoit; Yamaska / St-François-du-Lac Nouvelle-France depth; some Acadian great-grandparent links noted",
-        "Parallel FC DNA: Lozon/Lauzon–Maillet (Ontario) with Québec Emery root",
-        "Yankee Michigan pioneer path: Crosier–Carmoney in Eaton Co. by 1854 / Charlotte by 1865",
-        "Unlikely drivers: Krause, Staub, Altz (later Detroit-area families)",
-        "Ask Ann for the exact Ancestry community name on her DNA results page to lock which story Ancestry meant"
+        "Journey that matches “Michigan settlers”: Eastern Michigan & Southeastern Missouri French Settlers (Detroit | Chatham | St. Clair; Lake St. Clair Area)",
+        "Chatham sub-region → Lozon/Lauzon Kent Co., Ontario (Adolphus; Wallaceburg; Madeline → Detroit 1925)",
+        "Eastern Michigan FC farm wave → Salois/Forcier → Delia LaPan → Rena → Dolores → Karolyn → Ann",
+        "SW Quebec / Montérégie journeys → Yamaska Salois–Forcier + Châteauguay Emery (Maillet line)",
+        "Ohio & Indiana Settlers → Crosier (Sullivan OH) + Carmoney (OH → Eaton/Charlotte MI)",
+        "Ethnicity lock: French Canada 18% (Québec 14% + Acadia 4%); England 28%; Munster Ireland 26%; Germanic/Central Europe ~23% combined",
+        "Acadia 4% consistent with Salois WikiTree Acadian great-grandparent links",
+        "Still open: which ancestors carry the Munster Ireland 26% (Maher/Bowles/Gore / Staub–Collins leads)"
       ],
       "sources": [
         {
@@ -1247,12 +1248,12 @@
           "url": "https://www.findagrave.com/memorial/48010109/anthony-salois"
         },
         {
-          "label": "Genealogy Trails — Bay County history (French Canadian pioneers)",
-          "url": "https://genealogytrails.com/mich/bay/books/History_of_Bay_ch6.html"
+          "label": "Trees of Ancestry — Magdeleine Maillet / Alexandre Lauzon (Emery, Châteauguay)",
+          "url": "http://classypages.com/img/oxygen/n370.htm"
         },
         {
-          "label": "AncestryDNA genetic communities list (French Settlers of Montreal & Metro Detroit)",
-          "url": "https://thegeneticgenealogist.com/wp-content/uploads/2017/03/AncestryDNA_Genetic_Communities.pdf"
+          "label": "Genealogy Trails — Bay County history (French Canadian pioneers)",
+          "url": "https://genealogytrails.com/mich/bay/books/History_of_Bay_ch6.html"
         }
       ]
     },
@@ -1294,7 +1295,8 @@
         "Dolores quilting group / church guild name (family memory)",
         "Norman Joseph Altz parents’ names (Rena’s parents = John LaPan × Delia Salois; Delia’s parents Antoine Salois × Zoé Forcier locked)",
         "John LaPan (1875–1954) parents / birthplace (paternal La Pan line still thin)",
-        "Exact AncestryDNA community name on Ann’s kit (French Settler vs Michigan pioneer wording)",
+        "Which ancestors carry Munster Ireland 26% (Maher / Bowles / Gore / Helen Staub–Collins leads)",
+        "Push Salois Acadian great-grandparent names from WikiTree into confirmed sources",
         "Whether Zoa’s Aug 2021 notice also ran in Macomb Daily / Oakland Press print death columns (Ann’s clip)"
       ],
       "sources": []
