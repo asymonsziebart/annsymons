@@ -357,8 +357,8 @@ export default function FamilyTreeApp({ initialTree, dbReady }: Props) {
       />
 
       <p className="text-xs text-[var(--color-ink-muted)]">
-        Tap a circle to center that person. Right-click or press-and-hold for the radial menu (edit,
-        add relatives, link/unlink, delete). Drag to pan, use +/− to zoom.
+        Tap a circle to center that person. Right-click or press-and-hold for edit options (parents,
+        spouse, child, link/unlink, photo, delete). Drag to pan, use +/− to zoom.
       </p>
 
       {editing ? (
