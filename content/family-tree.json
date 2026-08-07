@@ -388,8 +388,8 @@
       "x": 0.0,
       "y": 0.0,
       "surname": "Crosier",
-      "given": "Kathy",
-      "middle": null,
+      "given": "Kathleen",
+      "middle": "Marie",
       "birth": {
         "year": 1953,
         "month": 3,
@@ -411,8 +411,8 @@
       "x": 0.0,
       "y": 0.0,
       "surname": "Crosier",
-      "given": "Kenny",
-      "middle": null,
+      "given": "Kenneth",
+      "middle": "Frederick",
       "birth": {
         "year": 1955,
         "month": 12,
@@ -430,7 +430,7 @@
       "y": 0.0,
       "surname": "Crosier",
       "given": "Kerry",
-      "middle": null,
+      "middle": "Michael",
       "birth": null,
       "death": null,
       "gender": "male"
@@ -443,7 +443,7 @@
       "y": 0.0,
       "surname": "Crosier",
       "given": "Kevin",
-      "middle": null,
+      "middle": "Jerome",
       "birth": null,
       "death": null,
       "gender": "male"
@@ -455,8 +455,8 @@
       "x": 0.0,
       "y": 0.0,
       "surname": "Crosier",
-      "given": "Kris",
-      "middle": null,
+      "given": "Kristopher",
+      "middle": "J",
       "birth": null,
       "death": null,
       "gender": "male"
@@ -2443,14 +2443,14 @@
       "middle": "David",
       "birth": {
         "year": 1865,
-        "month": null,
-        "day": null,
+        "month": 12,
+        "day": 28,
         "known": true
       },
       "death": {
         "year": 1942,
-        "month": null,
-        "day": null,
+        "month": 6,
+        "day": 18,
         "known": true
       },
       "gender": "male"
@@ -2641,6 +2641,255 @@
         "known": true
       },
       "gender": "female"
+    },
+    {
+      "id": "fh-aubrey-lozon",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Lozon",
+      "given": "Aubrey",
+      "middle": "Samuel",
+      "birth": {
+        "year": 1898,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "death": null,
+      "gender": "male"
+    },
+    {
+      "id": "fh-roy-lozon",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Lozon",
+      "given": "Roy",
+      "middle": "Clarence",
+      "birth": {
+        "year": 1899,
+        "month": 10,
+        "day": 8,
+        "known": true
+      },
+      "death": null,
+      "gender": "male"
+    },
+    {
+      "id": "fh-wilfred-lozon",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Lozon",
+      "given": "Wilfred",
+      "middle": "Joseph",
+      "birth": null,
+      "death": null,
+      "gender": "male"
+    },
+    {
+      "id": "fh-infant-lozon",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Lozon",
+      "given": "Infant",
+      "middle": null,
+      "birth": {
+        "year": 1903,
+        "month": 7,
+        "day": 5,
+        "known": true
+      },
+      "death": {
+        "year": 1903,
+        "month": 7,
+        "day": 5,
+        "known": true
+      },
+      "gender": "unknown"
+    },
+    {
+      "id": "fh-charles-crosier",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Crosier",
+      "given": "Charles",
+      "middle": null,
+      "birth": {
+        "year": 1838,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "death": {
+        "year": 1917,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "gender": "male"
+    },
+    {
+      "id": "fh-mary-carmoney",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Carmoney",
+      "given": "Mary",
+      "middle": "M",
+      "birth": {
+        "year": 1844,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "death": {
+        "year": 1932,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "gender": "female"
+    },
+    {
+      "id": "fh-james-maher",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Maher",
+      "given": "James",
+      "middle": null,
+      "birth": null,
+      "death": null,
+      "gender": "male"
+    },
+    {
+      "id": "fh-rose-bowles",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Bowles",
+      "given": "Rose",
+      "middle": "Ann",
+      "birth": null,
+      "death": null,
+      "gender": "female"
+    },
+    {
+      "id": "fh-alexandre-lauzon",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Lauzon",
+      "given": "Alexandre",
+      "middle": null,
+      "birth": {
+        "year": 1827,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "death": null,
+      "gender": "male"
+    },
+    {
+      "id": "fh-magdeleine-maillet",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Maillet",
+      "given": "Magdeleine",
+      "middle": null,
+      "birth": {
+        "year": 1826,
+        "month": 4,
+        "day": 11,
+        "known": true
+      },
+      "death": null,
+      "gender": "female"
+    },
+    {
+      "id": "fh-ada-crosier",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Crosier",
+      "given": "Ada",
+      "middle": "Isabel",
+      "birth": {
+        "year": 1867,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "death": {
+        "year": 1946,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "gender": "female"
+    },
+    {
+      "id": "fh-cora-crosier",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Crosier",
+      "given": "Cora",
+      "middle": "Estelle",
+      "birth": {
+        "year": 1869,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "death": {
+        "year": 1956,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "gender": "female"
+    },
+    {
+      "id": "fh-fred-b-crosier",
+      "familyId": null,
+      "siblingOrder": 0,
+      "x": 0.0,
+      "y": 0.0,
+      "surname": "Crosier",
+      "given": "Fred",
+      "middle": "B",
+      "birth": {
+        "year": 1871,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "death": {
+        "year": 1883,
+        "month": null,
+        "day": null,
+        "known": true
+      },
+      "gender": "male"
     }
   ],
   "families": [
