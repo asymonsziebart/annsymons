@@ -9,8 +9,11 @@ import {
 } from "@/lib/familyTree/relations";
 import {
   addRelative,
+  linkAsSpouse,
   removePerson,
+  unlinkPerson,
   updatePerson,
+  type AddRelativeKind,
 } from "@/lib/familyTree/mutations";
 import FamilyTreeCanvas from "./FamilyTreeCanvas";
 import PersonEditDialog from "./PersonEditDialog";
@@ -32,6 +35,7 @@ export default function FamilyTreeApp({ initialTree, dbReady }: Props) {
   const [uploading, setUploading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState<FamilyTreePerson | null>(null);
+  const [linkFromId, setLinkFromId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
   const fileRef = useRef<HTMLInputElement>(null);
   const photoRef = useRef<HTMLInputElement>(null);
@@ -40,8 +44,13 @@ export default function FamilyTreeApp({ initialTree, dbReady }: Props) {
   const index = useMemo(() => buildRelationIndex(tree), [tree]);
   const focus = focusId ? index.byId.get(focusId) : undefined;
   const focusLife = focus ? lifespanLabel(focus) : "";
+  const linkFrom = linkFromId ? index.byId.get(linkFromId) : undefined;
 
   function selectPerson(id: string) {
+    if (linkFromId) {
+      void completeLink(linkFromId, id);
+      return;
+    }
     startTransition(() => {
       setFocusId(id);
       setError("");
@@ -53,14 +62,15 @@ export default function FamilyTreeApp({ initialTree, dbReady }: Props) {
     newPersonId?: string;
   }> {
     if (!dbReady) {
-      // Apply locally for preview without DB.
       const personId = String(body.personId || "");
       const action = String(body.action || "update");
-      if (action === "delete") {
-        return { tree: removePerson(tree, personId) };
+      if (action === "delete") return { tree: removePerson(tree, personId) };
+      if (action === "unlink") return { tree: unlinkPerson(tree, personId) };
+      if (action === "link-spouse") {
+        return { tree: linkAsSpouse(tree, personId, String(body.otherId || "")) };
       }
       if (action === "add-relative") {
-        return addRelative(tree, personId, body.kind as "father" | "mother" | "spouse" | "son" | "daughter");
+        return addRelative(tree, personId, body.kind as AddRelativeKind);
       }
       if (action === "clear-photo") {
         return { tree: updatePerson(tree, personId, { photoUrl: null }) };
@@ -94,6 +104,35 @@ export default function FamilyTreeApp({ initialTree, dbReady }: Props) {
     return { tree: data.tree, newPersonId: data.newPersonId };
   }
 
+  async function completeLink(fromId: string, toId: string) {
+    setLinkFromId(null);
+    if (fromId === toId) {
+      setError("Pick a different person to link.");
+      return;
+    }
+    setBusy(true);
+    setError("");
+    try {
+      const { tree: next } = await apiAction({
+        personId: fromId,
+        action: "link-spouse",
+        otherId: toId,
+      });
+      setTree(next);
+      setFocusId(fromId);
+      const other = next.people.find((p) => p.id === toId);
+      setStatus(
+        `Linked ${personDisplayName(index.byId.get(fromId)!)} and ${
+          other ? personDisplayName(other) : "person"
+        } as spouses.`
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Link failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function onUpload(file: File | null) {
     if (!file) return;
     if (!dbReady) {
@@ -113,9 +152,7 @@ export default function FamilyTreeApp({ initialTree, dbReady }: Props) {
         tree?: FamilyTreeData;
         imported?: { people: number; families: number };
       };
-      if (!res.ok || !data.tree) {
-        throw new Error(data.error || "Upload failed");
-      }
+      if (!res.ok || !data.tree) throw new Error(data.error || "Upload failed");
       setTree(data.tree);
       setFocusId(data.tree.defaultFocusId ?? data.tree.people[0]?.id ?? "");
       setStatus(
@@ -147,6 +184,8 @@ export default function FamilyTreeApp({ initialTree, dbReady }: Props) {
       const data = (await res.json()) as { error?: string; tree?: FamilyTreeData };
       if (!res.ok || !data.tree) throw new Error(data.error || "Photo upload failed");
       setTree(data.tree);
+      const updated = data.tree.people.find((p) => p.id === personId);
+      if (updated && editing?.id === personId) setEditing(updated);
       setStatus("Photo updated.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Photo upload failed");
@@ -160,10 +199,6 @@ export default function FamilyTreeApp({ initialTree, dbReady }: Props) {
     setError("");
     setStatus("");
 
-    if (action.type === "center") {
-      selectPerson(person.id);
-      return;
-    }
     if (action.type === "edit") {
       setEditing(person);
       return;
@@ -173,6 +208,11 @@ export default function FamilyTreeApp({ initialTree, dbReady }: Props) {
       photoRef.current?.click();
       return;
     }
+    if (action.type === "link") {
+      setLinkFromId(person.id);
+      setStatus(`Link mode: tap someone to connect them to ${personDisplayName(person)} as a spouse.`);
+      return;
+    }
 
     if (action.type === "delete") {
       const ok = window.confirm(
@@ -180,23 +220,17 @@ export default function FamilyTreeApp({ initialTree, dbReady }: Props) {
       );
       if (!ok) return;
     }
+    if (action.type === "unlink") {
+      const ok = window.confirm(
+        `Unlink ${personDisplayName(person)} from parents and partnerships? The person stays in the tree.`
+      );
+      if (!ok) return;
+    }
 
     setBusy(true);
     try {
-      if (action.type === "clear-photo") {
-        const { tree: next } = await apiAction({
-          personId: person.id,
-          action: "clear-photo",
-        });
-        setTree(next);
-        setStatus("Photo removed.");
-        return;
-      }
       if (action.type === "delete") {
-        const { tree: next } = await apiAction({
-          personId: person.id,
-          action: "delete",
-        });
+        const { tree: next } = await apiAction({ personId: person.id, action: "delete" });
         setTree(next);
         if (focusId === person.id) {
           setFocusId(next.defaultFocusId ?? next.people[0]?.id ?? "");
@@ -204,20 +238,39 @@ export default function FamilyTreeApp({ initialTree, dbReady }: Props) {
         setStatus(`Deleted ${personDisplayName(person)}.`);
         return;
       }
-      if (action.type === "add-relative") {
-        const { tree: next, newPersonId } = await apiAction({
-          personId: person.id,
-          action: "add-relative",
-          kind: action.kind,
-        });
+      if (action.type === "unlink") {
+        const { tree: next } = await apiAction({ personId: person.id, action: "unlink" });
         setTree(next);
-        if (newPersonId) {
-          setFocusId(newPersonId);
-          const created = next.people.find((p) => p.id === newPersonId);
-          if (created) setEditing(created);
-        }
-        setStatus(`Added ${action.kind}.`);
+        setStatus(`Unlinked ${personDisplayName(person)}.`);
+        return;
       }
+
+      const kindMap: Record<string, AddRelativeKind> = {
+        "add-parents": "parents",
+        "add-spouse": "spouse",
+        "add-child": "child",
+      };
+      const kind = kindMap[action.type];
+      if (!kind) return;
+
+      const { tree: next, newPersonId } = await apiAction({
+        personId: person.id,
+        action: "add-relative",
+        kind,
+      });
+      setTree(next);
+      if (newPersonId) {
+        setFocusId(newPersonId);
+        const created = next.people.find((p) => p.id === newPersonId);
+        if (created) setEditing(created);
+      }
+      setStatus(
+        kind === "parents"
+          ? "Added parents."
+          : kind === "spouse"
+            ? "Added a spouse."
+            : "Added a child."
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Action failed");
     } finally {
@@ -238,6 +291,16 @@ export default function FamilyTreeApp({ initialTree, dbReady }: Props) {
             <p className="mt-1 text-sm text-[var(--color-ink)]">
               Centered on <span className="font-semibold">{personDisplayName(focus)}</span>
               {focusLife ? ` · ${focusLife}` : ""}
+            </p>
+          ) : null}
+          {linkFrom ? (
+            <p className="mt-1 text-sm text-[#c45f1a]">
+              Linking from <span className="font-semibold">{personDisplayName(linkFrom)}</span> —
+              tap another person, or{" "}
+              <button type="button" className="underline" onClick={() => setLinkFromId(null)}>
+                cancel
+              </button>
+              .
             </p>
           ) : null}
           {!dbReady ? (
@@ -290,17 +353,22 @@ export default function FamilyTreeApp({ initialTree, dbReady }: Props) {
         onSelectPerson={selectPerson}
         onViewModeChange={setViewMode}
         onPersonAction={(person, action) => void handlePersonAction(person, action)}
+        linkMode={Boolean(linkFromId)}
       />
 
       <p className="text-xs text-[var(--color-ink-muted)]">
-        Tap a circle to center that person. Right-click (or press and hold) a circle for edit,
-        photo, and add-relative options. Drag to pan, use +/− to zoom.
+        Tap a circle to center that person. Right-click or press-and-hold for the radial menu (edit,
+        add relatives, link/unlink, delete). Drag to pan, use +/− to zoom.
       </p>
 
       {editing ? (
         <PersonEditDialog
           person={editing}
           onClose={() => setEditing(null)}
+          onChangePhoto={() => {
+            photoPersonIdRef.current = editing.id;
+            photoRef.current?.click();
+          }}
           onSave={async (patch) => {
             const { tree: next } = await apiAction({
               personId: editing.id,

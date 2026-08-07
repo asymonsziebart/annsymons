@@ -4,7 +4,9 @@ import { storeAdminImageFile } from "@/lib/admin/fileStorage";
 import { getFamilyTree, saveFamilyTree } from "@/lib/data/familyTree";
 import {
   addRelative,
+  linkAsSpouse,
   removePerson,
+  unlinkPerson,
   updatePerson,
   type AddRelativeKind,
   type PersonEditInput,
@@ -77,12 +79,30 @@ export async function PATCH(request: Request) {
 
     if (action === "add-relative") {
       const kind = body.kind as AddRelativeKind;
-      if (!["father", "mother", "spouse", "son", "daughter"].includes(kind)) {
+      if (
+        !["father", "mother", "spouse", "son", "daughter", "child", "parents"].includes(kind)
+      ) {
         return NextResponse.json({ error: "Invalid relative kind" }, { status: 400 });
       }
       const { tree: next, newPersonId } = addRelative(current, personId, kind);
       const tree = await saveFamilyTree(next);
       return NextResponse.json({ ok: true, tree, newPersonId });
+    }
+
+    if (action === "unlink") {
+      const next = unlinkPerson(current, personId);
+      const tree = await saveFamilyTree(next);
+      return NextResponse.json({ ok: true, tree });
+    }
+
+    if (action === "link-spouse") {
+      const otherId = typeof body.otherId === "string" ? body.otherId : "";
+      if (!otherId) {
+        return NextResponse.json({ error: "otherId is required" }, { status: 400 });
+      }
+      const next = linkAsSpouse(current, personId, otherId);
+      const tree = await saveFamilyTree(next);
+      return NextResponse.json({ ok: true, tree });
     }
 
     if (action === "clear-photo") {

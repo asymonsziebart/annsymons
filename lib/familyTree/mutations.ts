@@ -89,7 +89,75 @@ export type AddRelativeKind =
   | "mother"
   | "spouse"
   | "son"
-  | "daughter";
+  | "daughter"
+  | "child"
+  | "parents";
+
+/** Detach from parents and partnerships without deleting the person. */
+export function unlinkPerson(tree: FamilyTreeData, personId: string): FamilyTreeData {
+  const people = tree.people.map((p) =>
+    p.id === personId ? { ...p, familyId: null, siblingOrder: 0 } : p
+  );
+  const families = tree.families
+    .map((f) => {
+      if (f.partner1Id === personId) return { ...f, partner1Id: null };
+      if (f.partner2Id === personId) return { ...f, partner2Id: null };
+      return f;
+    })
+    .filter(
+      (f) =>
+        Boolean(f.partner1Id || f.partner2Id) ||
+        people.some((p) => p.familyId === f.id)
+    );
+
+  return { ...tree, people, families };
+}
+
+/** Link two existing people as spouses (creates a marriage if needed). */
+export function linkAsSpouse(
+  tree: FamilyTreeData,
+  personId: string,
+  otherId: string
+): FamilyTreeData {
+  if (personId === otherId) throw new Error("Cannot link a person to themselves.");
+  const a = tree.people.find((p) => p.id === personId);
+  const b = tree.people.find((p) => p.id === otherId);
+  if (!a || !b) throw new Error("Person not found");
+
+  const existing = tree.families.find(
+    (f) =>
+      (f.partner1Id === personId && f.partner2Id === otherId) ||
+      (f.partner1Id === otherId && f.partner2Id === personId)
+  );
+  if (existing) return tree;
+
+  // Prefer filling an open partner slot on either person's union.
+  const open = tree.families.find(
+    (f) =>
+      ((f.partner1Id === personId || f.partner2Id === personId) &&
+        (!f.partner1Id || !f.partner2Id)) ||
+      ((f.partner1Id === otherId || f.partner2Id === otherId) &&
+        (!f.partner1Id || !f.partner2Id))
+  );
+  if (open) {
+    const families = tree.families.map((f) => {
+      if (f.id !== open.id) return f;
+      if (!f.partner1Id) return { ...f, partner1Id: f.partner2Id === personId ? otherId : personId };
+      if (!f.partner2Id) return { ...f, partner2Id: f.partner1Id === personId ? otherId : personId };
+      return f;
+    });
+    return { ...tree, families };
+  }
+
+  const family: FamilyTreeFamily = {
+    id: newId(),
+    partner1Id: personId,
+    partner2Id: otherId,
+    x: 0,
+    y: 0,
+  };
+  return { ...tree, families: [...tree.families, family] };
+}
 
 export function addRelative(
   tree: FamilyTreeData,
@@ -98,6 +166,12 @@ export function addRelative(
 ): { tree: FamilyTreeData; newPersonId: string } {
   const person = tree.people.find((p) => p.id === personId);
   if (!person) throw new Error("Person not found");
+
+  if (kind === "parents") {
+    const withFather = addRelative(tree, personId, "father");
+    const withMother = addRelative(withFather.tree, personId, "mother");
+    return { tree: withMother.tree, newPersonId: withFather.newPersonId };
+  }
 
   if (kind === "father" || kind === "mother") {
     const gender = kind === "father" ? "male" : "female";
@@ -185,11 +259,12 @@ export function addRelative(
     };
   }
 
-  // son / daughter
-  const childGender = kind === "son" ? "male" : "female";
+  // son / daughter / child
+  const childGender =
+    kind === "son" ? "male" : kind === "daughter" ? "female" : "unknown";
   const child = emptyPerson({
     gender: childGender,
-    given: kind === "son" ? "Son" : "Daughter",
+    given: kind === "son" ? "Son" : kind === "daughter" ? "Daughter" : "Child",
     surname: person.surname,
   });
 

@@ -19,6 +19,7 @@ type Props = {
   onSelectPerson: (id: string) => void;
   onViewModeChange: (mode: FamilyTreeViewMode) => void;
   onPersonAction: (person: FamilyTreePerson, action: ContextMenuAction) => void;
+  linkMode?: boolean;
 };
 
 const MIN_SCALE = 0.35;
@@ -66,6 +67,7 @@ export default function FamilyTreeCanvas({
   onSelectPerson,
   onViewModeChange,
   onPersonAction,
+  linkMode = false,
 }: Props) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
@@ -220,7 +222,9 @@ export default function FamilyTreeCanvas({
     <div className="relative overflow-hidden rounded-2xl border border-[var(--color-ink)]/10 bg-[#f3efe6] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
       <div
         ref={viewportRef}
-        className="relative h-[min(72vh,40rem)] w-full touch-none cursor-grab active:cursor-grabbing"
+        className={`relative h-[min(72vh,40rem)] w-full touch-none ${
+          linkMode ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"
+        }`}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}

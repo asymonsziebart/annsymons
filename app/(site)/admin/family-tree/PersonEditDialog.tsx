@@ -14,6 +14,7 @@ type Props = {
     birth: FamilyTreeDate | null;
     death: FamilyTreeDate | null;
   }) => Promise<void>;
+  onChangePhoto?: () => void;
   onClose: () => void;
 };
 
@@ -38,7 +39,7 @@ function inputsToDate(year: string, month: string, day: string): FamilyTreeDate 
   };
 }
 
-export default function PersonEditDialog({ person, onSave, onClose }: Props) {
+export default function PersonEditDialog({ person, onSave, onChangePhoto, onClose }: Props) {
   const [given, setGiven] = useState(person.given);
   const [surname, setSurname] = useState(person.surname);
   const [middle, setMiddle] = useState(person.middle ?? "");
@@ -98,6 +99,15 @@ export default function PersonEditDialog({ person, onSave, onClose }: Props) {
         <h2 className="font-heading text-xl font-semibold text-[var(--color-ink)]">
           Edit {personDisplayName(person)}
         </h2>
+        {onChangePhoto ? (
+          <button
+            type="button"
+            className="neo-btn mt-3 !min-h-11 w-full"
+            onClick={onChangePhoto}
+          >
+            {person.photoUrl ? "Change photo" : "Add photo"}
+          </button>
+        ) : null}
         <div className="mt-4 grid gap-3">
           <label className="block text-sm">
             <span className="text-[var(--color-ink-muted)]">First name</span>
