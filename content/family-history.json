@@ -380,6 +380,57 @@
       ]
     },
     {
+      "id": "siblings-jeremy-emily-elizabeth",
+      "title": "Jeremy, Emily & Elizabeth Krause",
+      "line": "Core",
+      "status": "confirmed",
+      "personIds": [
+        "465748",
+        "301493",
+        "19175",
+        "265809",
+        "543356"
+      ],
+      "summary": "Ann\u2019s older siblings appear in people-search clusters tied to Gerald and Karolyn Krause (Troy / Rochester Hills area). Approximate ages from those records: Jeremy ~39, Emily ~37, Elizabeth ~34 (Ann b. 1997). Public professional profiles that match this cluster: Jeremy Krause of Troy \u2014 Target backroom trainer (15 Mile & Dequindre / Warren store area) since 2008, Baker College B.B.A. Business Administration ~2010\u20132016 (this may be the Baker College memory that earlier floated for Gerald). Emily Elizabeth Krause \u2014 Central Michigan University (Mount Pleasant) B.S. Statistics/Mathematics/Actuarial Science (~2007\u20132011) and M.A. Mathematics (~2011\u20132012), graduate teaching assistant for Intermediate Algebra, then Dialer Analyst at Credit Acceptance (Southfield) from ~2015; people-search also lists AKA Emily Elizabeth Larry, matching her spouse Kwame Larry in the family tree. Elizabeth Ann Krause has thinner public career detail so far (college-associated people-search only); a separate MSU Liz Krause (English B.A., later MSW) is unconfirmed and may be a different person.",
+      "highlights": [
+        "Birth order / approx ages (people-search): Jeremy (~1987), Emily (~1989), Elizabeth (~1992), Ann (1997)",
+        "Jeremy: Target backroom trainer, Troy MI area (15 & Dequindre), since Aug 2008",
+        "Jeremy education: Baker College \u2014 Bachelor\u2019s in Business Administration & Management (~2010\u20132016)",
+        "Note: Gerald\u2019s earlier \u201cmaybe Baker\u201d memory may actually refer to Jeremy\u2019s Baker degree",
+        "Emily: CMU undergrad + M.A. Mathematics; taught MTH 105 as grad assistant",
+        "Emily work: Dialer Analyst, Credit Acceptance (Southfield), from ~May 2015",
+        "Emily spouse: Kwame Larry (tree); people-search AKA Emily Elizabeth Larry",
+        "Elizabeth: linked in family people-search; career/school details still thin online",
+        "Unconfirmed candidate: Liz Krause LinkedIn (MSU English / secondary cert / MSW) \u2014 needs family confirm before treating as Elizabeth Ann"
+      ],
+      "sources": [
+        {
+          "label": "LinkedIn \u2014 Jeremy Krause (Target / Baker College, Troy)",
+          "url": "https://www.linkedin.com/in/jeremy-krause-46248511a"
+        },
+        {
+          "label": "LinkedIn \u2014 Emily Krause (Credit Acceptance / CMU, Troy)",
+          "url": "https://www.linkedin.com/in/emily-krause-1055106a"
+        },
+        {
+          "label": "Spokeo cluster \u2014 Emily Elizabeth Krause related to Gerald, Jeremy, Elizabeth, Ann",
+          "url": "https://www.spokeo.com/Emily-Krause/Michigan"
+        },
+        {
+          "label": "Baker College",
+          "url": "https://www.baker.edu/"
+        },
+        {
+          "label": "Central Michigan University",
+          "url": "https://www.cmich.edu/"
+        },
+        {
+          "label": "Credit Acceptance",
+          "url": "https://www.creditacceptance.com/"
+        }
+      ]
+    },
+    {
       "id": "immediate-family",
       "title": "Ann\u2019s immediate family (baseline)",
       "line": "Core",
@@ -391,6 +442,7 @@
       "highlights": [
         "Focus person: Ann Emily Krause Symons (b. 5 Oct 1997)",
         "Spouse: Timothy Symons",
+        "Siblings: Jeremy Francis, Emily Elizabeth, Elizabeth Ann (see siblings section)",
         "Krause uncles: Jay, Denny, Brian, Eric",
         "Symons: Jeffrey & Elizabeth; John & Treva; Heisperadis & Lucia Kokx"
       ],
@@ -415,7 +467,9 @@
         "Geraldine\u2019s exact Somerset Collection store name",
         "Which school cafeteria Dolores worked in",
         "Josephine Crosier\u2019s maiden surname",
-        "Gerald college confirmation (Baker vs another; high school also unknown)",
+        "Gerald college confirmation (high school unknown; Baker may have been Jeremy\u2019s school)",
+        "Confirm Elizabeth Ann school/career (MSU Liz Krause profile?)",
+        "Exact birth dates for Jeremy, Emily, Elizabeth",
         "Gerald & Karolyn exact marriage date/year (Ann does not remember; ask parents)",
         "Which church they married in (Ann does not know; ask parents)"
       ],
