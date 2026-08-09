@@ -4,10 +4,13 @@ import {
   HOME_VIDEO_SAVER_FILES,
   HOME_VIDEO_SAVER_VERSION,
 } from "@/lib/homeVideoSaverBundle";
-
-export const dynamic = "force-static";
+import { canUseAdminApi } from "@/lib/auth";
 
 export async function GET() {
+  if (!(await canUseAdminApi("/admin/home-video-saver"))) {
+    return new Response("Forbidden", { status: 403 });
+  }
+
   const zip = new JSZip();
   const folder = zip.folder("Home Video Saver");
 
@@ -32,7 +35,7 @@ export async function GET() {
 
   return new Response(body, {
     headers: {
-      "Cache-Control": "public, max-age=3600, s-maxage=86400",
+      "Cache-Control": "private, no-store",
       "Content-Disposition": `attachment; filename="home-video-saver-${HOME_VIDEO_SAVER_VERSION}.zip"`,
       "Content-Length": archive.byteLength.toString(),
       "Content-Type": "application/zip",

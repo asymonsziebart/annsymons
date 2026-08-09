@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import { HOME_VIDEO_SAVER_VERSION } from "@/lib/homeVideoSaverBundle";
 
@@ -6,6 +7,7 @@ export const metadata: Metadata = {
   title: "Home Video Saver — DVD to MP4",
   description:
     "Download a simple desktop app that converts personal home-video DVDs into cloud-ready MP4 files.",
+  robots: { index: false, follow: false },
 };
 
 const steps = [
@@ -44,7 +46,7 @@ function DiscIcon() {
   );
 }
 
-export default function HomeVideoSaverPage() {
+export function HomeVideoSaverPageContent() {
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-8 sm:py-16">
       <section className="grid items-center gap-10 lg:grid-cols-[1.03fr_.97fr] lg:gap-14">
@@ -175,4 +177,8 @@ export default function HomeVideoSaverPage() {
       </section>
     </main>
   );
+}
+
+export default function PublicHomeVideoSaverRedirect() {
+  redirect("/admin/home-video-saver");
 }
