@@ -27,8 +27,10 @@ export async function GET() {
     compressionOptions: { level: 9 },
     platform: "UNIX",
   });
+  const body = new ArrayBuffer(archive.byteLength);
+  new Uint8Array(body).set(archive);
 
-  return new Response(archive, {
+  return new Response(body, {
     headers: {
       "Cache-Control": "public, max-age=3600, s-maxage=86400",
       "Content-Disposition": `attachment; filename="home-video-saver-${HOME_VIDEO_SAVER_VERSION}.zip"`,
