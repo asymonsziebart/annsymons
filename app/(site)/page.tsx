@@ -11,11 +11,6 @@ const exploreLinks = [
     blurb: "Paint in the air with your fingertip and webcam",
   },
   {
-    href: "/home-video-saver",
-    label: "Home Video Saver",
-    blurb: "Turn personal DVDs into cloud-ready MP4 files",
-  },
-  {
     href: "/holo-ttt",
     label: "Hologram Tic-Tac-Toe",
     blurb: "Point, pinch, and play on a floating board",

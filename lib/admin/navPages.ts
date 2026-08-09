@@ -71,6 +71,12 @@ export const ADMIN_NAV_PAGES: AdminNavPage[] = [
     ],
   },
   {
+    href: "/admin/home-video-saver",
+    label: "Home Video Saver",
+    description: "Convert personal DVDs into cloud-ready MP4 files",
+    keywords: ["dvd", "mp4", "video", "converter", "handbrake", "cloud"],
+  },
+  {
     href: "/admin/dogs",
     label: "Puppy Ranch",
     description: "Cozy dog breeding game",
