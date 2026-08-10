@@ -138,7 +138,8 @@ export default function MorseTrainer() {
 
   useEffect(() => () => clearIdleTimer(), [clearIdleTimer]);
 
-  const activeIds = new Set(pathIds(sequence));
+  // Only light nodes while a path is in progress (idle board stays dark)
+  const activeIds = new Set(sequence ? pathIds(sequence) : []);
   const current = MORSE_NODE_MAP[sequence];
   const letter = current?.letter ?? null;
 
