@@ -7,16 +7,15 @@ import {
   MORSE_NODES,
   MORSE_VIEWBOX,
   childForSymbol,
+  orthogonalPath,
   pathIds,
+  type MorseNode,
   type MorseSymbol,
 } from "@/lib/morse/tree";
 
 const IDLE_RESET_MS = 2500;
-
-function formatSequence(sequence: string): string {
-  if (!sequence) return "—";
-  return sequence.replaceAll(".", "·").replaceAll("-", "−");
-}
+const INK = "#e8edf4";
+const LED = "#39ff6a";
 
 function useMorseAudio() {
   const ctxRef = useRef<AudioContext | null>(null);
@@ -69,6 +68,21 @@ function useMorseAudio() {
   }, []);
 
   return playTone;
+}
+
+function labelOffset(node: MorseNode): { x: number; y: number; anchor: "start" | "middle" | "end" } {
+  switch (node.label) {
+    case "left":
+      return { x: -16, y: 4, anchor: "end" };
+    case "right":
+      return { x: 16, y: 4, anchor: "start" };
+    case "above":
+      return { x: 0, y: -16, anchor: "middle" };
+    case "below":
+      return { x: 0, y: 22, anchor: "middle" };
+    default:
+      return { x: 0, y: 0, anchor: "middle" };
+  }
 }
 
 export default function MorseTrainer() {
@@ -148,110 +162,129 @@ export default function MorseTrainer() {
   const activeIds = new Set(sequence ? pathIds(sequence) : []);
   const current = MORSE_NODE_MAP[sequence];
   const letter = current?.letter ?? null;
+  const antennaLit = sequence.length > 0;
 
   return (
-    <div className="morse-device mx-auto flex w-full max-w-xl flex-col overflow-hidden rounded-[1.35rem] border border-[#3a4554] bg-[#1a1f28] shadow-[0_18px_36px_rgba(15,23,42,0.32),inset_0_1px_0_rgba(255,255,255,0.06)]">
-      <div className="relative flex flex-col px-2.5 pb-2.5 pt-3 sm:px-4 sm:pb-3 sm:pt-4">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-[0.12]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 20% 10%, #94a3b8 0.6px, transparent 0.7px), radial-gradient(circle at 80% 30%, #94a3b8 0.5px, transparent 0.6px)",
-            backgroundSize: "18px 18px, 22px 22px",
-          }}
-        />
-
-        <div className="relative flex shrink-0 items-center justify-center gap-2.5">
-          <span className="font-heading text-[0.65rem] font-semibold tracking-[0.32em] text-[#c5cedb] sm:text-xs">
-            MORSE
-          </span>
-          <AntennaIcon lit={sequence.length > 0} />
-          <span className="font-heading text-[0.65rem] font-semibold tracking-[0.32em] text-[#c5cedb] sm:text-xs">
-            CODE
-          </span>
-        </div>
-
+    <div className="morse-device mx-auto w-full max-w-[26rem] overflow-hidden rounded-[1.25rem] border border-[#cfd6e0] bg-[#0b0d11] shadow-[0_18px_40px_rgba(15,23,42,0.35)]">
+      {/* Faceplate: tree exactly like the pocket trainer */}
+      <div className="relative px-2 pt-3 sm:px-3 sm:pt-4">
         <svg
           viewBox={`0 0 ${MORSE_VIEWBOX.width} ${MORSE_VIEWBOX.height}`}
-          className="relative mt-1 h-auto w-full select-none"
+          className="relative h-auto w-full select-none"
           role="img"
           aria-label="Morse code binary tree trainer"
-          preserveAspectRatio="xMidYMid meet"
         >
           <defs>
-            <filter id="morse-led-glow" x="-60%" y="-60%" width="220%" height="220%">
-              <feGaussianBlur stdDeviation="4" result="blur" />
+            <filter id="morse-led-glow" x="-80%" y="-80%" width="260%" height="260%">
+              <feGaussianBlur stdDeviation="3.5" result="blur" />
               <feMerge>
                 <feMergeNode in="blur" />
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
-            <linearGradient id="morse-metal" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#e8edf4" />
-              <stop offset="55%" stopColor="#a8b4c4" />
-              <stop offset="100%" stopColor="#7b8798" />
-            </linearGradient>
           </defs>
+
+          {/* Title + antenna root (antenna is NOT a dot) */}
+          <text
+            x="78"
+            y="42"
+            textAnchor="middle"
+            fill={INK}
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              letterSpacing: "0.28em",
+              fontFamily: "var(--font-heading), ui-sans-serif, system-ui, sans-serif",
+            }}
+          >
+            MORSE
+          </text>
+          <text
+            x="342"
+            y="42"
+            textAnchor="middle"
+            fill={INK}
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              letterSpacing: "0.28em",
+              fontFamily: "var(--font-heading), ui-sans-serif, system-ui, sans-serif",
+            }}
+          >
+            CODE
+          </text>
+
+          <g
+            transform={`translate(${MORSE_NODE_MAP[""].x} ${MORSE_NODE_MAP[""].y})`}
+            style={antennaLit ? { filter: "url(#morse-led-glow)" } : undefined}
+          >
+            {/* Classic trainer antenna: stem + V prongs — never a filled circle */}
+            <path
+              d="M0 18 L0 -2 M0 -2 L-10 -14 M0 -2 L10 -14"
+              fill="none"
+              stroke={antennaLit ? LED : INK}
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </g>
 
           {MORSE_EDGES.map((edge) => {
             const from = MORSE_NODE_MAP[edge.from];
             const to = MORSE_NODE_MAP[edge.to];
             if (!from || !to) return null;
             const lit = activeIds.has(edge.from) && activeIds.has(edge.to);
+            // Root antenna connects from bottom of stem, not center of a circle
+            const startY = from.kind === "root" ? from.y + 18 : from.y;
             return (
-              <line
+              <path
                 key={`${edge.from}->${edge.to}`}
-                x1={from.x}
-                y1={from.y}
-                x2={to.x}
-                y2={to.y}
-                stroke={lit ? "#4ade80" : "url(#morse-metal)"}
-                strokeWidth={lit ? 3.2 : 2}
-                strokeLinecap="round"
-                opacity={lit ? 1 : 0.72}
+                d={orthogonalPath(from.x, startY, to.x, to.y)}
+                fill="none"
+                stroke={lit ? LED : INK}
+                strokeWidth={lit ? 2.6 : 1.7}
+                strokeLinejoin="miter"
+                strokeLinecap="square"
+                opacity={lit ? 1 : 0.92}
                 style={lit ? { filter: "url(#morse-led-glow)" } : undefined}
               />
             );
           })}
 
-          {MORSE_NODES.map((node) => {
+          {MORSE_NODES.filter((n) => n.kind !== "root").map((node) => {
             const lit = activeIds.has(node.id);
             const isTip = node.id === sequence && sequence.length > 0;
+            const fill = lit ? LED : INK;
+            const offset = labelOffset(node);
             return (
-              <g key={node.id || "root"} transform={`translate(${node.x} ${node.y})`}>
-                {node.kind === "root" ? (
-                  <circle
-                    r={9}
-                    fill={lit ? "#4ade80" : "url(#morse-metal)"}
-                    style={lit ? { filter: "url(#morse-led-glow)" } : undefined}
-                  />
-                ) : node.kind === "dash" ? (
+              <g key={node.id} transform={`translate(${node.x} ${node.y})`}>
+                {node.kind === "dash" ? (
                   <rect
-                    x={-12}
-                    y={-6}
-                    width={24}
-                    height={12}
-                    rx={3}
-                    fill={lit ? "#4ade80" : "url(#morse-metal)"}
+                    x={-11}
+                    y={-5}
+                    width={22}
+                    height={10}
+                    rx={1.5}
+                    fill={fill}
                     style={lit ? { filter: "url(#morse-led-glow)" } : undefined}
                   />
                 ) : (
                   <circle
-                    r={8}
-                    fill={lit ? "#4ade80" : "url(#morse-metal)"}
+                    r={7}
+                    fill={fill}
                     style={lit ? { filter: "url(#morse-led-glow)" } : undefined}
                   />
                 )}
                 {node.letter ? (
                   <text
-                    y={node.y > 280 ? 24 : -14}
-                    textAnchor="middle"
+                    x={offset.x}
+                    y={offset.y}
+                    textAnchor={offset.anchor}
+                    fill={lit ? LED : INK}
                     style={{
-                      fontSize: isTip ? 17 : 13,
-                      fontWeight: isTip ? 700 : 600,
+                      fontSize: isTip ? 16 : 13,
+                      fontWeight: isTip ? 800 : 700,
                       fontFamily: "var(--font-heading), ui-sans-serif, system-ui, sans-serif",
-                      fill: lit ? "#86efac" : "#d7dee8",
                     }}
                   >
                     {node.letter}
@@ -260,90 +293,67 @@ export default function MorseTrainer() {
               </g>
             );
           })}
-        </svg>
 
-        <div className="relative mt-1 flex shrink-0 items-center justify-between gap-3 rounded-xl bg-[#111827]/80 px-3 py-2">
-          <div className="min-w-0">
-            <p className="font-mono text-xs tracking-[0.28em] text-[#94a3b8]">
-              {formatSequence(sequence)}
-            </p>
-            <p className="mt-0.5 text-[0.65rem] text-[#64748b]">
-              Idle {IDLE_RESET_MS / 1000}s resets
-            </p>
-          </div>
-          <p
-            className="font-heading text-4xl font-semibold leading-none tracking-tight text-[#86efac] tabular-nums"
-            style={{ minWidth: "1.2em", textAlign: "right" }}
-            aria-live="polite"
+          {/* Current letter readout, still on the faceplate */}
+          <text
+            x="210"
+            y="430"
+            textAnchor="middle"
+            fill={letter ? LED : "#5b6472"}
+            style={{
+              fontSize: 42,
+              fontWeight: 700,
+              fontFamily: "var(--font-heading), ui-sans-serif, system-ui, sans-serif",
+            }}
           >
             {letter ?? "·"}
-          </p>
-          <button
-            type="button"
-            onClick={resetPath}
-            className="shrink-0 rounded-lg border border-[#334155] px-2.5 py-1.5 text-xs font-semibold text-[#cbd5e1] transition active:bg-[#0b1220]"
+          </text>
+          <text
+            x="210"
+            y="458"
+            textAnchor="middle"
+            fill="#7b8798"
+            style={{
+              fontSize: 12,
+              letterSpacing: "0.35em",
+              fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+            }}
           >
-            Reset
-          </button>
-        </div>
+            {sequence
+              ? sequence.replaceAll(".", "·").replaceAll("-", "−")
+              : `idle ${IDLE_RESET_MS / 1000}s`}
+          </text>
+        </svg>
+      </div>
 
-        <div className="relative mt-2 grid shrink-0 grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => press(".")}
-            className="morse-key group flex min-h-[3.75rem] flex-col items-center justify-center gap-1 rounded-2xl border border-[#334155] bg-[#111827] text-[#e2e8f0] transition active:translate-y-[1px] active:bg-[#0b1220] sm:min-h-20"
-            aria-label="Dot"
-          >
-            <span className="inline-block h-3.5 w-3.5 rounded-full bg-[#4ade80] shadow-[0_0_12px_rgba(74,222,128,0.65)]" />
-            <span className="font-heading text-base font-semibold tracking-wide sm:text-lg">Dot</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => press("-")}
-            className="morse-key group flex min-h-[3.75rem] flex-col items-center justify-center gap-1 rounded-2xl border border-[#334155] bg-[#111827] text-[#e2e8f0] transition active:translate-y-[1px] active:bg-[#0b1220] sm:min-h-20"
-            aria-label="Dash"
-          >
-            <span className="inline-block h-2.5 w-9 rounded-sm bg-[#4ade80] shadow-[0_0_12px_rgba(74,222,128,0.65)]" />
-            <span className="font-heading text-base font-semibold tracking-wide sm:text-lg">Dash</span>
-          </button>
-        </div>
+      {/* Dot / Dash live at the bottom of the same device rectangle */}
+      <div className="grid grid-cols-2 gap-2 border-t border-[#2a3140] bg-[#0b0d11] p-2.5 sm:p-3">
+        <button
+          type="button"
+          onClick={() => press(".")}
+          className="flex min-h-[3.5rem] flex-col items-center justify-center gap-1 rounded-xl border border-[#3a4554] bg-[#141820] text-[#e8edf4] transition active:translate-y-px active:bg-[#0a0c10] sm:min-h-16"
+          aria-label="Dot"
+        >
+          <span className="inline-block h-3 w-3 rounded-full bg-[#39ff6a] shadow-[0_0_10px_rgba(57,255,106,0.7)]" />
+          <span className="font-heading text-sm font-semibold tracking-wide">Dot</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => press("-")}
+          className="flex min-h-[3.5rem] flex-col items-center justify-center gap-1 rounded-xl border border-[#3a4554] bg-[#141820] text-[#e8edf4] transition active:translate-y-px active:bg-[#0a0c10] sm:min-h-16"
+          aria-label="Dash"
+        >
+          <span className="inline-block h-2 w-8 rounded-[2px] bg-[#39ff6a] shadow-[0_0_10px_rgba(57,255,106,0.7)]" />
+          <span className="font-heading text-sm font-semibold tracking-wide">Dash</span>
+        </button>
+        <button
+          type="button"
+          onClick={resetPath}
+          className="col-span-2 rounded-lg py-1.5 text-xs font-semibold text-[#8b95a5] transition hover:text-[#e8edf4]"
+        >
+          Reset path
+        </button>
       </div>
     </div>
-  );
-}
-
-function AntennaIcon({ lit }: { lit: boolean }) {
-  return (
-    <svg width="22" height="22" viewBox="0 0 28 28" aria-hidden className="shrink-0">
-      <path
-        d="M14 4v10"
-        stroke={lit ? "#4ade80" : "#c5cedb"}
-        strokeWidth="2"
-        strokeLinecap="round"
-        style={lit ? { filter: "drop-shadow(0 0 4px #4ade80)" } : undefined}
-      />
-      <circle
-        cx="14"
-        cy="4"
-        r="2.4"
-        fill={lit ? "#4ade80" : "#c5cedb"}
-        style={lit ? { filter: "drop-shadow(0 0 4px #4ade80)" } : undefined}
-      />
-      <path
-        d="M8 12c3.2-3.2 8.8-3.2 12 0"
-        fill="none"
-        stroke={lit ? "#86efac" : "#94a3b8"}
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <path
-        d="M10.5 14.5c2-2 5-2 7 0"
-        fill="none"
-        stroke={lit ? "#86efac" : "#94a3b8"}
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-      <rect x="11" y="14" width="6" height="8" rx="1.5" fill={lit ? "#4ade80" : "#a8b4c4"} />
-    </svg>
   );
 }
