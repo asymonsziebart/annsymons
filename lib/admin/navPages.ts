@@ -83,6 +83,12 @@ export const ADMIN_NAV_PAGES: AdminNavPage[] = [
     keywords: ["dogs", "game", "puppies"],
   },
   {
+    href: "/admin/morse",
+    label: "Morse Code",
+    description: "Practice Morse with a lighting binary tree",
+    keywords: ["morse", "cw", "dot", "dash", "practice", "beep"],
+  },
+  {
     href: "/admin/movies",
     label: "Movies",
     description: "Private Google Drive movie library",
