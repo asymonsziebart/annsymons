@@ -150,14 +150,8 @@ export default function MorseTrainer() {
   const letter = current?.letter ?? null;
 
   return (
-    <div
-      className="morse-device mx-auto flex w-full max-w-xl flex-col overflow-hidden rounded-[1.35rem] border border-[#3a4554] bg-[#1a1f28] shadow-[0_18px_36px_rgba(15,23,42,0.32),inset_0_1px_0_rgba(255,255,255,0.06)]"
-      style={{
-        // One phone-friendly board: leave room for site header + Admin FAB
-        maxHeight: "min(36rem, calc(100dvh - 7.5rem))",
-      }}
-    >
-      <div className="relative flex min-h-0 flex-1 flex-col px-2.5 pb-2.5 pt-3 sm:px-4 sm:pb-3 sm:pt-4">
+    <div className="morse-device mx-auto flex w-full max-w-xl flex-col overflow-hidden rounded-[1.35rem] border border-[#3a4554] bg-[#1a1f28] shadow-[0_18px_36px_rgba(15,23,42,0.32),inset_0_1px_0_rgba(255,255,255,0.06)]">
+      <div className="relative flex flex-col px-2.5 pb-2.5 pt-3 sm:px-4 sm:pb-3 sm:pt-4">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-[0.12]"
@@ -178,14 +172,13 @@ export default function MorseTrainer() {
           </span>
         </div>
 
-        <div className="relative mt-1 min-h-0 w-full flex-1">
-          <svg
-            viewBox={`0 0 ${MORSE_VIEWBOX.width} ${MORSE_VIEWBOX.height}`}
-            className="absolute inset-0 h-full w-full select-none"
-            role="img"
-            aria-label="Morse code binary tree trainer"
-            preserveAspectRatio="xMidYMid meet"
-          >
+        <svg
+          viewBox={`0 0 ${MORSE_VIEWBOX.width} ${MORSE_VIEWBOX.height}`}
+          className="relative mt-1 h-auto w-full select-none"
+          role="img"
+          aria-label="Morse code binary tree trainer"
+          preserveAspectRatio="xMidYMid meet"
+        >
           <defs>
             <filter id="morse-led-glow" x="-60%" y="-60%" width="220%" height="220%">
               <feGaussianBlur stdDeviation="4" result="blur" />
@@ -267,8 +260,7 @@ export default function MorseTrainer() {
               </g>
             );
           })}
-          </svg>
-        </div>
+        </svg>
 
         <div className="relative mt-1 flex shrink-0 items-center justify-between gap-3 rounded-xl bg-[#111827]/80 px-3 py-2">
           <div className="min-w-0">
