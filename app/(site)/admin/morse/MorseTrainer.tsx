@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   MORSE_EDGES,
+  MORSE_HUB,
   MORSE_NODE_MAP,
   MORSE_NODES,
   MORSE_VIEWBOX,
   childForSymbol,
   orthogonalPath,
   pathIds,
+  rootEdgePath,
   type MorseNode,
   type MorseSymbol,
 } from "@/lib/morse/tree";
@@ -42,16 +44,13 @@ function useMorseAudio() {
       const now = ctx.currentTime;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-
       const isDot = symbol === ".";
       osc.type = "sine";
       osc.frequency.setValueAtTime(isDot ? 880 : 420, now);
-
       const duration = isDot ? 0.09 : 0.22;
       gain.gain.setValueAtTime(0.0001, now);
       gain.gain.exponentialRampToValueAtTime(0.28, now + 0.012);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start(now);
@@ -73,13 +72,13 @@ function useMorseAudio() {
 function labelOffset(node: MorseNode): { x: number; y: number; anchor: "start" | "middle" | "end" } {
   switch (node.label) {
     case "left":
-      return { x: -16, y: 4, anchor: "end" };
+      return { x: -14, y: 4, anchor: "end" };
     case "right":
-      return { x: 16, y: 4, anchor: "start" };
+      return { x: 14, y: 4, anchor: "start" };
     case "above":
-      return { x: 0, y: -16, anchor: "middle" };
+      return { x: 0, y: -14, anchor: "middle" };
     case "below":
-      return { x: 0, y: 22, anchor: "middle" };
+      return { x: 0, y: 20, anchor: "middle" };
     default:
       return { x: 0, y: 0, anchor: "middle" };
   }
@@ -163,20 +162,20 @@ export default function MorseTrainer() {
   const current = MORSE_NODE_MAP[sequence];
   const letter = current?.letter ?? null;
   const antennaLit = sequence.length > 0;
+  const root = MORSE_NODE_MAP[""];
 
   return (
     <div className="morse-device mx-auto w-full max-w-[26rem] overflow-hidden rounded-[1.25rem] border border-[#cfd6e0] bg-[#0b0d11] shadow-[0_18px_40px_rgba(15,23,42,0.35)]">
-      {/* Faceplate: tree exactly like the pocket trainer */}
-      <div className="relative px-2 pt-3 sm:px-3 sm:pt-4">
+      <div className="relative px-1.5 pt-2 sm:px-2 sm:pt-3">
         <svg
           viewBox={`0 0 ${MORSE_VIEWBOX.width} ${MORSE_VIEWBOX.height}`}
           className="relative h-auto w-full select-none"
           role="img"
-          aria-label="Morse code binary tree trainer"
+          aria-label="Morse code rail-tree trainer"
         >
           <defs>
             <filter id="morse-led-glow" x="-80%" y="-80%" width="260%" height="260%">
-              <feGaussianBlur stdDeviation="3.5" result="blur" />
+              <feGaussianBlur stdDeviation="3.2" result="blur" />
               <feMerge>
                 <feMergeNode in="blur" />
                 <feMergeNode in="SourceGraphic" />
@@ -184,14 +183,13 @@ export default function MorseTrainer() {
             </filter>
           </defs>
 
-          {/* Title + antenna root (antenna is NOT a dot) */}
           <text
-            x="78"
-            y="42"
+            x="100"
+            y="36"
             textAnchor="middle"
             fill={INK}
             style={{
-              fontSize: 18,
+              fontSize: 17,
               fontWeight: 700,
               letterSpacing: "0.28em",
               fontFamily: "var(--font-heading), ui-sans-serif, system-ui, sans-serif",
@@ -200,12 +198,12 @@ export default function MorseTrainer() {
             MORSE
           </text>
           <text
-            x="342"
-            y="42"
+            x="360"
+            y="36"
             textAnchor="middle"
             fill={INK}
             style={{
-              fontSize: 18,
+              fontSize: 17,
               fontWeight: 700,
               letterSpacing: "0.28em",
               fontFamily: "var(--font-heading), ui-sans-serif, system-ui, sans-serif",
@@ -214,13 +212,13 @@ export default function MorseTrainer() {
             CODE
           </text>
 
+          {/* Antenna root — V prongs on a stem, never a filled dot */}
           <g
-            transform={`translate(${MORSE_NODE_MAP[""].x} ${MORSE_NODE_MAP[""].y})`}
+            transform={`translate(${root.x} ${root.y})`}
             style={antennaLit ? { filter: "url(#morse-led-glow)" } : undefined}
           >
-            {/* Classic trainer antenna: stem + V prongs — never a filled circle */}
             <path
-              d="M0 18 L0 -2 M0 -2 L-10 -14 M0 -2 L10 -14"
+              d="M0 20 L0 0 M0 0 L-11 -14 M0 0 L11 -14"
               fill="none"
               stroke={antennaLit ? LED : INK}
               strokeWidth="3"
@@ -234,22 +232,33 @@ export default function MorseTrainer() {
             const to = MORSE_NODE_MAP[edge.to];
             if (!from || !to) return null;
             const lit = activeIds.has(edge.from) && activeIds.has(edge.to);
-            // Root antenna connects from bottom of stem, not center of a circle
-            const startY = from.kind === "root" ? from.y + 18 : from.y;
+            const d =
+              from.kind === "root"
+                ? rootEdgePath(to.x, to.y, from.y)
+                : orthogonalPath(from.x, from.y, to.x, to.y);
             return (
               <path
                 key={`${edge.from}->${edge.to}`}
-                d={orthogonalPath(from.x, startY, to.x, to.y)}
+                d={d}
                 fill="none"
                 stroke={lit ? LED : INK}
-                strokeWidth={lit ? 2.6 : 1.7}
+                strokeWidth={lit ? 2.5 : 1.6}
                 strokeLinejoin="miter"
                 strokeLinecap="square"
-                opacity={lit ? 1 : 0.92}
+                opacity={lit ? 1 : 0.9}
                 style={lit ? { filter: "url(#morse-led-glow)" } : undefined}
               />
             );
           })}
+
+          {/* Tiny hub join on the main rail */}
+          <circle
+            cx={MORSE_HUB.x}
+            cy={MORSE_HUB.y}
+            r={2.2}
+            fill={antennaLit ? LED : INK}
+            style={antennaLit ? { filter: "url(#morse-led-glow)" } : undefined}
+          />
 
           {MORSE_NODES.filter((n) => n.kind !== "root").map((node) => {
             const lit = activeIds.has(node.id);
@@ -260,17 +269,17 @@ export default function MorseTrainer() {
               <g key={node.id} transform={`translate(${node.x} ${node.y})`}>
                 {node.kind === "dash" ? (
                   <rect
-                    x={-11}
-                    y={-5}
-                    width={22}
-                    height={10}
-                    rx={1.5}
+                    x={-10}
+                    y={-4.5}
+                    width={20}
+                    height={9}
+                    rx={1.2}
                     fill={fill}
                     style={lit ? { filter: "url(#morse-led-glow)" } : undefined}
                   />
                 ) : (
                   <circle
-                    r={7}
+                    r={6.5}
                     fill={fill}
                     style={lit ? { filter: "url(#morse-led-glow)" } : undefined}
                   />
@@ -282,7 +291,7 @@ export default function MorseTrainer() {
                     textAnchor={offset.anchor}
                     fill={lit ? LED : INK}
                     style={{
-                      fontSize: isTip ? 16 : 13,
+                      fontSize: isTip ? 15 : 12,
                       fontWeight: isTip ? 800 : 700,
                       fontFamily: "var(--font-heading), ui-sans-serif, system-ui, sans-serif",
                     }}
@@ -294,14 +303,13 @@ export default function MorseTrainer() {
             );
           })}
 
-          {/* Current letter readout, still on the faceplate */}
           <text
-            x="210"
-            y="430"
+            x="230"
+            y="450"
             textAnchor="middle"
             fill={letter ? LED : "#5b6472"}
             style={{
-              fontSize: 42,
+              fontSize: 40,
               fontWeight: 700,
               fontFamily: "var(--font-heading), ui-sans-serif, system-ui, sans-serif",
             }}
@@ -309,13 +317,13 @@ export default function MorseTrainer() {
             {letter ?? "·"}
           </text>
           <text
-            x="210"
-            y="458"
+            x="230"
+            y="478"
             textAnchor="middle"
             fill="#7b8798"
             style={{
-              fontSize: 12,
-              letterSpacing: "0.35em",
+              fontSize: 11,
+              letterSpacing: "0.32em",
               fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
             }}
           >
@@ -326,7 +334,6 @@ export default function MorseTrainer() {
         </svg>
       </div>
 
-      {/* Dot / Dash live at the bottom of the same device rectangle */}
       <div className="grid grid-cols-2 gap-2 border-t border-[#2a3140] bg-[#0b0d11] p-2.5 sm:p-3">
         <button
           type="button"

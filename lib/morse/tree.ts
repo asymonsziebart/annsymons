@@ -1,4 +1,4 @@
-/** Binary Morse tree: dash = left, dot = right (matches the physical trainer). */
+/** Condensed rail Morse tree: same symbol stays horizontal, opposite drops vertical. */
 
 export type MorseSymbol = "." | "-";
 
@@ -6,62 +6,191 @@ export type MorseNode = {
   /** Path from root using . and - */
   id: string;
   letter: string | null;
-  /** SVG coordinates in viewBox units */
   x: number;
   y: number;
-  /** Visual node style on the faceplate — root is the antenna, never a dot */
+  /** root = antenna; never drawn as a lit circle */
   kind: "root" | "dot" | "dash";
-  /** Where to place the letter label relative to the symbol */
   label: "left" | "right" | "above" | "below" | "none";
   dashChild?: string;
   dotChild?: string;
 };
 
-/** Portrait faceplate proportions like the keychain trainer. */
-export const MORSE_VIEWBOX = { width: 420, height: 520 } as const;
+/** Portrait faceplate for the pocket-trainer rail layout. */
+export const MORSE_VIEWBOX = { width: 460, height: 500 } as const;
+
+/** Junction under the antenna on the main T—E rail (not a letter node). */
+export const MORSE_HUB = { x: 230, y: 112 } as const;
 
 /**
- * Hand-placed layout matching the pocket Morse trainer board.
- * Dash branches lean left; dot branches lean right.
- * Connections are drawn as orthogonal (circuit-board) paths in the UI.
+ * Rail layout (matches the physical LED trainer):
+ * - Main horizontal rail: O—M—T · hub · E—I—S—H
+ * - Same symbol continues sideways on a rail
+ * - Opposite symbol drops straight down to the next row
  */
 export const MORSE_NODES: MorseNode[] = [
-  // Antenna tip — not a lit circle
-  { id: "", letter: null, x: 210, y: 58, kind: "root", label: "none", dashChild: "-", dotChild: "." },
+  {
+    id: "",
+    letter: null,
+    x: MORSE_HUB.x,
+    y: 46,
+    kind: "root",
+    label: "none",
+    dashChild: "-",
+    dotChild: ".",
+  },
 
-  // Depth 1
-  { id: "-", letter: "T", x: 118, y: 118, kind: "dash", label: "left", dashChild: "--", dotChild: "-." },
-  { id: ".", letter: "E", x: 302, y: 118, kind: "dot", label: "right", dashChild: ".-", dotChild: ".." },
+  // Main dash rail (left)
+  { id: "---", letter: "O", x: 48, y: 112, kind: "dash", label: "above" },
+  {
+    id: "--",
+    letter: "M",
+    x: 108,
+    y: 112,
+    kind: "dash",
+    label: "above",
+    dashChild: "---",
+    dotChild: "--.",
+  },
+  {
+    id: "-",
+    letter: "T",
+    x: 170,
+    y: 112,
+    kind: "dash",
+    label: "above",
+    dashChild: "--",
+    dotChild: "-.",
+  },
 
-  // Depth 2
-  { id: "--", letter: "M", x: 62, y: 188, kind: "dash", label: "left", dashChild: "---", dotChild: "--." },
-  { id: "-.", letter: "N", x: 158, y: 188, kind: "dot", label: "right", dashChild: "-.-", dotChild: "-.." },
-  { id: ".-", letter: "A", x: 262, y: 188, kind: "dash", label: "left", dashChild: ".--", dotChild: ".-." },
-  { id: "..", letter: "I", x: 358, y: 188, kind: "dot", label: "right", dashChild: "..-", dotChild: "..." },
+  // Main dot rail (right)
+  {
+    id: ".",
+    letter: "E",
+    x: 290,
+    y: 112,
+    kind: "dot",
+    label: "above",
+    dashChild: ".-",
+    dotChild: "..",
+  },
+  {
+    id: "..",
+    letter: "I",
+    x: 350,
+    y: 112,
+    kind: "dot",
+    label: "above",
+    dashChild: "..-",
+    dotChild: "...",
+  },
+  {
+    id: "...",
+    letter: "S",
+    x: 410,
+    y: 112,
+    kind: "dot",
+    label: "above",
+    dashChild: "...-",
+    dotChild: "....",
+  },
+  { id: "....", letter: "H", x: 450, y: 112, kind: "dot", label: "above" },
 
-  // Depth 3
-  { id: "---", letter: "O", x: 30, y: 268, kind: "dash", label: "left" },
-  { id: "--.", letter: "G", x: 86, y: 268, kind: "dot", label: "right", dashChild: "--.-", dotChild: "--.." },
-  { id: "-.-", letter: "K", x: 134, y: 268, kind: "dash", label: "left", dashChild: "-.--", dotChild: "-.-." },
-  { id: "-..", letter: "D", x: 182, y: 268, kind: "dot", label: "right", dashChild: "-..-", dotChild: "-..." },
-  { id: ".-.", letter: "R", x: 238, y: 268, kind: "dot", label: "left", dashChild: undefined, dotChild: ".-.." },
-  { id: ".--", letter: "W", x: 286, y: 268, kind: "dash", label: "right", dashChild: ".---", dotChild: ".--." },
-  { id: "...", letter: "S", x: 334, y: 268, kind: "dot", label: "left", dashChild: "...-", dotChild: "...." },
-  { id: "..-", letter: "U", x: 382, y: 268, kind: "dash", label: "right", dashChild: undefined, dotChild: "..-." },
+  // Row 2 — first opposite-symbol drops
+  {
+    id: "--.",
+    letter: "G",
+    x: 108,
+    y: 200,
+    kind: "dot",
+    label: "left",
+    dashChild: "--.-",
+    dotChild: "--..",
+  },
+  {
+    id: "-.",
+    letter: "N",
+    x: 170,
+    y: 200,
+    kind: "dot",
+    label: "right",
+    dashChild: "-.-",
+    dotChild: "-..",
+  },
+  {
+    id: ".-",
+    letter: "A",
+    x: 290,
+    y: 200,
+    kind: "dash",
+    label: "left",
+    dashChild: ".--",
+    dotChild: ".-.",
+  },
+  {
+    id: "..-",
+    letter: "U",
+    x: 350,
+    y: 200,
+    kind: "dash",
+    label: "right",
+    dashChild: undefined,
+    dotChild: "..-.",
+  },
+  { id: "...-", letter: "V", x: 410, y: 200, kind: "dash", label: "right" },
 
-  // Depth 4
-  { id: "--.-", letter: "Q", x: 64, y: 368, kind: "dash", label: "below" },
-  { id: "--..", letter: "Z", x: 102, y: 368, kind: "dot", label: "below" },
-  { id: "-.--", letter: "Y", x: 122, y: 368, kind: "dash", label: "below" },
-  { id: "-.-.", letter: "C", x: 152, y: 368, kind: "dot", label: "below" },
-  { id: "-..-", letter: "X", x: 172, y: 368, kind: "dash", label: "below" },
-  { id: "-...", letter: "B", x: 202, y: 368, kind: "dot", label: "below" },
-  { id: ".-..", letter: "L", x: 238, y: 368, kind: "dot", label: "below" },
-  { id: ".--.", letter: "P", x: 274, y: 368, kind: "dot", label: "below" },
-  { id: ".---", letter: "J", x: 302, y: 368, kind: "dash", label: "below" },
-  { id: "...-", letter: "V", x: 326, y: 368, kind: "dash", label: "below" },
-  { id: "....", letter: "H", x: 352, y: 368, kind: "dot", label: "below" },
-  { id: "..-.", letter: "F", x: 390, y: 368, kind: "dot", label: "below" },
+  // Row 3
+  { id: "--.-", letter: "Q", x: 55, y: 290, kind: "dash", label: "below" },
+  { id: "--..", letter: "Z", x: 105, y: 290, kind: "dot", label: "below" },
+  {
+    id: "-.-",
+    letter: "K",
+    x: 155,
+    y: 290,
+    kind: "dash",
+    label: "left",
+    dashChild: "-.--",
+    dotChild: "-.-.",
+  },
+  {
+    id: "-..",
+    letter: "D",
+    x: 210,
+    y: 290,
+    kind: "dot",
+    label: "right",
+    dashChild: "-..-",
+    dotChild: "-...",
+  },
+  {
+    id: ".--",
+    letter: "W",
+    x: 260,
+    y: 290,
+    kind: "dash",
+    label: "left",
+    dashChild: ".---",
+    dotChild: ".--.",
+  },
+  {
+    id: ".-.",
+    letter: "R",
+    x: 325,
+    y: 290,
+    kind: "dot",
+    label: "right",
+    dashChild: undefined,
+    dotChild: ".-..",
+  },
+  { id: "..-.", letter: "F", x: 385, y: 290, kind: "dot", label: "below" },
+
+  // Row 4
+  { id: "-.--", letter: "Y", x: 130, y: 390, kind: "dash", label: "below" },
+  { id: "-.-.", letter: "C", x: 170, y: 390, kind: "dot", label: "below" },
+  { id: "-..-", letter: "X", x: 195, y: 390, kind: "dash", label: "below" },
+  { id: "-...", letter: "B", x: 235, y: 390, kind: "dot", label: "below" },
+  { id: ".---", letter: "J", x: 255, y: 390, kind: "dash", label: "below" },
+  { id: ".--.", letter: "P", x: 295, y: 390, kind: "dot", label: "below" },
+  { id: ".-..", letter: "L", x: 335, y: 390, kind: "dot", label: "below" },
 ];
 
 export const MORSE_NODE_MAP = Object.fromEntries(
@@ -76,15 +205,28 @@ export const MORSE_EDGES: { from: string; to: string; symbol: MorseSymbol }[] =
     return edges;
   });
 
-/** Orthogonal (right-angle) path from parent center to child center. */
+/**
+ * Strict right-angle trace between two points.
+ * Prefers: horizontal if same row, vertical if same column,
+ * otherwise vertical-then-horizontal (drop, then rail).
+ */
 export function orthogonalPath(
   fromX: number,
   fromY: number,
   toX: number,
   toY: number,
 ): string {
-  const midY = fromY + (toY - fromY) * 0.45;
-  return `M ${fromX} ${fromY} L ${fromX} ${midY} L ${toX} ${midY} L ${toX} ${toY}`;
+  if (fromX === toX || fromY === toY) {
+    return `M ${fromX} ${fromY} L ${toX} ${toY}`;
+  }
+  // Drop first, then run sideways — matches the condensed trainer wiring
+  return `M ${fromX} ${fromY} L ${fromX} ${toY} L ${toX} ${toY}`;
+}
+
+/** Root edges route through the hub on the main rail. */
+export function rootEdgePath(toX: number, toY: number, antennaY: number): string {
+  const stemBottom = antennaY + 20;
+  return `M ${MORSE_HUB.x} ${stemBottom} L ${MORSE_HUB.x} ${MORSE_HUB.y} L ${toX} ${toY}`;
 }
 
 export function pathIds(sequence: string): string[] {
