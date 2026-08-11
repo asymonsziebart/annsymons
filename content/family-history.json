@@ -1,7 +1,7 @@
 {
   "title": "Family History",
   "updatedAt": "2026-08-07",
-  "note": "Public genealogy trees that match Ann’s known family lines are treated as confirmed unless they conflict with family memory. Story details that need family knowledge (jobs, photos, unit/branch unknown online) stay marked needs_review. Aug 2026 digs add Civil War Crosiers, Carmoney sister marriages, Canada-born Marion Maher, Lozon WWI color, Altz Rochester/Joseph millwright finds, Otto SSDI dates + Rhine mission, and Geraldine Staub natal family. Sources are public web records.",
+  "note": "Public genealogy trees that match Ann’s known family lines are treated as confirmed unless they conflict with family memory. Story details that need family knowledge (jobs, photos, unit/branch unknown online) stay marked needs_review. Aug 2026 digs add Civil War Crosiers, Carmoney sister marriages, Canada-born Marion Maher, Lozon WWI color, Altz Rochester/Joseph millwright finds, Otto SSDI dates + Rhine mission, Geraldine Staub natal family, and a women-focused pass on Magdeleine Maillet’s parents, Minerva Howard, Mary Carmoney’s daughters, and Jerome’s California sisters Rose Mary & Annetta. Sources are public web records. Also adds Dolores Crosier’s 2005 michigan.com death notice, Zoa Cubba’s 2021 Sullivan obituary, Delia Salois LaPan’s Québec→Bay County Salois/Forcier line, and a locked mapping of Ann’s AncestryDNA export (Eastern Michigan French Settlers + SW Quebec journeys + Ohio & Indiana Settlers) onto the tree.",
   "sections": [
     {
       "id": "otto-wwii",
@@ -96,22 +96,18 @@
         "705532",
         "730562"
       ],
-      "summary": "Frederick Charles Crosier (29 Sep 1925 – 25 Feb 2020), of Rochester Hills, married Dolores Marie Altz Crosier (22 Oct 1930, Oakland County, MI – 11 Dec 2005, Rochester Hills, MI) on 17 May 1952. Their six children — Kathleen Marie, Kenneth Frederick, Kerry Michael, Kevin Jerome, Kristopher J., and Karolyn — appear in public death notices (they are children, not siblings). Modetz fullDescription (page metadata) is family-only: late wife Dolores; late daughter Kathleen; sons Kenneth, Kerry (Dawn), Kevin, Kristopher; daughter Karolyn (Gerald) Krause; grandchildren Jeremy/Emily/Elizabeth/Ann Krause, David (Char) Crosier, Nathan Crosier; great-granddaughter Samantha — no WWII, railroad, or UCS text. WWII branch/unit/ship: not found in free public indexes (NARA AAD blocked from this environment; no Fold3/Ancestry free snippet; no Michigan veterans hit). Railroad (Penn Central/Conrail Sterling Yard) remains family-confirmed only; no named employee roster found. UCS: family-confirmed; soft public corroboration via people-finder email domain @universalcomputersys.com matching Houston UCS (merged into Reynolds and Reynolds 2006). Dolores death notice (michigan.com via classypages): Mt. Avon interment; cafeteria/quilting are family memory only.",
+      "summary": "Frederick Charles Crosier (29 Sep 1925 – 25 Feb 2020), of Rochester Hills, married Dolores Marie Altz Crosier (22 Oct 1930, Oakland County, MI – 11 Dec 2005, Rochester Hills, MI) on 17 May 1952. Their six children — Kathleen Marie, Kenneth Frederick, Kerry Michael, Kevin Jerome, Kristopher J., and Karolyn — appear in public death notices. Dolores’s michigan.com death notice (12 Dec 2005, classypages extract) is the best public life sketch found: age 75, of Rochester Hills; loving wife of Frederick; mother of Kathleen, Kenneth, Kerry (Dawn), Kevin Crosier, Karolyn (Gerald) Krause, and Kristopher Crosier; grandmother of David, Jeremy, Emily, Elizabeth, Ann, and Nathan; great-grandmother of Samantha; sister of Jeanette (Charles) Benedict, Barbara (Gino) Tonin, Norman (Carol) Altz, Donna (Dan) Griffiths, Linda (Jerry) Griffin, Mary (Danny) Griffin, and Joseph (Rusty) Altz; and niece of Zoa Cubba. Funeral Mass 14 Dec 2005 at St. Mary’s of the Hills Catholic Church, 2675 John R Rd., Rochester Hills; visitation at Potere-Modetz Funeral Home, Rochester; interment Mt. Avon Cemetery (Find A Grave #22581260 in trees). Modetz fullDescription for Frederick is family-only (late wife Dolores; late daughter Kathleen; sons/daughter as above). WWII branch/unit/ship for Frederick and railroad/UCS remain as previously documented. Cafeteria work and quilting remain family memory only — not named in the paid death notice text retrieved.",
       "highlights": [
-        "Modetz confirmed: b. 29 Sep 1925; d. 25 Feb 2020 age 94; Rochester Hills; Potere-Modetz handling",
-        "Married 17 May 1952 (classypages event list; marriage place not in free public clip)",
-        "Children (NOT siblings): Kathleen Marie (Kathy, 25 Mar 1953 – 4 Apr 2009 Troy), Kenneth Frederick (Kenny), Kerry Michael (Dawn), Kevin Jerome, Kristopher J., Karolyn (Gerald Krause)",
-        "Kathy’s son David; granddaughter Samantha (named in 2005/2009/2020 notices)",
-        "Dolores: b. 22 Oct 1930 Oakland Co.; d. 11 Dec 2005 Rochester Hills; funeral St. Mary’s of the Hills; interment Mt. Avon (Find A Grave #22581260)",
-        "Kathy burial: Mt. Avon Cemetery (Find A Grave #134601775); Mass St. Elizabeth Ann Seton, Troy",
-        "Frederick burial location: NOT stated in Modetz text (speculative Mt. Avon with Dolores/Kathy/Josephine)",
-        "WWII: no public enlistment, draft-card image, unit, ship, or Michigan veterans listing found this pass",
-        "Railroad employers (family only): Penn Central → Conrail; last location Sterling Yard off 16 Mile near Van Dyke",
-        "Corporate line history at Sterling (public context, not naming him): Michigan Central → NYC → Penn Central (1968) → Conrail (1976) → Conrail Shared Assets (post-1999)",
-        "Public search: no named Crosier on Conrail/Penn Central employee lists found",
-        "UCS: family; soft public email @universalcomputersys.com (PeopleWin) matching Houston UCS domain in 2005–06 press releases",
-        "Dolores: cafeteria work + quilting (family memory only)",
-        "1948 Rochester MI directory lists “Crosier, Fred J.” at house #312 — identity vs Frederick Charles NOT confirmed (wrong middle initial)"
+        "Married 17 May 1952; six children Kathleen, Kenneth, Kerry (Dawn), Kevin, Kristopher, Karolyn (Gerald) Krause",
+        "Dolores: 22 Oct 1930 Oakland Co. – 11 Dec 2005 Rochester Hills (age 75)",
+        "Death notice grandchildren: David, Jeremy, Emily, Elizabeth, Ann, Nathan; great-grandchild Samantha",
+        "Dolores’s siblings listed in her notice: Jeanette Benedict, Barbara Tonin, Norman Altz, Donna Griffiths, Linda Griffin, Mary Griffin, Joseph Altz",
+        "Death notice names Dolores as niece of Zoa Cubba (great-aunt Zoe on the La Pan side)",
+        "Funeral Mass St. Mary’s of the Hills (2675 John R, Rochester Hills), 14 Dec 2005",
+        "Burial Mt. Avon Cemetery, Rochester (trees: FAG #22581260)",
+        "Visitation Potere-Modetz Funeral Home, 339 Walnut Blvd., Rochester",
+        "Cafeteria work + quilting: family memory only (not in published death notice)",
+        "Frederick railroad / UCS / WWII: see prior highlights — still thin online"
       ],
       "sources": [
         {
@@ -181,6 +177,10 @@
         {
           "label": "Wikipedia — Reynolds and Reynolds (UCS merger 2006)",
           "url": "https://en.wikipedia.org/wiki/Reynolds_and_Reynolds"
+        },
+        {
+          "label": "St. Mary of the Hills Catholic Church (Rochester Hills)",
+          "url": "https://smoth.org/"
         }
       ]
     },
@@ -252,19 +252,32 @@
         "fh-cora-crosier",
         "fh-fred-b-crosier"
       ],
-      "summary": "Jerome Frederick Crosier’s siblings (children of Albert David Crosier and Marion A. Maher) were Albert June Crosier (30 Jun 1901 Jackson – 5 Sep 1952 Los Angeles), Francis DeWitt Crosier (1903–2000), Rose Mary Crosier (1908–2000), and Annetta Mary Crosier (1910–1985). Albert David’s own siblings included Ada Isabel, Cora Estelle, and Fred B. Crosier; his parents were Charles Crosier (1838–1917) and Mary M. Carmoney (1844–1932).",
+      "summary": "Jerome Frederick Crosier’s siblings (children of Albert David Crosier and Marion A. Maher) were Albert June Crosier (30 Jun 1901 Jackson – 5 Sep 1952 Los Angeles), Francis DeWitt Crosier (5 Dec 1903 Jackson – 30 Aug 2000 San Rafael; m. Josephine Elizabeth Ragsdale 9 Jul 1937 Watsonville), Rose Mary Crosier Arnone (28 Jun 1908 MI – 11 Aug 2000 San Francisco), and Annetta Mary Crosier Dorsett Casper (21 Dec 1910 Jackson – 21 Sep 1985 Wofford Heights, Kern Co.). Albert David’s own siblings included Ada Isabel Crosier (1867 Eaton – 1946 Charlotte), Cora Estelle Crosier Sleater (22 Jul 1869 Charlotte – 1956; m. Silas Henry Sleater 31 Dec 1897 Charlotte), and Fred B. Crosier (1871–1883 Charlotte). Parents of that generation: Charles Crosier (1838–1917) and Mary M. Carmoney (1844–1932). See dedicated sections for Rose Mary/Annetta and for Mary Carmoney’s daughters.",
       "highlights": [
-        "Albert June Crosier (30 Jun 1901 – 5 Sep 1952)",
-        "Francis DeWitt Crosier (1903–2000)",
-        "Rose Mary Crosier (1908–2000)",
-        "Annetta Mary Crosier (1910–1985)",
+        "Albert June Crosier (30 Jun 1901 – 5 Sep 1952 Los Angeles)",
+        "Francis DeWitt Crosier (5 Dec 1903 – 30 Aug 2000 San Rafael); m. Josephine E. Ragsdale 1937 Watsonville",
+        "Rose Mary Crosier Arnone (28 Jun 1908 – 11 Aug 2000 San Francisco) — see women section",
+        "Annetta Mary Crosier Dorsett Casper (21 Dec 1910 – 21 Sep 1985 Wofford Heights) — see women section",
         "Great-grandparents: Charles Crosier & Mary M. Carmoney",
-        "Albert David siblings: Ada Isabel, Cora Estelle, Fred B."
+        "Albert David’s sisters: Ada Isabel (1867–1946 Charlotte); Cora Estelle Sleater (1869–1956)",
+        "Albert David’s brother Fred B. Crosier (1871–1883 Charlotte)"
       ],
       "sources": [
         {
           "label": "Trees of Ancestry — Albert David Crosier family",
           "url": "https://classypages.com/img/oxygen/n307.htm"
+        },
+        {
+          "label": "Trees of Ancestry — Rose Mary Crosier × Louis Armone",
+          "url": "https://classypages.com/img/oxygen/n398.htm"
+        },
+        {
+          "label": "Trees of Ancestry — Annetta Mary Crosier Dorsett/Casper",
+          "url": "https://classypages.com/img/oxygen/n312.htm"
+        },
+        {
+          "label": "Trees of Ancestry — Francis DeWitt Crosier × Ragsdale",
+          "url": "http://classypages.com/img/oxygen/n342.htm"
         }
       ]
     },
@@ -281,14 +294,16 @@
         "fh-james-maher",
         "fh-rose-bowles"
       ],
-      "summary": "Albert David Crosier was born 28 Dec 1865 in Michigan and died 18 Jun 1942 in San Francisco. He married Marion A. Maher on 24 Feb 1897 in Jackson, Michigan. His parents were Charles Crosier (1838–1917) and Mary M. Carmoney (1844–1932). Marion’s parents appear in the same trees as James Maher and Rose Ann Bowles. Marion was born in Canada (6 Jul 1865); the couple later died in San Francisco (Albert 1942, Marion 1951). See California migration and Civil War sections for deeper story.",
+      "summary": "Albert David Crosier was born 28 Dec 1865 in Michigan and died 18 Jun 1942 in San Francisco. He married Marion A. Maher on 24 Feb 1897 in Jackson, Michigan. His parents were Charles Crosier (1838–1917) and Mary M. Carmoney (1844–1932). Marion’s parents appear in the same trees as James Maher and Rose Ann Bowles; Marion had at least one sister, Claire Maher. Marion was born in Canada (6 Jul 1865); the couple later died in San Francisco (Albert 1942, Marion 21 Apr 1951). Rose Ann Bowles’s own parents and exact vital dates were not locked from a free obituary this pass.",
       "highlights": [
         "Albert David Crosier: 28 Dec 1865 MI – 18 Jun 1942 San Francisco",
         "Married Marion A. Maher 24 Feb 1897, Jackson, MI",
         "Parents: Charles Crosier & Mary M. Carmoney",
         "Marion’s parents: James Maher & Rose Ann Bowles",
+        "Marion’s sister (trees): Claire Maher",
         "Marion A. Maher born Canada 6 Jul 1865 (immigration to Michigan before 1897 marriage)",
-        "Albert & Marion later died in San Francisco (1942 / 1951)"
+        "Albert & Marion later died in San Francisco (1942 / 21 Apr 1951)",
+        "Rose Ann Bowles parents / exact dates: still open in free sources"
       ],
       "sources": [
         {
@@ -315,12 +330,13 @@
         "fh-alexandre-lauzon",
         "fh-magdeleine-maillet"
       ],
-      "summary": "Madeline’s parents were Adolphus Lozon (b. ~1861, Chatham, Kent, Ontario) and Mary Veronica Gore (b. ~1863). They married 8 Jan 1883 in Wallaceburg, Ontario. Adolphus was a son of Alexandre Lauzon (b. ~1827) and Magdeleine Maillet (b. 11 Apr 1826; married 1 Jun 1842, St. Peter Tilbury, Ontario). Known children: Solomon Alex (b. 6 Nov 1891), Madeline Phoebe, Peter Adolphus (b. 29 Aug 1896), Aubrey Samuel (~1898), Roy Clarence (b. 8 Oct 1899), an infant who died 5 Jul 1903, and Wilfred Joseph.",
+      "summary": "Madeline’s parents were Adolphus Lozon (b. ~1861, Chatham, Kent, Ontario) and Mary Veronica Gore (b. ~1863). They married 8 Jan 1883 in Wallaceburg, Ontario. Adolphus was a son of Alexandre Lauzon (b. ~1827) and Magdeleine Maillet (b. 11 Apr 1826). Known children: Solomon Alex (b. 6 Nov 1891), Madeline Phoebe, Peter Adolphus (b. 29 Aug 1896), Aubrey Samuel (~1898), Roy Clarence (b. 8 Oct 1899), an infant who died 5 Jul 1903, and Wilfred Joseph. By Peter’s July 1918 enlistment, next of kin was “Mary Lozon” of R.R. #2 Wallaceburg (mother), suggesting Adolphus had already died or was absent — his death date is still open. Mary Veronica Gore’s own parents remain blank in free public trees.",
       "highlights": [
         "Adolphus × Mary Veronica married 8 Jan 1883, Wallaceburg",
-        "Grandparents: Alexandre Lauzon & Magdeleine Maillet (m. 1 Jun 1842 Tilbury)",
+        "Grandparents: Alexandre Lauzon & Magdeleine Maillet",
         "Children: Solomon Alex, Madeline, Peter Adolphus, Aubrey Samuel, Roy Clarence, infant 1903, Wilfred Joseph",
-        "Farm / R.R. #2 Wallaceburg–Becher area in WWI attestation papers"
+        "1918: Peter’s NOK = mother Mary Lozon, R.R. #2 Wallaceburg (Adolphus death date still open)",
+        "Mary Veronica Gore parents: still blank in free public trees"
       ],
       "sources": [
         {
@@ -338,6 +354,10 @@
         {
           "label": "Wallaceburg marriage event — Lozon × Gore 1883",
           "url": "https://classypages.com/FranksGenealogyPage/oxygen/evp36.htm"
+        },
+        {
+          "label": "Gathering Our Heroes — Peter Dulphy Lozon (NOK mother Mary)",
+          "url": "https://www.gatheringourheroes.ca/hero/lozon-p-d/"
         }
       ]
     },
@@ -384,12 +404,13 @@
         "1011292",
         "826851"
       ],
-      "summary": "Dolores Marie Altz (1930 Oakland County – 2005 Rochester Hills) was a daughter of Norman Joseph Altz and Rena Margaret La Pan. Her 2005 death notice lists siblings Jeanette (Charles) Benedict, Barbara (Gino) Tonin, Norman (Carol) Altz, Donna (Dan) Griffiths, Linda (Jerry) Griffin, Mary (Danny) Griffin, and Joseph (Rusty) Altz. Funeral Mass was at St. Mary’s of the Hills, Rochester Hills; burial Mt. Avon Cemetery.",
+      "summary": "Dolores Marie Altz (1930 Oakland County – 2005 Rochester Hills) was a daughter of Norman Joseph Altz and Rena Margaret La Pan (parents of Rena: John and Delia LaPan, per Zoa’s 2021 obituary). Her 2005 death notice lists siblings Jeanette (Charles) Benedict, Barbara (Gino) Tonin, Norman (Carol) Altz, Donna (Dan) Griffiths, Linda (Jerry) Griffin, Mary (Danny) Griffin, and Joseph (Rusty) Altz, and names her as niece of Zoa Cubba. Funeral Mass was at St. Mary’s of the Hills, Rochester Hills; burial Mt. Avon Cemetery. Rena’s Pinconning-area La Pan kin include sisters Zoa Cubba and Rosalle (Lapan) Dore (mother of William “Bill” Dore of Kawkawlin/Pinconning) and brother Joseph LaPan — confirming the La Pan siblings clustered in Bay County before the Altz branch settled Rochester.",
       "highlights": [
-        "Parents: Norman Joseph Altz & Rena Margaret La Pan",
-        "Siblings (with spouses from Dolores obituary): Jeanette (Charles) Benedict, Barbara (Gino) Tonin, Norman (Carol) Altz, Donna (Dan) Griffiths, Linda (Jerry) Griffin, Mary (Danny) Griffin, Joseph (Rusty) Altz",
-        "Dolores funeral: St. Mary’s of the Hills, Rochester Hills; interment Mt. Avon Cemetery",
-        "Grandchildren named in notice: David, Jeremy, Emily, Elizabeth, Ann, Nathan"
+        "Parents: Norman Joseph Altz & Rena Margaret La Pan (maternal grandparents John & Delia LaPan)",
+        "Siblings (Dolores death notice): Jeanette Benedict, Barbara Tonin, Norman Altz, Donna Griffiths, Linda Griffin, Mary Griffin, Joseph Altz",
+        "Niece of Zoa Cubba (La Pan aunt — see Zoa section)",
+        "Funeral Mass St. Mary’s of the Hills; burial Mt. Avon",
+        "La Pan sister Rosalle (Lapan) Dore of Pinconning/Kawkawlin (Bill Dore 2021 obit)"
       ],
       "sources": [
         {
@@ -399,6 +420,10 @@
         {
           "label": "Trees of Ancestry source — Dolores Crosier death notice",
           "url": "http://classypages.com/img/oxygen/src73.htm"
+        },
+        {
+          "label": "Pinconning Journal — William “Bill” Dore (mother Rosalle Lapan Dore)",
+          "url": "https://www.pinconningjournal.com/obituaries/william-%E2%80%9Cbill%E2%80%9D-dore"
         }
       ]
     },
@@ -729,13 +754,15 @@
         "fh-stephen-p-crosier",
         "fh-albert-crosier"
       ],
-      "summary": "Two daughters of John Henry Carmoney and Catherine Bair married two sons of Stephen Park Crosier and Minerva Lucy Howard. Sarah Ann Carmoney (11 Feb 1835 OH – 28 Jan 1911 Charlotte) married Stephen P. Crosier on 4 Jul 1854 in Eaton County. Her younger sister Mary M. Carmoney (9 Mar 1844 Mercer Co., OH – 13 May 1932 Charlotte) married Charles Crosier on 18 Jan 1865 in Eaton County — Ann’s direct line. Both couples settled in Charlotte; Maple Hill holds Crosier/Carmoney stones including Mary M., Sarah A., Stephen P., Freddie, Ada, Halbert, and an infant. Catherine Carmoney is also indexed at Maple Hill. The Ohio→Michigan Carmoney move and the Crosier Vermont→New York→Ohio→Michigan trail (Halifax/Somerset VT → Bainbridge NY → Sullivan OH → Charlotte MI) are the family’s mid-19th-century migration story.",
+      "summary": "Two daughters of John Henry Carmoney and Catherine Bair (1808–1861; daughter of Adam Bair, 1772–1833) married two sons of Stephen Park Crosier and Minerva Lucy Howard. Sarah Ann Carmoney (11 Feb 1835 OH – 28 Jan 1911 Charlotte) married Stephen P. Crosier on 4 Jul 1854 in Eaton County; their children include Minerva Catharine Crosier (1855–1912 Charlotte), William Henry Crosier (1858–1933 Albion), and Halbert Ball Crosier (1871–1956). Her younger sister Mary M. Carmoney (9 Mar 1844 Mercer Co., OH – 13 May 1932 Charlotte) married Charles Crosier on 18 Jan 1865 in Eaton County — Ann’s direct line. Mary and Charles’s children: Albert David, Ada Isabel (1867–1946 Charlotte), Cora Estelle (1869–1956; m. Silas Henry Sleater), and Fred B. (1871–1883). Both couples settled in Charlotte; Maple Hill Cemetery index lists Crosier Mary M., Crosier Sarah A., Crosier Ada B., and Carmoney Catherine among related stones.",
       "highlights": [
-        "Sarah Ann Carmoney × Stephen P. Crosier — 4 Jul 1854 Eaton MI",
-        "Mary M. Carmoney × Charles Crosier — 18 Jan 1865 Eaton MI (Ann’s line)",
-        "Parents: John Henry Carmoney & Catherine Bair; Stephen Park Crosier & Minerva Lucy Howard",
-        "Maple Hill: Mary M., Sarah A., Stephen P., Freddie, Ada B., Halbert B., infant Crosier; Catherine Carmoney",
-        "Migration: Crosiers VT → NY → Ashland Co. OH → Eaton Co. MI; Carmoneys OH → MI"
+        "Catherine Bair Carmoney (1808–1861), daughter of Adam Bair (1772–1833) — mother of the Carmoney sisters",
+        "Sarah Ann Carmoney × Stephen P. Crosier, 4 Jul 1854 Eaton Co.",
+        "Sarah’s children: Minerva Catharine (1855–1912), William Henry (1858–1933 Albion), Halbert Ball (1871–1956)",
+        "Mary M. Carmoney × Charles Crosier, 18 Jan 1865 Eaton Co. (Ann’s line)",
+        "Mary’s daughters who stayed in Charlotte: Ada Isabel (1867–1946); Cora Estelle Sleater (1869–1956)",
+        "Cora × Silas Henry Sleater, 31 Dec 1897 Charlotte; children Richard Bland Sleater & Margaret E. Sleater",
+        "Maple Hill index: Crosier Mary M.; Crosier Sarah A.; Crosier Ada B.; Carmoney Catherine"
       ],
       "sources": [
         {
@@ -757,6 +784,10 @@
         {
           "label": "Maple Hill Cemetery Index",
           "url": "https://www.miegs.org/CemeteryIndex/MapleHillWeb.pdf"
+        },
+        {
+          "label": "Trees of Ancestry — Cora Estelle Crosier × Sleater",
+          "url": "https://classypages.com/img/oxygen/asc5078.htm"
         }
       ]
     },
@@ -851,9 +882,11 @@
         "fh-magdeleine-maillet",
         "fh-adolphus-lozon"
       ],
-      "summary": "Adolphus Lozon’s parents Alexandre Lauzon (~1827) and Magdeleine Maillet (b. 11 Apr 1826) married in the St. Pierre / Raleigh–Tilbury East French Catholic corridor of Kent County, Ontario. Trees of Ancestry give the marriage as 1 Jun 1842 at St. Peter Tilbury; MesAieux / YourFolks indexes the same couple as Alexandre Lauson × Magdeleine Maillet in 1846 at Raleigh, ON — treat the year as unresolved between sources until a parish image is pulled. The Lozon/Lauzon spelling shift is normal in this border French community (Wallaceburg, Dover, Tilbury, Grande Pointe). A related Wallaceburg marriage (David Luzon, son of “Alex Luzon and Adeline Myers,” 1879) shows the same parental names anglicized (Myers ≈ Maillet), reinforcing that Adolphus’s generation sat inside a dense French-Ontarian kinship network rather than an isolated English farm family. Do not confuse this Alexandre (~1827) with the better-documented Alexandre Lauzon (1814–1893) of Sandwich/Grande Pointe who married Marie Catherine Martin — a different man in the same surname cluster.",
+      "summary": "Adolphus Lozon’s parents Alexandre Lauzon (~1827) and Magdeleine Maillet (b. 11 Apr 1826) married in the St. Pierre / Raleigh–Tilbury East French Catholic corridor of Kent County, Ontario. Trees of Ancestry give the marriage as 1 Jun 1842 at St. Peter Tilbury; MesAieux / YourFolks indexes the same couple as Alexandre Lauson × Magdeleine Maillet in 1846 at Raleigh, ON — treat the year as unresolved between sources until a parish image is pulled. WikiTree profiles for Magdeleine’s siblings Geneviève Maillet Labadie and George Maillet identify their parents as Joseph Maillet (23 May 1788 – 31 May 1873) and Charlotte Emery (30 Sep 1805 St-Joachim, Châteauguay, Québec – 17 Jun 1886), and list Magdelaine (Maillet) Lauzon among the siblings — so Magdeleine’s natal family is the Joseph Maillet × Charlotte Emery household of the Kent French corridor (not an unrelated Acadian Maillet line). The Lozon/Lauzon spelling shift is normal in this border French community. Do not confuse this Alexandre (~1827) with Alexandre Lauzon (1814–1893) of Sandwich/Grande Pointe who married Marie Catherine Martin.",
       "highlights": [
         "Alexandre Lauzon (~1827) × Magdeleine Maillet (b. 11 Apr 1826)",
+        "Magdeleine’s parents (WikiTree sibling cluster): Joseph Maillet (1788–1873) & Charlotte Emery (1805–1886)",
+        "Magdeleine’s sisters include Geneviève Maillet Labadie (1835–1912 Pain Court) and Angelique Charlotte Maillet Lauzon",
         "Marriage place: St. Pierre Tilbury / Raleigh Kent Co. corridor",
         "Date conflict: trees say 1 Jun 1842; MesAieux indexes 1846 Raleigh — unresolved",
         "Lozon/Lauzon/Luzon and Maillet/Myers spelling variants in Kent records",
@@ -876,6 +909,14 @@
         {
           "label": "WikiTree — David Lozon × Rosalie Hébert (Alex Luzon / Adeline Myers parents)",
           "url": "https://www.wikitree.com/wiki/Hebert-8276"
+        },
+        {
+          "label": "WikiTree — Geneviève Maillet Labadie (lists Magdelaine Lauzon as sister; parents Joseph Maillet × Charlotte Emery)",
+          "url": "https://www.wikitree.com/wiki/Maillet-156"
+        },
+        {
+          "label": "WikiTree — George Maillet (same parents; Magdelaine Lauzon sibling)",
+          "url": "https://www.wikitree.com/wiki/Maillet-289"
         }
       ]
     },
@@ -889,14 +930,16 @@
         "826851",
         "730562"
       ],
-      "summary": "Norman Altz appears in the 1948 Rochester (Avon Twp.) street directory alongside other residents at the 1421 address cluster — placing Dolores’s parents in Rochester when she was a teenager. Son Joseph Edward Altz (28 Nov 1951 Rochester – 23 Sep 2025 Lapeer), Dolores’s youngest brother, worked 20+ years as a millwright at American Axle in Detroit, later at Pontiac Truck and Bus and Bosch (Lake Orion). He collected Pontiac Fieros and model locomotives, volunteered at Holy Cross Youth Center (Saginaw) and Lapeer Hospital, and was buried from St. Lawrence Catholic Church, Utica. His 2025 obituary reconfirms parents Norman & Rena Altz and sisters including Dolores Crosier. Public trees still do not name Norman’s or Rena La Pan’s parents — that generation remains open.",
+      "summary": "Norman Altz appears in the 1948 Rochester (Avon Twp.) street directory alongside other residents at the 1421 address cluster — placing Dolores’s parents in Rochester when she was a teenager. Son Joseph Edward Altz (28 Nov 1951 Rochester – 23 Sep 2025 Lapeer), Dolores’s youngest brother, worked 20+ years as a millwright at American Axle in Detroit, later at Pontiac Truck and Bus and Bosch (Lake Orion). His 2025 obituary reconfirms parents Norman & Rena Altz and sisters including Dolores Crosier. A Cross in the Woods (Indian River) paver reads “IN MEMORY OF NORMAN AND RENA ALTZ.” Rena Margaret La Pan’s sisters are Zoa Cubba and Rosalle/Rosalie (Lapan) Dore of the Pinconning/Kawkawlin Sacred Heart farm community; Zoa’s 2021 Sullivan obituary also names brother Joseph LaPan and parents John and Delia LaPan. Norman Joseph Altz’s parents remain open in free sources.",
       "highlights": [
         "Norman Altz in 1948 Rochester/Avon directory (1421 address cluster)",
         "Joseph Edward Altz — millwright, American Axle Detroit; later Pontiac Truck & Bus / Bosch Lake Orion",
-        "Passions: Pontiac Fieros, model locomotives; GM retiree breakfasts",
-        "Funeral Mass St. Lawrence Catholic Church, Utica; burial Stiles Cemetery",
         "Obituary confirms Norman & Rena; sisters Barbara Tonin, Jeanette Benedict, Dolores Crosier",
-        "Still open: Norman Joseph Altz and Rena Margaret La Pan parents / immigration"
+        "Cross in the Woods paver: IN MEMORY OF NORMAN AND RENA ALTZ",
+        "Rena’s siblings: Zoa Cubba; Rosalle/Rosalie (Lapan) Dore; Joseph LaPan",
+        "Rena’s parents: John LaPan (1875–1954) × Delia Salois (1874–1952), Pinconning",
+        "Rena’s maternal grandparents: Antoine Salois × Zoé Forcier (Québec → Kawkawlin ~1879)",
+        "Still open: Norman Joseph Altz parents’ full names; John LaPan’s parents"
       ],
       "sources": [
         {
@@ -910,6 +953,14 @@
         {
           "label": "Trees of Ancestry — Altz × La Pan children",
           "url": "https://classypages.com/img/oxygen/asc70.htm"
+        },
+        {
+          "label": "Cross in the Woods paver database — Norman and Rena Altz",
+          "url": "https://crossinthewoods.com/paver-database/"
+        },
+        {
+          "label": "classypages — Dolores death notice (niece of Zoa Cubba)",
+          "url": "http://classypages.com/img/oxygen/src73.htm"
         }
       ]
     },
@@ -936,6 +987,277 @@
       ]
     },
     {
+      "id": "minerva-howard-crosier",
+      "title": "Minerva Lucy Howard — mother of Charles Crosier",
+      "line": "Crosier",
+      "status": "confirmed",
+      "personIds": [
+        "fh-minerva-howard",
+        "fh-stephen-park-crosier",
+        "fh-charles-crosier",
+        "fh-samuel-howard",
+        "fh-clarinda-denison"
+      ],
+      "summary": "Minerva Lucy Howard (31 May 1803 Brimfield, Massachusetts – 26 Dec 1874 Sullivan, Ohio) married Stephen Park Crosier (27 Jun 1802 Halifax, Vermont – 23 Sep 1874 Sullivan, Ohio) on 18 Mar 1822 in Somerset, Vermont. Trees identify her parents as Samuel Howard and Clarinda Denison. Their children included Stephen P. Crosier (1827–1891 Charlotte; Civil War, 12th Michigan) and Charles Crosier (29 Dec 1838 Sullivan, OH – 15 Sep 1917 Charlotte; Ann’s 3×-great-grandfather). Both Minerva and Stephen Park are buried at Southview Cemetery, Sullivan, Ashland County, Ohio (Find A Grave #41145545 / #41145544). She is the woman who carried the Howard line into the Crosier generation that later settled Charlotte, Michigan.",
+      "highlights": [
+        "Minerva Lucy Howard: 31 May 1803 Brimfield, MA – 26 Dec 1874 Sullivan, OH",
+        "Married Stephen Park Crosier 18 Mar 1822, Somerset, VT",
+        "Parents (trees): Samuel Howard & Clarinda Denison",
+        "Sons on Ann’s chart: Stephen P. (1827–1891) and Charles (1838–1917)",
+        "Burial: Southview Cemetery, Sullivan, Ashland Co., OH (FAG #41145545)",
+        "Family moved Somerset VT → Bainbridge NY → Sullivan OH before Charles’s Michigan generation"
+      ],
+      "sources": [
+        {
+          "label": "Descendants of John Crosier — Minerva Lucy Howard notes",
+          "url": "http://www.classypages.com/FranksGenealogyPage/DescendantFiles/Descendants%20of%20John%20Crosier%20-%201737.pdf"
+        },
+        {
+          "label": "Trees of Ancestry — Stephen Park Crosier × Minerva Howard children",
+          "url": "https://classypages.com/img/oxygen/n325.htm"
+        },
+        {
+          "label": "Trees of Ancestry — Minerva Lucy Howard household",
+          "url": "http://classypages.com/img/oxygen/asc1920.htm"
+        }
+      ]
+    },
+    {
+      "id": "mary-carmoney-daughters",
+      "title": "Mary M. Carmoney’s daughters — Ada Isabel & Cora Estelle",
+      "line": "Crosier",
+      "status": "confirmed",
+      "personIds": [
+        "fh-mary-carmoney",
+        "fh-ada-crosier",
+        "fh-cora-crosier",
+        "fh-charles-crosier",
+        "fh-albert-crosier"
+      ],
+      "summary": "Besides Albert David (Ann’s line), Mary M. Carmoney Crosier and Charles Crosier raised two daughters who stayed in the Charlotte area. Ada Isabel Crosier (1867 Eaton County – 1946 Charlotte) appears in Maple Hill Cemetery as Crosier Ada B. Cora Estelle Crosier (22 Jul 1869 Charlotte – 1956) married Silas Henry Sleater (Feb 1854 Ohio – 28 Dec 1917) on 31 Dec 1897 in Charlotte; their children include Richard Bland Sleater (3 Oct 1898 Charlotte – 5 Mar 1977; m. Hazel Murray 28 Nov 1925 Jackson) and Margaret E. Sleater (b. 5 Aug 1900 Charlotte; later Pendleton in trees). A younger brother Fred B. Crosier (1871–1883) died in childhood in Charlotte. These sisters are Albert David’s siblings — aunts/uncles to Jerome Frederick Crosier.",
+      "highlights": [
+        "Ada Isabel Crosier: 1867 Eaton Co. – 1946 Charlotte (Maple Hill: Crosier Ada B.)",
+        "Cora Estelle Crosier: 22 Jul 1869 Charlotte – 1956",
+        "Cora × Silas Henry Sleater, 31 Dec 1897, Charlotte",
+        "Cora’s children: Richard Bland Sleater (1898–1977); Margaret E. Sleater (b. 1900)",
+        "Fred B. Crosier (1871–1883 Charlotte) — childhood death",
+        "These are Albert David Crosier’s sisters (Jerome’s aunts)"
+      ],
+      "sources": [
+        {
+          "label": "Trees of Ancestry — Mary M. Carmoney children",
+          "url": "https://classypages.com/img/oxygen/n214.htm"
+        },
+        {
+          "label": "Trees of Ancestry — Cora Estelle Crosier × Sleater",
+          "url": "http://classypages.com/img/oxygen/n1155.htm"
+        },
+        {
+          "label": "Maple Hill Cemetery Index — Crosier Ada B. / Mary M. / Sarah A.",
+          "url": "https://www.miegs.org/CemeteryIndex/MapleHillWeb.pdf"
+        }
+      ]
+    },
+    {
+      "id": "rose-mary-annetta-crosier",
+      "title": "Rose Mary & Annetta Crosier — Jerome’s California sisters",
+      "line": "Crosier",
+      "status": "confirmed",
+      "personIds": [
+        "fh-rose-mary-crosier",
+        "fh-annetta-mary-crosier",
+        "581371",
+        "fh-marion-maher",
+        "fh-albert-crosier"
+      ],
+      "summary": "Two of Jerome Frederick Crosier’s sisters built adult lives in California after the Albert/Marion Crosier migration west. Rose Mary Crosier (28 Jun 1908 Michigan – 11 Aug 2000 San Francisco) married Louis Francis Armone/Arnone (15 Nov 1904 Pueblo, Colorado – 14 Feb 1978 San Francisco). Their children include Louis Francis Armone (6 Aug 1927 Los Angeles Co. – 2 Jan 2009 Cotati), Charles Bryan Arnone (1928–2011), and Alma Rose Arnone. Rose Mary is buried at San Francisco National Cemetery (Sec. PPNAW, Site 440) as “Arnone, Rose Mary Crosier … Wife of Louis F Arnone.” Annetta Mary Crosier (21 Dec 1910 Jackson, Michigan – 21 Sep 1985 Wofford Heights, Kern Co., California) married Lyle Dorsett (1905–1970) on 2 Nov 1929 in Los Angeles; trees list children Gayle John Dorsett (1928–2007), Edward, Lyle Louis, and Bud. She later married Clyde Jerome Casper (1907–1992) on 22 Jul 1972 in Kern County.",
+      "highlights": [
+        "Rose Mary Crosier Arnone: 28 Jun 1908 MI – 11 Aug 2000 San Francisco",
+        "Husband: Louis Francis Armone/Arnone (1904 Pueblo, CO – 1978 San Francisco)",
+        "Children: Louis Francis (1927–2009 Cotati), Charles Bryan (1928–2011), Alma Rose",
+        "Burial: San Francisco National Cemetery, Sec. PPNAW Site 440 (wife of Louis F Arnone)",
+        "Annetta Mary Crosier: 21 Dec 1910 Jackson – 21 Sep 1985 Wofford Heights, Kern Co.",
+        "Annetta × Lyle Dorsett, 2 Nov 1929 Los Angeles; children Gayle John, Edward, Lyle Louis, Bud",
+        "Annetta × Clyde Jerome Casper, 22 Jul 1972 Kern Co."
+      ],
+      "sources": [
+        {
+          "label": "Trees of Ancestry — Rose Mary Crosier × Louis Armone",
+          "url": "https://classypages.com/img/oxygen/n398.htm"
+        },
+        {
+          "label": "Trees of Ancestry — Louis Francis Armone family",
+          "url": "https://classypages.com/img/oxygen/n25.htm"
+        },
+        {
+          "label": "Interment.net — San Francisco National Cemetery (Arnone, Rose Mary Crosier)",
+          "url": "https://www.interment.net/united-states/california/san-francisco/san-francisco-national-cemetery/records.php?page=8"
+        },
+        {
+          "label": "Trees of Ancestry — Annetta Mary Crosier Dorsett/Casper",
+          "url": "https://classypages.com/img/oxygen/n312.htm"
+        }
+      ]
+    },
+    {
+      "id": "women-research-pass",
+      "title": "Women of the tree — Aug 2026 research pass",
+      "line": "Research",
+      "status": "confirmed",
+      "personIds": [],
+      "summary": "A dedicated pass on ancestral women filled several gaps that earlier military-heavy digs left thin: Magdeleine Maillet’s parents (Joseph Maillet × Charlotte Emery), Minerva Lucy Howard as Charles Crosier’s mother, Mary M. Carmoney’s Charlotte daughters Ada Isabel and Cora Estelle Sleater, and Jerome’s California sisters Rose Mary Arnone and Annetta Dorsett Casper. Still thin online: Josephine C. Crosier’s maiden name, Mary Veronica Gore’s parents, Rose Ann Bowles’s parents/exact dates, Helen C. Staub’s maiden name, Rena Margaret La Pan’s parents, and Madeline Phoebe Lozon’s 1925 Michigan death-certificate cause.",
+      "highlights": [
+        "Added / expanded: Magdeleine Maillet parents; Minerva Howard; Mary Carmoney’s daughters; Rose Mary & Annetta",
+        "Still open (women): Josephine Crosier maiden; Mary Veronica Gore parents; Rose Ann Bowles parents",
+        "Still open (women): Helen C. Staub maiden; Madeline Lozon death certificate cause; Norman Altz parents (Rena’s parents = John & Delia LaPan)",
+        "Living women (Karolyn, Emily, Elizabeth, Ann): rely on family memory more than new public hits this pass"
+      ],
+      "sources": []
+    },
+    {
+      "id": "dolores-altz-crosier",
+      "title": "Dolores Marie Altz Crosier — Ann’s grandmother",
+      "line": "Crosier",
+      "status": "confirmed",
+      "personIds": [
+        "730562",
+        "705532",
+        "fh-rena-lapan",
+        "fh-norman-altz"
+      ],
+      "summary": "Dolores Marie Altz Crosier (22 Oct 1930, Oakland County – 11 Dec 2005, Rochester Hills) is Karolyn’s mother and Ann’s maternal grandmother. She married Frederick Charles Crosier on 17 May 1952 and raised six children in the Rochester Hills area. The only free newspaper-style entry found is her michigan.com death notice (published 12 Dec 2005; mirrored on classypages): it lists her husband, all six children (with Dawn and Gerald named as in-laws), six grandchildren including Ann, great-granddaughter Samantha, seven surviving siblings with spouses, and aunt Zoa Cubba. That notice is the kind of paid death-column text that typically also ran in Detroit Free Press / Oakland Press obituary pages; no separate feature or community-news story about Dolores turned up free. Catholic funeral rites were at St. Mary’s of the Hills on John R in Rochester Hills (14 Dec 2005), burial Mount Avon Cemetery. Family memory adds cafeteria work and quilting; those details are not in the published notice. Aunt Zoa’s obituary says Zoa cooked for Rochester Schools at Hamlin Elementary — a useful lead for which cafeteria Dolores may have worked in, still unconfirmed.",
+      "highlights": [
+        "Birth / death: 22 Oct 1930 Oakland Co. – 11 Dec 2005 Rochester Hills (age 75)",
+        "Married Frederick Charles Crosier 17 May 1952",
+        "Children: Kathleen, Kenneth, Kerry (Dawn), Kevin, Karolyn (Gerald) Krause, Kristopher",
+        "Grandchildren named in notice: David, Jeremy, Emily, Elizabeth, Ann, Nathan",
+        "Great-grandchild Samantha (named 2005)",
+        "Parents: Norman Joseph Altz & Rena Margaret La Pan",
+        "Newspaper entry found: michigan.com death notice 12 Dec 2005 (death-column style; no feature story found free)",
+        "Funeral Mass St. Mary’s of the Hills, 2675 John R Rd., Rochester Hills (14 Dec 2005)",
+        "Burial Mount Avon Cemetery, Rochester",
+        "Niece of Zoa Cubba (see great-aunt Zoa section)",
+        "Family memory only: school cafeteria work; quilting (school/group names open; Hamlin is a lead via Zoa)"
+      ],
+      "sources": [
+        {
+          "label": "classypages — Dolores Marie Altz Crosier michigan.com death notice",
+          "url": "http://classypages.com/img/oxygen/src73.htm"
+        },
+        {
+          "label": "Potere-Modetz — Dolores Crosier (22 Oct 1930 – 11 Dec 2005)",
+          "url": "https://www.modetzfuneralhomes.com/obituaries/Dolores-Crosier?obId=21349"
+        },
+        {
+          "label": "Trees of Ancestry — Dolores Marie Altz family",
+          "url": "http://classypages.com/img/oxygen/n370.htm"
+        },
+        {
+          "label": "St. Mary of the Hills Catholic Church",
+          "url": "https://smoth.org/"
+        }
+      ]
+    },
+    {
+      "id": "zoa-cubba-lapan",
+      "title": "Great-aunt Zoa Cubba (La Pan)",
+      "line": "Crosier",
+      "status": "confirmed",
+      "personIds": [
+        "fh-zoa-cubba",
+        "fh-rena-lapan",
+        "730562"
+      ],
+      "summary": "Ann’s great-aunt Zoe is Zoa Cubba (née LaPan), confirmed sister of Rena Margaret La Pan Altz. Dolores’s 2005 death notice named Dolores as “Niece of Zoa Cubba.” The full Sullivan Funeral Directors obituary (archived Jan 2022 on Wayback) locks the biography: born 24 Jul 1914 in Pinconning to John and Delia LaPan; died 12 Aug 2021 in Rochester Hills at age 107; sisters late Rosalie Dore and late Rena Altz; brother late Joseph LaPan; wife of the late Sam Cubba (d. 1991); mother of Louis (Rae) Cubba, Zoa Scott, the late Michael Cubba, and the late Samuel (late Barbara) Cubba; many grandchildren and 27 great-grandchildren. Life sketch: strong Catholic faith; sewing, tatting, gardening, canning; church volunteering and election-poll work; cook for Rochester School Systems at Hamlin Elementary. Services: visitation 17 Aug 2021 at Wm. Sullivan & Son, Utica; funeral Mass 18 Aug 2021 at St. Lawrence Catholic Church, Utica; burial St. Lawrence Cemetery. Memorials to American Diabetes Association. That funeral-home text is the newspaper-style notice Ann may have seen in Aug 2021 local death columns (Macomb/Oakland papers often reprint Sullivan notices); Dolores’s 2005 notice is the other free newspaper hit that names her.",
+      "highlights": [
+        "24 Jul 1914 Pinconning – 12 Aug 2021 Rochester Hills (age 107)",
+        "Parents: John LaPan (1875–1954) & Delia Salois LaPan (1874–1952), Pinconning / St. Michaels",
+        "Maternal grandparents: Antoine (Anthony) Salois × Zoé Forcier — Québec → Kawkawlin ~1879",
+        "Siblings: Rosalie/Rosalle Dore; Rena Altz; Joseph LaPan",
+        "Husband: Sam Cubba (d. 1991); children Louis (Rae), Zoa Scott, Michael (late), Samuel (late)",
+        "Cook for Rochester Schools at Hamlin Elementary",
+        "Church volunteering, election polls; sewing, tatting, gardening, canning",
+        "Funeral Mass St. Lawrence Catholic Church, Utica; burial St. Lawrence Cemetery",
+        "Named earlier in Dolores Crosier’s 2005 death notice as aunt"
+      ],
+      "sources": [
+        {
+          "label": "Wm. Sullivan & Son — Zoa Cubba obituary (Wayback 25 Jan 2022)",
+          "url": "https://web.archive.org/web/20220125222831/https://www.sullivanfuneraldirectors.com/obituaries/Zoa-Cubba/"
+        },
+        {
+          "label": "Sullivan Funeral Directors — Zoa Cubba (live page)",
+          "url": "https://www.sullivanfuneraldirectors.com/obituaries/zoa-cubba/"
+        },
+        {
+          "label": "classypages — Dolores death notice naming Zoa Cubba",
+          "url": "http://classypages.com/img/oxygen/src73.htm"
+        },
+        {
+          "label": "Pinconning Journal — William “Bill” Dore (mother Rosalle Lapan Dore)",
+          "url": "https://www.pinconningjournal.com/obituaries/william-%E2%80%9Cbill%E2%80%9D-dore"
+        },
+        {
+          "label": "Find A Grave — Delia Salois LaPan (parents Anthony Salois & Zoe Forcia)",
+          "url": "https://www.findagrave.com/memorial/172783389/delia-lapan"
+        }
+      ]
+    },
+    {
+      "id": "michigan-settlers-dna",
+      "title": "AncestryDNA export — journeys mapped to the tree",
+      "line": "Research",
+      "status": "confirmed",
+      "personIds": [
+        "fh-rena-lapan",
+        "730562",
+        "fh-zoa-cubba",
+        "fh-magdeleine-maillet",
+        "fh-madeline-lozon"
+      ],
+      "summary": "Ann’s AncestryDNA export (Aug 2026) locks the “original Michigan settlers” hint as the ancestral journey Eastern Michigan & Southeastern Missouri French Settlers, with sub-regions Detroit | Chatham | St. Clair and Lake St. Clair Area. That journey lines up with the French-Canadian Crosier–Lozon / La Pan–Salois cluster, not the later German Krause/Altz/Staub families. Ethnicity estimate: French Canada 18% (Québec 14% + Acadia 4%), England 28%, Celtic & Gaelic 28% (Munster Ireland 26%), Western Europe / Southern Germanic 11%, Central & Eastern Europe 12%, plus small Balkan/Nordic slices. Journey map: (1) Eastern Michigan French Settlers → Lozon/Lauzon of Chatham–Wallaceburg, Kent Co., Ontario (Adolphus Lozon b. ~1861 Chatham; Madeline married into Michigan and died Detroit 1925) plus the Bay County Salois→La Pan French-Canadian farm/lumber settlement (Antoine Salois × Zoé Forcier imm. ~1879 Kawkawlin; Delia → Rena → Dolores). (2) Southwestern Quebec French Settlers + Southwestern Quebec, New York & Vermont French Settlers (Montérégie; Montérégie & Lake St. Clair, Ontario) → Salois/Forcier Yamaska–St-François-du-Lac / Sorel depth and Magdeleine Maillet’s mother Charlotte Emery (b. St-Joachim, Châteauguay — Montérégie), feeding the same Lake St. Clair Ontario Lozon cluster. (3) Ohio & Indiana Settlers (Northwestern Ohio & Michigan Border) → Crosier (Sullivan, Ashland Co., OH) and Carmoney (Ohio → Eaton Co., MI by 1854). Acadia 4% matches WikiTree notes of Acadian great-grandparents on the Salois line (Grand-Pré / Pisiguit). Munster Ireland 26% is still unplaced in a locked ancestor — Maher/Bowles/Gore and Helen Staub’s possible Collins line are the open Irish leads.",
+      "highlights": [
+        "Journey that matches “Michigan settlers”: Eastern Michigan & Southeastern Missouri French Settlers (Detroit | Chatham | St. Clair; Lake St. Clair Area)",
+        "Chatham sub-region → Lozon/Lauzon Kent Co., Ontario (Adolphus; Wallaceburg; Madeline → Detroit 1925)",
+        "Eastern Michigan FC farm wave → Salois/Forcier → Delia LaPan → Rena → Dolores → Karolyn → Ann",
+        "SW Quebec / Montérégie journeys → Yamaska Salois–Forcier + Châteauguay Emery (Maillet line)",
+        "Ohio & Indiana Settlers → Crosier (Sullivan OH) + Carmoney (OH → Eaton/Charlotte MI)",
+        "Ethnicity lock: French Canada 18% (Québec 14% + Acadia 4%); England 28%; Munster Ireland 26%; Germanic/Central Europe ~23% combined",
+        "Acadia 4% consistent with Salois WikiTree Acadian great-grandparent links",
+        "Still open: which ancestors carry the Munster Ireland 26% (Maher/Bowles/Gore / Staub–Collins leads)"
+      ],
+      "sources": [
+        {
+          "label": "Find A Grave — Delia Salois LaPan (1874–1952), St. Michaels, Pinconning",
+          "url": "https://www.findagrave.com/memorial/172783389/delia-lapan"
+        },
+        {
+          "label": "FamilySearch — Delia Salois (m. John LaPan 14 Jul 1897 Linwood)",
+          "url": "https://ancestors.familysearch.org/en/LBY1-97H/delia-salois-1874-1952"
+        },
+        {
+          "label": "WikiTree — Antoine Salois (Yamaska → Kawkawlin)",
+          "url": "https://www.wikitree.com/wiki/Salois-67"
+        },
+        {
+          "label": "WikiTree — Zoé Marie Forcier Salois",
+          "url": "https://www.wikitree.com/wiki/Forcier-130"
+        },
+        {
+          "label": "Find A Grave — Anthony Salois (1829–1916), Calvary, Kawkawlin",
+          "url": "https://www.findagrave.com/memorial/48010109/anthony-salois"
+        },
+        {
+          "label": "Trees of Ancestry — Magdeleine Maillet / Alexandre Lauzon (Emery, Châteauguay)",
+          "url": "http://classypages.com/img/oxygen/n370.htm"
+        },
+        {
+          "label": "Genealogy Trails — Bay County history (French Canadian pioneers)",
+          "url": "https://genealogytrails.com/mich/bay/books/History_of_Bay_ch6.html"
+        }
+      ]
+    },
+    {
       "id": "open-questions",
       "title": "Still needs family memory (not found cleanly online)",
       "line": "Research",
@@ -950,27 +1272,32 @@
       "highlights": [
         "Otto Krause parents / siblings (still blank beyond Geraldine’s Staub natal family)",
         "Geraldine Staub Krause exact death date / obituary / Somerset store name",
+        "Helen C. Staub (Geraldine’s mother) maiden surname",
         "Otto Krause postwar job / burial place (SSDI death 6 May 1999 locked; AAM 15 Apr conflict)",
-        "Frederick Crosier WWII: draft card / Army or Navy enlistment / unit / ship / discharge (NARA AAD, Fold3, Ancestry, NPRC)",
+        "Frederick Crosier WWII: draft card / Army or Navy enlistment / unit / ship / discharge",
         "Frederick railroad job title / years (and whether he started under NYC before Penn Central)",
-        "Frederick Universal Computer Systems role / years (confirm Houston UCS/Reynolds vs local firm)",
+        "Frederick Universal Computer Systems role / years",
         "Frederick burial plot (Modetz text silent; check Mt. Avon / Rochester Hills clerk)",
         "Madeline Phoebe Lozon Crosier Michigan death certificate (cause; same-day birth link)",
         "Confirm or reject 1948 “Fred J. Crosier” directory hit as Frederick Charles",
-        "Geraldine’s exact Somerset Collection store name",
-        "Which school cafeteria Dolores worked in",
-        "Josephine Crosier’s maiden surname",
+        "Josephine Crosier’s maiden surname (stepmother who raised Frederick)",
         "Gerald college / high school (Baker memory now attributed to Jeremy)",
         "Elizabeth Ann online teaching master’s school/program",
         "Ann Krause 2016 All-County tennis Macomb Daily clip (digitized copy)",
         "Exact birth dates for Jeremy, Emily, Elizabeth",
-        "Gerald & Karolyn exact marriage date/year (Ann does not remember; ask parents)",
-        "Which church they married in (Ann does not know; ask parents)",
+        "Gerald & Karolyn exact marriage date/year / church (ask parents)",
         "Charles Crosier — confirm 42nd OVI Co. H (“Crozier”) via pension/service file",
         "Alexandre Lauzon × Magdeleine Maillet marriage year (1842 vs 1846) — pull parish image",
         "Mary Veronica Gore parents (still blank in public trees)",
-        "Norman Joseph Altz & Rena Margaret La Pan parents / earlier generations",
-        "Adolphus Lozon death date (Peter 1918 NOK = mother Mary)"
+        "Rose Ann Bowles parents / exact birth–death dates (Marion Maher’s mother)",
+        "Adolphus Lozon death date (Peter 1918 NOK = mother Mary)",
+        "Which school cafeteria Dolores worked in (family memory; aunt Zoa cooked at Hamlin Elementary — ask if same school)",
+        "Dolores quilting group / church guild name (family memory)",
+        "Norman Joseph Altz parents’ names (Rena’s parents = John LaPan × Delia Salois; Delia’s parents Antoine Salois × Zoé Forcier locked)",
+        "John LaPan (1875–1954) parents / birthplace (paternal La Pan line still thin)",
+        "Which ancestors carry Munster Ireland 26% (Maher / Bowles / Gore / Helen Staub–Collins leads)",
+        "Push Salois Acadian great-grandparent names from WikiTree into confirmed sources",
+        "Whether Zoa’s Aug 2021 notice also ran in Macomb Daily / Oakland Press print death columns (Ann’s clip)"
       ],
       "sources": []
     }
