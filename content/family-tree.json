@@ -88,7 +88,7 @@
         "year": 1989,
         "month": null,
         "day": null,
-        "known": false
+        "known": true
       },
       "death": null,
       "gender": "female"
@@ -106,7 +106,7 @@
         "year": 1992,
         "month": null,
         "day": null,
-        "known": false
+        "known": true
       },
       "death": null,
       "gender": "female"

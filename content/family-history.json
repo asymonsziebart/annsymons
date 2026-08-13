@@ -1,7 +1,99 @@
 {
   "title": "Family History",
-  "updatedAt": "2026-08-07",
+  "updatedAt": "2026-08-13",
   "note": "Public genealogy trees that match Ann’s known family lines are treated as confirmed unless they conflict with family memory. Story details that need family knowledge (jobs, photos, unit/branch unknown online) stay marked needs_review. Aug 2026 digs add Civil War Crosiers, Carmoney sister marriages, Canada-born Marion Maher, Lozon WWI color, Altz Rochester/Joseph millwright finds, Otto SSDI dates + Rhine mission, and Geraldine Staub natal family. Sources are public web records.",
+  "questions": [
+    {
+      "id": "otto-parents-siblings",
+      "category": "Krause family",
+      "prompt": "What do you remember about Otto Krause’s parents and siblings? Names, nicknames, where they lived, and any stories all help."
+    },
+    {
+      "id": "geraldine-death-store",
+      "category": "Krause family",
+      "prompt": "Do you know Geraldine Staub Krause’s exact death date, where her obituary might be, or the name of the store where she worked at Somerset?"
+    },
+    {
+      "id": "otto-postwar",
+      "category": "Krause family",
+      "prompt": "What work did Otto Krause do after World War II, and where was he buried?"
+    },
+    {
+      "id": "frederick-military",
+      "category": "Crosier family",
+      "prompt": "What do you know about Frederick Crosier’s World War II service—branch, unit, ship, rank, duties, locations, or discharge?"
+    },
+    {
+      "id": "frederick-railroad",
+      "category": "Crosier family",
+      "prompt": "What was Frederick Crosier’s railroad job, which railroad or yard did he work for, and about what years did he work there?"
+    },
+    {
+      "id": "frederick-ucs",
+      "category": "Crosier family",
+      "prompt": "What did Frederick Crosier do for Universal Computer Systems, where was the company located, and about what years did he work there?"
+    },
+    {
+      "id": "frederick-burial",
+      "category": "Crosier family",
+      "prompt": "Where was Frederick Crosier buried?"
+    },
+    {
+      "id": "fred-directory",
+      "category": "Crosier family",
+      "prompt": "Could the “Fred J. Crosier” listed at house number 312 in the 1948 Rochester directory be Frederick Charles Crosier? Do you recognize that address or middle initial?"
+    },
+    {
+      "id": "dolores-cafeteria",
+      "category": "Crosier family",
+      "prompt": "Which school cafeteria did Dolores Crosier work in, and about what years did she work there?"
+    },
+    {
+      "id": "josephine-maiden-name",
+      "category": "Crosier family",
+      "prompt": "Do you know Josephine Crosier’s maiden surname or anything about her parents?"
+    },
+    {
+      "id": "gerald-college",
+      "category": "Your family",
+      "prompt": "Which college did Gerald attend, what did he study, and about when did he graduate?"
+    },
+    {
+      "id": "elizabeth-masters",
+      "category": "Your family",
+      "prompt": "Which school and program did Elizabeth use for her online teaching master’s degree, and about when did she finish?"
+    },
+    {
+      "id": "children-birth-dates",
+      "category": "Your family",
+      "prompt": "What are the exact birth dates (month, day, and year) for Jeremy, Emily, and Elizabeth?"
+    },
+    {
+      "id": "gerald-karolyn-wedding",
+      "category": "Your family",
+      "prompt": "What was the exact date or year of your wedding to Gerald?"
+    },
+    {
+      "id": "gerald-karolyn-church",
+      "category": "Your family",
+      "prompt": "Which church and city were you and Gerald married in? Is there anything about the wedding you would like preserved?"
+    },
+    {
+      "id": "mary-gore-parents",
+      "category": "Earlier generations",
+      "prompt": "Do you know the names of Mary Veronica Gore’s parents or anything about her family?"
+    },
+    {
+      "id": "altz-lapan-parents",
+      "category": "Earlier generations",
+      "prompt": "Do you know anything about Norman Joseph Altz’s parents or Rena Margaret La Pan’s parents and earlier family?"
+    },
+    {
+      "id": "other-memories",
+      "category": "Anything else",
+      "prompt": "What other family stories, jobs, schools, homes, traditions, corrections, or memories should be added to the family history?"
+    }
+  ],
   "sections": [
     {
       "id": "otto-wwii",
@@ -501,9 +593,9 @@
         "265809",
         "543356"
       ],
-      "summary": "Ann’s older siblings (family-confirmed). All four Krause kids attended Sterling Heights High School (Warren Consolidated Schools). Emily and Ann were also selected into the Macomb Mathematics Science Technology Center (MMSTC) at Butcher Educational Center in Warren — a competitive half-day math/science/tech magnet; home-school courses stayed at Sterling Heights. Ages: Jeremy b. 1986 (confirmed by family); Emily ~37, Elizabeth ~34 from people-search (Ann b. 1997). Jeremy — Target backroom trainer (15 Mile & Dequindre) since 2008; Baker College B.B.A. ~2010–2016 (likely the Baker memory earlier attributed to Gerald). Emily — Sterling Heights valedictorian, strong track athlete, full-ride to Central Michigan University; CMU triple-major B.S. in Statistics, Mathematics, and Actuarial Science (~2007–2011), then M.A. Mathematics (~2011–2012); grad teaching assistant for Intermediate Algebra; co-author of SIAM Undergraduate Research Online “Spread of a Rumor” (2013); Dialer Analyst at Credit Acceptance (Southfield) from ~2015; spouse Kwame Larry. Elizabeth Ann — Saginaw Valley State University teaching degree, then an online master’s in teaching (program/school still open); teaches gym and art at Holly Elementary (Holly Area Schools); lives in Pontiac; single. A Holly Area Schools elementary art page lists Miss Krause among teacher contacts, matching family memory. Ann also attended SVSU (Computer & Information Sciences, ~2016–2020), overlapping the SVSU years with Tim (football) and Elizabeth (teaching).",
+      "summary": "Ann’s older siblings (family-confirmed). All four Krause kids attended Sterling Heights High School (Warren Consolidated Schools). Emily and Ann were also selected into the Macomb Mathematics Science Technology Center (MMSTC) at Butcher Educational Center in Warren — a competitive half-day math/science/tech magnet; home-school courses stayed at Sterling Heights. Birth years confirmed by family: Jeremy 1986, Emily 1989, Elizabeth 1992, and Ann 1997. Jeremy — Target backroom trainer (15 Mile & Dequindre) since 2008; Baker College B.B.A. ~2010–2016 (likely the Baker memory earlier attributed to Gerald). Emily — Sterling Heights valedictorian, strong track athlete, full-ride to Central Michigan University; CMU triple-major B.S. in Statistics, Mathematics, and Actuarial Science (~2007–2011), then M.A. Mathematics (~2011–2012); grad teaching assistant for Intermediate Algebra; co-author of SIAM Undergraduate Research Online “Spread of a Rumor” (2013); Dialer Analyst at Credit Acceptance (Southfield) from ~2015; spouse Kwame Larry. Elizabeth Ann — Saginaw Valley State University teaching degree, then an online master’s in teaching (program/school still open); teaches gym and art at Holly Elementary (Holly Area Schools); lives in Pontiac; single. A Holly Area Schools elementary art page lists Miss Krause among teacher contacts, matching family memory. Ann also attended SVSU (Computer & Information Sciences, ~2016–2020), overlapping the SVSU years with Tim (football) and Elizabeth (teaching).",
       "highlights": [
-        "Birth order / ages: Jeremy (1986, confirmed by family), Emily (~1989), Elizabeth (~1992), Ann (1997)",
+        "Birth order / years (confirmed by family): Jeremy (1986), Emily (1989), Elizabeth (1992), Ann (1997)",
         "Home high school (all four siblings): Sterling Heights High School (Stallions)",
         "MMSTC / Butcher Educational Center (Warren): Emily and Ann selected into Macomb Mathematics Science Technology Center",
         "Jeremy: Target backroom trainer, Troy MI area (15 & Dequindre), since Aug 2008",

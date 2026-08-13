@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getFamilyHistory } from "@/lib/familyHistory";
+import FamilyHistoryQuestionnaire from "./FamilyHistoryQuestionnaire";
 
 export const metadata = {
   title: "Family History | Admin",
@@ -40,8 +41,12 @@ export default async function FamilyHistoryAdminPage() {
         </p>
       </header>
 
+      <FamilyHistoryQuestionnaire questions={history.questions} />
+
       <div className="mt-10 space-y-10">
-        {history.sections.map((section) => (
+        {history.sections
+          .filter((section) => section.id !== "open-questions")
+          .map((section) => (
           <article
             key={section.id}
             id={section.id}
@@ -116,7 +121,7 @@ export default async function FamilyHistoryAdminPage() {
               </div>
             ) : null}
           </article>
-        ))}
+          ))}
       </div>
     </div>
   );

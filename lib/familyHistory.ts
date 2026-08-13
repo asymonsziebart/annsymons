@@ -11,6 +11,12 @@ export type FamilyHistoryVerbatimEntry = {
   paragraphs: string[];
 };
 
+export type FamilyHistoryQuestion = {
+  id: string;
+  category: string;
+  prompt: string;
+};
+
 export type FamilyHistorySection = {
   id: string;
   title: string;
@@ -28,6 +34,7 @@ export type FamilyHistoryData = {
   title: string;
   updatedAt: string;
   note: string;
+  questions: FamilyHistoryQuestion[];
   sections: FamilyHistorySection[];
 };
 
