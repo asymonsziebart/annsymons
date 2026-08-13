@@ -67,10 +67,10 @@
       "given": "Jeremy",
       "middle": "Francis",
       "birth": {
-        "year": 1987,
+        "year": 1986,
         "month": null,
         "day": null,
-        "known": false
+        "known": true
       },
       "death": null,
       "gender": "male"
