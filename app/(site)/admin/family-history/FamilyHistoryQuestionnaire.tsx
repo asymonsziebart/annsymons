@@ -29,13 +29,17 @@ export default function FamilyHistoryQuestionnaire({
   const [message, setMessage] = useState("");
 
   useEffect(() => {
+    let draftAnswers: Record<string, string> = {};
+    let draftAnsweredBy = "";
     try {
       const draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || "{}") as {
         answers?: Record<string, string>;
         answeredBy?: string;
       };
-      setAnswers((current) => ({ ...current, ...(draft.answers ?? {}) }));
-      if (draft.answeredBy) setAnsweredBy(draft.answeredBy);
+      draftAnswers = draft.answers ?? {};
+      draftAnsweredBy = draft.answeredBy ?? "";
+      setAnswers((current) => ({ ...current, ...draftAnswers }));
+      if (draftAnsweredBy) setAnsweredBy(draftAnsweredBy);
     } catch {
       // Ignore an invalid local draft and continue with server answers.
     }
@@ -49,9 +53,10 @@ export default function FamilyHistoryQuestionnaire({
         const serverAnswers = Object.fromEntries(
           (data.answers ?? []).map((item) => [item.questionId, item.answer])
         );
-        setAnswers((current) => ({ ...current, ...serverAnswers }));
+        // A draft typed on this device is newer than the last explicit server save.
+        setAnswers((current) => ({ ...current, ...serverAnswers, ...draftAnswers }));
         const lastResponder = data.answers?.find((item) => item.answeredBy)?.answeredBy;
-        if (lastResponder) setAnsweredBy(lastResponder);
+        if (lastResponder && !draftAnsweredBy) setAnsweredBy(lastResponder);
         setState("ready");
       } catch (error) {
         setState("error");
