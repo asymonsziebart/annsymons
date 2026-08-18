@@ -13,6 +13,7 @@ export const ADMIN_UPLOAD_FOLDERS = [
   "backyard",
   "instagram",
   "family-tree",
+  "pokemon-cards",
 ] as const;
 
 export type AdminUploadFolder = (typeof ADMIN_UPLOAD_FOLDERS)[number];

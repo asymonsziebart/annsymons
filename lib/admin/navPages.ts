@@ -38,6 +38,22 @@ export const ADMIN_NAV_PAGES: AdminNavPage[] = [
     keywords: ["bins", "storage", "qr"],
   },
   {
+    href: "/admin/pokemon-cards",
+    label: "Pokémon Cards",
+    description: "Catalogue cards and estimate worth from eBay solds",
+    keywords: [
+      "pokemon",
+      "pokémon",
+      "tcg",
+      "cards",
+      "collection",
+      "ebay",
+      "lego",
+      "magic",
+      "mtg",
+    ],
+  },
+  {
     href: "/admin/manuals",
     label: "Manuals",
     description: "Appliance and gear manuals in one place",
