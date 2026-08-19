@@ -80,7 +80,9 @@ export async function resolveSiteUserAccess(
 ): Promise<"allow" | "deny" | "none"> {
   const session = await resolveSiteUserSession(cookieHeaderValue);
   if (session.kind === "none") return "none";
-  if (session.kind === "deny") return "deny";
+  // Invalid, expired, or unapproved sessions should re-login — not /admin?denied=1,
+  // which would loop forever for stale cookies.
+  if (session.kind === "deny") return "none";
   if (session.kind === "owner") return "allow";
   return pathIsAllowed(pathname, session.pages) ? "allow" : "deny";
 }
