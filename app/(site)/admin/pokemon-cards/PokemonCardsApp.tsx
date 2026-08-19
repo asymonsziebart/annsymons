@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useRef, useState, useTransition } from "react";
+import type { CardScanResult } from "@/lib/cardScan";
 import type {
   CardComp,
   CollectionCard,
@@ -16,6 +17,7 @@ import {
   portfolioTotals,
   type Timeframe,
 } from "@/lib/collectionValue";
+import CardScanner from "./CardScanner";
 
 type Totals = ReturnType<typeof portfolioTotals>;
 
@@ -28,7 +30,7 @@ type Props = {
   loadError: string | null;
 };
 
-type View = "home" | "collection" | "form" | "detail";
+type View = "home" | "collection" | "form" | "detail" | "scan";
 
 type FormState = {
   id: number | null;
@@ -273,6 +275,39 @@ export default function PokemonCardsApp({
     setCards(data.cards ?? []);
     setSnapshots(data.snapshots ?? []);
     setTotals(data.totals ?? portfolioTotals(data.cards ?? []));
+  }
+
+  function openScan() {
+    setForm(EMPTY_FORM);
+    setView("scan");
+    setMessage("Point your camera at the card or upload a photo.");
+  }
+
+  function applyScanToForm(card: CardScanResult, imagePath: string) {
+    setForm({
+      id: null,
+      name: card.name ?? "",
+      setName: card.setName ?? "",
+      cardNumber: card.cardNumber ?? "",
+      variant: card.variant ?? "",
+      condition: card.condition ?? "Near Mint",
+      grader: card.grader ?? "",
+      grade: card.grade ?? "",
+      language: card.language ?? "English",
+      quantity: "1",
+      purchasePrice: "",
+      acquiredOn: "",
+      imagePath,
+      notes: "",
+    });
+    setView("form");
+    setMessage(
+      card.message ??
+        (card.configured
+          ? "Scanned — review the fields, then save."
+          : "Photo uploaded — enter any details the scan missed."),
+      card.configured ? "ok" : "warn"
+    );
   }
 
   async function uploadImage(file: File) {
@@ -598,18 +633,33 @@ export default function PokemonCardsApp({
             <button
               type="button"
               className="pc-tool"
-              onClick={() => {
-                setForm(EMPTY_FORM);
-                setView("form");
-                setMessage("Add a card, then pull sold comps from eBay.");
-              }}
+              onClick={openScan}
             >
               <span className="pc-tool-icon">
                 <IconCamera />
               </span>
               <span>
-                <div className="pc-tool-title">Add Card</div>
-                <div className="pc-tool-sub">Catalogue a card with set, condition, and photo.</div>
+                <div className="pc-tool-title">Live Card Scanner</div>
+                <div className="pc-tool-sub">
+                  Snap your camera at a card to fill in name, set, and number.
+                </div>
+              </span>
+            </button>
+            <button
+              type="button"
+              className="pc-tool"
+              onClick={() => {
+                setForm(EMPTY_FORM);
+                setView("form");
+                setMessage("Type card details by hand, or use Live Card Scanner.");
+              }}
+            >
+              <span className="pc-tool-icon">
+                <IconBolt />
+              </span>
+              <span>
+                <div className="pc-tool-title">Add by hand</div>
+                <div className="pc-tool-sub">Type set, condition, grade, and notes yourself.</div>
               </span>
             </button>
             <button
@@ -627,10 +677,10 @@ export default function PokemonCardsApp({
               }}
             >
               <span className="pc-tool-icon">
-                <IconBolt />
+                <IconVideo />
               </span>
               <span>
-                <div className="pc-tool-title">eBay Sold Lookup</div>
+                <div className="pc-tool-title">eBay sold lookup</div>
                 <div className="pc-tool-sub">
                   Cross-reference recent sold listings to estimate worth.
                 </div>
@@ -646,7 +696,7 @@ export default function PokemonCardsApp({
                 <IconVideo />
               </span>
               <span>
-                <div className="pc-tool-title">Revalue Collection</div>
+                <div className="pc-tool-title">Revalue collection</div>
                 <div className="pc-tool-sub">Refresh every card from eBay solds / askings.</div>
               </span>
             </button>
@@ -682,12 +732,19 @@ export default function PokemonCardsApp({
               <button
                 type="button"
                 className="pc-btn pc-btn-primary"
+                onClick={openScan}
+              >
+                Scan card
+              </button>
+              <button
+                type="button"
+                className="pc-btn"
                 onClick={() => {
                   setForm(EMPTY_FORM);
                   setView("form");
                 }}
               >
-                Add card
+                Add by hand
               </button>
             </div>
           </div>
@@ -742,17 +799,30 @@ export default function PokemonCardsApp({
         </section>
       ) : null}
 
+      {view === "scan" ? (
+        <CardScanner
+          category={category}
+          onScanned={applyScanToForm}
+          onCancel={() => setView("home")}
+        />
+      ) : null}
+
       {view === "form" ? (
         <section className="pc-panel">
           <div className="pc-panel-head">
             <h2>{form.id ? "Edit card" : "Add card"}</h2>
-            <button
-              type="button"
-              className="pc-btn pc-btn-ghost"
-              onClick={() => setView(form.id ? "detail" : "home")}
-            >
-              Cancel
-            </button>
+            <div className="pc-actions">
+              <button type="button" className="pc-btn" onClick={openScan}>
+                Scan
+              </button>
+              <button
+                type="button"
+                className="pc-btn pc-btn-ghost"
+                onClick={() => setView(form.id ? "detail" : "home")}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
           <form className="pc-panel-body" onSubmit={saveCard}>
             <div className="pc-field">
@@ -915,6 +985,11 @@ export default function PokemonCardsApp({
               <button type="submit" className="pc-btn pc-btn-primary" disabled={busy}>
                 {busy ? "Saving..." : "Save card"}
               </button>
+              {!form.id ? (
+                <button type="button" className="pc-btn" onClick={openScan} disabled={busy}>
+                  Scan another
+                </button>
+              ) : null}
             </div>
           </form>
         </section>

@@ -626,6 +626,70 @@ body.pokemon-cards-active .site-footer-root {
   color: var(--pc-green);
 }
 
+.pc-scanner-hint {
+  margin: 0 0 0.85rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--pc-muted);
+}
+
+.pc-scanner-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid var(--pc-border-strong);
+  background: #050505;
+  aspect-ratio: 3 / 4;
+  max-height: min(62vh, 520px);
+  margin: 0 auto 1rem;
+}
+
+.pc-scanner-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.pc-scanner-video--live {
+  opacity: 1;
+}
+
+.pc-scanner-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--pc-dim);
+  font-size: 0.85rem;
+  font-weight: 600;
+  background:
+    linear-gradient(135deg, rgba(57, 255, 20, 0.04), transparent 50%),
+    #0a0a0a;
+}
+
+.pc-scanner-frame {
+  pointer-events: none;
+  position: absolute;
+  inset: 8%;
+  border: 2px solid rgba(57, 255, 20, 0.55);
+  border-radius: 0.85rem;
+  box-shadow:
+    0 0 0 9999px rgba(0, 0, 0, 0.35),
+    inset 0 0 24px rgba(57, 255, 20, 0.08);
+}
+
+.pc-scanner-actions {
+  margin-top: 0.25rem;
+}
+
+.pc-scanner-file {
+  display: none;
+}
+
 @keyframes pc-fade-up {
   from {
     opacity: 0;
