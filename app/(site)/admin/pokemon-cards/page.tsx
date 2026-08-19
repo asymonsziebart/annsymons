@@ -1,13 +1,9 @@
-import { listCards, listSnapshots, normalizeCategory } from "@/lib/data/collectionCards";
+import { getCollectionPageData, normalizeCategory } from "@/lib/data/collectionCards";
 import { portfolioTotals } from "@/lib/collectionValue";
 import { isEbayConfigured } from "@/lib/ebay";
 import PokemonCardsApp from "./PokemonCardsApp";
-import "./pokemon-cards.css";
 
-export const metadata = {
-  title: "Pokémon Cards | Admin",
-  robots: "noindex, nofollow",
-};
+export const dynamic = "force-dynamic";
 
 export default async function PokemonCardsPage({
   searchParams,
@@ -17,14 +13,16 @@ export default async function PokemonCardsPage({
   const sp = await searchParams;
   const category = normalizeCategory(sp.category ?? "pokemon");
 
-  let cards: Awaited<ReturnType<typeof listCards>> = [];
-  let snapshots: Awaited<ReturnType<typeof listSnapshots>> = [];
+  let cards: Awaited<ReturnType<typeof getCollectionPageData>>["cards"] = [];
+  let snapshots: Awaited<ReturnType<typeof getCollectionPageData>>["snapshots"] = [];
   let loadError: string | null = null;
 
   try {
-    cards = await listCards(category);
-    snapshots = await listSnapshots(category);
+    const data = await getCollectionPageData(category);
+    cards = data.cards;
+    snapshots = data.snapshots;
   } catch (error) {
+    console.error("Failed to load Pokemon Cards admin page", error);
     loadError =
       error instanceof Error
         ? error.message
@@ -34,15 +32,13 @@ export default async function PokemonCardsPage({
   const totals = portfolioTotals(cards);
 
   return (
-    <div className="pokemon-cards-page">
-      <PokemonCardsApp
-        initialCategory={category}
-        initialCards={cards}
-        initialSnapshots={snapshots}
-        initialTotals={totals}
-        ebayConfigured={isEbayConfigured()}
-        loadError={loadError}
-      />
-    </div>
+    <PokemonCardsApp
+      initialCategory={category}
+      initialCards={cards}
+      initialSnapshots={snapshots}
+      initialTotals={totals}
+      ebayConfigured={isEbayConfigured()}
+      loadError={loadError}
+    />
   );
 }

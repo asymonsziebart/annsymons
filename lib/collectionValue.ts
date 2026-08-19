@@ -5,7 +5,7 @@ import type {
   CollectionCategory,
   CollectionSnapshot,
   CompSource,
-} from "@/lib/data/collectionCards";
+} from "@/lib/collectionCardsShared";
 
 export type Timeframe = "1D" | "1W" | "1M" | "3M" | "1Y" | "3Y" | "ALL";
 

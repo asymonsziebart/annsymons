@@ -7,8 +7,8 @@ import type {
   CollectionCard,
   CollectionCategory,
   CollectionSnapshot,
-} from "@/lib/data/collectionCards";
-import { CATEGORY_LABELS, COLLECTION_CATEGORIES } from "@/lib/data/collectionCards";
+} from "@/lib/collectionCardsShared";
+import { CATEGORY_LABELS, COLLECTION_CATEGORIES } from "@/lib/collectionCardsShared";
 import {
   TIMEFRAMES,
   filterSnapshots,

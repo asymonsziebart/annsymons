@@ -9,7 +9,9 @@ export default function SiteFooter() {
   if (
     pathname === "/tasks" ||
     pathname.startsWith("/tasks/") ||
-    pathname === "/admin/truck-fund"
+    pathname === "/admin/truck-fund" ||
+    pathname === "/admin/pokemon-cards" ||
+    pathname.startsWith("/admin/pokemon-cards/")
   ) {
     return null;
   }

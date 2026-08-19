@@ -1,106 +1,51 @@
 import { getSql, getSqlOrThrow } from "@/lib/db";
+import {
+  normalizeCategory,
+  normalizeCompSource,
+  type CardComp,
+  type CardCompInput,
+  type CardValuation,
+  type CollectionCard,
+  type CollectionCardInput,
+  type CollectionCategory,
+  type CollectionSnapshot,
+} from "@/lib/collectionCardsShared";
+
+export {
+  CATEGORY_LABELS,
+  COLLECTION_CATEGORIES,
+  COMP_SOURCES,
+  normalizeCategory,
+  normalizeCompSource,
+} from "@/lib/collectionCardsShared";
+export type {
+  CardComp,
+  CardCompInput,
+  CardValuation,
+  CollectionCard,
+  CollectionCardInput,
+  CollectionCategory,
+  CollectionSnapshot,
+  CompSource,
+} from "@/lib/collectionCardsShared";
 
 type SqlClient = ReturnType<typeof getSqlOrThrow>;
 
-export const COLLECTION_CATEGORIES = ["pokemon", "lego", "magic"] as const;
-export type CollectionCategory = (typeof COLLECTION_CATEGORIES)[number];
-
-export const CATEGORY_LABELS: Record<CollectionCategory, string> = {
-  pokemon: "Pokémon",
-  lego: "LEGO",
-  magic: "Magic",
-};
-
-/** Where an estimate came from. eBay Marketplace Insights is the only true sold-price feed. */
-export const COMP_SOURCES = ["ebay-sold", "ebay-active", "manual"] as const;
-export type CompSource = (typeof COMP_SOURCES)[number];
-
-export type CollectionCard = {
-  id: number;
-  category: CollectionCategory;
-  name: string;
-  setName: string | null;
-  cardNumber: string | null;
-  variant: string | null;
-  condition: string | null;
-  grader: string | null;
-  grade: string | null;
-  language: string | null;
-  quantity: number;
-  purchasePrice: number | null;
-  acquiredOn: string | null;
-  marketValue: number | null;
-  marketValueSource: string | null;
-  marketValueSample: number | null;
-  marketValueUpdatedAt: string | null;
-  imagePath: string | null;
-  notes: string | null;
-  createdAt: string;
-  updatedAt: string;
-  compCount: number;
-};
-
-export type CollectionCardInput = {
-  category: CollectionCategory;
-  name: string;
-  setName?: string | null;
-  cardNumber?: string | null;
-  variant?: string | null;
-  condition?: string | null;
-  grader?: string | null;
-  grade?: string | null;
-  language?: string | null;
-  quantity?: number | null;
-  purchasePrice?: number | null;
-  acquiredOn?: string | null;
-  imagePath?: string | null;
-  notes?: string | null;
-};
-
-export type CardComp = {
-  id: number;
-  cardId: number;
-  source: CompSource;
-  externalId: string | null;
-  title: string;
-  soldPrice: number;
-  currency: string;
-  soldOn: string | null;
-  conditionLabel: string | null;
-  listingUrl: string | null;
-  imageUrl: string | null;
-  isExcluded: boolean;
-  fetchedAt: string;
-};
-
-export type CardCompInput = {
-  source: CompSource;
-  externalId?: string | null;
-  title: string;
-  soldPrice: number;
-  currency?: string | null;
-  soldOn?: string | null;
-  conditionLabel?: string | null;
-  listingUrl?: string | null;
-  imageUrl?: string | null;
-};
-
-export type CollectionSnapshot = {
-  capturedOn: string;
-  marketValue: number;
-  costBasis: number;
-  cardCount: number;
-};
-
-export type CardValuation = {
-  marketValue: number | null;
-  source: CompSource | null;
-  sampleSize: number;
-};
-
 const MAX_NOTES = 2_000;
 
+let schemaReady: Promise<void> | null = null;
+
 async function ensureSchema(sql: SqlClient): Promise<void> {
+  if (!schemaReady) {
+    schemaReady = runEnsureSchema(sql).catch((error) => {
+      schemaReady = null;
+      throw error;
+    });
+  }
+  return schemaReady;
+}
+
+async function runEnsureSchema(sql: SqlClient): Promise<void> {
   await sql`
     CREATE TABLE IF NOT EXISTS collection_cards (
       id SERIAL PRIMARY KEY,
@@ -193,16 +138,15 @@ function timestamp(value: unknown): string | null {
   return typeof value === "string" && value ? value : null;
 }
 
-export function normalizeCategory(value: unknown): CollectionCategory {
-  const raw = typeof value === "string" ? value.trim().toLowerCase() : "";
-  return (COLLECTION_CATEGORIES as readonly string[]).includes(raw)
-    ? (raw as CollectionCategory)
-    : "pokemon";
-}
-
-function normalizeCompSource(value: unknown): CompSource {
-  const raw = typeof value === "string" ? value.trim().toLowerCase() : "";
-  return (COMP_SOURCES as readonly string[]).includes(raw) ? (raw as CompSource) : "manual";
+export async function getCollectionPageData(category: CollectionCategory): Promise<{
+  cards: CollectionCard[];
+  snapshots: CollectionSnapshot[];
+}> {
+  const [cards, snapshots] = await Promise.all([
+    listCards(category),
+    listSnapshots(category),
+  ]);
+  return { cards, snapshots };
 }
 
 function mapCard(row: Record<string, unknown>): CollectionCard {

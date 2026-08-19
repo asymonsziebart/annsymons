@@ -11,7 +11,7 @@
  *   EBAY_MARKETPLACE_ID                 – optional, default EBAY_US
  */
 
-import type { CardCompInput, CollectionCard } from "@/lib/data/collectionCards";
+import type { CardCompInput, CollectionCard } from "@/lib/collectionCardsShared";
 
 const TOKEN_URL = {
   production: "https://api.ebay.com/identity/v1/oauth2/token",
