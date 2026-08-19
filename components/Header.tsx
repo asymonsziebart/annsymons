@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { isPokemonCardsPath } from "@/lib/isPokemonCardsPath";
 
 const navLinks = [
   { href: "/recipes", label: "Recipes" },
@@ -15,6 +16,7 @@ export default function Header() {
   const pathname = usePathname();
   const isTasksApp =
     pathname === "/tasks" || (pathname != null && pathname.startsWith("/tasks/"));
+  const isPokemonCards = isPokemonCardsPath(pathname);
   const [menuOpen, setMenuOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
 
@@ -23,16 +25,16 @@ export default function Header() {
   }, [pathname]);
 
   useEffect(() => {
-    if (!menuOpen || isTasksApp) return;
+    if (!menuOpen || isTasksApp || isPokemonCards) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setMenuOpen(false);
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [menuOpen, isTasksApp]);
+  }, [menuOpen, isTasksApp, isPokemonCards]);
 
   useEffect(() => {
-    if (!menuOpen || isTasksApp) return;
+    if (!menuOpen || isTasksApp || isPokemonCards) return;
     const close = (e: MouseEvent) => {
       if (headerRef.current && !headerRef.current.contains(e.target as Node)) {
         setMenuOpen(false);
@@ -40,7 +42,11 @@ export default function Header() {
     };
     document.addEventListener("mousedown", close);
     return () => document.removeEventListener("mousedown", close);
-  }, [menuOpen, isTasksApp]);
+  }, [menuOpen, isTasksApp, isPokemonCards]);
+
+  if (isPokemonCards) {
+    return null;
+  }
 
   return (
     <header

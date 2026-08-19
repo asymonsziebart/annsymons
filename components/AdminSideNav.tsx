@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ADMIN_NAV_PAGES } from "@/lib/admin/navPages";
+import { isPokemonCardsPath } from "@/lib/isPokemonCardsPath";
 
 const STORAGE_KEY = "admin-side-nav-collapsed";
 
@@ -49,6 +50,8 @@ export default function AdminSideNav({
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [mobileOpen]);
+
+  const immersiveMobile = isPokemonCardsPath(pathname);
 
   if (pathname === "/admin/login") {
     return null;
@@ -120,21 +123,23 @@ export default function AdminSideNav({
 
   return (
     <>
-      {/* Mobile open button */}
-      <button
-        type="button"
-        onClick={() => setMobileOpen(true)}
-        className="neo-btn-primary fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-[max(1rem,env(safe-area-inset-left))] z-[90] !rounded-full lg:hidden"
-        aria-label="Open admin menu"
-      >
-        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-          <path d="M4 6h16M4 12h10M4 18h16" strokeLinecap="round" />
-        </svg>
-        Admin
-      </button>
+      {/* Mobile open button — hidden on immersive full-screen admin apps */}
+      {!immersiveMobile ? (
+        <button
+          type="button"
+          onClick={() => setMobileOpen(true)}
+          className="neo-btn-primary fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-[max(1rem,env(safe-area-inset-left))] z-[90] !rounded-full lg:hidden"
+          aria-label="Open admin menu"
+        >
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+            <path d="M4 6h16M4 12h10M4 18h16" strokeLinecap="round" />
+          </svg>
+          Admin
+        </button>
+      ) : null}
 
       {/* Mobile drawer */}
-      {mobileOpen ? (
+      {!immersiveMobile && mobileOpen ? (
         <div className="fixed inset-0 z-[95] lg:hidden">
           <button
             type="button"

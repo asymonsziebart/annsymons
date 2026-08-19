@@ -1,17 +1,17 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { isPokemonCardsPath } from "@/lib/isPokemonCardsPath";
 import Footer from "./Footer";
 
-/** Hides the main site footer on the tasks app so the list can use vertical space. */
+/** Hides the main site footer on full-screen admin apps. */
 export default function SiteFooter() {
   const pathname = usePathname() ?? "";
   if (
     pathname === "/tasks" ||
     pathname.startsWith("/tasks/") ||
     pathname === "/admin/truck-fund" ||
-    pathname === "/admin/pokemon-cards" ||
-    pathname.startsWith("/admin/pokemon-cards/")
+    isPokemonCardsPath(pathname)
   ) {
     return null;
   }

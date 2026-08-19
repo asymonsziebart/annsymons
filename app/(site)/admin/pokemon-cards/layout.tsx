@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import PokemonCardsBodyLock from "./PokemonCardsBodyLock";
 import "./pokemon-cards.css";
 
 export const metadata: Metadata = {
@@ -15,5 +16,10 @@ export default function PokemonCardsLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <div className="pokemon-cards-page">{children}</div>;
+  return (
+    <>
+      <PokemonCardsBodyLock />
+      <div className="pokemon-cards-page">{children}</div>
+    </>
+  );
 }
