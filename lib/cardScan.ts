@@ -1,22 +1,10 @@
-import type { CollectionCategory } from "@/lib/collectionCardsShared";
+import type {
+  CardScanResult,
+  CollectionCategory,
+  ScannedCardFields,
+} from "@/lib/collectionCardsShared";
 
-export type ScannedCardFields = {
-  name: string;
-  setName: string | null;
-  cardNumber: string | null;
-  variant: string | null;
-  condition: string | null;
-  grader: string | null;
-  grade: string | null;
-  language: string | null;
-};
-
-export type CardScanResult = ScannedCardFields & {
-  configured: boolean;
-  matchedFromCatalog: boolean;
-  confidence: string | null;
-  message?: string;
-};
+export type { CardScanResult, ScannedCardFields };
 
 const CONDITION_VALUES = [
   "Sealed",

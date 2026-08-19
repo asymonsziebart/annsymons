@@ -1,10 +1,11 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useMemo, useRef, useState, useTransition } from "react";
-import type { CardScanResult } from "@/lib/cardScan";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import type {
   CardComp,
+  CardScanResult,
   CollectionCard,
   CollectionCategory,
   CollectionSnapshot,
@@ -17,17 +18,23 @@ import {
   portfolioTotals,
   type Timeframe,
 } from "@/lib/collectionValue";
-import CardScanner from "./CardScanner";
+
+const CardScanner = dynamic(() => import("./CardScanner"), {
+  ssr: false,
+  loading: () => (
+    <section className="pc-panel pc-scanner">
+      <div className="pc-panel-body">
+        <p className="pc-value-meta">Starting scanner…</p>
+      </div>
+    </section>
+  ),
+});
 
 type Totals = ReturnType<typeof portfolioTotals>;
 
 type Props = {
   initialCategory: CollectionCategory;
-  initialCards: CollectionCard[];
-  initialSnapshots: CollectionSnapshot[];
-  initialTotals: Totals;
   ebayConfigured: boolean;
-  loadError: string | null;
 };
 
 type View = "home" | "collection" | "form" | "detail" | "scan";
@@ -190,27 +197,66 @@ function IconChevron() {
 
 export default function PokemonCardsApp({
   initialCategory,
-  initialCards,
-  initialSnapshots,
-  initialTotals,
   ebayConfigured,
-  loadError,
 }: Props) {
   const [category, setCategory] = useState<CollectionCategory>(initialCategory);
-  const [cards, setCards] = useState(initialCards);
-  const [snapshots, setSnapshots] = useState(initialSnapshots);
-  const [totals, setTotals] = useState(initialTotals);
+  const [cards, setCards] = useState<CollectionCard[]>([]);
+  const [snapshots, setSnapshots] = useState<CollectionSnapshot[]>([]);
+  const [totals, setTotals] = useState<Totals>(() => portfolioTotals([]));
   const [timeframe, setTimeframe] = useState<Timeframe>("ALL");
   const [view, setView] = useState<View>("home");
   const [query, setQuery] = useState("");
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [comps, setComps] = useState<CardComp[]>([]);
-  const [status, setStatus] = useState(loadError ?? "");
+  const [status, setStatus] = useState("");
   const [statusTone, setStatusTone] = useState<"ok" | "warn" | "">("");
   const [busy, setBusy] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [pending, startTransition] = useTransition();
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadInitial() {
+      setInitialLoading(true);
+      setStatus("Loading collection...");
+      setStatusTone("");
+      try {
+        const res = await fetch(`/api/admin/pokemon-cards?category=${initialCategory}`);
+        const data = (await res.json()) as {
+          cards?: CollectionCard[];
+          snapshots?: CollectionSnapshot[];
+          totals?: Totals;
+          error?: string;
+        };
+        if (!res.ok) throw new Error(data.error || "Failed to load cards");
+        if (cancelled) return;
+        setCategory(initialCategory);
+        setCards(data.cards ?? []);
+        setSnapshots(data.snapshots ?? []);
+        setTotals(data.totals ?? portfolioTotals(data.cards ?? []));
+        setStatus("");
+        setStatusTone("");
+      } catch (error) {
+        if (cancelled) return;
+        setStatus(
+          error instanceof Error
+            ? error.message
+            : "Could not load cards. Check DATABASE_URL."
+        );
+        setStatusTone("warn");
+      } finally {
+        if (!cancelled) setInitialLoading(false);
+      }
+    }
+
+    void loadInitial();
+    return () => {
+      cancelled = true;
+    };
+  }, [initialCategory]);
 
   const selected = useMemo(
     () => cards.find((card) => card.id === selectedId) ?? null,
@@ -565,6 +611,18 @@ export default function PokemonCardsApp({
   const label = CATEGORY_LABELS[category];
   const gain =
     totals.costBasis > 0 ? ((totals.marketValue - totals.costBasis) / totals.costBasis) * 100 : null;
+
+  if (initialLoading) {
+    return (
+      <div className="pc-shell">
+        <Link href="/admin" className="pc-back">
+          ← Admin
+        </Link>
+        <p className="pc-loading-title">Pokemon Cards</p>
+        <p className="pc-value-meta">Loading collection…</p>
+      </div>
+    );
+  }
 
   return (
     <div className="pc-shell">

@@ -1,8 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { CardScanResult } from "@/lib/cardScan";
-import type { CollectionCategory } from "@/lib/collectionCardsShared";
+import type { CardScanResult, CollectionCategory } from "@/lib/collectionCardsShared";
 
 type Phase = "idle" | "starting" | "live" | "uploading" | "scanning" | "error";
 
