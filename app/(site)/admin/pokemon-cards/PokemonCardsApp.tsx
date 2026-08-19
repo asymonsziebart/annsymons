@@ -18,6 +18,7 @@ import {
   portfolioTotals,
   type Timeframe,
 } from "@/lib/collectionValue";
+import { uploadAndScanCardPhoto } from "@/lib/cardScanClient";
 
 const CardScanner = dynamic(() => import("./CardScanner"), {
   ssr: false,
@@ -170,6 +171,15 @@ function IconBolt() {
   );
 }
 
+function IconUpload() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M12 16V4m0 0 4 4m-4-4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function IconVideo() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -213,8 +223,10 @@ export default function PokemonCardsApp({
   const [statusTone, setStatusTone] = useState<"ok" | "warn" | "">("");
   const [busy, setBusy] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [scanStartWithUpload, setScanStartWithUpload] = useState(false);
   const [pending, startTransition] = useTransition();
   const fileRef = useRef<HTMLInputElement>(null);
+  const uploadScanRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -323,10 +335,36 @@ export default function PokemonCardsApp({
     setTotals(data.totals ?? portfolioTotals(data.cards ?? []));
   }
 
-  function openScan() {
+  function openScan(options?: { upload?: boolean }) {
     setForm(EMPTY_FORM);
+    setScanStartWithUpload(options?.upload ?? false);
     setView("scan");
-    setMessage("Point your camera at the card or upload a photo.");
+    setMessage(
+      options?.upload
+        ? "Choose a saved photo — we'll read the card details from it."
+        : "Point your camera at the card or upload a saved photo."
+    );
+  }
+
+  function openUploadScan() {
+    setForm(EMPTY_FORM);
+    setMessage("Choose a photo from your library to scan.");
+    uploadScanRef.current?.click();
+  }
+
+  function mergeScanIntoForm(card: CardScanResult, imagePath: string) {
+    setForm((prev) => ({
+      ...prev,
+      name: card.name || prev.name,
+      setName: card.setName ?? prev.setName,
+      cardNumber: card.cardNumber ?? prev.cardNumber,
+      variant: card.variant ?? prev.variant,
+      condition: card.condition || prev.condition,
+      grader: card.grader ?? prev.grader,
+      grade: card.grade ?? prev.grade,
+      language: card.language || prev.language,
+      imagePath,
+    }));
   }
 
   function applyScanToForm(card: CardScanResult, imagePath: string) {
@@ -347,6 +385,7 @@ export default function PokemonCardsApp({
       notes: "",
     });
     setView("form");
+    setScanStartWithUpload(false);
     setMessage(
       card.message ??
         (card.configured
@@ -356,20 +395,22 @@ export default function PokemonCardsApp({
     );
   }
 
-  async function uploadImage(file: File) {
+  async function uploadAndScanImage(file: File) {
     setBusy(true);
-    setMessage("Uploading card photo...");
+    setMessage("Uploading and scanning photo...");
     try {
-      const body = new FormData();
-      body.set("file", file);
-      body.set("folder", "pokemon-cards");
-      const res = await fetch("/api/admin/upload", { method: "POST", body });
-      const data = (await res.json()) as { path?: string; error?: string };
-      if (!res.ok || !data.path) throw new Error(data.error || "Upload failed");
-      setForm((prev) => ({ ...prev, imagePath: data.path! }));
-      setMessage("Photo uploaded.", "ok");
+      const result = await uploadAndScanCardPhoto(file, category);
+      mergeScanIntoForm(result.card, result.imagePath);
+      if (view !== "form") setView("form");
+      setMessage(
+        result.card.message ??
+          (result.card.configured
+            ? "Scanned from photo — review the fields, then save."
+            : "Photo uploaded — enter any details the scan missed."),
+        result.card.configured ? "ok" : "warn"
+      );
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Upload failed", "warn");
+      setMessage(error instanceof Error ? error.message : "Upload and scan failed", "warn");
     } finally {
       setBusy(false);
     }
@@ -691,7 +732,7 @@ export default function PokemonCardsApp({
             <button
               type="button"
               className="pc-tool"
-              onClick={openScan}
+              onClick={() => openScan()}
             >
               <span className="pc-tool-icon">
                 <IconCamera />
@@ -706,10 +747,25 @@ export default function PokemonCardsApp({
             <button
               type="button"
               className="pc-tool"
+              onClick={openUploadScan}
+            >
+              <span className="pc-tool-icon">
+                <IconUpload />
+              </span>
+              <span>
+                <div className="pc-tool-title">Upload photo to scan</div>
+                <div className="pc-tool-sub">
+                  Pick a saved photo from your library — no card in front of you needed.
+                </div>
+              </span>
+            </button>
+            <button
+              type="button"
+              className="pc-tool"
               onClick={() => {
                 setForm(EMPTY_FORM);
                 setView("form");
-                setMessage("Type card details by hand, or use Live Card Scanner.");
+                setMessage("Type card details by hand, or upload a photo to scan.");
               }}
             >
               <span className="pc-tool-icon">
@@ -790,7 +846,7 @@ export default function PokemonCardsApp({
               <button
                 type="button"
                 className="pc-btn pc-btn-primary"
-                onClick={openScan}
+                onClick={() => openScan()}
               >
                 Scan card
               </button>
@@ -860,8 +916,12 @@ export default function PokemonCardsApp({
       {view === "scan" ? (
         <CardScanner
           category={category}
+          startWithUpload={scanStartWithUpload}
           onScanned={applyScanToForm}
-          onCancel={() => setView("home")}
+          onCancel={() => {
+            setScanStartWithUpload(false);
+            setView("home");
+          }}
         />
       ) : null}
 
@@ -870,7 +930,7 @@ export default function PokemonCardsApp({
           <div className="pc-panel-head">
             <h2>{form.id ? "Edit card" : "Add card"}</h2>
             <div className="pc-actions">
-              <button type="button" className="pc-btn" onClick={openScan}>
+              <button type="button" className="pc-btn" onClick={() => openScan()}>
                 Scan
               </button>
               <button
@@ -1005,6 +1065,7 @@ export default function PokemonCardsApp({
             </div>
             <div className="pc-field">
               <label htmlFor="pc-photo">Photo</label>
+              <p className="pc-field-hint">Upload a saved photo to scan name, set, and number automatically.</p>
               <input
                 ref={fileRef}
                 id="pc-photo"
@@ -1012,7 +1073,8 @@ export default function PokemonCardsApp({
                 accept="image/jpeg,image/png,image/gif,image/webp"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) void uploadImage(file);
+                  e.target.value = "";
+                  if (file) void uploadAndScanImage(file);
                 }}
               />
               {form.imagePath ? (
@@ -1044,7 +1106,7 @@ export default function PokemonCardsApp({
                 {busy ? "Saving..." : "Save card"}
               </button>
               {!form.id ? (
-                <button type="button" className="pc-btn" onClick={openScan} disabled={busy}>
+                <button type="button" className="pc-btn" onClick={() => openScan()} disabled={busy}>
                   Scan another
                 </button>
               ) : null}
@@ -1202,6 +1264,20 @@ export default function PokemonCardsApp({
           catalogue cards and enter sold prices by hand.
         </p>
       ) : null}
+
+      <input
+        ref={uploadScanRef}
+        type="file"
+        accept="image/jpeg,image/png,image/gif,image/webp"
+        className="pc-scanner-file"
+        aria-hidden
+        tabIndex={-1}
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          e.target.value = "";
+          if (file) void uploadAndScanImage(file);
+        }}
+      />
     </div>
   );
 }

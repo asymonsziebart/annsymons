@@ -398,6 +398,13 @@ body.pokemon-cards-active .site-footer-root {
   color: var(--pc-muted);
 }
 
+.pc-field-hint {
+  margin: -0.1rem 0 0.15rem;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--pc-dim);
+}
+
 .pc-field input,
 .pc-field select,
 .pc-field textarea {

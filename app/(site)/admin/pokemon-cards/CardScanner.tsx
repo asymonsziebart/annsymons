@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CardScanResult, CollectionCategory } from "@/lib/collectionCardsShared";
+import { uploadAndScanCardPhoto } from "@/lib/cardScanClient";
 
 type Phase = "idle" | "starting" | "live" | "uploading" | "scanning" | "error";
 
@@ -9,36 +10,9 @@ type Props = {
   category: CollectionCategory;
   onScanned: (card: CardScanResult, imagePath: string) => void;
   onCancel: () => void;
+  /** When true, open the photo library picker immediately (no card in hand). */
+  startWithUpload?: boolean;
 };
-
-async function uploadCardPhoto(file: Blob): Promise<string> {
-  const form = new FormData();
-  form.set("file", file, `card-scan-${Date.now()}.jpg`);
-  form.set("folder", "pokemon-cards");
-  const res = await fetch("/api/admin/upload", { method: "POST", body: form });
-  const data = (await res.json()) as { path?: string; error?: string };
-  if (!res.ok || !data.path) throw new Error(data.error || "Upload failed");
-  return data.path;
-}
-
-async function scanCardPhoto(
-  imagePath: string,
-  category: CollectionCategory
-): Promise<{ card: CardScanResult; imagePath: string }> {
-  const res = await fetch("/api/admin/pokemon-cards/scan", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ imagePath, category }),
-  });
-  const data = (await res.json()) as {
-    card?: CardScanResult;
-    imagePath?: string;
-    error?: string;
-  };
-  if (!res.ok) throw new Error(data.error || "Scan failed");
-  if (!data.card) throw new Error("Scan returned no card details.");
-  return { card: data.card, imagePath: data.imagePath ?? imagePath };
-}
 
 function captureVideoFrame(video: HTMLVideoElement): Blob {
   const canvas = document.createElement("canvas");
@@ -54,13 +28,21 @@ function captureVideoFrame(video: HTMLVideoElement): Blob {
   return new Blob([bytes], { type: "image/jpeg" });
 }
 
-export default function CardScanner({ category, onScanned, onCancel }: Props) {
+export default function CardScanner({
+  category,
+  onScanned,
+  onCancel,
+  startWithUpload = false,
+}: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const autoUploadRef = useRef(startWithUpload);
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [hint, setHint] = useState("Center the card in frame with good lighting.");
+  const [hint, setHint] = useState(
+    "No card in front of you? Upload a saved photo. Otherwise start the camera."
+  );
 
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
@@ -79,24 +61,25 @@ export default function CardScanner({ category, onScanned, onCancel }: Props) {
       setError(null);
       setHint("Uploading photo...");
       try {
-        const imagePath = await uploadCardPhoto(file);
         setPhase("scanning");
         setHint("Reading card name, set, and number...");
-        const result = await scanCardPhoto(imagePath, category);
-        if (!result.card.configured || !result.card.name) {
-          onScanned(result.card, result.imagePath);
-          return;
-        }
+        const result = await uploadAndScanCardPhoto(file, category);
         stopCamera();
         onScanned(result.card, result.imagePath);
       } catch (e) {
         setPhase("error");
         setError(e instanceof Error ? e.message : "Scan failed");
-        setHint("Try again with the card flat and filling most of the frame.");
+        setHint("Try another photo with the card flat and filling most of the frame.");
       }
     },
     [category, onScanned, stopCamera]
   );
+
+  useEffect(() => {
+    if (!autoUploadRef.current) return;
+    autoUploadRef.current = false;
+    fileRef.current?.click();
+  }, []);
 
   const startCamera = useCallback(async () => {
     setPhase("starting");
@@ -181,10 +164,18 @@ export default function CardScanner({ category, onScanned, onCancel }: Props) {
         ) : null}
 
         <div className="pc-actions pc-scanner-actions">
+          <button
+            type="button"
+            className="pc-btn pc-btn-primary"
+            onClick={() => fileRef.current?.click()}
+            disabled={busy}
+          >
+            {phase === "uploading" || phase === "scanning" ? "Working..." : "Upload photo"}
+          </button>
           {phase === "live" ? (
             <button
               type="button"
-              className="pc-btn pc-btn-primary"
+              className="pc-btn"
               onClick={() => void capture()}
               disabled={busy}
             >
@@ -193,27 +184,17 @@ export default function CardScanner({ category, onScanned, onCancel }: Props) {
           ) : (
             <button
               type="button"
-              className="pc-btn pc-btn-primary"
+              className="pc-btn"
               onClick={() => void startCamera()}
               disabled={busy}
             >
               {phase === "starting"
                 ? "Starting..."
-                : phase === "uploading" || phase === "scanning"
-                  ? "Working..."
-                  : phase === "error"
-                    ? "Retry camera"
-                    : "Start camera"}
+                : phase === "error"
+                  ? "Retry camera"
+                  : "Start camera"}
             </button>
           )}
-          <button
-            type="button"
-            className="pc-btn"
-            onClick={() => fileRef.current?.click()}
-            disabled={busy}
-          >
-            Upload photo
-          </button>
           <input
             ref={fileRef}
             type="file"
