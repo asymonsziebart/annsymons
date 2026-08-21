@@ -61,7 +61,9 @@ export function scanPromptForCategory(category: CollectionCategory): string {
 export function parseVisionScanJson(raw: string): ScannedCardFields & { confidence: string | null } {
   const trimmed = raw.trim();
   const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
-  const jsonText = fenced ? fenced[1]!.trim() : trimmed;
+  const candidate = fenced ? fenced[1]!.trim() : trimmed;
+  const objectMatch = candidate.match(/\{[\s\S]*\}/);
+  const jsonText = objectMatch ? objectMatch[0] : candidate;
 
   let parsed: Record<string, unknown>;
   try {

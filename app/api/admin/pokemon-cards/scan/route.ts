@@ -1,21 +1,15 @@
 import { NextResponse } from "next/server";
 import { canUseAdminApi } from "@/lib/auth";
+import { absoluteImageUrl, enrichPokemonFromTcgApi } from "@/lib/cardScan";
 import {
-  absoluteImageUrl,
-  enrichPokemonFromTcgApi,
-  parseVisionScanJson,
-  scanPromptForCategory,
-  type ScannedCardFields,
-} from "@/lib/cardScan";
+  ollamaVisionModel,
+  preferredVisionProvider,
+  scanCardWithOllama,
+  scanCardWithOpenAI,
+} from "@/lib/cardScanVision";
 import { normalizeCategory, type CardScanResult } from "@/lib/collectionCardsShared";
 
 export const runtime = "nodejs";
-
-type OpenAIContent = {
-  type: "input_text" | "input_image";
-  text?: string;
-  image_url?: string;
-};
 
 export async function POST(request: Request) {
   const ok = await canUseAdminApi("/admin/pokemon-cards");
@@ -30,8 +24,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Upload or capture a card photo first." }, { status: 400 });
     }
 
-    const apiKey = process.env.OPENAI_API_KEY?.trim();
-    if (!apiKey) {
+    const provider = preferredVisionProvider();
+    if (!provider) {
       const result: CardScanResult = {
         configured: false,
         matchedFromCatalog: false,
@@ -45,66 +39,43 @@ export async function POST(request: Request) {
         grade: null,
         language: null,
         message:
-          "Card scanning needs OPENAI_API_KEY on the server. You can still upload a photo and type details by hand.",
+          "Card scanning needs Ollama locally (llama3.2-vision) or OPENAI_API_KEY. You can still upload a photo and type details by hand.",
       };
       return NextResponse.json({ ok: true, imagePath, card: result });
     }
 
-    const imageUrl = absoluteImageUrl(request, imagePath);
-    const content: OpenAIContent[] = [
-      { type: "input_text", text: scanPromptForCategory(category) },
-      { type: "input_image", image_url: imageUrl },
-    ];
+    const parsed =
+      provider === "ollama"
+        ? await scanCardWithOllama(imagePath, category)
+        : await scanCardWithOpenAI(absoluteImageUrl(request, imagePath), category);
 
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: process.env.OPENAI_VISION_MODEL?.trim() || "gpt-4o-mini",
-        input: [{ role: "user", content }],
-        max_output_tokens: 400,
-      }),
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      const detail = await response.text();
-      return NextResponse.json(
-        { error: `Card scan failed: ${detail.slice(0, 300)}` },
-        { status: 502 }
-      );
-    }
-
-    const data = (await response.json()) as { output_text?: string };
-    const parsed = parseVisionScanJson(data.output_text ?? "");
-
-    let fields: ScannedCardFields = parsed;
+    let fields: typeof parsed = parsed;
     let matchedFromCatalog = false;
     if (category === "pokemon") {
       const enriched = await enrichPokemonFromTcgApi(parsed);
-      fields = enriched.fields;
+      fields = { ...parsed, ...enriched.fields };
       matchedFromCatalog = enriched.matched;
     }
 
+    const modelNote =
+      provider === "ollama" ? ` via ${ollamaVisionModel()}` : " via OpenAI";
     const result: CardScanResult = {
       configured: true,
       matchedFromCatalog,
-      confidence: parsed.confidence,
       ...fields,
       message: matchedFromCatalog
-        ? "Matched against the Pokemon TCG catalog — review and save."
-        : "Read from photo — review the fields before saving.",
+        ? `Matched against the Pokemon TCG catalog${modelNote} — review and save.`
+        : `Read from photo${modelNote} — review the fields before saving.`,
     };
 
     return NextResponse.json({ ok: true, imagePath, card: result });
   } catch (error) {
     console.error("Card scan failed", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Card scan failed" },
-      { status: 500 }
-    );
+    const raw = error instanceof Error ? error.message : "Card scan failed";
+    const message =
+      /ECONNREFUSED|fetch failed/i.test(raw)
+        ? "Could not reach Ollama at http://127.0.0.1:11434. Start Ollama, then run: ollama pull llama3.2-vision"
+        : raw;
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
