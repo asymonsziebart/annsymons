@@ -39,7 +39,7 @@ export async function POST(request: Request) {
         grade: null,
         language: null,
         message:
-          "Card scanning needs Ollama locally (llama3.2-vision) or OPENAI_API_KEY. You can still upload a photo and type details by hand.",
+          "Card scanning needs Ollama locally (qwen2.5vl:7b) or OPENAI_API_KEY. You can still upload a photo and type details by hand.",
       };
       return NextResponse.json({ ok: true, imagePath, card: result });
     }
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
     const raw = error instanceof Error ? error.message : "Card scan failed";
     const message =
       /ECONNREFUSED|fetch failed/i.test(raw)
-        ? "Could not reach Ollama at http://127.0.0.1:11434. Start Ollama, then run: ollama pull llama3.2-vision"
+        ? "Could not reach Ollama at http://127.0.0.1:11434. Start Ollama, then run: ollama pull qwen2.5vl:7b"
         : raw;
     return NextResponse.json({ error: message }, { status: 500 });
   }
