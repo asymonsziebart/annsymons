@@ -121,7 +121,14 @@ function credentialHint(): string {
   if (!secretEnv) {
     return "EBAY_CLIENT_SECRET doesn't look like an eBay Cert ID (those start with PRD- or SBX-). Make sure it's the Cert ID (Client Secret), not the Dev ID.";
   }
-  return `Using the ${idEnv} keyset. Confirm the App ID and Cert ID were copied in full from the same keyset, with no extra spaces.`;
+  if (/\s/.test(creds.clientId) || /\s/.test(creds.clientSecret)) {
+    return "One of the keys contains a space or line break in the middle — re-copy it into Vercel as a single line.";
+  }
+  return (
+    `Using the ${idEnv} keyset (App ID ${creds.clientId.length} chars, Cert ID ${creds.clientSecret.length} chars). ` +
+    "Both look well formed, so compare those lengths against developer.ebay.com/my/keys — a truncated Cert ID is the usual cause. " +
+    "If they match, the keyset may not be enabled for production yet."
+  );
 }
 
 function marketplaceId(): string {
@@ -472,8 +479,10 @@ export async function checkEbayConnection(): Promise<EbayConnectionCheck> {
     };
   }
 
-  // Enough of the App ID to identify the keyset, without publishing the whole thing.
-  const clientIdHint = `${creds.clientId.slice(0, 12)}…(${creds.clientId.length} chars)`;
+  // Enough shape to compare against the eBay portal, without publishing the secret.
+  const clientIdHint =
+    `App ID ${creds.clientId.slice(0, 12)}…(${creds.clientId.length} chars), ` +
+    `Cert ID ${creds.clientSecret.slice(0, 4)}…(${creds.clientSecret.length} chars)`;
 
   try {
     await getAppToken(BROWSE_SCOPE);
