@@ -17,9 +17,66 @@ const CONDITION_VALUES = [
 ] as const;
 
 function text(value: unknown, max = 200): string | null {
-  if (typeof value !== "string") return null;
-  const trimmed = value.trim().slice(0, max);
-  return trimmed ? trimmed : null;
+  // Models often return numbers for fields like grade or collector number.
+  const raw =
+    typeof value === "string"
+      ? value
+      : typeof value === "number" && Number.isFinite(value)
+        ? String(value)
+        : null;
+  if (raw == null) return null;
+  const trimmed = raw.trim().slice(0, max);
+  if (!trimmed) return null;
+  // "null"/"unknown"/"n/a" come back as strings surprisingly often.
+  if (/^(null|none|n\/a|na|unknown|not visible|not specified|-{1,2})$/i.test(trimmed)) {
+    return null;
+  }
+  return trimmed;
+}
+
+/** Vision models wrap the answer in a container key more often than not. */
+function unwrapCardObject(parsed: Record<string, unknown>): Record<string, unknown> {
+  const WRAPPERS = [
+    "card",
+    "cardInfo",
+    "card_info",
+    "cardDetails",
+    "card_details",
+    "data",
+    "result",
+    "response",
+    "output",
+    "fields",
+    "pokemon",
+  ];
+  for (const key of WRAPPERS) {
+    const inner = parsed[key];
+    if (inner && typeof inner === "object" && !Array.isArray(inner)) {
+      return inner as Record<string, unknown>;
+    }
+  }
+  // A single unrecognised key holding an object is still a wrapper.
+  const keys = Object.keys(parsed);
+  if (keys.length === 1) {
+    const inner = parsed[keys[0]!];
+    if (inner && typeof inner === "object" && !Array.isArray(inner)) {
+      return inner as Record<string, unknown>;
+    }
+  }
+  return parsed;
+}
+
+/** Reads the first present key, so alternate field names still resolve. */
+function pick(
+  source: Record<string, unknown>,
+  keys: string[],
+  max = 200
+): string | null {
+  for (const key of keys) {
+    const found = text(source[key], max);
+    if (found) return found;
+  }
+  return null;
 }
 
 function normalizeCondition(value: unknown): string | null {
@@ -65,28 +122,75 @@ export function parseVisionScanJson(raw: string): ScannedCardFields & { confiden
   const objectMatch = candidate.match(/\{[\s\S]*\}/);
   const jsonText = objectMatch ? objectMatch[0] : candidate;
 
-  let parsed: Record<string, unknown>;
+  // Surface what the model said, otherwise a chatty reply is impossible to debug.
+  const unreadable = () =>
+    new Error(
+      `The AI didn't return card details. It said: "${trimmed.slice(0, 90) || "(nothing)"}" — try a clearer, well-lit photo.`
+    );
+
+  let parsedRaw: unknown;
   try {
-    parsed = JSON.parse(jsonText) as Record<string, unknown>;
+    parsedRaw = JSON.parse(jsonText);
   } catch {
-    throw new Error("Could not read card details from the photo. Try a clearer, well-lit shot.");
+    throw unreadable();
   }
 
-  const name = text(parsed.name, 200);
+  // Some models answer with an array containing one card object.
+  const asObject = Array.isArray(parsedRaw) ? parsedRaw[0] : parsedRaw;
+  if (!asObject || typeof asObject !== "object") {
+    throw unreadable();
+  }
+
+  const card = unwrapCardObject(asObject as Record<string, unknown>);
+
+  const name = pick(card, [
+    "name",
+    "cardName",
+    "card_name",
+    "pokemonName",
+    "pokemon_name",
+    "pokemon",
+    "title",
+  ]);
   if (!name) {
     throw new Error("Could not find a card name in the photo. Center the card and try again.");
   }
 
   return {
     name,
-    setName: text(parsed.setName, 200),
-    cardNumber: text(parsed.cardNumber, 50),
-    variant: text(parsed.variant, 100),
-    condition: normalizeCondition(parsed.condition),
-    grader: text(parsed.grader, 20),
-    grade: text(parsed.grade, 10),
-    language: text(parsed.language, 50) ?? "English",
-    confidence: text(parsed.confidence, 20),
+    setName: pick(card, [
+      "setName",
+      "set_name",
+      "set",
+      "setTitle",
+      "expansion",
+      "series",
+    ]),
+    cardNumber: pick(
+      card,
+      [
+        "cardNumber",
+        "card_number",
+        "number",
+        "collectorNumber",
+        "collector_number",
+        "cardNo",
+        "no",
+      ],
+      50
+    ),
+    variant: pick(card, ["variant", "rarity", "edition", "holo", "finish"], 100),
+    condition: normalizeCondition(
+      card.condition ?? card.cardCondition ?? card.card_condition
+    ),
+    grader: pick(
+      card,
+      ["grader", "gradingCompany", "grading_company", "gradeCompany"],
+      20
+    ),
+    grade: pick(card, ["grade", "gradeValue", "grade_value"], 10),
+    language: pick(card, ["language", "lang"], 50) ?? "English",
+    confidence: pick(card, ["confidence", "certainty"], 20),
   };
 }
 
