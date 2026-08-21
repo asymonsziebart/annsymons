@@ -10,8 +10,8 @@ import type { CollectionCategory } from "@/lib/collectionCardsShared";
 export type VisionProvider = "openai" | "ollama";
 
 const DEFAULT_OLLAMA = "http://127.0.0.1:11434";
-/** Best local pick for reading printed card text on a Mac. */
-export const DEFAULT_OLLAMA_VISION_MODEL = "llama3.2-vision";
+/** Reads small printed text (set names, collector numbers) better than llama3.2-vision. */
+export const DEFAULT_OLLAMA_VISION_MODEL = "qwen2.5vl:7b";
 
 export function ollamaBaseUrl(): string {
   return (

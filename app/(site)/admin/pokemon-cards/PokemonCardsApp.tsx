@@ -820,6 +820,17 @@ export default function PokemonCardsApp({
                 </div>
               </span>
             </button>
+            <Link href="/admin/pokemon-cards/batch-scan" className="pc-tool">
+              <span className="pc-tool-icon">
+                <IconUpload />
+              </span>
+              <span>
+                <div className="pc-tool-title">Batch scanner</div>
+                <div className="pc-tool-sub">
+                  Scan a whole stack of photos at once, then save them together.
+                </div>
+              </span>
+            </Link>
             <button
               type="button"
               className="pc-tool"
