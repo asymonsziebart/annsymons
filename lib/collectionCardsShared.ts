@@ -93,6 +93,25 @@ export type CardValuation = {
   sampleSize: number;
 };
 
+/** Fields read from a card photo (client-safe; used by the scanner UI). */
+export type ScannedCardFields = {
+  name: string;
+  setName: string | null;
+  cardNumber: string | null;
+  variant: string | null;
+  condition: string | null;
+  grader: string | null;
+  grade: string | null;
+  language: string | null;
+};
+
+export type CardScanResult = ScannedCardFields & {
+  configured: boolean;
+  matchedFromCatalog: boolean;
+  confidence: string | null;
+  message?: string;
+};
+
 export function normalizeCategory(value: unknown): CollectionCategory {
   const raw = typeof value === "string" ? value.trim().toLowerCase() : "";
   return (COLLECTION_CATEGORIES as readonly string[]).includes(raw)

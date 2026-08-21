@@ -1,7 +1,8 @@
 export default function PokemonCardsLoading() {
   return (
     <div className="pc-shell">
-      <p className="pc-value-meta">Loading collection…</p>
+      <p className="pc-loading-title">Pokemon Cards</p>
+      <p className="pc-value-meta">Opening collection…</p>
     </div>
   );
 }

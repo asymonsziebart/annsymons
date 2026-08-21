@@ -59,6 +59,13 @@ body.pokemon-cards-active .site-footer-root {
     max(1rem, env(safe-area-inset-left));
 }
 
+.pc-loading-title {
+  margin: 1.25rem 0 0.35rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
 .pc-top {
   display: flex;
   align-items: center;
@@ -389,6 +396,13 @@ body.pokemon-cards-active .site-footer-root {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--pc-muted);
+}
+
+.pc-field-hint {
+  margin: -0.1rem 0 0.15rem;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--pc-dim);
 }
 
 .pc-field input,

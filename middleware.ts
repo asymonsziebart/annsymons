@@ -67,7 +67,18 @@ async function allowProtectedPath(
 function loginRedirect(request: NextRequest, pathname: string) {
   const loginUrl = new URL("/admin/login", request.url);
   loginUrl.searchParams.set("next", `${pathname}${request.nextUrl.search}`);
-  return NextResponse.redirect(loginUrl);
+  const response = NextResponse.redirect(loginUrl);
+  // Drop stale site-user cookies so Safari doesn't loop on /admin?denied=1.
+  if (request.cookies.get(SITE_USER_COOKIE)?.value) {
+    response.cookies.set(SITE_USER_COOKIE, "", {
+      path: "/",
+      maxAge: 0,
+      httpOnly: true,
+      sameSite: "lax",
+      secure: request.nextUrl.protocol === "https:",
+    });
+  }
+  return response;
 }
 
 function forbiddenRedirect(request: NextRequest) {

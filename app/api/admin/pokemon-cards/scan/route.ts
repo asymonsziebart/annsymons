@@ -5,10 +5,9 @@ import {
   enrichPokemonFromTcgApi,
   parseVisionScanJson,
   scanPromptForCategory,
-  type CardScanResult,
   type ScannedCardFields,
 } from "@/lib/cardScan";
-import { normalizeCategory } from "@/lib/collectionCardsShared";
+import { normalizeCategory, type CardScanResult } from "@/lib/collectionCardsShared";
 
 export const runtime = "nodejs";
 
