@@ -615,6 +615,44 @@ export default function PokemonCardsApp({
     }
   }
 
+  async function removeSampleCards() {
+    if (
+      !window.confirm(
+        "Remove the fake sample cards from this collection? Cards you scanned or added yourself stay."
+      )
+    ) {
+      return;
+    }
+    setBusy(true);
+    setMessage("Removing sample cards...");
+    try {
+      const res = await fetch("/api/admin/pokemon-cards/sample", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ category }),
+      });
+      const data = (await res.json()) as {
+        cards?: CollectionCard[];
+        snapshots?: CollectionSnapshot[];
+        totals?: Totals;
+        message?: string;
+        error?: string;
+      };
+      if (!res.ok) throw new Error(data.error || "Failed to remove sample cards");
+      setCards(data.cards ?? []);
+      setSnapshots(data.snapshots ?? []);
+      if (data.totals) setTotals(data.totals);
+      setMessage(data.message ?? "Sample cards removed.", "ok");
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Failed to remove sample cards",
+        "warn"
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function checkEbayConnection() {
     setBusy(true);
     setMessage("Checking eBay connection...");
@@ -903,6 +941,22 @@ export default function PokemonCardsApp({
                 <div className="pc-tool-title">Add sample cards</div>
                 <div className="pc-tool-sub">
                   Load a few real {label} cards to test eBay pricing. Delete them anytime.
+                </div>
+              </span>
+            </button>
+            <button
+              type="button"
+              className="pc-tool"
+              onClick={() => void removeSampleCards()}
+              disabled={busy}
+            >
+              <span className="pc-tool-icon">
+                <IconBolt />
+              </span>
+              <span>
+                <div className="pc-tool-title">Remove sample cards</div>
+                <div className="pc-tool-sub">
+                  Clear the fake test cards. Anything you scanned yourself stays.
                 </div>
               </span>
             </button>

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { canUseAdminApi } from "@/lib/auth";
 import {
   createCard,
+  deleteSampleCards,
   listCards,
   listSnapshots,
   normalizeCategory,
@@ -54,6 +55,44 @@ export async function POST(request: Request) {
       {
         error:
           error instanceof Error ? error.message : "Failed to add sample cards",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/** Removes only cards tagged as samples — leaves anything you scanned or added by hand. */
+export async function DELETE(request: Request) {
+  const ok = await canUseAdminApi("/admin/pokemon-cards");
+  if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
+    const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
+    const category = normalizeCategory(body.category ?? "pokemon");
+    const removed = await deleteSampleCards(category);
+    if (removed > 0) await recordSnapshot(category);
+
+    const cards = await listCards(category);
+    const snapshots = await listSnapshots(category);
+
+    return NextResponse.json({
+      ok: true,
+      category,
+      removed,
+      cards,
+      snapshots,
+      totals: portfolioTotals(cards),
+      message:
+        removed > 0
+          ? `Removed ${removed} sample card${removed === 1 ? "" : "s"}.`
+          : "No sample cards left in this collection.",
+    });
+  } catch (error) {
+    console.error("Failed to remove sample cards", error);
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error ? error.message : "Failed to remove sample cards",
       },
       { status: 500 }
     );

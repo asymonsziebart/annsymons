@@ -358,6 +358,20 @@ export async function deleteCard(id: number): Promise<void> {
   await sql`DELETE FROM collection_cards WHERE id = ${id}`;
 }
 
+export async function deleteSampleCards(
+  category: CollectionCategory
+): Promise<number> {
+  const sql = getSqlOrThrow();
+  await ensureSchema(sql);
+  const rows = await sql`
+    DELETE FROM collection_cards
+    WHERE category = ${category}
+      AND notes ILIKE '%safe to delete%'
+    RETURNING id
+  `;
+  return (rows as { id: number }[]).length;
+}
+
 export async function listComps(cardId: number): Promise<CardComp[]> {
   if (!Number.isInteger(cardId) || cardId <= 0) return [];
   const sql = getSql();
