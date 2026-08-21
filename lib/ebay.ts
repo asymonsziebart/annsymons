@@ -69,19 +69,59 @@ export type EbayLookupResult = {
   message?: string;
 };
 
+/**
+ * eBay keysets are tagged in the credential itself: App IDs contain "-SBX-" or
+ * "-PRD-", Cert IDs start with "SBX-" or "PRD-". Use that so sandbox keys don't
+ * get sent to the production endpoint (which fails as invalid_client).
+ */
+function keysetEnv(value: string | undefined): EbayEnv | null {
+  if (!value) return null;
+  if (/(^|-)SBX-/i.test(value)) return "sandbox";
+  if (/(^|-)PRD-/i.test(value)) return "production";
+  return null;
+}
+
 function getEnv(): EbayEnv {
-  return process.env.EBAY_ENV === "sandbox" ? "sandbox" : "production";
+  const explicit = process.env.EBAY_ENV?.trim().toLowerCase();
+  if (explicit === "sandbox") return "sandbox";
+  if (explicit === "production") return "production";
+  return keysetEnv(cleanEnvValue(process.env.EBAY_CLIENT_ID)) ?? "production";
+}
+
+/** Env values are sometimes pasted with surrounding quotes, which breaks auth. */
+function cleanEnvValue(value: string | undefined): string {
+  return (value ?? "").trim().replace(/^["']|["']$/g, "").trim();
 }
 
 function getCredentials(): { clientId: string; clientSecret: string } | null {
-  const clientId = process.env.EBAY_CLIENT_ID?.trim();
-  const clientSecret = process.env.EBAY_CLIENT_SECRET?.trim();
+  const clientId = cleanEnvValue(process.env.EBAY_CLIENT_ID);
+  const clientSecret = cleanEnvValue(process.env.EBAY_CLIENT_SECRET);
   if (!clientId || !clientSecret) return null;
   return { clientId, clientSecret };
 }
 
 export function isEbayConfigured(): boolean {
   return getCredentials() != null;
+}
+
+/** Explains an invalid_client rejection using what we can tell about the keys. */
+function credentialHint(): string {
+  const creds = getCredentials();
+  if (!creds) return "EBAY_CLIENT_ID / EBAY_CLIENT_SECRET are not set.";
+
+  const idEnv = keysetEnv(creds.clientId);
+  const secretEnv = keysetEnv(creds.clientSecret);
+
+  if (idEnv && secretEnv && idEnv !== secretEnv) {
+    return `EBAY_CLIENT_ID looks like a ${idEnv} key but EBAY_CLIENT_SECRET looks like a ${secretEnv} key — they must come from the same eBay keyset.`;
+  }
+  if (!idEnv) {
+    return "EBAY_CLIENT_ID doesn't look like an eBay App ID (those contain -PRD- or -SBX-). Make sure it's the App ID (Client ID), not the Dev ID or Cert ID.";
+  }
+  if (!secretEnv) {
+    return "EBAY_CLIENT_SECRET doesn't look like an eBay Cert ID (those start with PRD- or SBX-). Make sure it's the Cert ID (Client Secret), not the Dev ID.";
+  }
+  return `Using the ${idEnv} keyset. Confirm the App ID and Cert ID were copied in full from the same keyset, with no extra spaces.`;
 }
 
 function marketplaceId(): string {
@@ -133,11 +173,17 @@ async function getAppToken(scope: string): Promise<string> {
   };
 
   if (!res.ok || !data.access_token) {
-    const error = new Error(
-      data.error_description ||
-        data.error ||
-        `eBay OAuth failed (${res.status}).`
-    ) as Error & { status?: number; ebayError?: string };
+    const base =
+      data.error_description || data.error || `eBay OAuth failed (${res.status}).`;
+    // invalid_client means the key pair itself was rejected, so say what to check.
+    const message =
+      data.error === "invalid_client"
+        ? `eBay rejected the app credentials (${base}). ${credentialHint()}`
+        : base;
+    const error = new Error(message) as Error & {
+      status?: number;
+      ebayError?: string;
+    };
     error.status = res.status;
     error.ebayError = data.error;
     throw error;
@@ -371,6 +417,16 @@ export async function lookupEbayComps(card: CollectionCard): Promise<EbayLookupR
             : undefined,
       };
     } catch (soldError) {
+      // Bad keys fail every call, so retrying the Browse API just repeats the error.
+      if (isCredentialError(soldError)) {
+        return {
+          mode: "unavailable",
+          comps: [],
+          query,
+          message:
+            soldError instanceof Error ? soldError.message : "eBay rejected the credentials.",
+        };
+      }
       // Most app keys lack buy.marketplace.insights (limited release). That shows up
       // as an OAuth invalid_scope or a 4xx from the API — either way, use asking prices.
       blockInsights();
@@ -381,6 +437,75 @@ export async function lookupEbayComps(card: CollectionCard): Promise<EbayLookupR
   }
 
   return activeFallback(query, card.category, null);
+}
+
+function isCredentialError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    "ebayError" in error &&
+    (error as Error & { ebayError?: string }).ebayError === "invalid_client"
+  );
+}
+
+export type EbayConnectionCheck = {
+  configured: boolean;
+  ok: boolean;
+  environment: EbayEnv;
+  clientIdHint: string | null;
+  soldHistoryAvailable: boolean;
+  message: string;
+};
+
+/** Verifies the app credentials without exposing them, for the admin UI check. */
+export async function checkEbayConnection(): Promise<EbayConnectionCheck> {
+  const creds = getCredentials();
+  const environment = getEnv();
+
+  if (!creds) {
+    return {
+      configured: false,
+      ok: false,
+      environment,
+      clientIdHint: null,
+      soldHistoryAvailable: false,
+      message: "Set EBAY_CLIENT_ID and EBAY_CLIENT_SECRET in your environment variables.",
+    };
+  }
+
+  // Enough of the App ID to identify the keyset, without publishing the whole thing.
+  const clientIdHint = `${creds.clientId.slice(0, 12)}…(${creds.clientId.length} chars)`;
+
+  try {
+    await getAppToken(BROWSE_SCOPE);
+  } catch (error) {
+    return {
+      configured: true,
+      ok: false,
+      environment,
+      clientIdHint,
+      soldHistoryAvailable: false,
+      message: error instanceof Error ? error.message : "eBay authentication failed.",
+    };
+  }
+
+  let soldHistoryAvailable = false;
+  let soldNote = "Sold-history API isn't enabled for this key, so values use current asking prices.";
+  try {
+    await getAppToken(SOLD_SCOPE);
+    soldHistoryAvailable = true;
+    soldNote = "Sold-history access is enabled — values will use real sold prices.";
+  } catch {
+    // Expected for most keys: Insights is limited release.
+  }
+
+  return {
+    configured: true,
+    ok: true,
+    environment,
+    clientIdHint,
+    soldHistoryAvailable,
+    message: `Connected to eBay ${environment}. ${soldNote}`,
+  };
 }
 
 async function activeFallback(

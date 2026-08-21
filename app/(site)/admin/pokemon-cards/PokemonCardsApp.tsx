@@ -615,6 +615,35 @@ export default function PokemonCardsApp({
     }
   }
 
+  async function checkEbayConnection() {
+    setBusy(true);
+    setMessage("Checking eBay connection...");
+    try {
+      const res = await fetch("/api/admin/pokemon-cards/ebay-status");
+      const data = (await res.json()) as {
+        ok?: boolean;
+        environment?: string;
+        clientIdHint?: string | null;
+        message?: string;
+        error?: string;
+      };
+      if (!res.ok) throw new Error(data.error || "Could not check eBay connection");
+      setMessage(
+        [data.message, data.clientIdHint ? `Key: ${data.clientIdHint}` : ""]
+          .filter(Boolean)
+          .join(" "),
+        data.ok ? "ok" : "warn"
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Could not check eBay connection",
+        "warn"
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function toggleComp(comp: CardComp) {
     setBusy(true);
     try {
@@ -863,6 +892,22 @@ export default function PokemonCardsApp({
                 <div className="pc-tool-title">Add sample cards</div>
                 <div className="pc-tool-sub">
                   Load a few real {label} cards to test eBay pricing. Delete them anytime.
+                </div>
+              </span>
+            </button>
+            <button
+              type="button"
+              className="pc-tool"
+              onClick={() => void checkEbayConnection()}
+              disabled={busy}
+            >
+              <span className="pc-tool-icon">
+                <IconBolt />
+              </span>
+              <span>
+                <div className="pc-tool-title">Check eBay connection</div>
+                <div className="pc-tool-sub">
+                  Test your API keys and see whether sold prices are available.
                 </div>
               </span>
             </button>
