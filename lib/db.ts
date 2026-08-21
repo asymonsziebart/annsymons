@@ -1,8 +1,17 @@
 import { neon } from "@neondatabase/serverless";
 
+/**
+ * Pasted values often arrive wrapped in quotes or broken across lines, which
+ * would fail the postgres:// check and look like a missing variable.
+ */
 function getConnectionString(): string | null {
-  const raw = process.env.DATABASE_URL?.trim();
-  return raw || null;
+  const raw = process.env.DATABASE_URL;
+  if (!raw) return null;
+  const cleaned = raw
+    .trim()
+    .replace(/^["']|["']$/g, "")
+    .replace(/\s+/g, "");
+  return cleaned || null;
 }
 
 /** Neon serverless driver only accepts Postgres URLs. */
@@ -31,7 +40,9 @@ export function getSqlOrThrow() {
   const url = getConnectionString();
   if (!url) throw new Error("DATABASE_URL is not set");
   if (!isPostgresUrl(url)) {
-    throw new Error("DATABASE_URL must be a postgresql:// connection string for Neon");
+    throw new Error(
+      `DATABASE_URL must start with postgresql:// (got "${url.slice(0, 12)}…")`
+    );
   }
   return neon(url);
 }
