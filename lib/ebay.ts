@@ -6,9 +6,11 @@
  * to the public Browse API (active listings only) so the page still works.
  *
  * Env:
- *   EBAY_CLIENT_ID / EBAY_CLIENT_SECRET  – OAuth app credentials
+ *   EBAY_CLIENT_ID / EBAY_CLIENT_SECRET  – OAuth app credentials (App ID / Cert ID)
  *   EBAY_ENV=sandbox|production         – optional, default production
  *   EBAY_MARKETPLACE_ID                 – optional, default EBAY_US
+ *
+ * EBAY_DEV_ID is only needed by the legacy Trading API, not these REST calls.
  */
 
 import type { CardCompInput, CollectionCard } from "@/lib/collectionCardsShared";
@@ -44,6 +46,18 @@ type CachedToken = {
 declare global {
   // Reuse tokens across hot reloads / warm serverless instances.
   var ebayTokenCache: Map<string, CachedToken> | undefined;
+  // Remembers that Insights is not provisioned so bulk revalues skip it.
+  var ebayInsightsBlockedUntil: number | undefined;
+}
+
+const INSIGHTS_BLOCK_MS = 30 * 60 * 1000;
+
+function insightsBlocked(): boolean {
+  return (global.ebayInsightsBlockedUntil ?? 0) > Date.now();
+}
+
+function blockInsights(): void {
+  global.ebayInsightsBlockedUntil = Date.now() + INSIGHTS_BLOCK_MS;
 }
 
 export type EbayLookupMode = "sold" | "active" | "unavailable";
@@ -119,11 +133,14 @@ async function getAppToken(scope: string): Promise<string> {
   };
 
   if (!res.ok || !data.access_token) {
-    throw new Error(
+    const error = new Error(
       data.error_description ||
         data.error ||
         `eBay OAuth failed (${res.status}).`
-    );
+    ) as Error & { status?: number; ebayError?: string };
+    error.status = res.status;
+    error.ebayError = data.error;
+    throw error;
   }
 
   tokenCache().set(cacheKey, {
@@ -201,10 +218,10 @@ type EbayBrowseItem = {
 
 async function searchSold(query: string, category: string): Promise<CardCompInput[]> {
   const token = await getAppToken(SOLD_SCOPE);
+  // Insights only sorts by price; anything else is rejected. Best Match is what we want.
   const params = new URLSearchParams({
     q: query,
     limit: "20",
-    sort: "lastSoldDate",
   });
   const categoryId = CATEGORY_IDS[category];
   if (categoryId) params.set("category_ids", categoryId);
@@ -259,16 +276,16 @@ async function searchSold(query: string, category: string): Promise<CardCompInpu
 
 async function searchActive(query: string, category: string): Promise<CardCompInput[]> {
   const token = await getAppToken(BROWSE_SCOPE);
+  // No sort: Best Match keeps the sample representative instead of 20 cheapest.
   const params = new URLSearchParams({
     q: query,
     limit: "20",
-    sort: "price",
   });
   const categoryId = CATEGORY_IDS[category];
   if (categoryId) params.set("category_ids", categoryId);
   params.set(
     "filter",
-    "buyingOptions:{FIXED_PRICE|AUCTION},conditions:{NEW|LIKE_NEW|VERY_GOOD|GOOD|ACCEPTABLE},itemLocationCountry:US,priceCurrency:USD"
+    "buyingOptions:{FIXED_PRICE|AUCTION},itemLocationCountry:US,priceCurrency:USD"
   );
 
   const res = await fetch(
@@ -341,52 +358,55 @@ export async function lookupEbayComps(card: CollectionCard): Promise<EbayLookupR
     };
   }
 
+  if (!insightsBlocked()) {
+    try {
+      const comps = await searchSold(query, card.category);
+      return {
+        mode: "sold",
+        comps,
+        query,
+        message:
+          comps.length === 0
+            ? "No sold listings matched in the last ~90 days."
+            : undefined,
+      };
+    } catch (soldError) {
+      // Most app keys lack buy.marketplace.insights (limited release). That shows up
+      // as an OAuth invalid_scope or a 4xx from the API — either way, use asking prices.
+      blockInsights();
+      const soldMessage =
+        soldError instanceof Error ? soldError.message : "eBay sold lookup failed.";
+      return activeFallback(query, card.category, soldMessage);
+    }
+  }
+
+  return activeFallback(query, card.category, null);
+}
+
+async function activeFallback(
+  query: string,
+  category: string,
+  soldMessage: string | null
+): Promise<EbayLookupResult> {
   try {
-    const comps = await searchSold(query, card.category);
+    const comps = await searchActive(query, category);
     return {
-      mode: "sold",
+      mode: "active",
       comps,
       query,
       message:
         comps.length === 0
-          ? "No sold listings matched in the last ~90 days."
-          : undefined,
+          ? "No active listings matched this card on eBay US."
+          : "Sold-history API isn't enabled for this eBay app, so these are current asking prices. Request buy.marketplace.insights in the eBay Developer Program for true sold comps.",
     };
-  } catch (soldError) {
-    const status =
-      soldError instanceof Error && "status" in soldError
-        ? Number((soldError as Error & { status?: number }).status)
-        : undefined;
-    // 403 / 401 usually means Insights isn't provisioned for this app key.
-    if (status === 401 || status === 403 || status === 404) {
-      try {
-        const comps = await searchActive(query, card.category);
-        return {
-          mode: "active",
-          comps,
-          query,
-          message:
-            "Sold-history API isn't enabled for this eBay app, so these are active asking prices. Request buy.marketplace.insights in the eBay Developer Program for true sold comps.",
-        };
-      } catch (activeError) {
-        return {
-          mode: "unavailable",
-          comps: [],
-          query,
-          message:
-            activeError instanceof Error
-              ? activeError.message
-              : "eBay lookup failed.",
-        };
-      }
-    }
-
+  } catch (activeError) {
+    const activeMessage =
+      activeError instanceof Error ? activeError.message : "eBay lookup failed.";
     return {
       mode: "unavailable",
       comps: [],
       query,
-      message:
-        soldError instanceof Error ? soldError.message : "eBay sold lookup failed.",
+      message: soldMessage ? `${activeMessage} (sold lookup: ${soldMessage})` : activeMessage,
     };
   }
 }
