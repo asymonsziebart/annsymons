@@ -583,6 +583,38 @@ export default function PokemonCardsApp({
     }
   }
 
+  async function addSampleCards() {
+    setBusy(true);
+    setMessage("Adding sample cards...");
+    try {
+      const res = await fetch("/api/admin/pokemon-cards/sample", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ category }),
+      });
+      const data = (await res.json()) as {
+        cards?: CollectionCard[];
+        snapshots?: CollectionSnapshot[];
+        totals?: Totals;
+        added?: number;
+        message?: string;
+        error?: string;
+      };
+      if (!res.ok) throw new Error(data.error || "Failed to add sample cards");
+      setCards(data.cards ?? []);
+      setSnapshots(data.snapshots ?? []);
+      if (data.totals) setTotals(data.totals);
+      setMessage(data.message ?? "Sample cards added.", "ok");
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Failed to add sample cards",
+        "warn"
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function toggleComp(comp: CardComp) {
     setBusy(true);
     try {
@@ -810,8 +842,28 @@ export default function PokemonCardsApp({
                 <IconVideo />
               </span>
               <span>
-                <div className="pc-tool-title">Revalue collection</div>
-                <div className="pc-tool-sub">Refresh every card from eBay solds / askings.</div>
+                <div className="pc-tool-title">Search eBay &amp; update value</div>
+                <div className="pc-tool-sub">
+                  {cards.length === 0
+                    ? "Add cards first, then this prices every one from eBay."
+                    : `Price all ${cards.length} card${cards.length === 1 ? "" : "s"} from eBay and update your total.`}
+                </div>
+              </span>
+            </button>
+            <button
+              type="button"
+              className="pc-tool"
+              onClick={() => void addSampleCards()}
+              disabled={busy}
+            >
+              <span className="pc-tool-icon">
+                <IconStar />
+              </span>
+              <span>
+                <div className="pc-tool-title">Add sample cards</div>
+                <div className="pc-tool-sub">
+                  Load a few real {label} cards to test eBay pricing. Delete them anytime.
+                </div>
               </span>
             </button>
           </div>
