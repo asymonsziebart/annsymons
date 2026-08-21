@@ -39,12 +39,11 @@ export function preferredVisionProvider(): VisionProvider | null {
   return null;
 }
 
-async function loadImageBase64(photoPath: string): Promise<string> {
+async function loadImageBytes(photoPath: string): Promise<Buffer> {
   if (/^https?:\/\//i.test(photoPath)) {
     const res = await fetch(photoPath, { cache: "no-store" });
     if (!res.ok) throw new Error("Could not load the uploaded card photo.");
-    const buf = Buffer.from(await res.arrayBuffer());
-    return buf.toString("base64");
+    return Buffer.from(await res.arrayBuffer());
   }
 
   const relative = photoPath.replace(/^\/+/, "");
@@ -52,8 +51,30 @@ async function loadImageBase64(photoPath: string): Promise<string> {
     throw new Error("Invalid photo path.");
   }
   const full = path.join(process.cwd(), "public", relative);
-  const buf = await readFile(full);
-  return buf.toString("base64");
+  return readFile(full);
+}
+
+/**
+ * Phone photos are far larger than a vision model needs, and every pixel costs
+ * context tokens — full-size images overflow Ollama's window and get rejected.
+ * A card's text stays legible well below that limit.
+ */
+async function loadImageBase64(photoPath: string): Promise<string> {
+  const original = await loadImageBytes(photoPath);
+  const maxEdge = Number(process.env.OLLAMA_IMAGE_MAX_EDGE?.trim()) || 1024;
+
+  try {
+    const { default: sharp } = await import("sharp");
+    const resized = await sharp(original)
+      .rotate()
+      .resize(maxEdge, maxEdge, { fit: "inside", withoutEnlargement: true })
+      .jpeg({ quality: 85 })
+      .toBuffer();
+    return resized.toString("base64");
+  } catch {
+    // Better to try the original than to fail outright if resizing is unavailable.
+    return original.toString("base64");
+  }
 }
 
 export async function scanCardWithOllama(
@@ -71,6 +92,11 @@ export async function scanCardWithOllama(
       model,
       stream: false,
       format: "json",
+      // Ollama defaults to a small window that one card photo can exceed.
+      options: {
+        num_ctx: Number(process.env.OLLAMA_NUM_CTX?.trim()) || 8192,
+        temperature: 0.1,
+      },
       messages: [
         {
           role: "user",
@@ -84,6 +110,11 @@ export async function scanCardWithOllama(
 
   if (!res.ok) {
     const detail = await res.text();
+    if (/context|too large|exceed/i.test(detail)) {
+      throw new Error(
+        `The photo is too large for ${model}'s context window. Set OLLAMA_NUM_CTX=16384 in .env.local, or lower OLLAMA_IMAGE_MAX_EDGE (currently ${process.env.OLLAMA_IMAGE_MAX_EDGE?.trim() || 1024}). Ollama said: ${detail.slice(0, 160)}`
+      );
+    }
     throw new Error(
       `Ollama scan failed (${res.status}). Is \`${model}\` pulled? ${detail.slice(0, 200)}`
     );
