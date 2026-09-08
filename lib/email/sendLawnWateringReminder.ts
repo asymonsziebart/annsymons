@@ -52,6 +52,8 @@ export async function sendLawnWateringReminder(
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
+      // Prevent a cron retry from sending the household the same reminder twice.
+      "Idempotency-Key": `lawn-watering-${new Date().toISOString().slice(0, 10)}`,
     },
     body: JSON.stringify({
       from,
