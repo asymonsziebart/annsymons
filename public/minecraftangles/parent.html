@@ -226,10 +226,15 @@
       l4: "Which rule?",
       l5: "Solve for x",
       l6: "Naming angles",
+      l7: "Crossed swords",
+      l8: "Flat ground and y",
+      l9: "Block corner",
+      l10: "Crafting table",
+      l11: "Congruent angles",
       boss: "Ender Dragon Quiz"
     };
     var done = (s.done || []).map(function (id) { return names[id] || id; });
-    var left = ["l1", "l2", "l3", "l4", "l5", "l6", "boss"].filter(function (id) {
+    var left = ["l1", "l2", "l3", "l4", "l5", "l6", "l7", "l8", "l9", "l10", "l11", "boss"].filter(function (id) {
       return (s.done || []).indexOf(id) === -1;
     }).map(function (id) { return names[id]; });
     box.innerHTML = "<b>" + (s.name || "Player") + "</b> · " + (s.xp || 0) + " XP<br>" +

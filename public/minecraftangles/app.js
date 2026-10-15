@@ -60,6 +60,51 @@
       xp: 20,
     },
     {
+      id: "l7",
+      num: "07",
+      icon: "⚔️",
+      title: "Crossed swords",
+      sub: "Vertical angles · find all four",
+      achievement: "Twin Angles",
+      xp: 35,
+    },
+    {
+      id: "l8",
+      num: "08",
+      icon: "🟫",
+      title: "Flat ground & y",
+      sub: "Linear pairs · three angles · find y",
+      achievement: "Path Builder",
+      xp: 35,
+    },
+    {
+      id: "l9",
+      num: "09",
+      icon: "🧱",
+      title: "Block corner",
+      sub: "Pieces that add to 90°",
+      achievement: "Corner Crafter",
+      xp: 30,
+    },
+    {
+      id: "l10",
+      num: "10",
+      icon: "🧰",
+      title: "Crafting table",
+      sub: "Angle Addition Postulate",
+      achievement: "Whole From Pieces",
+      xp: 35,
+    },
+    {
+      id: "l11",
+      num: "11",
+      icon: "🎯",
+      title: "Congruent angles",
+      sub: "Matching marks · ≅ statements",
+      achievement: "Same Size Twins",
+      xp: 35,
+    },
+    {
       id: "boss",
       num: "BOSS",
       icon: "🐉",
@@ -198,19 +243,12 @@
   function renderMap() {
     clear(app);
     const cards = LEVELS.map((lv, i) => {
-      const locked = i > state.unlocked;
       const done = state.done.includes(lv.id);
-      const cls = [
-        "card",
-        locked ? "locked" : "",
-        lv.boss ? "boss" : "",
-      ]
-        .filter(Boolean)
-        .join(" ");
+      const cls = ["card", lv.boss ? "boss" : ""].filter(Boolean).join(" ");
       return `
-        <button type="button" class="${cls}" data-i="${i}" ${locked ? "disabled" : ""}>
+        <button type="button" class="${cls}" data-i="${i}">
           <span class="num">${lv.num}</span>
-          <span class="status">${done ? "✅" : locked ? "🔒" : "▶️"}</span>
+          <span class="status">${done ? "✅" : "▶️"}</span>
           <div class="icon">${lv.icon}</div>
           <div class="ctitle">${escapeHtml(lv.title)}</div>
           <div class="csub">${escapeHtml(lv.sub)}</div>
@@ -233,7 +271,7 @@
         renderMap();
       }
     };
-    app.querySelectorAll(".card:not(.locked)").forEach((btn) => {
+    app.querySelectorAll(".card").forEach((btn) => {
       btn.onclick = () => openLevel(Number(btn.dataset.i));
     });
   }
@@ -243,15 +281,9 @@
     if (!state.done.includes(lv.id)) {
       state.done.push(lv.id);
       state.xp += lv.xp;
-      if (state.unlocked === levelIndex) state.unlocked = levelIndex + 1;
+      state.unlocked = Math.max(state.unlocked, levelIndex + 1);
       saveState();
       showAchievement(lv.achievement);
-    } else {
-      // Already done — still allow advancing unlock if needed
-      if (state.unlocked === levelIndex) {
-        state.unlocked = levelIndex + 1;
-        saveState();
-      }
     }
   }
 
@@ -264,6 +296,11 @@
     if (lv.id === "l4") return renderLearnQuiz(i, level4Content(), level4Questions());
     if (lv.id === "l5") return renderLearnQuiz(i, level5Content(), level5Questions());
     if (lv.id === "l6") return renderLearnQuiz(i, level6Content(), level6Questions());
+    if (lv.id === "l7") return renderLearnQuiz(i, level7Content(), level7Questions());
+    if (lv.id === "l8") return renderLearnQuiz(i, level8Content(), level8Questions());
+    if (lv.id === "l9") return renderLearnQuiz(i, level9Content(), level9Questions());
+    if (lv.id === "l10") return renderLearnQuiz(i, level10Content(), level10Questions());
+    if (lv.id === "l11") return renderLearnQuiz(i, level11Content(), level11Questions());
   }
 
   /* ---------- generic learn + quiz ---------- */
@@ -395,6 +432,134 @@
     clear(area);
     clear(fb);
 
+    if (q.type === "equation") {
+      let stepIndex = 0;
+      const lab = el(`<div class="equation-lab"></div>`);
+      area.appendChild(lab);
+
+      function equationBoard(equation) {
+        const parts = equation.split("=");
+        return `
+          <div class="balance" aria-label="${escapeHtml(equation)}">
+            <div class="balance-pan"><span>${escapeHtml((parts[0] || "").trim())}</span><small>LEFT SIDE</small></div>
+            <div class="balance-equals">=</div>
+            <div class="balance-pan"><span>${escapeHtml((parts[1] || "").trim())}</span><small>RIGHT SIDE</small></div>
+          </div>`;
+      }
+
+      function paintStep() {
+        const step = q.steps[stepIndex];
+        const completed = q.steps.slice(0, stepIndex);
+        lab.innerHTML = `
+          <div class="equation-progress">MINING STEP ${stepIndex + 1} OF ${q.steps.length}</div>
+          ${equationBoard(step.equation)}
+          <p class="equation-instruction">${escapeHtml(step.instruction)}</p>
+          <div class="operation-tray" aria-label="Choose an operation">
+            ${step.choices
+              .map(
+                (choice, i) => `
+                <button type="button" draggable="true" class="operation-card" data-choice="${i}">
+                  <span>${escapeHtml(choice.label)}</span>
+                  <small>drag or tap</small>
+                </button>`,
+              )
+              .join("")}
+          </div>
+          <button type="button" class="apply-zone" id="apply-zone">
+            <span>⬇</span> APPLY TO BOTH SIDES
+          </button>
+          <div class="equation-history">
+            ${completed
+              .map(
+                (done) => `
+                <div class="equation-done">
+                  <span>✅ ${escapeHtml(done.correctLabel)}</span>
+                  <b>${escapeHtml(done.after)}</b>
+                </div>`,
+              )
+              .join("")}
+          </div>`;
+
+        let selected = null;
+        const zone = lab.querySelector("#apply-zone");
+        const cards = Array.from(lab.querySelectorAll(".operation-card"));
+
+        function select(choiceIndex) {
+          selected = choiceIndex;
+          cards.forEach((card, i) => card.classList.toggle("selected", i === choiceIndex));
+          zone.classList.add("ready");
+          zone.innerHTML = `<span>✓</span> APPLY ${escapeHtml(step.choices[choiceIndex].label)} TO BOTH SIDES`;
+        }
+
+        function apply(choiceIndex) {
+          if (choiceIndex == null) {
+            fb.innerHTML = `<div class="fb hint"><div class="head">Pick a move first</div><div class="explain">Drag a card here, or tap a card and then tap this box.</div></div>`;
+            return;
+          }
+          const choice = step.choices[choiceIndex];
+          if (!choice.ok) {
+            hooks.onWrong();
+            cards[choiceIndex].classList.add("wrong");
+            fb.innerHTML = `<div class="fb hint"><div class="head">That would unbalance the trade</div><div class="explain">${choice.hint}</div></div>`;
+            return;
+          }
+
+          step.correctLabel = choice.label;
+          cards.forEach((card) => (card.disabled = true));
+          zone.disabled = true;
+          zone.classList.add("correct");
+          fb.innerHTML = `<div class="fb ok"><div class="head">✅ Balanced!</div><div class="explain">${step.explain}</div></div>`;
+          setTimeout(() => {
+            stepIndex += 1;
+            if (stepIndex >= q.steps.length) {
+              lab.innerHTML = `
+                <div class="equation-complete">💎 ORE FOUND!</div>
+                ${equationBoard(q.result)}
+                <div class="equation-history">
+                  ${q.steps
+                    .map(
+                      (done) => `
+                      <div class="equation-done">
+                        <span>✅ ${escapeHtml(done.correctLabel)}</span>
+                        <b>${escapeHtml(done.after)}</b>
+                      </div>`,
+                    )
+                    .join("")}
+                </div>`;
+              fb.innerHTML = `<div class="fb ok"><div class="head">⛏️ You got x alone!</div><div class="explain">${q.explain}</div></div>`;
+              hooks.onCorrect();
+            } else {
+              fb.innerHTML = "";
+              paintStep();
+            }
+          }, 750);
+        }
+
+        cards.forEach((card, i) => {
+          card.onclick = () => select(i);
+          card.addEventListener("dragstart", (event) => {
+            event.dataTransfer.setData("text/plain", String(i));
+            event.dataTransfer.effectAllowed = "move";
+            select(i);
+          });
+        });
+        zone.onclick = () => apply(selected);
+        zone.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          zone.classList.add("dragover");
+        });
+        zone.addEventListener("dragleave", () => zone.classList.remove("dragover"));
+        zone.addEventListener("drop", (event) => {
+          event.preventDefault();
+          zone.classList.remove("dragover");
+          apply(Number(event.dataTransfer.getData("text/plain")));
+        });
+      }
+
+      paintStep();
+      return;
+    }
+
     if (q.type === "choice") {
       const grid = el(`<div class="choices"></div>`);
       q.choices.forEach((c, idx) => {
@@ -432,7 +597,7 @@
     if (q.type === "number") {
       const row = el(`
         <div class="numrow">
-          <span class="xeq">${escapeHtml(q.prefix || "x =")}</span>
+          <span class="xeq">${escapeHtml(q.prefix == null ? "x =" : q.prefix)}</span>
           <input type="number" inputmode="numeric" id="num-ans" aria-label="Your answer">
           <button type="button" class="btn green small" id="check-num">Check</button>
         </div>`);
@@ -725,40 +890,157 @@
   function level5Questions() {
     return [
       {
-        type: "number",
-        prompt: "Vertical angles: 5x + 10 and 3x + 30. Find x.",
-        prefix: "x =",
-        answer: 10,
-        hint: "Set them equal, then get x alone. Subtract 3x first.",
-        reveal: "5x + 10 = 3x + 30 → 2x = 20 → x = 10",
-        explain: "Both angles are 60°. Twins!",
+        type: "equation",
+        prompt: "Vertical angles: 5x + 10 and 3x + 30. Keep the villager trade balanced and dig out x.",
+        result: "x = 10",
+        steps: [
+          {
+            equation: "5x + 10 = 3x + 30",
+            instruction: "x is on both sides. Which move gets the smaller x-stack out of the way?",
+            after: "2x + 10 = 30",
+            explain: "Subtracting 3x from both sides removes the 3x on the right and leaves 2x on the left.",
+            choices: [
+              { label: "− 3x", ok: true },
+              { label: "+ 3x", ok: false, hint: "Adding makes both x-stacks bigger. Use the opposite of +3x." },
+              { label: "− 30", ok: false, hint: "First get all the x-blocks onto one side." },
+            ],
+          },
+          {
+            equation: "2x + 10 = 30",
+            instruction: "What is attached to 2x? Use its opposite on both sides.",
+            after: "2x = 20",
+            explain: "Subtracting 10 cancels the +10. On the right, 30 − 10 = 20.",
+            choices: [
+              { label: "− 10", ok: true },
+              { label: "+ 10", ok: false, hint: "You want the +10 to disappear. Its opposite is −10." },
+              { label: "÷ 2", ok: false, hint: "Remove the loose +10 before dividing the x-stack." },
+            ],
+          },
+          {
+            equation: "2x = 20",
+            instruction: "Two equal x-stacks make 20. How do you get one x-stack?",
+            after: "x = 10",
+            explain: "Divide both sides by 2. One x-stack is 10.",
+            choices: [
+              { label: "÷ 2", ok: true },
+              { label: "− 2", ok: false, hint: "2x means 2 times x, so undo multiplication with division." },
+              { label: "× 2", ok: false, hint: "Multiplying makes the x-stack larger. Split both sides into 2 equal groups." },
+            ],
+          },
+        ],
+        explain: "x = 10. Put it back in: 5(10)+10 = 60° and 3(10)+30 = 60°. The vertical twins match!",
       },
       {
-        type: "number",
-        prompt: "Linear pair: (4x + 20) and (2x + 40). Find x.",
-        prefix: "x =",
-        answer: 20,
-        hint: "Add the expressions and set equal to 180.",
-        reveal: "6x + 60 = 180 → 6x = 120 → x = 20",
-        explain: "Angles are 100° and 80°. 100 + 80 = 180 ✅",
+        type: "equation",
+        prompt: "Linear pair: (4x + 20) and (2x + 40). Build the equation, then isolate x.",
+        result: "x = 20",
+        steps: [
+          {
+            equation: "4x + 20 + 2x + 40 = 180",
+            instruction: "First craft matching items together: x-blocks with x-blocks, numbers with numbers.",
+            after: "6x + 60 = 180",
+            explain: "4x + 2x = 6x, and 20 + 40 = 60.",
+            choices: [
+              { label: "Combine like terms", ok: true },
+              { label: "Set them equal", ok: false, hint: "These are neighbors on flat ground, not twins across an X." },
+              { label: "Change 180 to 90", ok: false, hint: "A linear pair fills flat ground: 180°." },
+            ],
+          },
+          {
+            equation: "6x + 60 = 180",
+            instruction: "Undo the loose +60 on both sides.",
+            after: "6x = 120",
+            explain: "Subtract 60 from both sides: 180 − 60 = 120.",
+            choices: [
+              { label: "− 60", ok: true },
+              { label: "+ 60", ok: false, hint: "Use the opposite of +60." },
+              { label: "÷ 6", ok: false, hint: "Clear the +60 before splitting the x-stack." },
+            ],
+          },
+          {
+            equation: "6x = 120",
+            instruction: "Six x-stacks make 120. Split both sides evenly.",
+            after: "x = 20",
+            explain: "120 ÷ 6 = 20.",
+            choices: [
+              { label: "÷ 6", ok: true },
+              { label: "− 6", ok: false, hint: "6x is multiplication, so division is the opposite." },
+              { label: "÷ 120", ok: false, hint: "Divide by the number attached to x." },
+            ],
+          },
+        ],
+        explain: "x = 20. The angles are 100° and 80°, and 100 + 80 = 180°.",
       },
       {
-        type: "number",
-        prompt: "Right angle split: (2x + 5) and (x + 10). Find x.",
-        prefix: "x =",
-        answer: 25,
-        hint: "Pieces of a block corner add to 90.",
-        reveal: "3x + 15 = 90 → 3x = 75 → x = 25",
-        explain: "Angles 55° and 35° add to 90°.",
+        type: "equation",
+        prompt: "Right-angle split: (2x + 5) and (x + 10). Mine x from the block corner.",
+        result: "x = 25",
+        steps: [
+          {
+            equation: "2x + 5 + x + 10 = 90",
+            instruction: "Combine the like terms before using opposite moves.",
+            after: "3x + 15 = 90",
+            explain: "2x + x = 3x, and 5 + 10 = 15.",
+            choices: [
+              { label: "Combine like terms", ok: true },
+              { label: "Change 90 to 180", ok: false, hint: "The square marker means a 90° block corner." },
+              { label: "Set the pieces equal", ok: false, hint: "The pieces add to 90; they are not necessarily the same." },
+            ],
+          },
+          {
+            equation: "3x + 15 = 90",
+            instruction: "Undo +15 on both sides.",
+            after: "3x = 75",
+            explain: "90 − 15 = 75.",
+            choices: [
+              { label: "− 15", ok: true },
+              { label: "+ 15", ok: false, hint: "Use the opposite of +15." },
+              { label: "÷ 3", ok: false, hint: "Remove +15 before dividing." },
+            ],
+          },
+          {
+            equation: "3x = 75",
+            instruction: "Three x-stacks make 75. Split them.",
+            after: "x = 25",
+            explain: "75 ÷ 3 = 25.",
+            choices: [
+              { label: "÷ 3", ok: true },
+              { label: "− 3", ok: false, hint: "3x means multiplication, not addition." },
+              { label: "× 3", ok: false, hint: "Use the opposite of times 3." },
+            ],
+          },
+        ],
+        explain: "x = 25. The pieces are 55° and 35°, which add to 90°.",
       },
       {
-        type: "number",
-        prompt: "Solve: 20 = 2x − 30. Find x. (Watch the minus!)",
-        prefix: "x =",
-        answer: 25,
-        hint: "Undo −30 by adding 30 to both sides.",
-        reveal: "20 + 30 = 2x → 50 = 2x → x = 25",
-        explain: "Adding 30 cancels the −30. Don’t write −30 on the other side.",
+        type: "equation",
+        prompt: "Creeper trap: 20 = 2x − 30. Watch the minus sign and keep both sides balanced.",
+        result: "25 = x",
+        steps: [
+          {
+            equation: "20 = 2x − 30",
+            instruction: "What is the opposite of subtracting 30?",
+            after: "50 = 2x",
+            explain: "Add 30 to both sides. On the right, −30 + 30 disappears. On the left, 20 + 30 = 50.",
+            choices: [
+              { label: "+ 30", ok: true },
+              { label: "− 30", ok: false, hint: "That repeats the minus and causes the common negative-answer mistake. Opposite of −30 is +30." },
+              { label: "÷ 2", ok: false, hint: "Clear the −30 first." },
+            ],
+          },
+          {
+            equation: "50 = 2x",
+            instruction: "Two x-stacks equal 50. Split both sides in half.",
+            after: "25 = x",
+            explain: "50 ÷ 2 = 25, and 2x ÷ 2 = x.",
+            choices: [
+              { label: "÷ 2", ok: true },
+              { label: "− 2", ok: false, hint: "2x means 2 times x, so divide." },
+              { label: "× 2", ok: false, hint: "You need one x-stack, not four." },
+            ],
+          },
+        ],
+        explain: "x = 25. Check it: 2(25) − 30 = 50 − 30 = 20.",
       },
     ];
   }
@@ -807,6 +1089,295 @@
           { label: "segment SU only", ok: false, hint: "SU doesn’t include the vertex as an endpoint of both sides." },
           { label: "point S only", ok: false, hint: "Sides are rays, not a single point." },
         ],
+      },
+    ];
+  }
+
+  /* ---------- LEVELS 7–11: homework builds ---------- */
+  function level7Content() {
+    return `
+      <p>Two paths cross like swords. The angles <b>across the X</b> are twins. Same color in the picture = same size.</p>
+      ${window.AQ.crossed({ top: "4x+2", right: "?", bottom: "6x−14", left: "?" })}
+      <div class="big-rule">Across the X → set them equal</div>
+      <div class="steps">
+        <div class="step"><div class="say">Orange is across from orange</div><div class="math">4x + 2 = 6x − 14</div></div>
+        <div class="step"><div class="say">Get the x's together. Subtract 4x.</div><div class="math">2 = 2x − 14</div></div>
+        <div class="step"><div class="say">Undo the −14. Add 14 to both sides.</div><div class="math">16 = 2x</div></div>
+        <div class="step"><div class="say">Divide by 2, then put x back in.</div><div class="math">x = 8 → both orange angles are 34°</div></div>
+      </div>
+      <p>Once you know <b>one</b> angle, you know all four. Across = the same. Next door = 180 minus it.</p>
+      <p class="muted">Creeper: if x comes out negative, you moved a minus the wrong way. Add to undo a minus. Don't subtract it again.</p>`;
+  }
+
+  function level7Questions() {
+    const pic = window.AQ.crossed({ top: "4x+2", right: "?", bottom: "6x−14", left: "?" });
+    const known = window.AQ.crossed({ top: "52°", right: "?", bottom: "?", left: "?" });
+    return [
+      {
+        type: "number",
+        prompt: "The orange angles are across the X. Find x.",
+        diagram: pic,
+        prefix: "x =",
+        answer: 8,
+        hint: "4x + 2 = 6x − 14. Subtract 4x, then add 14.",
+        reveal: "2 = 2x − 14 → 16 = 2x → x = 8",
+        explain: "Each orange angle is 4(8)+2 = 34°. The other expression gives 34° too.",
+      },
+      {
+        type: "number",
+        prompt: "x is 8, so each orange angle is 34°. What is a blue angle, the one next door?",
+        diagram: pic,
+        prefix: "angle =",
+        answer: 146,
+        hint: "Neighbors on a straight line add to 180.",
+        reveal: "180 − 34 = 146",
+        explain: "The four angles are 34°, 146°, 34°, 146°.",
+      },
+      {
+        type: "number",
+        prompt: "This X already shows 52° on top. The angle across from it is…",
+        diagram: known,
+        prefix: "angle =",
+        answer: 52,
+        hint: "Across the X means the same number. Don't subtract yet.",
+        reveal: "Vertical twin = 52°",
+        explain: "The bottom angle is also 52°. Each side angle is 180 − 52 = 128°.",
+      },
+      {
+        type: "choice",
+        prompt: "A player solved 18 = 2x − 10 and got x = 4 by subtracting 10. What should they do instead?",
+        choices: [
+          { label: "Leave it. x = 4 checks out.", ok: false, hint: "Plug 4 back in: 2(4) − 10 = −2, not 18." },
+          { label: "Add 10 to both sides, then divide", ok: true, explain: "18 + 10 = 2x → 28 = 2x → x = 14. Adding cancels the −10." },
+          { label: "Subtract 10 from 18", ok: false, hint: "That's the move that gave x = 4. A minus is undone by adding." },
+          { label: "The angles add to 90", ok: false, hint: "These are crossed swords, so the angles are equal, not a block corner." },
+        ],
+      },
+    ];
+  }
+
+  function level8Content() {
+    return `
+      <p>Flat ground is a straight dirt path: <b>180°</b>. Angles sitting on it share that 180.</p>
+      ${window.AQ.linear({ left: "5x+10", right: "x+20" })}
+      <div class="big-rule">Side by side on a line → add to 180</div>
+      <div class="steps">
+        <div class="step"><div class="say">Add both expressions</div><div class="math">5x + 10 + x + 20 = 180</div></div>
+        <div class="step"><div class="say">Combine like things</div><div class="math">6x + 30 = 180</div></div>
+        <div class="step"><div class="say">Undo +30, then divide by 6</div><div class="math">6x = 150 → x = 25</div></div>
+      </div>
+      <p>When there is a <b>y</b>, do x first. Then <b>y = 180 − the other angles</b>.</p>
+      ${window.AQ.triple({ left: "3x+6", mid: "y", right: "5x−8" })}
+      <p class="muted">The double tick marks mean those two angles match. Set them equal before you touch y.</p>`;
+  }
+
+  function level8Questions() {
+    const pair = window.AQ.linear({ left: "5x+10", right: "x+20" });
+    const three = window.AQ.triple({ left: "40°", mid: "y", right: "55°" });
+    const ticks = window.AQ.triple({ left: "3x+6", mid: "y", right: "5x−8" });
+    return [
+      {
+        type: "number",
+        prompt: "These two angles share the straight path. Find x.",
+        diagram: pair,
+        prefix: "x =",
+        answer: 25,
+        hint: "(5x+10) + (x+20) = 180",
+        reveal: "6x + 30 = 180 → x = 25",
+        explain: "The angles are 135° and 45°. 135 + 45 = 180.",
+      },
+      {
+        type: "number",
+        prompt: "No x here. Three angles sit on flat ground. Find y.",
+        diagram: three,
+        prefix: "y =",
+        answer: 85,
+        hint: "40 + y + 55 = 180",
+        reveal: "y = 180 − 40 − 55 = 85",
+        explain: "40 + 85 + 55 = 180.",
+      },
+      {
+        type: "number",
+        prompt: "The tick marks match, so those two angles are equal. Find x first. Leave y for the next hit.",
+        diagram: ticks,
+        prefix: "x =",
+        answer: 7,
+        hint: "3x + 6 = 5x − 8. Don't use 180 until you know the angle sizes.",
+        reveal: "6 + 8 = 2x → x = 7",
+        explain: "Each marked angle is 3(7)+6 = 27°.",
+      },
+      {
+        type: "number",
+        prompt: "Each marked angle is 27°. Now find y.",
+        diagram: ticks,
+        prefix: "y =",
+        answer: 126,
+        hint: "y = 180 − 27 − 27",
+        reveal: "180 − 54 = 126",
+        explain: "27 + 126 + 27 = 180.",
+      },
+    ];
+  }
+
+  function level9Content() {
+    return `
+      <p>The red square is a block corner: <b>90°</b>. A fence splits it into two pieces.</p>
+      ${window.AQ.corner({ upper: "4x−2", lower: "2x+8" })}
+      <div class="big-rule">Pieces of the block corner → add to 90</div>
+      <div class="steps">
+        <div class="step"><div class="say">Add the pieces</div><div class="math">4x − 2 + 2x + 8 = 90</div></div>
+        <div class="step"><div class="say">Combine</div><div class="math">6x + 6 = 90</div></div>
+        <div class="step"><div class="say">Undo +6, then divide by 6</div><div class="math">6x = 84 → x = 14</div></div>
+      </div>
+      <p class="muted">Only use 90 when you see the square, or the problem says it is a right angle.</p>`;
+  }
+
+  function level9Questions() {
+    const pic = window.AQ.corner({ upper: "4x−2", lower: "2x+8" });
+    const known = window.AQ.corner({ upper: "23°", lower: "?" });
+    return [
+      {
+        type: "number",
+        prompt: "The square means 90°. Find x.",
+        diagram: pic,
+        prefix: "x =",
+        answer: 14,
+        hint: "(4x−2) + (2x+8) = 90",
+        reveal: "6x + 6 = 90 → x = 14",
+        explain: "The pieces are 54° and 36°. 54 + 36 = 90.",
+      },
+      {
+        type: "number",
+        prompt: "One piece of this block corner is 23°. How big is the other piece?",
+        diagram: known,
+        prefix: "angle =",
+        answer: 67,
+        hint: "90 − 23",
+        reveal: "90 − 23 = 67",
+        explain: "23 + 67 = 90.",
+      },
+      {
+        type: "choice",
+        prompt: "There is no square box, and nobody said 90°. Two angles just sit on a straight path. What do they add to?",
+        choices: [
+          { label: "90°", ok: false, hint: "90 needs the square box." },
+          { label: "180°", ok: true, explain: "Straight path = flat ground = 180." },
+          { label: "They are equal", ok: false, hint: "Equal is for twins across an X, or matching marks." },
+          { label: "360°", ok: false, hint: "That's a full spin around a point." },
+        ],
+      },
+    ];
+  }
+
+  function level10Content() {
+    return `
+      <p>This is the <b>Angle Addition Postulate</b>. In the game it's the crafting rule: little angles craft into one big angle.</p>
+      ${window.AQ.addition({ whole: "m∠ = 118°", left: "2x+6", right: "3x+2" })}
+      <div class="big-rule">piece + piece = the whole angle</div>
+      <div class="steps">
+        <div class="step"><div class="say">The red dashed arc is the whole 118°</div><div class="math">2x + 6 + 3x + 2 = 118</div></div>
+        <div class="step"><div class="say">Combine</div><div class="math">5x + 8 = 118</div></div>
+        <div class="step"><div class="say">Undo +8, then divide by 5</div><div class="math">5x = 110 → x = 22</div></div>
+      </div>
+      <p>If they already give you the whole and <b>one</b> piece, subtract: <b>other piece = whole − piece</b>.</p>`;
+  }
+
+  function level10Questions() {
+    const pic = window.AQ.addition({ whole: "118°", left: "2x+6", right: "3x+2" });
+    const sub = window.AQ.addition({ whole: "142°", left: "38°", right: "?" });
+    return [
+      {
+        type: "number",
+        prompt: "The two colored pieces craft into the 118° angle. Find x.",
+        diagram: pic,
+        prefix: "x =",
+        answer: 22,
+        hint: "(2x+6) + (3x+2) = 118",
+        reveal: "5x + 8 = 118 → x = 22",
+        explain: "The pieces are 50° and 68°. 50 + 68 = 118.",
+      },
+      {
+        type: "number",
+        prompt: "The whole angle is 142° and one piece is 38°. Find the other piece.",
+        diagram: sub,
+        prefix: "angle =",
+        answer: 104,
+        hint: "whole − piece",
+        reveal: "142 − 38 = 104",
+        explain: "38 + 104 = 142. That's angle addition with only one unknown piece.",
+      },
+      {
+        type: "choice",
+        prompt: "Which equation matches “two pieces make this whole angle”?",
+        choices: [
+          { label: "piece + piece = whole", ok: true, explain: "That's the Angle Addition Postulate." },
+          { label: "piece = whole", ok: false, hint: "A piece is smaller than the whole angle." },
+          { label: "piece + piece = 180, always", ok: false, hint: "180 is only for a straight line. Use the number they gave for the whole." },
+          { label: "piece + piece = 90, always", ok: false, hint: "90 is only for a block corner with the square." },
+        ],
+      },
+    ];
+  }
+
+  function level11Content() {
+    return `
+      <p><b>Congruent</b> means the same size. The sign is <b>≅</b>.</p>
+      <p>A <b>congruence statement</b> names both angles, with the vertex letter in the middle:</p>
+      <div class="big-rule">∠ABC ≅ ∠DEF</div>
+      ${window.AQ.twins({ leftMeasure: "7x−5", rightMeasure: "4x+16", statement: "∠BAC ≅ ∠EDF" })}
+      <ul>
+        <li>Middle letters match: <b>A</b> and <b>D</b> are the spawn points.</li>
+        <li>The sides match in order: B↔E and C↔F.</li>
+        <li>Same double tick marks are another way to say ≅. Set the measures equal: <b>m∠BAC = m∠EDF</b>.</li>
+      </ul>
+      <p>You can reverse both names together: ∠CAB ≅ ∠FDE. Don't swap only one side.</p>`;
+  }
+
+  function level11Questions() {
+    const pic = window.AQ.twins({
+      leftMeasure: "7x−5",
+      rightMeasure: "4x+16",
+      statement: "∠BAC ≅ ∠EDF",
+    });
+    return [
+      {
+        type: "choice",
+        prompt: "In ∠ABC ≅ ∠DEF, which letters are the vertices?",
+        choices: [
+          { label: "A and D", ok: false, hint: "The vertex is the middle letter of each name." },
+          { label: "B and E", ok: true, explain: "B is the middle of ∠ABC. E is the middle of ∠DEF." },
+          { label: "C and F", ok: false, hint: "Those are the last letters, one side each." },
+          { label: "A and F", ok: false, hint: "Match middle letter to middle letter." },
+        ],
+      },
+      {
+        type: "choice",
+        prompt: "Which statement is the same pair as ∠PQR ≅ ∠STU?",
+        choices: [
+          { label: "∠RQP ≅ ∠UTS", ok: true, explain: "Both names flipped, so Q still matches U in the middle." },
+          { label: "∠QPR ≅ ∠STU", ok: false, hint: "That moves the vertex to P." },
+          { label: "∠PQR ≅ ∠SUT", ok: false, hint: "The right-hand vertex has to stay U if the left vertex is Q." },
+          { label: "∠PRQ ≅ ∠TSU", ok: false, hint: "R would be the vertex on the left. Q has to stay in the middle." },
+        ],
+      },
+      {
+        type: "number",
+        prompt: "The double ticks mean these angles are congruent. Find x.",
+        diagram: pic,
+        prefix: "x =",
+        answer: 7,
+        hint: "7x − 5 = 4x + 16",
+        reveal: "3x = 21 → x = 7",
+        explain: "Both angles measure 44°. Congruent twins have to match.",
+      },
+      {
+        type: "number",
+        prompt: "∠JKL ≅ ∠MNP and m∠JKL = 58°. What is m∠MNP?",
+        prefix: "m∠MNP =",
+        answer: 58,
+        hint: "≅ means the measures are equal.",
+        reveal: "m∠MNP = 58°",
+        explain: "The statement already told you they match. N is the vertex of the second angle.",
       },
     ];
   }
