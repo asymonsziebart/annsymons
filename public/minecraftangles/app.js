@@ -370,7 +370,7 @@
       mountQuestion(q, app.querySelector("#q-area"), app.querySelector("#fb"), {
         onCorrect() {
           wrongStreak = 0;
-          setTimeout(() => {
+          const advance = () => {
             qi += 1;
             if (qi >= questions.length) {
               completeLevel(levelIndex);
@@ -378,7 +378,12 @@
             } else {
               paint();
             }
-          }, 700);
+          };
+          if (q.type === "equation" || q.type === "number") {
+            showNextButton(app.querySelector("#fb"), qi + 1 >= questions.length, advance);
+          } else {
+            setTimeout(advance, 700);
+          }
         },
         onWrong() {
           wrongStreak += 1;
@@ -388,6 +393,20 @@
     }
 
     paint();
+  }
+
+  function showNextButton(fb, isLast, advance) {
+    const row = el(`
+      <div class="next-row">
+        <button type="button" class="btn green" id="next-q">${isLast ? "Finish level →" : "Next problem →"}</button>
+      </div>`);
+    fb.appendChild(row);
+    const btn = row.querySelector("#next-q");
+    btn.onclick = () => {
+      btn.disabled = true;
+      advance();
+    };
+    btn.focus();
   }
 
   function wireLearnExtras() {
@@ -428,6 +447,197 @@
     }
   }
 
+  function parseSide(raw) {
+    const s = String(raw).replace(/−/g, "-").replace(/–/g, "-").replace(/\s+/g, "");
+    const terms = [];
+    const re = /([+-])?(\d*\.?\d*)(x)?/g;
+    let match;
+    while ((match = re.exec(s))) {
+      if (!match[0]) {
+        re.lastIndex += 1;
+        continue;
+      }
+      const hasX = Boolean(match[3]);
+      if (!match[2] && !hasX) continue;
+      const magnitude = match[2] === "" ? 1 : Number(match[2]);
+      terms.push({ variable: hasX, value: (match[1] === "-" ? -1 : 1) * magnitude });
+    }
+    return terms;
+  }
+
+  function termText(term, forceSign) {
+    const abs = Math.abs(term.value);
+    const body = term.variable ? (abs === 1 ? "x" : `${abs}x`) : String(abs);
+    if (!forceSign && term.value >= 0) return body;
+    return `${term.value < 0 ? "− " : "+ "}${body}`;
+  }
+
+  function termChip(term, forceSign) {
+    const cls = [
+      "term-chip",
+      term.variable ? "x-term" : "constant",
+      term.value < 0 ? "negative" : "",
+    ].filter(Boolean).join(" ");
+    return `<span class="${cls}" data-variable="${term.variable ? 1 : 0}" data-value="${term.value}">${escapeHtml(termText(term, forceSign))}</span>`;
+  }
+
+  function sideChips(text) {
+    return `<div class="term-row">${parseSide(text).map((term, i) => termChip(term, i > 0)).join("")}</div>`;
+  }
+
+  function parseOp(label) {
+    const text = String(label).replace(/−/g, "-").replace(/–/g, "-").trim();
+    if (/combine/i.test(text)) return { kind: "combine" };
+    const division = text.match(/^[÷/]\s*(\d+(?:\.\d+)?)/);
+    if (division) return { kind: "divide", by: Number(division[1]) };
+    const addition = text.match(/^([+-])\s*(\d+(?:\.\d+)?)(x)?/);
+    if (addition) {
+      return {
+        kind: "both",
+        term: {
+          variable: Boolean(addition[3]),
+          value: (addition[1] === "-" ? -1 : 1) * Number(addition[2]),
+        },
+      };
+    }
+    return { kind: "combine" };
+  }
+
+  function wait(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  function flyClone(source, target) {
+    const flyer = source.cloneNode(true);
+    const start = source.getBoundingClientRect();
+    const end = target.getBoundingClientRect();
+    flyer.className = "operation-flyer";
+    flyer.style.left = `${start.left}px`;
+    flyer.style.top = `${start.top}px`;
+    flyer.style.width = `${start.width}px`;
+    flyer.style.height = `${start.height}px`;
+    document.body.appendChild(flyer);
+    const dx = end.left + end.width / 2 - (start.left + start.width / 2);
+    const dy = end.top + end.height / 2 - (start.top + start.height / 2);
+    return flyer.animate(
+      [
+        { transform: "translate(0,0) scale(1)", opacity: 1 },
+        { transform: `translate(${dx}px, ${dy}px) scale(0.7)`, opacity: 1 },
+      ],
+      { duration: 680, easing: "cubic-bezier(.16,.84,.22,1)", fill: "forwards" },
+    ).finished.then(() => flyer.remove());
+  }
+
+  function collapseChips(chips) {
+    const rects = chips.map((chip) => chip.getBoundingClientRect());
+    const mid = rects.reduce(
+      (acc, rect) => ({
+        x: acc.x + rect.left + rect.width / 2,
+        y: acc.y + rect.top + rect.height / 2,
+      }),
+      { x: 0, y: 0 },
+    );
+    mid.x /= rects.length;
+    mid.y /= rects.length;
+    const sum = chips.reduce((total, chip) => total + Number(chip.dataset.value), 0);
+    return Promise.all(chips.map((chip, i) => {
+      const rect = rects[i];
+      chip.classList.add(sum === 0 ? "canceling" : "merging");
+      return chip.animate(
+        [
+          { transform: "translate(0,0) scale(1)", opacity: 1 },
+          {
+            transform: `translate(${mid.x - (rect.left + rect.width / 2)}px, ${mid.y - (rect.top + rect.height / 2)}px) scale(${sum === 0 ? 0.15 : 1.08})`,
+            opacity: sum === 0 ? 0 : 1,
+          },
+        ],
+        { duration: 620, easing: "ease-in-out", fill: "forwards" },
+      ).finished;
+    }));
+  }
+
+  async function mergeRow(row) {
+    const chips = [...row.querySelectorAll(".term-chip")];
+    const groups = [
+      chips.filter((chip) => chip.dataset.variable === "1"),
+      chips.filter((chip) => chip.dataset.variable === "0"),
+    ].filter((group) => group.length > 1);
+    await Promise.all(groups.map(collapseChips));
+    const totals = { x: 0, n: 0, hasX: false, hasN: false };
+    chips.forEach((chip) => {
+      const value = Number(chip.dataset.value);
+      if (chip.dataset.variable === "1") {
+        totals.x += value;
+        totals.hasX = true;
+      } else {
+        totals.n += value;
+        totals.hasN = true;
+      }
+    });
+    const combined = [];
+    if (totals.hasX && totals.x !== 0) combined.push({ variable: true, value: totals.x });
+    if (totals.hasN && totals.n !== 0) combined.push({ variable: false, value: totals.n });
+    if (!combined.length) combined.push({ variable: false, value: 0 });
+    row.innerHTML = combined.map((term, i) => termChip(term, i > 0)).join("");
+    [...row.children].forEach((chip) => chip.classList.add("pop-in"));
+  }
+
+  async function divideRow(row, by) {
+    const chips = [...row.querySelectorAll(".term-chip")];
+    await Promise.all(chips.map((chip) => chip.animate(
+      [
+        { transform: "scale(1)" },
+        { transform: "scale(0.62)" },
+        { transform: "scale(1)" },
+      ],
+      { duration: 620, easing: "ease-in-out" },
+    ).finished));
+    const divided = chips.map((chip) => ({
+      variable: chip.dataset.variable === "1",
+      value: Number(chip.dataset.value) / by,
+    }));
+    row.innerHTML = divided.map((term, i) => termChip(term, i > 0)).join("");
+    [...row.children].forEach((chip) => chip.classList.add("pop-in"));
+  }
+
+  async function animateAlgebra(balance, after, opLabel, source, caption) {
+    const op = parseOp(opLabel);
+    const [afterLeft, afterRight] = after.split("=").map((side) => side.trim());
+    const leftRow = balance.querySelector('[data-side="left"] .term-row');
+    const rightRow = balance.querySelector('[data-side="right"] .term-row');
+    const reveal = () => {
+      leftRow.innerHTML = parseSide(afterLeft).map((term, i) => termChip(term, i > 0)).join("");
+      rightRow.innerHTML = parseSide(afterRight).map((term, i) => termChip(term, i > 0)).join("");
+    };
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      reveal();
+      return;
+    }
+    if (op.kind === "both") {
+      caption.textContent = `${opLabel} flies onto both sides`;
+      if (source) await Promise.all([flyClone(source, leftRow), flyClone(source, rightRow)]);
+      leftRow.insertAdjacentHTML("beforeend", termChip(op.term, true));
+      rightRow.insertAdjacentHTML("beforeend", termChip(op.term, true));
+      leftRow.lastElementChild.classList.add("pop-in");
+      rightRow.lastElementChild.classList.add("pop-in");
+      await wait(460);
+      caption.textContent = op.term.value < 0 && !op.term.variable
+        ? "Opposites meet and cancel, or make a new total"
+        : "Matching blocks slide together";
+      await Promise.all([mergeRow(leftRow), mergeRow(rightRow)]);
+    } else if (op.kind === "divide") {
+      caption.textContent = `Both sides split into ${op.by} equal groups`;
+      if (source) await Promise.all([flyClone(source, leftRow), flyClone(source, rightRow)]);
+      await Promise.all([divideRow(leftRow, op.by), divideRow(rightRow, op.by)]);
+    } else {
+      caption.textContent = "Like blocks slide together";
+      await Promise.all([mergeRow(leftRow), mergeRow(rightRow)]);
+    }
+    reveal();
+    [...balance.querySelectorAll(".term-chip")].forEach((chip) => chip.classList.add("pop-in"));
+    caption.textContent = "Both sides still match";
+  }
+
   function mountQuestion(q, area, fb, hooks) {
     clear(area);
     clear(fb);
@@ -441,10 +651,11 @@
         const parts = equation.split("=");
         return `
           <div class="balance" aria-label="${escapeHtml(equation)}">
-            <div class="balance-pan"><span>${escapeHtml((parts[0] || "").trim())}</span><small>LEFT SIDE</small></div>
+            <div class="balance-pan" data-side="left">${sideChips((parts[0] || "").trim())}<small>LEFT SIDE</small></div>
             <div class="balance-equals">=</div>
-            <div class="balance-pan"><span>${escapeHtml((parts[1] || "").trim())}</span><small>RIGHT SIDE</small></div>
-          </div>`;
+            <div class="balance-pan" data-side="right">${sideChips((parts[1] || "").trim())}<small>RIGHT SIDE</small></div>
+          </div>
+          <p class="move-caption"></p>`;
       }
 
       function paintStep() {
@@ -481,6 +692,7 @@
           </div>`;
 
         let selected = null;
+        let busy = false;
         const zone = lab.querySelector("#apply-zone");
         const cards = Array.from(lab.querySelectorAll(".operation-card"));
 
@@ -492,7 +704,8 @@
         }
 
         function apply(choiceIndex) {
-          if (choiceIndex == null) {
+          if (busy) return;
+          if (choiceIndex == null || Number.isNaN(choiceIndex)) {
             fb.innerHTML = `<div class="fb hint"><div class="head">Pick a move first</div><div class="explain">Drag a card here, or tap a card and then tap this box.</div></div>`;
             return;
           }
@@ -504,12 +717,15 @@
             return;
           }
 
+          busy = true;
           step.correctLabel = choice.label;
           cards.forEach((card) => (card.disabled = true));
           zone.disabled = true;
           zone.classList.add("correct");
-          fb.innerHTML = `<div class="fb ok"><div class="head">✅ Balanced!</div><div class="explain">${step.explain}</div></div>`;
-          setTimeout(() => {
+          fb.innerHTML = `<div class="fb ok"><div class="head">✅ Watch the blocks move</div><div class="explain">${step.explain}</div></div>`;
+          const balance = lab.querySelector(".balance");
+          const caption = lab.querySelector(".move-caption");
+          animateAlgebra(balance, step.after, choice.label, cards[choiceIndex], caption).then(() => {
             stepIndex += 1;
             if (stepIndex >= q.steps.length) {
               lab.innerHTML = `
@@ -532,7 +748,7 @@
               fb.innerHTML = "";
               paintStep();
             }
-          }, 750);
+          });
         }
 
         cards.forEach((card, i) => {
@@ -1475,7 +1691,7 @@
         onCorrect() {
           wrongStreak = 0;
           hp -= 1;
-          setTimeout(() => {
+          const advance = () => {
             qi += 1;
             if (qi >= bossQs.length) {
               completeLevel(levelIndex);
@@ -1483,7 +1699,12 @@
             } else {
               paint();
             }
-          }, 750);
+          };
+          if (q.type === "equation" || q.type === "number") {
+            showNextButton(app.querySelector("#fb"), qi + 1 >= bossQs.length, advance);
+          } else {
+            setTimeout(advance, 750);
+          }
         },
         onWrong() {
           wrongStreak += 1;
