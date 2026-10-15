@@ -85,8 +85,38 @@ function forbiddenRedirect(request: NextRequest) {
   return NextResponse.redirect(new URL("/admin?denied=1", request.url));
 }
 
+function isMinecraftAnglesHost(host: string | null): boolean {
+  const h = (host ?? "").split(":")[0]?.toLowerCase() ?? "";
+  return (
+    h === "minecraftangles.annsymons.com" ||
+    h === "minecraftangles.localhost" ||
+    h === "minecraftangles.127.0.0.1"
+  );
+}
+
+/** Public Angle Quest site — no login. Serves files under /minecraftangles. */
+function minecraftAnglesRewrite(request: NextRequest): NextResponse {
+  const path = request.nextUrl.pathname;
+  if (
+    path.startsWith("/minecraftangles") ||
+    path.startsWith("/_next") ||
+    path.startsWith("/api")
+  ) {
+    return NextResponse.next();
+  }
+  const url = request.nextUrl.clone();
+  url.pathname = path === "/" ? "/minecraftangles/" : `/minecraftangles${path}`;
+  return NextResponse.rewrite(url);
+}
+
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
+  const host = request.headers.get("host");
+
+  // Subdomain for Angela's game — always public, never behind admin login.
+  if (isMinecraftAnglesHost(host)) {
+    return minecraftAnglesRewrite(request);
+  }
 
   if (path.startsWith("/tasks")) {
     if (path === "/tasks/login") {
@@ -167,5 +197,13 @@ export const config = {
     "/archery/:path*",
     "/blog",
     "/blog/:path*",
+    // Angle Quest (also used when Host is minecraftangles.annsymons.com)
+    "/",
+    "/minecraftangles",
+    "/minecraftangles/:path*",
+    "/guide.html",
+    "/parent.html",
+    "/app.js",
+    "/style.css",
   ],
 };

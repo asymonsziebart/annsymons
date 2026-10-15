@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Angle Quest</title>
+<style>
+  body { font-family: -apple-system, "Trebuchet MS", Helvetica, Arial, sans-serif; max-width: 760px; margin: 0 auto; padding: 0 16px 40px; line-height: 1.6; color: #2b2b2b; font-size: 18px; background: #f3f8ee; }
+  .banner { background: linear-gradient(#5d9c3a 0 38%, #8b5a2b 38% 100%); color: white; text-align: center; padding: 26px 10px 30px; border-bottom: 6px solid #5a3a1a; margin: 0 -16px 20px; }
+  .banner h1 { font-family: "Courier New", monospace; font-size: 2.1em; margin: 0; text-shadow: 3px 3px 0 #2b2b2b; letter-spacing: 2px; }
+  .banner p { margin: 8px 0 0; font-size: 1.05em; text-shadow: 2px 2px 0 #2b2b2b; }
+  h2 { font-family: "Courier New", monospace; background: #3d6b26; color: #fff; padding: 8px 14px; border-radius: 6px; margin-top: 40px; text-shadow: 2px 2px 0 #1e3a12; }
+  h3 { color: #3d6b26; margin-bottom: 4px; }
+  .card { background: #fff; border: 3px solid #8b5a2b; border-radius: 10px; padding: 14px 18px; margin: 16px 0; box-shadow: 4px 4px 0 #c9a878; }
+  .big { font-size: 1.25em; font-weight: bold; color: #3d6b26; }
+  .achieve { background: #2b2b2b; color: #ffeb3b; font-family: "Courier New", monospace; border: 3px solid #777; border-radius: 6px; padding: 8px 14px; margin: 18px 0; display: inline-block; }
+  .achieve span { color: #fff; }
+  .steps { background: #fffbe6; border: 2px dashed #c9a878; border-radius: 8px; padding: 12px 16px; font-family: Menlo, "Courier New", monospace; font-size: 0.95em; white-space: pre-wrap; margin: 12px 0; }
+  .tip { background: #e3f2fd; border-left: 6px solid #42a5f5; padding: 10px 14px; border-radius: 6px; margin: 12px 0; }
+  .creeper { background: #e8f5e9; border-left: 6px solid #2e7d32; padding: 10px 14px; border-radius: 6px; margin: 12px 0; }
+  .pic { text-align: center; margin: 10px 0; }
+  .pic svg { max-width: 100%; height: auto; }
+  .cap { font-size: 0.9em; color: #555; text-align: center; }
+  table { border-collapse: collapse; width: 100%; background: #fff; }
+  td, th { border: 2px solid #c9a878; padding: 8px 10px; text-align: left; vertical-align: middle; }
+  th { background: #8b5a2b; color: #fff; }
+  .check li { list-style: none; margin: 8px 0; }
+  .check li::before { content: "⬜ "; }
+  @media print { body { background: #fff; } .card, .steps, .pic { page-break-inside: avoid; } h2 { page-break-after: avoid; } }
+</style>
+</head>
+<body>
+
+<div class="banner">
+  <h1>THE ANGLE QUEST</h1>
+  <p>A Minecraft-style guide to beating your geometry homework</p>
+  <p style="margin-top:14px;font-size:0.95em;">
+    <a href="./" style="color:#fff;font-weight:700;">▶ Play the game</a>
+    &nbsp;·&nbsp;
+    <a href="parent.html" style="color:#fff;">Grown-ups (answer key)</a>
+  </p>
+</div>
+
+<div class="card">
+  <p class="big">Welcome, player!</p>
+  <p>Angles are just like building in Minecraft. Every block has perfect corners, and every flat floor is perfectly straight. If you can build a house, you can do this.</p>
+  <p>This guide has <b>6 levels</b>. Beat each one and unlock the achievement. Let's go! ⛏️</p>
+</div>
+
+<!-- ===================== LEVEL 1 ===================== -->
+<h2>LEVEL 1: What is an angle?</h2>
+
+<div class="card">
+  <p>An <b>angle</b> is how wide two lines open up from one point.</p>
+  <p>Think about opening a <b>chest</b>. A little crack open is a small angle. Wide open is a big angle.</p>
+  <p>We measure angles in <b>degrees</b>, written with a tiny circle: <b>°</b>. So 90 degrees is written <b>90°</b>.</p>
+  <p>The point where the two lines meet is called the <b>vertex</b>. Think of it as the <b>spawn point</b> of the angle. Everything starts from there.</p>
+</div>
+
+<h3>The two magic numbers</h3>
+<p>You only need to remember <b>two numbers</b> for almost this whole unit:</p>
+
+<div class="card">
+  <div class="pic">
+    <svg width="560" height="170" viewBox="0 0 560 170">
+      <!-- block corner -->
+      <rect x="40" y="30" width="110" height="110" fill="#8b5a2b" stroke="#5a3a1a" stroke-width="4"/>
+      <rect x="40" y="30" width="110" height="28" fill="#5d9c3a"/>
+      <line x1="40" y1="140" x2="40" y2="20" stroke="#d32f2f" stroke-width="6"/>
+      <line x1="40" y1="140" x2="170" y2="140" stroke="#d32f2f" stroke-width="6"/>
+      <rect x="40" y="118" width="22" height="22" fill="none" stroke="#fff" stroke-width="3"/>
+      <text x="95" y="165" text-anchor="middle" font-size="18" font-weight="bold" fill="#d32f2f">90°</text>
+      <!-- straight floor -->
+      <rect x="300" y="100" width="40" height="40" fill="#5d9c3a" stroke="#3d6b26" stroke-width="3"/>
+      <rect x="340" y="100" width="40" height="40" fill="#5d9c3a" stroke="#3d6b26" stroke-width="3"/>
+      <rect x="380" y="100" width="40" height="40" fill="#5d9c3a" stroke="#3d6b26" stroke-width="3"/>
+      <rect x="420" y="100" width="40" height="40" fill="#5d9c3a" stroke="#3d6b26" stroke-width="3"/>
+      <rect x="460" y="100" width="40" height="40" fill="#5d9c3a" stroke="#3d6b26" stroke-width="3"/>
+      <line x1="285" y1="100" x2="515" y2="100" stroke="#d32f2f" stroke-width="6"/>
+      <path d="M 340 100 A 60 60 0 0 1 460 100" fill="none" stroke="#d32f2f" stroke-width="3" stroke-dasharray="6 5"/>
+      <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="bold" fill="#d32f2f">180°</text>
+    </svg>
+  </div>
+  <table>
+    <tr><th>Number</th><th>What it looks like</th><th>Minecraft way to remember</th></tr>
+    <tr><td><b>90°</b></td><td>A perfect corner. Your worksheet shows it with a tiny square box ⬜.</td><td>The corner of <b>any block</b></td></tr>
+    <tr><td><b>180°</b></td><td>A perfectly straight line</td><td><b>Flat ground.</b> Or turning around to face backwards.</td></tr>
+  </table>
+</div>
+
+<div class="achieve">🏆 Achievement Unlocked: <span>Spawn Point Found</span></div>
+
+<!-- ===================== LEVEL 2 ===================== -->
+<h2>LEVEL 2: Name that angle (acute, right, obtuse, straight)</h2>
+
+<div class="card">
+  <p>Every angle gets one of four names. To check, compare it to the <b>corner of a block</b>. That corner is 90°.</p>
+  <table>
+    <tr><th>Name</th><th>Size</th><th>Think of...</th></tr>
+    <tr><td><b>Acute</b></td><td>Smaller than a block corner. Less than 90°.</td><td>The pointy tip of a <b>sword</b> 🗡️. Sharp and skinny. ("A-cute" little angle!)</td></tr>
+    <tr><td><b>Right</b></td><td>Exactly a block corner. 90°.</td><td>A <b>block</b>. Look for the tiny square ⬜.</td></tr>
+    <tr><td><b>Obtuse</b></td><td>Bigger than a block corner but not flat. Between 90° and 180°.</td><td>A <b>door</b> swung open really wide 🚪</td></tr>
+    <tr><td><b>Straight</b></td><td>Totally flat. 180°.</td><td><b>Flat ground</b></td></tr>
+  </table>
+</div>
+
+<div class="tip">💡 <b>Real-life trick:</b> grab any sheet of paper. Its corner is exactly 90°, just like a block. Hold the corner up to an angle. If the angle is skinnier than the paper corner, it's <b>acute</b>. If it's wider, it's <b>obtuse</b>.</div>
+
+<div class="achieve">🏆 Achievement Unlocked: <span>Angle Identifier</span></div>
+
+<!-- ===================== LEVEL 3 ===================== -->
+<h2>LEVEL 3: The 3 Big Rules</h2>
+<p>These 3 rules unlock almost <b>every</b> problem. Learn these and you're basically in diamond armor.</p>
+
+<h3>⚔️ Rule 1: The Crossed Swords rule (vertical angles)</h3>
+<div class="card">
+  <div class="pic">
+    <svg width="320" height="220" viewBox="0 0 320 220">
+      <line x1="40" y1="30" x2="280" y2="190" stroke="#555" stroke-width="5"/>
+      <line x1="40" y1="190" x2="280" y2="30" stroke="#555" stroke-width="5"/>
+      <path d="M 160 110 L 205 80 A 54 54 0 0 1 205 140 Z" fill="#42a5f5" opacity="0.75"/>
+      <path d="M 160 110 L 115 140 A 54 54 0 0 1 115 80 Z" fill="#42a5f5" opacity="0.75"/>
+      <path d="M 160 110 L 115 80 A 54 54 0 0 1 205 80 Z" fill="#ffb300" opacity="0.75"/>
+      <path d="M 160 110 L 205 140 A 54 54 0 0 1 115 140 Z" fill="#ffb300" opacity="0.75"/>
+      <text x="230" y="116" font-size="20" font-weight="bold" fill="#1565c0">A</text>
+      <text x="76" y="116" font-size="20" font-weight="bold" fill="#1565c0">A</text>
+      <text x="153" y="50" font-size="20" font-weight="bold" fill="#e65100">B</text>
+      <text x="153" y="185" font-size="20" font-weight="bold" fill="#e65100">B</text>
+    </svg>
+  </div>
+  <p class="cap">When two lines cross, they make an X like two crossed swords.</p>
+  <p>When two lines cross, the angles <b>across from each other</b> are <b>twins</b>. They are exactly the same size.</p>
+  <ul>
+    <li>Blue and blue are the same. 🔵 = 🔵</li>
+    <li>Orange and orange are the same. 🟠 = 🟠</li>
+  </ul>
+  <p class="big">Across the X = SAME. So you set them equal: ____ = ____</p>
+  <p>Their math name is <b>vertical angles</b>.</p>
+</div>
+
+<h3>🟫 Rule 2: The Flat Ground rule (linear pair)</h3>
+<div class="card">
+  <div class="pic">
+    <svg width="360" height="170" viewBox="0 0 360 170">
+      <line x1="20" y1="140" x2="340" y2="140" stroke="#555" stroke-width="5"/>
+      <line x1="180" y1="140" x2="270" y2="30" stroke="#555" stroke-width="5"/>
+      <path d="M 180 140 L 240 140 A 60 60 0 0 0 218 94 Z" fill="#42a5f5" opacity="0.8"/>
+      <path d="M 180 140 L 218 94 A 60 60 0 0 0 120 140 Z" fill="#ffb300" opacity="0.8"/>
+      <text x="246" y="128" font-size="17" font-weight="bold" fill="#1565c0">small</text>
+      <text x="96" y="112" font-size="17" font-weight="bold" fill="#e65100">big</text>
+      <text x="180" y="165" text-anchor="middle" font-size="16" fill="#3d6b26" font-weight="bold">flat ground = 180°</text>
+    </svg>
+  </div>
+  <p>Two angles sit <b>side by side</b> on <b>flat ground</b> (a straight line).</p>
+  <p>Together they make the whole flat ground. Flat ground is 180°. So:</p>
+  <p class="big">Side by side on a straight line = ADD UP TO 180</p>
+  <p>It's like splitting a 180-piece stack between two chests. Whatever's in one chest, the rest goes in the other.</p>
+  <p>Their math name is a <b>linear pair</b>.</p>
+</div>
+
+<h3>🧱 Rule 3: The Block Corner rule (complementary)</h3>
+<div class="card">
+  <div class="pic">
+    <svg width="260" height="180" viewBox="0 0 260 180">
+      <line x1="40" y1="150" x2="40" y2="20" stroke="#555" stroke-width="5"/>
+      <line x1="40" y1="150" x2="230" y2="150" stroke="#555" stroke-width="5"/>
+      <line x1="40" y1="150" x2="200" y2="50" stroke="#555" stroke-width="5"/>
+      <rect x="40" y="128" width="22" height="22" fill="none" stroke="#d32f2f" stroke-width="3"/>
+      <path d="M 40 150 L 40 80 A 70 70 0 0 1 99 113 Z" fill="#42a5f5" opacity="0.6"/>
+      <path d="M 40 150 L 99 113 A 70 70 0 0 1 110 150 Z" fill="#ffb300" opacity="0.7"/>
+      <text x="120" y="172" font-size="16" font-weight="bold" fill="#d32f2f">box = 90°</text>
+    </svg>
+  </div>
+  <p>See the tiny square box? That means a block corner, 90°. If a line splits that corner into two pieces:</p>
+  <p class="big">Two pieces of a block corner = ADD UP TO 90</p>
+</div>
+
+<h3>➕ Bonus Rule: The Crafting rule (angle addition)</h3>
+<div class="card">
+  <p>In Minecraft, small pieces craft into one big item. Angles work the same way. Little angles fit together to make the big angle.</p>
+  <p class="big">piece + piece = whole thing</p>
+  <p>If the problem gives you the <b>whole</b> and <b>one piece</b>, just subtract: <b>whole − piece = the other piece</b>.</p>
+  <p>Example: the whole angle is 110° and one piece is 45°. The other piece is 110 − 45 = <b>65°</b>.</p>
+</div>
+
+<h3>🎯 Bonus Rule: Matching marks</h3>
+<div class="card">
+  <p>Sometimes two angles have the <b>same little curved mark</b> on them, like ⌒ and ⌒. That's a secret code. It means <b>"these two are the same size."</b> So set them equal, just like crossed swords.</p>
+</div>
+
+<div class="achieve">🏆 Achievement Unlocked: <span>Rule Master</span></div>
+
+<!-- ===================== LEVEL 4 ===================== -->
+<h2>LEVEL 4: Which rule do I use?</h2>
+
+<div class="card">
+  <p>Look at the two angles and ask yourself these questions <b>in order</b>:</p>
+  <table>
+    <tr><th>Question</th><th>If YES...</th></tr>
+    <tr><td>1. Do they have <b>matching marks</b>?</td><td>They're the same. Set them <b>equal</b>.</td></tr>
+    <tr><td>2. Are they <b>across the X</b> from each other, touching only at the middle point?</td><td>Crossed swords. Set them <b>equal</b>.</td></tr>
+    <tr><td>3. Are they <b>side by side</b> on a <b>straight line</b>?</td><td>Flat ground. <b>Add them = 180</b>.</td></tr>
+    <tr><td>4. Are they inside a corner with the <b>square box</b>?</td><td>Block corner. <b>Add them = 90</b>.</td></tr>
+    <tr><td>5. Are they pieces of a <b>bigger angle</b> whose size they gave you?</td><td>Crafting. <b>Add the pieces = the whole</b>.</td></tr>
+  </table>
+</div>
+
+<div class="tip">💡 <b>Finger trick:</b> put your finger on one angle and slide it to the other one.<br>
+👉 If you have to <b>jump over the middle point</b>, they're crossed swords, so they're the <b>same</b>.<br>
+👉 If you only <b>step over one line</b>, they're on flat ground, so they <b>add to 180</b>.</div>
+
+<div class="creeper">✅ <b>Look check:</b> crossed-sword twins always <b>look the same size</b>. Flat-ground buddies usually look different: one skinny and one wide.</div>
+
+<div class="achieve">🏆 Achievement Unlocked: <span>Pathfinder</span></div>
+
+<!-- ===================== LEVEL 5 ===================== -->
+<h2>LEVEL 5: Solving for x (the mining part ⛏️)</h2>
+
+<div class="card">
+  <p><b>x</b> is a hidden ore. You have to dig it out.</p>
+  <p>An equation is like a <b>trade with a villager</b>. Both sides have to stay <b>fair</b>. So whatever you do to one side, you <b>must do to the other side too</b>.</p>
+  <p>To dig out x, you <b>undo</b> things with the <b>opposite move</b>:</p>
+  <table>
+    <tr><th>If you see...</th><th>Do the opposite to BOTH sides</th></tr>
+    <tr><td><b>+ 10</b></td><td>take away 10 (<b>− 10</b>)</td></tr>
+    <tr><td><b>− 10</b></td><td>add 10 (<b>+ 10</b>)</td></tr>
+    <tr><td><b>3x</b> (3 times x)</td><td>divide by 3 (<b>÷ 3</b>)</td></tr>
+    <tr><td>x on <b>both sides</b></td><td>take away the smaller x-amount from both sides</td></tr>
+  </table>
+</div>
+
+<h3>Example 1: Crossed swords</h3>
+<div class="steps">Two lines cross. One angle is (5x + 10). The angle across from it is (3x + 30).
+
+Which rule? They're across the X, so they're the SAME.
+
+   5x + 10 = 3x + 30
+
+Step 1: get the x's together. Take away 3x from both sides.
+   2x + 10 = 30
+
+Step 2: undo the +10. Take away 10 from both sides.
+   2x = 20
+
+Step 3: undo the "2 times". Divide both sides by 2.
+   x = 10      ⛏️ Ore found!
+
+Step 4: put 10 back in where x was.
+   5(10) + 10 = 50 + 10 = 60°
+   3(10) + 30 = 30 + 30 = 60°
+
+Both are 60°. Twins! ✅</div>
+
+<h3>Example 2: Flat ground</h3>
+<div class="steps">Two angles are side by side on a straight line: (4x + 20) and (2x + 40).
+
+Which rule? Flat ground, so they ADD to 180.
+
+   4x + 20 + 2x + 40 = 180
+
+Step 1: put the like things together.
+   x's:     4x + 2x = 6x
+   numbers: 20 + 40 = 60
+   6x + 60 = 180
+
+Step 2: undo the +60. Take away 60 from both sides.
+   6x = 120
+
+Step 3: undo the "6 times". Divide by 6.
+   x = 20      ⛏️
+
+Step 4: put 20 back in.
+   4(20) + 20 = 100°
+   2(20) + 40 = 80°
+
+Check: 100 + 80 = 180 ✅</div>
+
+<h3>Example 3: Block corner</h3>
+<div class="steps">A corner with the square box is split into (2x + 5) and (x + 10).
+
+Which rule? Block corner, so they ADD to 90.
+
+   2x + 5 + x + 10 = 90
+   3x + 15 = 90         (2x + x = 3x, and 5 + 10 = 15)
+   3x = 75              (take away 15 from both sides)
+   x = 25               (divide by 3)
+
+   2(25) + 5 = 55°   and   25 + 10 = 35°
+   Check: 55 + 35 = 90 ✅</div>
+
+<h3>Example 4: When there's a minus sign</h3>
+<p>Minus signs are where a lot of players take damage. Go slow here!</p>
+<div class="steps">   20 = 2x − 30
+
+You see − 30, so do the opposite: ADD 30 to both sides.
+   20 + 30 = 2x
+   50 = 2x
+   x = 25
+
+⚠️ Do NOT write −30 again on the other side. Adding 30 makes the
+   −30 disappear and turns into +30 on the other side.</div>
+
+<h3>Example 5: "Find ALL the angles"</h3>
+<div class="card">
+  <p>Once you know <b>one</b> angle in an X, you know <b>all four</b>:</p>
+  <ul>
+    <li>The angle <b>across</b> from it is the <b>same</b>.</li>
+    <li>The angles <b>next to</b> it are <b>180 minus it</b>.</li>
+  </ul>
+  <p>Example: one angle is 70°. Across from it is also 70°. Next to it is 180 − 70 = 110°. So the four angles are <b>70°, 110°, 70°, 110°</b>.</p>
+</div>
+
+<h3>Example 6: There's a "y" too</h3>
+<div class="card">
+  <p>Don't panic. Two-step quest:</p>
+  <ol>
+    <li><b>First</b> find x and get the angle sizes, just like the examples above.</li>
+    <li><b>Then</b> use flat ground: all the angles on the straight line add to 180. So <b>y = 180 − (the other angles)</b>.</li>
+  </ol>
+  <p>Example: on a straight line you have y, 22°, and 22°. Then y = 180 − 22 − 22 = <b>136°</b>.</p>
+</div>
+
+<div class="achieve">🏆 Achievement Unlocked: <span>Diamonds! (You found x)</span></div>
+
+<!-- ===================== LEVEL 6 ===================== -->
+<h2>LEVEL 6: Naming angles</h2>
+
+<div class="card">
+  <p>Angles get names using letters, like a player tag.</p>
+  <ul>
+    <li>The <b>vertex</b> (spawn point) letter <b>always goes in the middle</b>.</li>
+    <li>Say the angle has points S, T, U and the vertex is T. You can call it <b>∠STU</b> or <b>∠UTS</b>. Both work, because T is in the middle.</li>
+    <li>If there's only <b>one</b> angle at that point, you can just say <b>∠T</b>.</li>
+    <li>If there's a number inside the angle, like 4, you can call it <b>∠4</b>.</li>
+  </ul>
+  <p>So that angle's <b>4 names</b> are: <b>∠STU, ∠UTS, ∠T, ∠4</b>.</p>
+  <p>The <b>sides</b> are the two lines coming out of the spawn point: <b>ray TS</b> and <b>ray TU</b>. A side always starts with the vertex letter.</p>
+</div>
+
+<div class="achieve">🏆 Achievement Unlocked: <span>Name Tag Crafted</span></div>
+
+<!-- ===================== BOSS ===================== -->
+<h2>⚠️ CREEPER WARNINGS (common traps)</h2>
+<div class="card">
+  <ul>
+    <li>💥 <b>Minus sign mix-ups.</b> When you move a number, use the <b>opposite</b> move. Write one step per line.</li>
+    <li>💥 <b>Stopping at x.</b> If it says "find the angle," put x back in! x is the ore. The angle is the diamond you craft from it.</li>
+    <li>💥 <b>Negative answers.</b> Angles can't be negative. If you get a negative, go back and check your steps.</li>
+    <li>💥 <b>Guessing a box.</b> Only use 90 if you see the square box, or the problem says 90°.</li>
+  </ul>
+</div>
+
+<h2>🐉 BEFORE YOU TURN IT IN (Ender Dragon checklist)</h2>
+<div class="card">
+  <ul class="check">
+    <li>Crossed swords: did both angles come out the <b>same number</b>?</li>
+    <li>Flat ground: do they <b>add up to 180</b>?</li>
+    <li>Block corner: do they <b>add up to 90</b>?</li>
+    <li>Crafting: do the pieces <b>add up to the whole</b>?</li>
+    <li>Does it <b>look right</b>? Skinny angles should be under 90. Wide ones should be over 90.</li>
+  </ul>
+</div>
+
+<div class="banner" style="margin-top:36px; border-top:6px solid #5a3a1a;">
+  <h1 style="font-size:1.6em;">QUEST COMPLETE!</h1>
+  <p>Remember the 4 moves: <b>Look → Pick the rule → Solve for x → Put x back in</b></p>
+  <p>You've got this! ⛏️💎</p>
+</div>
+
+</body>
+</html>
