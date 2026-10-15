@@ -196,6 +196,7 @@
           <div class="xpbar"><div class="xpfill" style="width:${pct}%"></div></div>
         </div>
         ${extra}
+        <button type="button" class="btn small gold js-calc">Calc</button>
         <button type="button" class="linkbtn" id="to-map">Map</button>
         <a class="linkbtn" href="guide.html" target="_blank" rel="noopener">How-to</a>
       </div>`;
@@ -204,6 +205,7 @@
   function bindTopbar() {
     const m = document.getElementById("to-map");
     if (m) m.onclick = () => renderMap();
+    bindCalcButtons();
   }
 
   /* ---------- TITLE ---------- */
@@ -358,6 +360,7 @@
             <div id="fb"></div>
             <div class="nav">
               <button type="button" class="btn small" id="back-learn">← Lesson</button>
+              <button type="button" class="btn small gold js-calc">Calculator</button>
             </div>
           </div>
         </div>`),
@@ -379,7 +382,7 @@
               paint();
             }
           };
-          if (q.type === "equation" || q.type === "number") {
+          if (q.type === "equation" || q.type === "number" || q.type === "guided") {
             showNextButton(app.querySelector("#fb"), qi + 1 >= questions.length, advance);
           } else {
             setTimeout(advance, 700);
@@ -782,6 +785,61 @@
       }
 
       paintStep();
+      return;
+    }
+
+    if (q.type === "guided") {
+      let stepIndex = 0;
+      const work = [];
+      const box = el(`<div class="guided"></div>`);
+      area.appendChild(box);
+
+      function paintGuided() {
+        const step = q.steps[stepIndex];
+        box.innerHTML = `
+          <div class="equation-progress">STEP ${stepIndex + 1} OF ${q.steps.length}</div>
+          <div class="guided-work">
+            ${work.map((line) => `<div class="guided-line">${escapeHtml(line)}</div>`).join("")}
+          </div>
+          <p class="equation-instruction">${escapeHtml(step.say)}</p>
+          <div class="operation-tray setup-tray">
+            ${step.choices
+              .map(
+                (choice, i) => `
+                <button type="button" class="operation-card" data-i="${i}">
+                  <span>${escapeHtml(choice.label)}</span>
+                </button>`,
+              )
+              .join("")}
+          </div>`;
+        box.querySelectorAll("button").forEach((btn) => {
+          btn.onclick = () => {
+            const choice = step.choices[Number(btn.dataset.i)];
+            if (!choice.ok) {
+              btn.classList.add("wrong");
+              btn.disabled = true;
+              hooks.onWrong();
+              fb.innerHTML = `<div class="fb hint"><div class="head">Not quite</div><div class="explain">${choice.hint}</div></div>`;
+              return;
+            }
+            work.push(step.work);
+            fb.innerHTML = "";
+            stepIndex += 1;
+            if (stepIndex >= q.steps.length) {
+              box.innerHTML = `
+                <div class="guided-work">
+                  ${work.map((line) => `<div class="guided-line">${escapeHtml(line)}</div>`).join("")}
+                </div>`;
+              fb.innerHTML = `<div class="fb ok"><div class="head">✅ That's why</div><div class="explain">${q.explain}</div></div>`;
+              hooks.onCorrect();
+            } else {
+              paintGuided();
+            }
+          };
+        });
+      }
+
+      paintGuided();
       return;
     }
 
@@ -1390,16 +1448,67 @@
             ],
           },
         ],
-        explain: "x = 8. Put it back in: 4(8) + 2 = 34° and 6(8) − 14 = 34°. Twins match!",
+        explain: "x = 8. Next, put 8 back where x was so you can see the angle.",
       },
       {
-        type: "number",
-        prompt: "x is 8, so each orange angle is 34°. What is a blue angle, the one next door?",
+        type: "guided",
+        prompt: "x is 8. The orange angle was 4x + 2. Put 8 in place of x.",
         diagram: pic,
-        prefix: "angle =",
-        answer: 146,
-        hint: "Neighbors on a straight line add to 180.",
-        reveal: "180 − 34 = 146",
+        steps: [
+          {
+            say: "4x means 4 times x. What do you write when x is 8?",
+            work: "4(8) + 2",
+            choices: [
+              { label: "4(8) + 2", ok: true },
+              { label: "4 + 8 + 2", ok: false, hint: "The 4 and the x are multiplied. Write 4(8), not 4 + 8." },
+              { label: "48 + 2", ok: false, hint: "Don't stick 4 and 8 together into 48. Multiply them." },
+            ],
+          },
+          {
+            say: "What is 4 × 8?",
+            work: "32 + 2",
+            choices: [
+              { label: "32", ok: true },
+              { label: "12", ok: false, hint: "12 is 4 + 8. This step is 4 times 8." },
+              { label: "48", ok: false, hint: "48 would be the digits 4 and 8 pushed together." },
+            ],
+          },
+          {
+            say: "Now add the 2 that was still there.",
+            work: "orange angle = 34°",
+            choices: [
+              { label: "34°", ok: true },
+              { label: "30°", ok: false, hint: "32 + 2 = 34." },
+              { label: "64°", ok: false, hint: "Add 2. Don't double 32." },
+            ],
+          },
+        ],
+        explain: "That's why it's 34°: 4 × 8 = 32, and 32 + 2 = 34. The other orange angle matches: 6 × 8 = 48, and 48 − 14 = 34.",
+      },
+      {
+        type: "guided",
+        prompt: "The orange angle is 34°. A blue angle is next door, on the same straight line.",
+        diagram: pic,
+        steps: [
+          {
+            say: "Neighbors on a straight line add to 180. Which subtraction finds the blue angle?",
+            work: "180 − 34",
+            choices: [
+              { label: "180 − 34", ok: true },
+              { label: "180 + 34", ok: false, hint: "The two neighbors share 180, so subtract." },
+              { label: "90 − 34", ok: false, hint: "90 is a block corner. This is a straight line, so use 180." },
+            ],
+          },
+          {
+            say: "What is 180 − 34?",
+            work: "blue angle = 146°",
+            choices: [
+              { label: "146°", ok: true },
+              { label: "154°", ok: false, hint: "180 − 30 = 150, then take away 4 more: 146." },
+              { label: "214°", ok: false, hint: "That added 34. Subtract it." },
+            ],
+          },
+        ],
         explain: "The four angles are 34°, 146°, 34°, 146°.",
       },
       {
@@ -1561,17 +1670,60 @@
             ],
           },
         ],
-        explain: "x = 7. Each marked angle is 3(7) + 6 = 27°. Next you'll find y.",
+        explain: "x = 7. Next, put 7 back into 3x + 6.",
       },
       {
-        type: "number",
-        prompt: "Each marked angle is 27°. Now find y.",
+        type: "guided",
+        prompt: "x is 7. A marked angle was 3x + 6. Put 7 in place of x, then find y.",
         diagram: ticks,
-        prefix: "y =",
-        answer: 126,
-        hint: "y = 180 − 27 − 27",
-        reveal: "180 − 54 = 126",
-        explain: "27 + 126 + 27 = 180.",
+        steps: [
+          {
+            say: "3x means 3 times x. What do you write?",
+            work: "3(7) + 6",
+            choices: [
+              { label: "3(7) + 6", ok: true },
+              { label: "3 + 7 + 6", ok: false, hint: "3x means 3 times x, so write 3(7)." },
+              { label: "37 + 6", ok: false, hint: "Don't stick 3 and 7 together. Multiply them." },
+            ],
+          },
+          {
+            say: "What is 3 × 7?",
+            work: "21 + 6",
+            choices: [
+              { label: "21", ok: true },
+              { label: "10", ok: false, hint: "10 is 3 + 7. This is 3 times 7." },
+              { label: "37", ok: false, hint: "Multiply 3 × 7. It's 21." },
+            ],
+          },
+          {
+            say: "Add the 6.",
+            work: "each marked angle = 27°",
+            choices: [
+              { label: "27°", ok: true },
+              { label: "15°", ok: false, hint: "21 + 6 = 27." },
+              { label: "126°", ok: false, hint: "That's much bigger. Just add 6 to 21." },
+            ],
+          },
+          {
+            say: "Both marked angles are 27°, and they sit on a straight line with y. What is left for y?",
+            work: "y = 180 − 27 − 27",
+            choices: [
+              { label: "180 − 27 − 27", ok: true },
+              { label: "180 − 27", ok: false, hint: "There are two 27° angles, so subtract 27 twice." },
+              { label: "27 + 27", ok: false, hint: "That's only the two marked angles. y is the rest of the 180°." },
+            ],
+          },
+          {
+            say: "27 + 27 = 54. What is 180 − 54?",
+            work: "y = 126°",
+            choices: [
+              { label: "126°", ok: true },
+              { label: "134°", ok: false, hint: "180 − 50 = 130, then take away 4 more: 126." },
+              { label: "54°", ok: false, hint: "54 is the two marked angles together. Subtract that from 180." },
+            ],
+          },
+        ],
+        explain: "3 × 7 = 21, and 21 + 6 = 27. Then y = 180 − 27 − 27 = 126°.",
       },
     ];
   }
@@ -1954,6 +2106,7 @@
             <div id="fb"></div>
             <div class="nav">
               <button type="button" class="btn small" id="back-map">Flee to map</button>
+              <button type="button" class="btn small gold js-calc">Calculator</button>
             </div>
           </div>
         </div>`),
@@ -1973,7 +2126,7 @@
               paint();
             }
           };
-          if (q.type === "equation" || q.type === "number") {
+          if (q.type === "equation" || q.type === "number" || q.type === "guided") {
             showNextButton(app.querySelector("#fb"), qi + 1 >= bossQs.length, advance);
           } else {
             setTimeout(advance, 750);
@@ -2007,6 +2160,198 @@
     confettiBurst();
     app.querySelector("#again").onclick = () => renderMap();
   }
+
+  /* ---------- calculator ---------- */
+  function bindCalcButtons() {
+    const open = calcPanel && !calcPanel.classList.contains("hidden");
+    document.querySelectorAll(".js-calc").forEach((btn) => {
+      btn.onclick = () => toggleCalc();
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  }
+
+  let calcPanel = null;
+  let calcAcc = null;
+  let calcOp = null;
+  let calcEntry = "0";
+  let calcFresh = true;
+  let calcExpr = "";
+
+  function formatCalc(n) {
+    if (!Number.isFinite(n)) return "Error";
+    const rounded = Math.round(n * 1e10) / 1e10;
+    return String(rounded);
+  }
+
+  function applyCalc(a, operator, b) {
+    if (operator === "+") return a + b;
+    if (operator === "−") return a - b;
+    if (operator === "×") return a * b;
+    if (operator === "÷") return b === 0 ? NaN : a / b;
+    return NaN;
+  }
+
+  function paintCalc() {
+    const screen = document.getElementById("calc-screen");
+    const expr = document.getElementById("calc-expr");
+    if (screen) screen.textContent = calcEntry;
+    if (expr) expr.textContent = calcExpr;
+  }
+
+  function calcDigit(d) {
+    if (calcEntry === "Error" || calcFresh) {
+      calcEntry = d === "." ? "0." : d;
+      calcFresh = false;
+    } else if (d === "." && calcEntry.includes(".")) {
+      return;
+    } else if (d === "0" && calcEntry === "0") {
+      return;
+    } else if (calcEntry === "0" && d !== ".") {
+      calcEntry = d;
+    } else {
+      calcEntry += d;
+    }
+    paintCalc();
+  }
+
+  function calcSetOp(next) {
+    if (calcEntry === "Error") {
+      calcClear();
+      return;
+    }
+    const n = Number(calcEntry);
+    if (calcAcc === null || calcFresh) {
+      calcAcc = n;
+    } else if (calcOp) {
+      calcAcc = applyCalc(calcAcc, calcOp, n);
+      calcEntry = formatCalc(calcAcc);
+    }
+    calcOp = next;
+    calcExpr = `${formatCalc(calcAcc)} ${next}`;
+    calcFresh = true;
+    paintCalc();
+  }
+
+  function calcEquals() {
+    if (calcOp === null || calcAcc === null || calcEntry === "Error") return;
+    const n = Number(calcEntry);
+    const result = applyCalc(calcAcc, calcOp, n);
+    calcExpr = `${formatCalc(calcAcc)} ${calcOp} ${formatCalc(n)} =`;
+    calcEntry = formatCalc(result);
+    calcAcc = null;
+    calcOp = null;
+    calcFresh = true;
+    paintCalc();
+  }
+
+  function calcClear() {
+    calcAcc = null;
+    calcOp = null;
+    calcEntry = "0";
+    calcFresh = true;
+    calcExpr = "";
+    paintCalc();
+  }
+
+  function calcBackspace() {
+    if (calcFresh || calcEntry === "Error") return;
+    calcEntry = calcEntry.length <= 1 || (calcEntry.length === 2 && calcEntry.startsWith("-")) ? "0" : calcEntry.slice(0, -1);
+    if (calcEntry === "-" || calcEntry === "") calcEntry = "0";
+    paintCalc();
+  }
+
+  function calcSign() {
+    if (calcEntry === "Error" || calcEntry === "0") return;
+    calcEntry = calcEntry.startsWith("-") ? calcEntry.slice(1) : `-${calcEntry}`;
+    calcFresh = false;
+    paintCalc();
+  }
+
+  function toggleCalc(forceOpen) {
+    ensureCalculator();
+    const open = typeof forceOpen === "boolean" ? forceOpen : calcPanel.classList.contains("hidden");
+    calcPanel.classList.toggle("hidden", !open);
+    bindCalcButtons();
+    if (open) calcPanel.focus();
+  }
+
+  function ensureCalculator() {
+    if (calcPanel) return;
+    calcPanel = el(`
+      <aside id="calc" class="calc hidden" role="dialog" aria-label="Calculator" tabindex="-1">
+        <div class="calc-head">
+          <span class="pixel">Calculator</span>
+          <button type="button" class="calc-x" id="calc-close" aria-label="Close calculator">✕</button>
+        </div>
+        <div class="calc-expr" id="calc-expr"></div>
+        <div class="calc-screen" id="calc-screen">0</div>
+        <div class="calc-keys">
+          <button type="button" class="calc-key" data-act="clear">C</button>
+          <button type="button" class="calc-key" data-act="back">⌫</button>
+          <button type="button" class="calc-key" data-act="sign">±</button>
+          <button type="button" class="calc-key op" data-op="÷">÷</button>
+          <button type="button" class="calc-key" data-digit="7">7</button>
+          <button type="button" class="calc-key" data-digit="8">8</button>
+          <button type="button" class="calc-key" data-digit="9">9</button>
+          <button type="button" class="calc-key op" data-op="×">×</button>
+          <button type="button" class="calc-key" data-digit="4">4</button>
+          <button type="button" class="calc-key" data-digit="5">5</button>
+          <button type="button" class="calc-key" data-digit="6">6</button>
+          <button type="button" class="calc-key op" data-op="−">−</button>
+          <button type="button" class="calc-key" data-digit="1">1</button>
+          <button type="button" class="calc-key" data-digit="2">2</button>
+          <button type="button" class="calc-key" data-digit="3">3</button>
+          <button type="button" class="calc-key op" data-op="+">+</button>
+          <button type="button" class="calc-key wide" data-digit="0">0</button>
+          <button type="button" class="calc-key" data-digit=".">.</button>
+          <button type="button" class="calc-key eq" data-act="eq">=</button>
+        </div>
+        <p class="calc-note">For the arithmetic. You still pick the move.</p>
+      </aside>`);
+    document.body.appendChild(calcPanel);
+    calcPanel.addEventListener("click", (event) => {
+      const btn = event.target.closest("button");
+      if (!btn || !calcPanel.contains(btn)) return;
+      if (btn.id === "calc-close") {
+        toggleCalc(false);
+        return;
+      }
+      if (btn.dataset.digit) calcDigit(btn.dataset.digit);
+      else if (btn.dataset.op) calcSetOp(btn.dataset.op);
+      else if (btn.dataset.act === "clear") calcClear();
+      else if (btn.dataset.act === "back") calcBackspace();
+      else if (btn.dataset.act === "sign") calcSign();
+      else if (btn.dataset.act === "eq") calcEquals();
+      calcPanel.focus();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (!calcPanel || calcPanel.classList.contains("hidden")) return;
+      const tag = document.activeElement && document.activeElement.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      const key = event.key;
+      if (/^[0-9.]$/.test(key)) {
+        calcDigit(key);
+        event.preventDefault();
+      } else if (key === "+" || key === "-" || key === "*" || key === "x" || key === "X" || key === "/") {
+        const op = { "+": "+", "-": "−", "*": "×", x: "×", X: "×", "/": "÷" }[key];
+        calcSetOp(op);
+        event.preventDefault();
+      } else if (key === "Enter" || key === "=") {
+        calcEquals();
+        event.preventDefault();
+      } else if (key === "Backspace") {
+        calcBackspace();
+        event.preventDefault();
+      } else if (key === "Escape") {
+        toggleCalc(false);
+      } else if (key === "c" || key === "C") {
+        calcClear();
+        event.preventDefault();
+      }
+    });
+  }
+
+  ensureCalculator();
 
   /* boot */
   if (state.name) renderMap();
