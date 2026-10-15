@@ -600,7 +600,7 @@
     [...row.children].forEach((chip) => chip.classList.add("pop-in"));
   }
 
-  async function animateAlgebra(balance, after, opLabel, source, caption) {
+  async function animateAlgebra(balance, after, opLabel, source, caption, setup) {
     const op = parseOp(opLabel);
     const [afterLeft, afterRight] = after.split("=").map((side) => side.trim());
     const leftRow = balance.querySelector('[data-side="left"] .term-row');
@@ -609,6 +609,13 @@
       leftRow.innerHTML = parseSide(afterLeft).map((term, i) => termChip(term, i > 0)).join("");
       rightRow.innerHTML = parseSide(afterRight).map((term, i) => termChip(term, i > 0)).join("");
     };
+    if (setup) {
+      caption.textContent = "The picture becomes an equation";
+      reveal();
+      [...balance.querySelectorAll(".term-chip")].forEach((chip) => chip.classList.add("pop-in"));
+      await wait(900);
+      return;
+    }
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       reveal();
       return;
@@ -665,7 +672,7 @@
           <div class="equation-progress">MINING STEP ${stepIndex + 1} OF ${q.steps.length}</div>
           ${equationBoard(step.equation)}
           <p class="equation-instruction">${escapeHtml(step.instruction)}</p>
-          <div class="operation-tray" aria-label="Choose an operation">
+          <div class="operation-tray${step.setup ? " setup-tray" : ""}" aria-label="Choose an operation">
             ${step.choices
               .map(
                 (choice, i) => `
@@ -677,7 +684,7 @@
               .join("")}
           </div>
           <button type="button" class="apply-zone" id="apply-zone">
-            <span>⬇</span> APPLY TO BOTH SIDES
+            <span>⬇</span> ${step.setup ? "BUILD THE EQUATION" : "APPLY TO BOTH SIDES"}
           </button>
           <div class="equation-history">
             ${completed
@@ -700,7 +707,9 @@
           selected = choiceIndex;
           cards.forEach((card, i) => card.classList.toggle("selected", i === choiceIndex));
           zone.classList.add("ready");
-          zone.innerHTML = `<span>✓</span> APPLY ${escapeHtml(step.choices[choiceIndex].label)} TO BOTH SIDES`;
+          zone.innerHTML = step.setup
+            ? `<span>✓</span> USE ${escapeHtml(step.choices[choiceIndex].label)}`
+            : `<span>✓</span> APPLY ${escapeHtml(step.choices[choiceIndex].label)} TO BOTH SIDES`;
         }
 
         function apply(choiceIndex) {
@@ -718,14 +727,14 @@
           }
 
           busy = true;
-          step.correctLabel = choice.label;
+          step.correctLabel = step.setup ? "Built the equation" : choice.label;
           cards.forEach((card) => (card.disabled = true));
           zone.disabled = true;
           zone.classList.add("correct");
           fb.innerHTML = `<div class="fb ok"><div class="head">✅ Watch the blocks move</div><div class="explain">${step.explain}</div></div>`;
           const balance = lab.querySelector(".balance");
           const caption = lab.querySelector(".move-caption");
-          animateAlgebra(balance, step.after, choice.label, cards[choiceIndex], caption).then(() => {
+          animateAlgebra(balance, step.after, choice.label, cards[choiceIndex], caption, step.setup).then(() => {
             stepIndex += 1;
             if (stepIndex >= q.steps.length) {
               lab.innerHTML = `
@@ -1330,14 +1339,58 @@
     const known = window.AQ.crossed({ top: "52°", right: "?", bottom: "?", left: "?" });
     return [
       {
-        type: "number",
-        prompt: "The orange angles are across the X. Find x.",
+        type: "equation",
+        prompt: "The orange angles are across the X. Solve for x one step at a time.",
         diagram: pic,
-        prefix: "x =",
-        answer: 8,
-        hint: "4x + 2 = 6x − 14. Subtract 4x, then add 14.",
-        reveal: "2 = 2x − 14 → 16 = 2x → x = 8",
-        explain: "Each orange angle is 4(8)+2 = 34°. The other expression gives 34° too.",
+        result: "x = 8",
+        steps: [
+          {
+            setup: true,
+            equation: "? = ?",
+            instruction: "Orange is across from orange. Crossed swords are twins. Which equation matches?",
+            after: "4x + 2 = 6x − 14",
+            explain: "Twins across the X are equal, so set the two expressions equal.",
+            choices: [
+              { label: "4x + 2 = 6x − 14", ok: true },
+              { label: "4x + 2 + 6x − 14 = 180", ok: false, hint: "180 is for neighbors on a straight line. These are across the X." },
+              { label: "4x + 2 + 6x − 14 = 90", ok: false, hint: "90 needs the square box. These are crossed-sword twins." },
+            ],
+          },
+          {
+            equation: "4x + 2 = 6x − 14",
+            instruction: "x is on both sides. Remove the smaller x-stack from both sides.",
+            after: "2 = 2x − 14",
+            explain: "4x − 4x leaves nothing on the left. 6x − 4x leaves 2x on the right.",
+            choices: [
+              { label: "− 4x", ok: true },
+              { label: "+ 4x", ok: false, hint: "Adding makes both x-stacks bigger. Use the opposite of +4x." },
+              { label: "÷ 2", ok: false, hint: "Get all the x-blocks on one side first." },
+            ],
+          },
+          {
+            equation: "2 = 2x − 14",
+            instruction: "What is stuck to 2x? Use its opposite on both sides.",
+            after: "16 = 2x",
+            explain: "Adding 14 cancels the −14. On the left, 2 + 14 = 16.",
+            choices: [
+              { label: "+ 14", ok: true },
+              { label: "− 14", ok: false, hint: "Creeper trap! Subtracting again makes it worse. The opposite of −14 is +14." },
+              { label: "÷ 2", ok: false, hint: "Clear the −14 before splitting the x-stack." },
+            ],
+          },
+          {
+            equation: "16 = 2x",
+            instruction: "Two x-stacks make 16. Split both sides into 2 groups.",
+            after: "8 = x",
+            explain: "16 ÷ 2 = 8.",
+            choices: [
+              { label: "÷ 2", ok: true },
+              { label: "− 2", ok: false, hint: "2x means 2 times x, so divide." },
+              { label: "× 2", ok: false, hint: "Multiplying makes it bigger. Divide by 2." },
+            ],
+          },
+        ],
+        explain: "x = 8. Put it back in: 4(8) + 2 = 34° and 6(8) − 14 = 34°. Twins match!",
       },
       {
         type: "number",
@@ -1393,14 +1446,58 @@
     const ticks = window.AQ.triple({ left: "3x+6", mid: "y", right: "5x−8" });
     return [
       {
-        type: "number",
-        prompt: "These two angles share the straight path. Find x.",
+        type: "equation",
+        prompt: "These two angles share the straight path. Solve for x one step at a time.",
         diagram: pair,
-        prefix: "x =",
-        answer: 25,
-        hint: "(5x+10) + (x+20) = 180",
-        reveal: "6x + 30 = 180 → x = 25",
-        explain: "The angles are 135° and 45°. 135 + 45 = 180.",
+        result: "x = 25",
+        steps: [
+          {
+            setup: true,
+            equation: "? = ?",
+            instruction: "The angles sit side by side on flat ground. Which equation matches?",
+            after: "5x + 10 + x + 20 = 180",
+            explain: "Flat ground is 180°, so the two angles add to 180.",
+            choices: [
+              { label: "5x + 10 + x + 20 = 180", ok: true },
+              { label: "5x + 10 = x + 20", ok: false, hint: "Equal is for twins across an X. These are neighbors." },
+              { label: "5x + 10 + x + 20 = 90", ok: false, hint: "There's no square box. A straight line is 180." },
+            ],
+          },
+          {
+            equation: "5x + 10 + x + 20 = 180",
+            instruction: "Craft matching blocks together: x's with x's, numbers with numbers.",
+            after: "6x + 30 = 180",
+            explain: "5x + x = 6x, and 10 + 20 = 30.",
+            choices: [
+              { label: "Combine like terms", ok: true },
+              { label: "− 180", ok: false, hint: "Combine the left side first so it's easier." },
+              { label: "÷ 5", ok: false, hint: "Clean up the left side before dividing." },
+            ],
+          },
+          {
+            equation: "6x + 30 = 180",
+            instruction: "Undo the +30 on both sides.",
+            after: "6x = 150",
+            explain: "180 − 30 = 150.",
+            choices: [
+              { label: "− 30", ok: true },
+              { label: "+ 30", ok: false, hint: "Use the opposite of +30." },
+              { label: "÷ 6", ok: false, hint: "Clear the +30 first." },
+            ],
+          },
+          {
+            equation: "6x = 150",
+            instruction: "Six x-stacks make 150. Split both sides into 6 groups.",
+            after: "x = 25",
+            explain: "150 ÷ 6 = 25.",
+            choices: [
+              { label: "÷ 6", ok: true },
+              { label: "− 6", ok: false, hint: "6x is multiplication, so divide." },
+              { label: "÷ 150", ok: false, hint: "Divide by the number attached to x." },
+            ],
+          },
+        ],
+        explain: "x = 25. The angles are 5(25)+10 = 135° and 25+20 = 45°. 135 + 45 = 180.",
       },
       {
         type: "number",
@@ -1413,14 +1510,58 @@
         explain: "40 + 85 + 55 = 180.",
       },
       {
-        type: "number",
+        type: "equation",
         prompt: "The tick marks match, so those two angles are equal. Find x first. Leave y for the next hit.",
         diagram: ticks,
-        prefix: "x =",
-        answer: 7,
-        hint: "3x + 6 = 5x − 8. Don't use 180 until you know the angle sizes.",
-        reveal: "6 + 8 = 2x → x = 7",
-        explain: "Each marked angle is 3(7)+6 = 27°.",
+        result: "x = 7",
+        steps: [
+          {
+            setup: true,
+            equation: "? = ?",
+            instruction: "Matching tick marks mean same size. Which equation matches?",
+            after: "3x + 6 = 5x − 8",
+            explain: "Matching marks = congruent, so set them equal. Save y for later.",
+            choices: [
+              { label: "3x + 6 = 5x − 8", ok: true },
+              { label: "3x + 6 + 5x − 8 = 180", ok: false, hint: "y also sits on that line. Use the matching marks first." },
+              { label: "3x + 6 + 5x − 8 = 90", ok: false, hint: "No square box here. The marks mean equal." },
+            ],
+          },
+          {
+            equation: "3x + 6 = 5x − 8",
+            instruction: "x is on both sides. Remove the smaller x-stack.",
+            after: "6 = 2x − 8",
+            explain: "3x − 3x leaves nothing on the left. 5x − 3x = 2x.",
+            choices: [
+              { label: "− 3x", ok: true },
+              { label: "+ 3x", ok: false, hint: "Use the opposite of +3x." },
+              { label: "− 6", ok: false, hint: "Get the x-blocks together first." },
+            ],
+          },
+          {
+            equation: "6 = 2x − 8",
+            instruction: "What is stuck to 2x? Use its opposite.",
+            after: "14 = 2x",
+            explain: "Adding 8 cancels −8. On the left, 6 + 8 = 14.",
+            choices: [
+              { label: "+ 8", ok: true },
+              { label: "− 8", ok: false, hint: "Creeper trap! The opposite of −8 is +8." },
+              { label: "÷ 2", ok: false, hint: "Clear the −8 first." },
+            ],
+          },
+          {
+            equation: "14 = 2x",
+            instruction: "Split both sides into 2 groups.",
+            after: "7 = x",
+            explain: "14 ÷ 2 = 7.",
+            choices: [
+              { label: "÷ 2", ok: true },
+              { label: "− 2", ok: false, hint: "2x means 2 times x, so divide." },
+              { label: "× 2", ok: false, hint: "Divide, don't multiply." },
+            ],
+          },
+        ],
+        explain: "x = 7. Each marked angle is 3(7) + 6 = 27°. Next you'll find y.",
       },
       {
         type: "number",
@@ -1453,14 +1594,58 @@
     const known = window.AQ.corner({ upper: "23°", lower: "?" });
     return [
       {
-        type: "number",
-        prompt: "The square means 90°. Find x.",
+        type: "equation",
+        prompt: "The square means 90°. Solve for x one step at a time.",
         diagram: pic,
-        prefix: "x =",
-        answer: 14,
-        hint: "(4x−2) + (2x+8) = 90",
-        reveal: "6x + 6 = 90 → x = 14",
-        explain: "The pieces are 54° and 36°. 54 + 36 = 90.",
+        result: "x = 14",
+        steps: [
+          {
+            setup: true,
+            equation: "? = ?",
+            instruction: "Two pieces fill the block corner. Which equation matches?",
+            after: "4x − 2 + 2x + 8 = 90",
+            explain: "Pieces of a block corner add to 90.",
+            choices: [
+              { label: "4x − 2 + 2x + 8 = 90", ok: true },
+              { label: "4x − 2 = 2x + 8", ok: false, hint: "The pieces don't have matching marks. They add up." },
+              { label: "4x − 2 + 2x + 8 = 180", ok: false, hint: "The square box means 90, not 180." },
+            ],
+          },
+          {
+            equation: "4x − 2 + 2x + 8 = 90",
+            instruction: "Craft matching blocks together.",
+            after: "6x + 6 = 90",
+            explain: "4x + 2x = 6x, and −2 + 8 = 6.",
+            choices: [
+              { label: "Combine like terms", ok: true },
+              { label: "+ 2", ok: false, hint: "Combine first. It's simpler." },
+              { label: "÷ 4", ok: false, hint: "Clean up the left side first." },
+            ],
+          },
+          {
+            equation: "6x + 6 = 90",
+            instruction: "Undo the +6 on both sides.",
+            after: "6x = 84",
+            explain: "90 − 6 = 84.",
+            choices: [
+              { label: "− 6", ok: true },
+              { label: "+ 6", ok: false, hint: "Use the opposite of +6." },
+              { label: "÷ 6", ok: false, hint: "Clear the +6 first." },
+            ],
+          },
+          {
+            equation: "6x = 84",
+            instruction: "Split both sides into 6 groups.",
+            after: "x = 14",
+            explain: "84 ÷ 6 = 14.",
+            choices: [
+              { label: "÷ 6", ok: true },
+              { label: "− 6", ok: false, hint: "6x means 6 times x, so divide." },
+              { label: "× 6", ok: false, hint: "Divide, don't multiply." },
+            ],
+          },
+        ],
+        explain: "x = 14. The pieces are 4(14)−2 = 54° and 2(14)+8 = 36°. 54 + 36 = 90.",
       },
       {
         type: "number",
@@ -1503,14 +1688,58 @@
     const sub = window.AQ.addition({ whole: "142°", left: "38°", right: "?" });
     return [
       {
-        type: "number",
-        prompt: "The two colored pieces craft into the 118° angle. Find x.",
+        type: "equation",
+        prompt: "The two colored pieces craft into the 118° angle. Solve for x one step at a time.",
         diagram: pic,
-        prefix: "x =",
-        answer: 22,
-        hint: "(2x+6) + (3x+2) = 118",
-        reveal: "5x + 8 = 118 → x = 22",
-        explain: "The pieces are 50° and 68°. 50 + 68 = 118.",
+        result: "x = 22",
+        steps: [
+          {
+            setup: true,
+            equation: "? = ?",
+            instruction: "Piece + piece = whole. Which equation matches?",
+            after: "2x + 6 + 3x + 2 = 118",
+            explain: "Angle Addition Postulate: the pieces add to the whole 118°.",
+            choices: [
+              { label: "2x + 6 + 3x + 2 = 118", ok: true },
+              { label: "2x + 6 = 3x + 2", ok: false, hint: "Pieces don't have to match. They add to the whole." },
+              { label: "2x + 6 + 3x + 2 = 180", ok: false, hint: "Use the whole angle they gave you: 118." },
+            ],
+          },
+          {
+            equation: "2x + 6 + 3x + 2 = 118",
+            instruction: "Craft matching blocks together.",
+            after: "5x + 8 = 118",
+            explain: "2x + 3x = 5x, and 6 + 2 = 8.",
+            choices: [
+              { label: "Combine like terms", ok: true },
+              { label: "− 118", ok: false, hint: "Combine the left side first." },
+              { label: "÷ 2", ok: false, hint: "Clean up the left side first." },
+            ],
+          },
+          {
+            equation: "5x + 8 = 118",
+            instruction: "Undo the +8 on both sides.",
+            after: "5x = 110",
+            explain: "118 − 8 = 110.",
+            choices: [
+              { label: "− 8", ok: true },
+              { label: "+ 8", ok: false, hint: "Use the opposite of +8." },
+              { label: "÷ 5", ok: false, hint: "Clear the +8 first." },
+            ],
+          },
+          {
+            equation: "5x = 110",
+            instruction: "Split both sides into 5 groups.",
+            after: "x = 22",
+            explain: "110 ÷ 5 = 22.",
+            choices: [
+              { label: "÷ 5", ok: true },
+              { label: "− 5", ok: false, hint: "5x means 5 times x, so divide." },
+              { label: "× 5", ok: false, hint: "Divide, don't multiply." },
+            ],
+          },
+        ],
+        explain: "x = 22. The pieces are 2(22)+6 = 50° and 3(22)+2 = 68°. 50 + 68 = 118.",
       },
       {
         type: "number",
@@ -1577,14 +1806,58 @@
         ],
       },
       {
-        type: "number",
-        prompt: "The double ticks mean these angles are congruent. Find x.",
+        type: "equation",
+        prompt: "The double ticks mean these angles are congruent. Solve for x one step at a time.",
         diagram: pic,
-        prefix: "x =",
-        answer: 7,
-        hint: "7x − 5 = 4x + 16",
-        reveal: "3x = 21 → x = 7",
-        explain: "Both angles measure 44°. Congruent twins have to match.",
+        result: "x = 7",
+        steps: [
+          {
+            setup: true,
+            equation: "? = ?",
+            instruction: "Congruent means same size. Which equation matches?",
+            after: "7x − 5 = 4x + 16",
+            explain: "∠BAC ≅ ∠EDF, so m∠BAC = m∠EDF.",
+            choices: [
+              { label: "7x − 5 = 4x + 16", ok: true },
+              { label: "7x − 5 + 4x + 16 = 180", ok: false, hint: "These angles aren't on a line together. ≅ means equal." },
+              { label: "7x − 5 + 4x + 16 = 90", ok: false, hint: "No square box. ≅ means equal." },
+            ],
+          },
+          {
+            equation: "7x − 5 = 4x + 16",
+            instruction: "x is on both sides. Remove the smaller x-stack.",
+            after: "3x − 5 = 16",
+            explain: "7x − 4x = 3x on the left. 4x − 4x leaves nothing on the right.",
+            choices: [
+              { label: "− 4x", ok: true },
+              { label: "+ 4x", ok: false, hint: "Use the opposite of +4x." },
+              { label: "+ 5", ok: false, hint: "Get the x-blocks together first." },
+            ],
+          },
+          {
+            equation: "3x − 5 = 16",
+            instruction: "What is stuck to 3x? Use its opposite.",
+            after: "3x = 21",
+            explain: "Adding 5 cancels −5. On the right, 16 + 5 = 21.",
+            choices: [
+              { label: "+ 5", ok: true },
+              { label: "− 5", ok: false, hint: "Creeper trap! The opposite of −5 is +5." },
+              { label: "÷ 3", ok: false, hint: "Clear the −5 first." },
+            ],
+          },
+          {
+            equation: "3x = 21",
+            instruction: "Split both sides into 3 groups.",
+            after: "x = 7",
+            explain: "21 ÷ 3 = 7.",
+            choices: [
+              { label: "÷ 3", ok: true },
+              { label: "− 3", ok: false, hint: "3x means 3 times x, so divide." },
+              { label: "× 3", ok: false, hint: "Divide, don't multiply." },
+            ],
+          },
+        ],
+        explain: "x = 7. Both angles are 7(7)−5 = 44° and 4(7)+16 = 44°. Congruent twins match!",
       },
       {
         type: "number",

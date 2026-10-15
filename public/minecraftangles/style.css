@@ -210,6 +210,9 @@ button { font-family: inherit; }
   border-radius: 7px; font-family: inherit; font-weight: 900;
 }
 .operation-card span { display: block; font-size: 1rem; }
+.setup-tray { grid-template-columns: 1fr; }
+.setup-tray .operation-card { min-height: 52px; }
+.setup-tray .operation-card span { font-family: Menlo, "Courier New", monospace; }
 .operation-card small { display: block; margin-top: 3px; opacity: 0.75; font-size: 0.68rem; }
 .operation-card:hover, .operation-card.selected { background: #5d9c3a; transform: translateY(-2px); }
 .operation-card.wrong { background: #c62828; animation: shake 0.35s; }
