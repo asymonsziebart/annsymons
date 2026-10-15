@@ -94,19 +94,28 @@ function isMinecraftAnglesHost(host: string | null): boolean {
   );
 }
 
+const MINECRAFT_ANGLES_INDEX = "/minecraftangles/index.html";
+
+function rewriteTo(request: NextRequest, pathname: string): NextResponse {
+  const url = request.nextUrl.clone();
+  url.pathname = pathname;
+  return NextResponse.rewrite(url);
+}
+
 /** Public Angle Quest site — no login. Serves files under /minecraftangles. */
 function minecraftAnglesRewrite(request: NextRequest): NextResponse {
   const path = request.nextUrl.pathname;
+  if (path === "/" || path === "/minecraftangles" || path === "/minecraftangles/") {
+    return rewriteTo(request, MINECRAFT_ANGLES_INDEX);
+  }
   if (
-    path.startsWith("/minecraftangles") ||
+    path.startsWith("/minecraftangles/") ||
     path.startsWith("/_next") ||
     path.startsWith("/api")
   ) {
     return NextResponse.next();
   }
-  const url = request.nextUrl.clone();
-  url.pathname = path === "/" ? "/minecraftangles/" : `/minecraftangles${path}`;
-  return NextResponse.rewrite(url);
+  return rewriteTo(request, `/minecraftangles${path}`);
 }
 
 export async function middleware(request: NextRequest) {
@@ -116,6 +125,10 @@ export async function middleware(request: NextRequest) {
   // Subdomain for Angela's game — always public, never behind admin login.
   if (isMinecraftAnglesHost(host)) {
     return minecraftAnglesRewrite(request);
+  }
+  // Public folders don't serve index.html on their own.
+  if (path === "/minecraftangles" || path === "/minecraftangles/") {
+    return rewriteTo(request, MINECRAFT_ANGLES_INDEX);
   }
 
   if (path.startsWith("/tasks")) {

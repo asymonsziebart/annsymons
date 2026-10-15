@@ -30,12 +30,12 @@
   <input id="pin" type="password" inputmode="numeric" autocomplete="off" style="font-size:1.2rem;padding:8px 10px;width:140px;border:2px solid #1a237e;border-radius:6px;">
   <button id="unlock" type="button" style="margin-left:8px;padding:8px 14px;font-weight:700;cursor:pointer;">Open</button>
   <p id="gate-err" style="color:#c62828;min-height:1.2em;"></p>
-  <p style="font-size:0.9em;"><a href="./">← Back to Angle Quest</a> · <a href="guide.html">How-to guide</a></p>
+  <p style="font-size:0.9em;"><a href="/minecraftangles">← Back to Angle Quest</a> · <a href="/minecraftangles/guide.html">How-to guide</a></p>
 </div>
 
 <div id="key" hidden>
 
-<p style="margin:20px 0 0;"><a href="./">← Angle Quest</a> · <a href="guide.html">How-to</a></p>
+<p style="margin:20px 0 0;"><a href="/minecraftangles">← Angle Quest</a> · <a href="/minecraftangles/guide.html">How-to</a> · <a href="#game-report">Angela's game report</a></p>
 
 <h1>Answer Key: Unit 2 Angles</h1>
 <p class="sub">For checking Angela's work. Pages are listed in the order of the photos.
@@ -148,6 +148,25 @@
 <tr><td>15) Vertex and sides</td><td colspan="2"></td><td class="ans">Vertex T; sides ray TS and ray TU</td></tr>
 </table>
 
+<h2 id="naming-page">Naming, Classifying, Angle Addition (Angela P)</h2>
+<table>
+<tr><th>#</th><th>Answer</th></tr>
+<tr><td>1</td><td class="ans">Vertex C. Sides: ray CB and ray CD.</td></tr>
+<tr><td>2</td><td class="ans">Vertex S. Sides: ray SR and ray ST.</td></tr>
+<tr><td>3</td><td class="ans">∠BAC, ∠CAB, ∠A, ∠3</td></tr>
+<tr><td>4</td><td class="ans">Acute: ∠ACB (or ∠BCA, or ∠C). Straight: ∠ACD (or ∠DCA).</td></tr>
+<tr><td>5</td><td class="ans">Obtuse: ∠XYZ (or ∠ZYX, or ∠Y). Acute: ∠WYZ (or ∠ZYW).</td></tr>
+<tr><td>9</td><td class="ans">Right</td></tr>
+<tr><td>10</td><td class="ans">Acute</td></tr>
+<tr><td>11</td><td class="ans">Obtuse</td></tr>
+<tr><td>12</td><td class="ans">Acute</td></tr>
+<tr><td>13</td><td class="ans">m∠DIJ = 141° (177 − 36)</td></tr>
+<tr><td>14</td><td class="ans">m∠BCT = 93° (151 − 58)</td></tr>
+<tr><td>17</td><td class="ans">x = −2; m∠KLU = 43° (and m∠ULM = 125°). The angles stay positive.</td></tr>
+<tr><td>20</td><td class="ans">x = 2; the small angle is 50°. (25x + 124 = 87x.)</td></tr>
+</table>
+<div class="note">On #17, a negative <b>x</b> is okay because both angle measures come out positive. A negative <b>angle</b> is the thing to send back.</div>
+
 <h2>Page 7: TG Unit 2 Test Review 1 (page 24)</h2>
 <table>
 <tr><th>#</th><th>Work</th><th>Answer</th><th>Her answer</th></tr>
@@ -160,6 +179,10 @@
 <tr><td>7 <span class="x">(crossed out)</span></td><td class="eq">∠EFG + ∠EFD = ∠DFG<br>25x + 8 + 10 + 3x = 130 → 28x = 112</td><td class="ans">x = 4; ∠EFG = 108°, ∠EFD = 22°</td><td>—</td></tr>
 <tr><td>8 <span class="x">(crossed out)</span></td><td class="eq">(15x+9) + (3x−9) = 90 → 18x = 90</td><td class="ans">x = 5; 84° and 6°</td><td>—</td></tr>
 </table>
+
+<h2 id="game-report">Angela's game report</h2>
+<p class="sub">This only appears on the same phone or computer where she played. It reads the game's saved progress in this browser.</p>
+<div id="game-report-box" class="note">Open this page on her device after she plays.</div>
 
 <div class="note">
   <b>Quick ways to check her work without the key:</b>
@@ -185,6 +208,37 @@
   try {
     if (sessionStorage.getItem("aq-parent") === "1") openKey();
   } catch (e) {}
+  function showReport() {
+    var box = document.getElementById("game-report-box");
+    if (!box) return;
+    var raw = null;
+    try { raw = localStorage.getItem("angle-quest-v1"); } catch (e) {}
+    if (!raw) {
+      box.innerHTML = "No saved game on this device yet. Have her play Angle Quest here, then reload this page.";
+      return;
+    }
+    var s;
+    try { s = JSON.parse(raw); } catch (e) { return; }
+    var names = {
+      l1: "What is an angle?",
+      l2: "Name that angle",
+      l3: "The 3 Big Rules",
+      l4: "Which rule?",
+      l5: "Solve for x",
+      l6: "Naming angles",
+      boss: "Ender Dragon Quiz"
+    };
+    var done = (s.done || []).map(function (id) { return names[id] || id; });
+    var left = ["l1", "l2", "l3", "l4", "l5", "l6", "boss"].filter(function (id) {
+      return (s.done || []).indexOf(id) === -1;
+    }).map(function (id) { return names[id]; });
+    box.innerHTML = "<b>" + (s.name || "Player") + "</b> · " + (s.xp || 0) + " XP<br>" +
+      "Finished: " + (done.length ? done.join(", ") : "nothing yet") + "<br>" +
+      "Still open: " + (left.length ? left.join(", ") : "the whole quest");
+  }
+  var _openKey = openKey;
+  openKey = function () { _openKey(); showReport(); };
+  if (!key.hidden) showReport();
   document.getElementById("unlock").onclick = function () {
     var v = (pin.value || "").trim().toLowerCase();
     if (v === "90" || v === "aunt") openKey();
