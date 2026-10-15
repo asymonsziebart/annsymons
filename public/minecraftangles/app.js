@@ -118,6 +118,8 @@
 
   /** @type {{ name: string, unlocked: number, done: string[], xp: number }} */
   let state = loadState();
+  syncUnlock();
+  saveState();
 
   const app = document.getElementById("app");
   const modal = document.getElementById("modal");
@@ -128,6 +130,15 @@
       if (raw) return JSON.parse(raw);
     } catch (_) {}
     return { name: "", unlocked: 0, done: [], xp: 0 };
+  }
+
+  // unlocked is the first level she has not finished yet. Level 1 is index 0.
+  // A finished level opens only the next one, so a gap cannot be skipped.
+  function syncUnlock() {
+    if (!Array.isArray(state.done)) state.done = [];
+    let streak = 0;
+    while (streak < LEVELS.length && state.done.includes(LEVELS[streak].id)) streak += 1;
+    state.unlocked = streak;
   }
 
   function saveState() {
@@ -246,14 +257,16 @@
     clear(app);
     const cards = LEVELS.map((lv, i) => {
       const done = state.done.includes(lv.id);
-      const cls = ["card", lv.boss ? "boss" : ""].filter(Boolean).join(" ");
+      const open = i <= state.unlocked;
+      const cls = ["card", lv.boss ? "boss" : "", open ? "" : "locked"].filter(Boolean).join(" ");
+      const status = done ? "✅" : open ? "▶️" : "🔒";
       return `
-        <button type="button" class="${cls}" data-i="${i}">
+        <button type="button" class="${cls}" data-i="${i}" ${open ? "" : "disabled"} aria-disabled="${open ? "false" : "true"}">
           <span class="num">${lv.num}</span>
-          <span class="status">${done ? "✅" : "▶️"}</span>
+          <span class="status">${status}</span>
           <div class="icon">${lv.icon}</div>
           <div class="ctitle">${escapeHtml(lv.title)}</div>
-          <div class="csub">${escapeHtml(lv.sub)}</div>
+          <div class="csub">${escapeHtml(open ? lv.sub : "Finish the previous level")}</div>
         </button>`;
     }).join("");
 
@@ -283,13 +296,14 @@
     if (!state.done.includes(lv.id)) {
       state.done.push(lv.id);
       state.xp += lv.xp;
-      state.unlocked = Math.max(state.unlocked, levelIndex + 1);
+      syncUnlock();
       saveState();
       showAchievement(lv.achievement);
     }
   }
 
   function openLevel(i) {
+    if (i > state.unlocked) return;
     const lv = LEVELS[i];
     if (lv.boss) return renderBoss(i);
     if (lv.id === "l1") return renderLearnQuiz(i, level1Content(), level1Questions());
