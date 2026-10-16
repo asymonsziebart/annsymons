@@ -2330,7 +2330,14 @@
         const deltaTime = Math.min(now - lastTime, 50);
         lastTime = now;
         
-        if (now > nextAngleTime) {
+        if (countdown > 0) {
+          const timeLeft = Math.ceil((nextAngleTime - now) / 1000);
+          if (timeLeft <= 0) {
+            countdown = 0;
+          }
+        }
+        
+        if (now > nextAngleTime && countdown <= 0) {
           angles.push(getRandomAngle());
           nextAngleTime = now + 2500 + Math.random() * 1500;
         }
@@ -2339,13 +2346,15 @@
           angle.x -= angle.speed * (deltaTime / 16);
           
           if (angle.x < -100) {
-            lives--;
-            livesEl.textContent = "❤️".repeat(Math.max(0, lives));
-            
-            if (lives <= 0) {
-              gameOver = true;
-              gameOverEl.classList.remove("hidden");
-              finalScoreEl.textContent = score;
+            if (countdown <= 0) {
+              lives--;
+              livesEl.textContent = "❤️".repeat(Math.max(0, lives));
+              
+              if (lives <= 0) {
+                gameOver = true;
+                gameOverEl.classList.remove("hidden");
+                finalScoreEl.textContent = score;
+              }
             }
             
             return false;
