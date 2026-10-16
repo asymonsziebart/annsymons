@@ -2205,8 +2205,8 @@
         type: type.name,
         degrees,
         color: type.color,
-        x: 900,
-        y: Math.random() * 200 + 80,
+        x: canvas.width + 100,
+        y: Math.random() * (canvas.height - 150) + 80,
         speed: 0.8 + Math.random() * 0.4,
         id: Date.now() + Math.random()
       };
@@ -2252,6 +2252,16 @@
     const livesEl = document.getElementById("secret-lives");
     const gameOverEl = document.getElementById("game-over");
     const finalScoreEl = document.getElementById("final-score");
+    
+    function resizeCanvas() {
+      const container = canvas.parentElement;
+      const rect = container.getBoundingClientRect();
+      canvas.width = Math.min(800, rect.width);
+      canvas.height = Math.min(400, rect.width * 0.5);
+    }
+    
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
     
     app.querySelector("#back-from-secret").onclick = () => {
       gameOver = true;
@@ -2348,12 +2358,13 @@
       ctx.fillStyle = "#8ec8f6";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
+      const groundY = canvas.height - 50;
       ctx.fillStyle = "#5d9c3a";
-      ctx.fillRect(0, 350, canvas.width, 50);
+      ctx.fillRect(0, groundY, canvas.width, 50);
       
       for (let i = 0; i < canvas.width; i += 40) {
         ctx.fillStyle = i % 80 === 0 ? "#3d6b26" : "#4d7b36";
-        ctx.fillRect(i, 350, 2, 50);
+        ctx.fillRect(i, groundY, 2, 50);
       }
       
       angles.forEach(angle => drawAngle(angle));
@@ -2395,7 +2406,7 @@
         let hit = false;
         
         angles = angles.filter(angle => {
-          if (!hit && angle.x < 700 && angle.x > 50 && angle.type === clickedType) {
+          if (!hit && angle.x < canvas.width - 50 && angle.x > 50 && angle.type === clickedType) {
             hit = true;
             score += 10;
             scoreEl.textContent = score;

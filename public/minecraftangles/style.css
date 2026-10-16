@@ -388,7 +388,8 @@ table.simple th { background: var(--dirt); color: #fff; }
 #game-canvas {
   display: block;
   width: 100%;
-  height: auto;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .secret-game-over {
