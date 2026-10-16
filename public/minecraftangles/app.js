@@ -276,6 +276,7 @@
         ${topbar(`<button type="button" class="linkbtn" id="reset-progress">Reset</button>`)}
         <h2 class="map-title">Choose a level</h2>
         <div class="map">${cards}</div>
+        <div class="secret-star" id="secret-star" title="Secret Level!">⭐</div>
       </div>`),
     );
     bindTopbar();
@@ -289,6 +290,7 @@
     app.querySelectorAll(".card").forEach((btn) => {
       btn.onclick = () => openLevel(Number(btn.dataset.i));
     });
+    app.querySelector("#secret-star").onclick = () => renderSecretLevel();
   }
 
   function completeLevel(levelIndex) {
@@ -2173,6 +2175,229 @@
     );
     confettiBurst();
     app.querySelector("#again").onclick = () => renderMap();
+  }
+
+  /* ---------- SECRET LEVEL: CHOMPING ANGLES ---------- */
+  function renderSecretLevel() {
+    clear(app);
+    
+    let score = 0;
+    let lives = 3;
+    let gameOver = false;
+    let gamePaused = false;
+    let angles = [];
+    let nextAngleTime = 0;
+    let lastTime = Date.now();
+    
+    const ANGLE_TYPES = [
+      { name: "acute", min: 20, max: 85, color: "#2e7d32" },
+      { name: "right", min: 90, max: 90, color: "#1565c0" },
+      { name: "obtuse", min: 95, max: 175, color: "#e65100" },
+      { name: "straight", min: 180, max: 180, color: "#6d4c41" }
+    ];
+    
+    function getRandomAngle() {
+      const type = ANGLE_TYPES[Math.floor(Math.random() * ANGLE_TYPES.length)];
+      const degrees = Math.floor(Math.random() * (type.max - type.min + 1)) + type.min;
+      return {
+        type: type.name,
+        degrees,
+        color: type.color,
+        x: 800,
+        y: Math.random() * 200 + 100,
+        speed: 1.5 + Math.random() * 1.5,
+        id: Date.now() + Math.random()
+      };
+    }
+    
+    app.appendChild(
+      el(`
+      <div class="secret-level">
+        ${topbar()}
+        <div class="secret-header">
+          <div class="secret-title">🌟 SECRET LEVEL: ANGLE CHOMPERS! 🌟</div>
+          <div class="secret-stats">
+            <span class="secret-score">Score: <b id="secret-score">0</b></span>
+            <span class="secret-lives">Lives: <b id="secret-lives">❤️❤️❤️</b></span>
+          </div>
+        </div>
+        <div class="secret-game-area" id="game-area">
+          <canvas id="game-canvas" width="800" height="400"></canvas>
+          <div class="secret-game-over hidden" id="game-over">
+            <h2>GAME OVER!</h2>
+            <p>Final Score: <b id="final-score">0</b></p>
+            <button type="button" class="btn green" id="restart-secret">Play Again</button>
+          </div>
+        </div>
+        <div class="secret-controls">
+          <button type="button" class="btn secret-btn acute" data-type="acute">ACUTE<br><small>&lt; 90°</small></button>
+          <button type="button" class="btn secret-btn right" data-type="right">RIGHT<br><small>= 90°</small></button>
+          <button type="button" class="btn secret-btn obtuse" data-type="obtuse">OBTUSE<br><small>90°-180°</small></button>
+          <button type="button" class="btn secret-btn straight" data-type="straight">STRAIGHT<br><small>= 180°</small></button>
+        </div>
+        <div class="nav">
+          <button type="button" class="btn small" id="back-from-secret">← Back to Map</button>
+          <button type="button" class="btn small" id="pause-game">Pause</button>
+        </div>
+      </div>`),
+    );
+    
+    bindTopbar();
+    
+    const canvas = document.getElementById("game-canvas");
+    const ctx = canvas.getContext("2d");
+    const scoreEl = document.getElementById("secret-score");
+    const livesEl = document.getElementById("secret-lives");
+    const gameOverEl = document.getElementById("game-over");
+    const finalScoreEl = document.getElementById("final-score");
+    
+    app.querySelector("#back-from-secret").onclick = () => {
+      gameOver = true;
+      renderMap();
+    };
+    
+    app.querySelector("#pause-game").onclick = function() {
+      gamePaused = !gamePaused;
+      this.textContent = gamePaused ? "Resume" : "Pause";
+    };
+    
+    app.querySelector("#restart-secret").onclick = () => {
+      renderSecretLevel();
+    };
+    
+    function drawAngle(angle) {
+      ctx.save();
+      ctx.translate(angle.x, angle.y);
+      
+      ctx.fillStyle = angle.color;
+      ctx.globalAlpha = 0.3;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, 50, 0, (angle.degrees * Math.PI) / 180);
+      ctx.lineTo(0, 0);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      
+      ctx.strokeStyle = angle.color;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(60, 0);
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      const endX = Math.cos((angle.degrees * Math.PI) / 180) * 60;
+      const endY = -Math.sin((angle.degrees * Math.PI) / 180) * 60;
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+      
+      ctx.fillStyle = "#000";
+      ctx.font = "bold 16px Nunito";
+      ctx.textAlign = "center";
+      ctx.fillText(angle.degrees + "°", 30, -15);
+      
+      const chomping = Math.sin(Date.now() / 100) > 0;
+      ctx.font = "32px Arial";
+      ctx.fillText(chomping ? "🦷" : "😬", 0, 35);
+      
+      ctx.restore();
+    }
+    
+    function updateGame() {
+      if (gameOver) return;
+      
+      if (!gamePaused) {
+        const now = Date.now();
+        const deltaTime = now - lastTime;
+        lastTime = now;
+        
+        if (now > nextAngleTime) {
+          angles.push(getRandomAngle());
+          nextAngleTime = now + 1500 + Math.random() * 1000;
+        }
+        
+        angles = angles.filter(angle => {
+          angle.x -= angle.speed * (deltaTime / 16);
+          
+          if (angle.x < -100) {
+            lives--;
+            livesEl.textContent = "❤️".repeat(Math.max(0, lives));
+            
+            if (lives <= 0) {
+              gameOver = true;
+              gameOverEl.classList.remove("hidden");
+              finalScoreEl.textContent = score;
+            }
+            
+            return false;
+          }
+          
+          return true;
+        });
+      }
+      
+      ctx.fillStyle = "#8ec8f6";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.fillStyle = "#5d9c3a";
+      ctx.fillRect(0, 350, canvas.width, 50);
+      
+      for (let i = 0; i < canvas.width; i += 40) {
+        ctx.fillStyle = i % 80 === 0 ? "#3d6b26" : "#4d7b36";
+        ctx.fillRect(i, 350, 2, 50);
+      }
+      
+      angles.forEach(angle => drawAngle(angle));
+      
+      if (gamePaused) {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 48px 'Press Start 2P', monospace";
+        ctx.textAlign = "center";
+        ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2);
+      }
+      
+      requestAnimationFrame(updateGame);
+    }
+    
+    app.querySelectorAll(".secret-btn").forEach(btn => {
+      btn.onclick = () => {
+        if (gameOver || gamePaused) return;
+        
+        const clickedType = btn.dataset.type;
+        let hit = false;
+        
+        angles = angles.filter(angle => {
+          if (!hit && angle.x < 650 && angle.x > 100 && angle.type === clickedType) {
+            hit = true;
+            score += 10;
+            scoreEl.textContent = score;
+            
+            for (let i = 0; i < 5; i++) {
+              const particle = document.createElement("div");
+              particle.className = "explosion-particle";
+              particle.style.left = Math.random() * 100 + "%";
+              particle.style.top = Math.random() * 100 + "%";
+              particle.textContent = ["💥", "⭐", "✨"][Math.floor(Math.random() * 3)];
+              document.getElementById("game-area").appendChild(particle);
+              setTimeout(() => particle.remove(), 600);
+            }
+            
+            return false;
+          }
+          return true;
+        });
+        
+        if (hit) {
+          btn.classList.add("btn-flash");
+          setTimeout(() => btn.classList.remove("btn-flash"), 200);
+        }
+      };
+    });
+    
+    updateGame();
   }
 
   /* ---------- calculator ---------- */
