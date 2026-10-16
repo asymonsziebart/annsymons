@@ -2334,6 +2334,7 @@
           const timeLeft = Math.ceil((nextAngleTime - now) / 1000);
           if (timeLeft <= 0) {
             countdown = 0;
+            lastTime = now;
           }
         }
         
@@ -2343,7 +2344,9 @@
         }
         
         angles = angles.filter(angle => {
-          angle.x -= angle.speed * (deltaTime / 16);
+          if (countdown <= 0) {
+            angle.x -= angle.speed * (deltaTime / 16);
+          }
           
           if (angle.x < -100) {
             if (countdown <= 0) {
