@@ -2186,8 +2186,9 @@
     let gameOver = false;
     let gamePaused = false;
     let angles = [];
-    let nextAngleTime = 0;
+    let nextAngleTime = Date.now() + 2000;
     let lastTime = Date.now();
+    let gameStarted = false;
     
     const ANGLE_TYPES = [
       { name: "acute", min: 20, max: 85, color: "#2e7d32" },
@@ -2309,7 +2310,13 @@
       
       if (!gamePaused) {
         const now = Date.now();
-        const deltaTime = now - lastTime;
+        
+        if (!gameStarted) {
+          lastTime = now;
+          gameStarted = true;
+        }
+        
+        const deltaTime = Math.min(now - lastTime, 50);
         lastTime = now;
         
         if (now > nextAngleTime) {
