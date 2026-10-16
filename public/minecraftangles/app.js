@@ -2186,9 +2186,10 @@
     let gameOver = false;
     let gamePaused = false;
     let angles = [];
-    let nextAngleTime = Date.now() + 2000;
+    let nextAngleTime = Date.now() + 3000;
     let lastTime = Date.now();
     let gameStarted = false;
+    let countdown = 3;
     
     const ANGLE_TYPES = [
       { name: "acute", min: 20, max: 85, color: "#2e7d32" },
@@ -2204,9 +2205,9 @@
         type: type.name,
         degrees,
         color: type.color,
-        x: 800,
-        y: Math.random() * 200 + 100,
-        speed: 1.5 + Math.random() * 1.5,
+        x: 900,
+        y: Math.random() * 200 + 80,
+        speed: 0.8 + Math.random() * 0.4,
         id: Date.now() + Math.random()
       };
     }
@@ -2321,7 +2322,7 @@
         
         if (now > nextAngleTime) {
           angles.push(getRandomAngle());
-          nextAngleTime = now + 1500 + Math.random() * 1000;
+          nextAngleTime = now + 2500 + Math.random() * 1500;
         }
         
         angles = angles.filter(angle => {
@@ -2357,6 +2358,23 @@
       
       angles.forEach(angle => drawAngle(angle));
       
+      if (countdown > 0) {
+        const timeLeft = Math.ceil((nextAngleTime - Date.now()) / 1000);
+        if (timeLeft > 0) {
+          ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = "#ffeb3b";
+          ctx.font = "bold 72px 'Press Start 2P', monospace";
+          ctx.textAlign = "center";
+          ctx.fillText(timeLeft, canvas.width / 2, canvas.height / 2);
+          ctx.fillStyle = "#fff";
+          ctx.font = "bold 20px Nunito";
+          ctx.fillText("Get Ready!", canvas.width / 2, canvas.height / 2 - 60);
+        } else {
+          countdown = 0;
+        }
+      }
+      
       if (gamePaused) {
         ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -2377,7 +2395,7 @@
         let hit = false;
         
         angles = angles.filter(angle => {
-          if (!hit && angle.x < 650 && angle.x > 100 && angle.type === clickedType) {
+          if (!hit && angle.x < 700 && angle.x > 50 && angle.type === clickedType) {
             hit = true;
             score += 10;
             scoreEl.textContent = score;
