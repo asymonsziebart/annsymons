@@ -8,6 +8,15 @@ Custom site for **annsymons.com** so you have full control (no GoDaddy website b
 - **Neon** (Postgres) for any data you need
 - **Vercel** for hosting (then point GoDaddy domain here)
 
+## Tasks API
+
+The site includes a REST API for tasks that allows external systems (like a home server) to sync tasks. See [docs/TASKS_API.md](docs/TASKS_API.md) for complete documentation.
+
+**Quick start:**
+1. Set `EXTERNAL_TASKS_API_KEY` environment variable in Vercel
+2. Use Bearer token authentication in all requests
+3. Optionally set `TASKS_WEBHOOK_URL` to receive push notifications
+
 ## What you can control
 - Design and layout (every section, font, color, spacing)
 - Pages and navigation (as many as you want)
