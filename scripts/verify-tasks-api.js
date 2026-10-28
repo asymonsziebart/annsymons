@@ -25,6 +25,7 @@ const headers = {
 
 let createdTaskId = null;
 let testSectionId = null;
+let createdSubtaskIds = [];
 
 async function test(name, fn) {
   process.stdout.write(`${name}... `);
@@ -147,7 +148,112 @@ async function runTests() {
     }
   })) passed++; else failed++;
 
-  // Test 6: Delete task
+  // Test 6: List subtasks (empty)
+  if (createdTaskId && await test('List subtasks - empty (GET /api/v1/tasks/:id/subtasks)', async () => {
+    const data = await fetchApi(`/api/v1/tasks/${createdTaskId}/subtasks`);
+    if (!Array.isArray(data.subtasks)) {
+      throw new Error('subtasks should be an array');
+    }
+    if (data.subtasks.length !== 0) {
+      throw new Error('subtasks should be empty initially');
+    }
+  })) passed++; else failed++;
+
+  // Test 7: Create single subtask
+  if (createdTaskId && await test('Create subtask (POST /api/v1/tasks/:id/subtasks)', async () => {
+    const data = await fetchApi(`/api/v1/tasks/${createdTaskId}/subtasks`, {
+      method: 'POST',
+      body: JSON.stringify({
+        title: 'Test subtask',
+      }),
+    });
+    if (!data.subtask || !data.subtask.id) {
+      throw new Error('Created subtask should have an id');
+    }
+    createdSubtaskIds.push(data.subtask.id);
+    console.log(`    Created subtask ID: ${data.subtask.id}`);
+    if (data.subtask.title !== 'Test subtask') {
+      throw new Error('Subtask title mismatch');
+    }
+    if (data.subtask.done !== false) {
+      throw new Error('Subtask should not be done initially');
+    }
+  })) passed++; else failed++;
+
+  // Test 8: Create multiple subtasks (batch)
+  if (createdTaskId && await test('Create multiple subtasks (POST /api/v1/tasks/:id/subtasks)', async () => {
+    const data = await fetchApi(`/api/v1/tasks/${createdTaskId}/subtasks`, {
+      method: 'POST',
+      body: JSON.stringify({
+        titles: ['Subtask 2', 'Subtask 3'],
+      }),
+    });
+    if (!Array.isArray(data.subtasks)) {
+      throw new Error('subtasks should be an array');
+    }
+    if (data.subtasks.length !== 2) {
+      throw new Error('Should create 2 subtasks');
+    }
+    for (const sub of data.subtasks) {
+      createdSubtaskIds.push(sub.id);
+      console.log(`    Created subtask ID: ${sub.id}`);
+    }
+  })) passed++; else failed++;
+
+  // Test 9: List subtasks (should have 3)
+  if (createdTaskId && await test('List subtasks (GET /api/v1/tasks/:id/subtasks)', async () => {
+    const data = await fetchApi(`/api/v1/tasks/${createdTaskId}/subtasks`);
+    if (!Array.isArray(data.subtasks)) {
+      throw new Error('subtasks should be an array');
+    }
+    if (data.subtasks.length !== 3) {
+      throw new Error(`Expected 3 subtasks, got ${data.subtasks.length}`);
+    }
+  })) passed++; else failed++;
+
+  // Test 10: Update subtask
+  if (createdSubtaskIds.length > 0 && await test('Update subtask (PATCH /api/v1/subtasks/:subId)', async () => {
+    const subId = createdSubtaskIds[0];
+    const data = await fetchApi(`/api/v1/subtasks/${subId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        title: 'Updated subtask',
+        done: true,
+      }),
+    });
+    if (data.subtask.title !== 'Updated subtask') {
+      throw new Error('Subtask title not updated');
+    }
+    if (data.subtask.done !== true) {
+      throw new Error('Subtask done status not updated');
+    }
+  })) passed++; else failed++;
+
+  // Test 11: Delete subtask
+  if (createdSubtaskIds.length > 0 && await test('Delete subtask (DELETE /api/v1/subtasks/:subId)', async () => {
+    const subId = createdSubtaskIds[0];
+    const data = await fetchApi(`/api/v1/subtasks/${subId}`, {
+      method: 'DELETE',
+    });
+    if (!data.ok) {
+      throw new Error('Delete should return { ok: true }');
+    }
+  })) passed++; else failed++;
+
+  // Test 12: Verify subtask was deleted
+  if (createdSubtaskIds.length > 0 && await test('Verify subtask deleted', async () => {
+    const subId = createdSubtaskIds[0];
+    const response = await fetch(`${BASE_URL}/api/v1/subtasks/${subId}`, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify({ title: 'Should fail' }),
+    });
+    if (response.status !== 404) {
+      throw new Error(`Expected 404 for deleted subtask, got ${response.status}`);
+    }
+  })) passed++; else failed++;
+
+  // Test 13: Delete task
   if (createdTaskId && await test('Delete task (DELETE /api/v1/tasks/:id)', async () => {
     const data = await fetchApi(`/api/v1/tasks/${createdTaskId}`, {
       method: 'DELETE',
@@ -157,7 +263,7 @@ async function runTests() {
     }
   })) passed++; else failed++;
 
-  // Test 7: Verify deletion
+  // Test 14: Verify deletion
   if (createdTaskId && await test('Verify task deleted', async () => {
     const response = await fetch(`${BASE_URL}/api/v1/tasks/${createdTaskId}`, {
       headers,

@@ -286,6 +286,197 @@ curl -X DELETE \
 
 ---
 
+## Subtasks
+
+### List Task Subtasks
+
+Get all subtasks for a specific task.
+
+**Request:**
+```http
+GET /api/v1/tasks/:id/subtasks
+Authorization: Bearer YOUR_API_KEY_HERE
+```
+
+**Response:**
+```json
+{
+  "subtasks": [
+    {
+      "id": 1,
+      "task_id": 123,
+      "title": "Subtask title",
+      "done": false,
+      "sort_order": 0,
+      "created_at": "2024-01-01T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+**curl example:**
+```bash
+curl -H "Authorization: Bearer YOUR_API_KEY_HERE" \
+  https://annsymons.com/api/v1/tasks/123/subtasks
+```
+
+---
+
+### Create Subtask(s)
+
+Create one or more subtasks for a task.
+
+**Request (single subtask):**
+```http
+POST /api/v1/tasks/:id/subtasks
+Authorization: Bearer YOUR_API_KEY_HERE
+Content-Type: application/json
+
+{
+  "title": "Subtask title"
+}
+```
+
+**Response:**
+```json
+{
+  "subtask": {
+    "id": 1,
+    "task_id": 123,
+    "title": "Subtask title",
+    "done": false,
+    "sort_order": 0,
+    "created_at": "2024-01-01T12:00:00.000Z"
+  }
+}
+```
+
+**Request (multiple subtasks):**
+```http
+POST /api/v1/tasks/:id/subtasks
+Authorization: Bearer YOUR_API_KEY_HERE
+Content-Type: application/json
+
+{
+  "titles": ["First subtask", "Second subtask", "Third subtask"]
+}
+```
+
+**Response:**
+```json
+{
+  "subtasks": [
+    {
+      "id": 1,
+      "task_id": 123,
+      "title": "First subtask",
+      "done": false,
+      "sort_order": 0,
+      "created_at": "2024-01-01T12:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "task_id": 123,
+      "title": "Second subtask",
+      "done": false,
+      "sort_order": 1,
+      "created_at": "2024-01-01T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+**curl example (single):**
+```bash
+curl -X POST \
+  -H "Authorization: Bearer YOUR_API_KEY_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{"title": "Buy milk"}' \
+  https://annsymons.com/api/v1/tasks/123/subtasks
+```
+
+**curl example (batch):**
+```bash
+curl -X POST \
+  -H "Authorization: Bearer YOUR_API_KEY_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{"titles": ["Buy milk", "Buy eggs", "Buy bread"]}' \
+  https://annsymons.com/api/v1/tasks/123/subtasks
+```
+
+---
+
+### Update Subtask
+
+Update a subtask's title and/or completion status.
+
+**Request:**
+```http
+PATCH /api/v1/subtasks/:subId
+Authorization: Bearer YOUR_API_KEY_HERE
+Content-Type: application/json
+
+{
+  "title": "Updated title",
+  "done": true
+}
+```
+
+**Updatable fields:**
+- `title` (string): Subtask title
+- `done` (boolean): Completion status
+
+**Response:**
+```json
+{
+  "subtask": {
+    "id": 1,
+    "task_id": 123,
+    "title": "Updated title",
+    "done": true,
+    "sort_order": 0,
+    "created_at": "2024-01-01T12:00:00.000Z"
+  }
+}
+```
+
+**curl example:**
+```bash
+curl -X PATCH \
+  -H "Authorization: Bearer YOUR_API_KEY_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{"done": true}' \
+  https://annsymons.com/api/v1/subtasks/1
+```
+
+---
+
+### Delete Subtask
+
+Delete a subtask.
+
+**Request:**
+```http
+DELETE /api/v1/subtasks/:subId
+Authorization: Bearer YOUR_API_KEY_HERE
+```
+
+**Response:**
+```json
+{
+  "ok": true
+}
+```
+
+**curl example:**
+```bash
+curl -X DELETE \
+  -H "Authorization: Bearer YOUR_API_KEY_HERE" \
+  https://annsymons.com/api/v1/subtasks/1
+```
+
+---
+
 ## Status Codes
 
 - `200 OK` - Request successful (GET, PATCH)
@@ -354,6 +545,17 @@ If you configure `TASKS_WEBHOOK_URL`:
 | `created_at` | string | Creation timestamp (ISO 8601) |
 | `last_overdue_email_at` | string \| null | Last overdue notification |
 | `subtask_count` | number | Number of subtasks |
+
+## Subtask Fields Reference
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | number | Unique subtask ID |
+| `task_id` | number | Parent task ID |
+| `title` | string | Subtask title |
+| `done` | boolean | Completion status |
+| `sort_order` | number | Order within task |
+| `created_at` | string | Creation timestamp (ISO 8601) |
 
 ## Required Environment Variables
 
