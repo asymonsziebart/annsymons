@@ -574,6 +574,58 @@ Set these in your hosting environment (e.g., Vercel Dashboard → Settings → E
 3. **`DATABASE_URL`** (already configured)
    - Your Neon Postgres connection string
 
+## Email Notifications
+
+The tasks system sends two types of daily email notifications:
+
+### Overdue Task Digest
+
+Sent to `TASKS_NOTIFY_EMAIL` once per week per task when tasks are overdue (past due date, or no due date and open 7+ days).
+
+**Required environment variables:**
+- **`RESEND_API_KEY`** — Resend API key for sending emails
+- **`TASKS_NOTIFY_EMAIL`** — Email address to receive overdue task notifications
+- **`RESEND_FROM_EMAIL`** (optional) — Sender email (defaults to Resend's onboarding email)
+
+### Assignee Daily Digest
+
+Sent to each task assignee (Ann and Tim) once per day when they have open tasks (status not done or cancelled).
+
+**Required environment variables:**
+- **`RESEND_API_KEY`** — Resend API key for sending emails (same as above)
+- **`TASKS_EMAIL_ANN`** — Ann's email address for daily task digest
+- **`TASKS_EMAIL_TIM`** — Tim's email address for daily task digest
+- **`RESEND_FROM_EMAIL`** (optional) — Sender email (defaults to Resend's onboarding email)
+
+**Behavior:**
+- Sends one email per person per day (not one per task)
+- If a person has zero open tasks, no email is sent
+- Assignee matching is case-insensitive and tolerant: 'Ann' or 'Anne' → Ann; 'Tim' or 'Timothy' → Tim
+- Tasks assigned to 'Bot' or with no assignee are ignored
+- Email includes task titles, due dates (with overdue markers), and a link to the tasks page
+- If an email environment variable is missing for an assignee, that person is skipped and the error is reported in the cron response
+
+### Cron Schedule
+
+Both digests run from `/api/cron/tasks-overdue` at `0 14 * * *` UTC (10 AM ET daily).
+
+**Manual testing:**
+```bash
+# Run both digests
+curl -H "Authorization: Bearer YOUR_CRON_SECRET" \
+  https://annsymons.com/api/cron/tasks-overdue
+
+# Run only overdue digest
+curl -H "Authorization: Bearer YOUR_CRON_SECRET" \
+  https://annsymons.com/api/cron/tasks-overdue?only=overdue
+
+# Run only assignee digest
+curl -H "Authorization: Bearer YOUR_CRON_SECRET" \
+  https://annsymons.com/api/cron/tasks-overdue?only=assignees
+```
+
+Both digests run independently — a failure in one does not block the other.
+
 ## Testing
 
 A verification script is included to test the API:
