@@ -576,7 +576,7 @@ Set these in your hosting environment (e.g., Vercel Dashboard → Settings → E
 
 ## Email Notifications
 
-The tasks system sends two types of daily email notifications:
+The tasks system sends three types of daily email notifications:
 
 ### Overdue Task Digest
 
@@ -605,13 +605,33 @@ Sent to each task assignee (Ann and Tim) once per day when they have open tasks 
 - Email includes task titles, due dates (with overdue markers), and a link to the tasks page
 - If an email environment variable is missing for an assignee, that person is skipped and the error is reported in the cron response
 
+### Tasks Due Today Digest
+
+Sent to each task assignee (Ann and Tim) once per day when they have tasks due today (status not done or cancelled).
+
+**Required environment variables:**
+- **`RESEND_API_KEY`** — Resend API key for sending emails (same as above)
+- **`TASKS_EMAIL_ANN`** — Ann's email address for daily task digest
+- **`TASKS_EMAIL_TIM`** — Tim's email address for daily task digest
+- **`RESEND_FROM_EMAIL`** (optional) — Sender email (defaults to Resend's onboarding email)
+
+**Behavior:**
+- Subject: "These tasks are due today — annsymons.com"
+- Sends one email per person per day (not one per task)
+- Only sends if person has at least one open task due today
+- "Today" is computed in America/Detroit (Eastern) timezone
+- Assignee matching is case-insensitive and tolerant: 'Ann' or 'Anne' → Ann; 'Tim' or 'Timothy' → Tim
+- Tasks assigned to 'Bot' or with no assignee are ignored
+- Email includes task titles and a link to the tasks page
+- If an email environment variable is missing for an assignee, that person is skipped and the error is reported in the cron response
+
 ### Cron Schedule
 
-Both digests run from `/api/cron/tasks-overdue` at `0 14 * * *` UTC (10 AM ET daily).
+All three digests run from `/api/cron/tasks-overdue` at `0 14 * * *` UTC (10 AM ET daily).
 
 **Manual testing:**
 ```bash
-# Run both digests
+# Run all digests
 curl -H "Authorization: Bearer YOUR_CRON_SECRET" \
   https://annsymons.com/api/cron/tasks-overdue
 
@@ -622,9 +642,13 @@ curl -H "Authorization: Bearer YOUR_CRON_SECRET" \
 # Run only assignee digest
 curl -H "Authorization: Bearer YOUR_CRON_SECRET" \
   https://annsymons.com/api/cron/tasks-overdue?only=assignees
+
+# Run only due-today digest
+curl -H "Authorization: Bearer YOUR_CRON_SECRET" \
+  https://annsymons.com/api/cron/tasks-overdue?only=duetoday
 ```
 
-Both digests run independently — a failure in one does not block the other.
+All digests run independently — a failure in one does not block the others.
 
 ## Testing
 

@@ -7,6 +7,7 @@ import {
 } from "@/lib/data/tasks";
 import { sendOverdueTasksDigest } from "@/lib/email/sendOverdueTasksDigest";
 import { sendAssigneeOpenTasksDigest } from "@/lib/email/sendAssigneeOpenTasksDigest";
+import { sendTasksDueTodayDigest } from "@/lib/email/sendTasksDueTodayDigest";
 
 export const dynamic = "force-dynamic";
 
@@ -15,10 +16,12 @@ export const dynamic = "force-dynamic";
  * Sends:
  * 1. One email for overdue tasks (past due date, or no due date and 7+ days open), at most weekly per task.
  * 2. One email per assignee (Ann and Tim) with their open tasks, once per day.
+ * 3. One email per assignee (Ann and Tim) with tasks due today, once per day.
  *
  * Query params:
  * - ?only=overdue — run only the overdue digest
  * - ?only=assignees — run only the assignee digest
+ * - ?only=duetoday — run only the due-today digest
  */
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;
@@ -33,6 +36,7 @@ export async function GET(request: Request) {
   const results: {
     overdue?: { ok: boolean; sent: boolean; taskCount?: number; error?: string; message?: string };
     assignees?: { ok: boolean; ann: unknown; tim: unknown };
+    duetoday?: { ok: boolean; ann: unknown; tim: unknown };
   } = {};
 
   // Run overdue digest
@@ -107,9 +111,42 @@ export async function GET(request: Request) {
     }
   }
 
+  // Run due-today digest
+  if (!only || only === "duetoday") {
+    try {
+      const allTasks = await getTasks();
+      // Filter to open tasks (status not done or cancelled)
+      const openTasks = allTasks.filter(
+        (t) => t.status !== "done" && t.status !== "cancelled"
+      );
+
+      const digestResult = await sendTasksDueTodayDigest(
+        openTasks.map((t) => ({
+          assignee: t.assignee,
+          title: t.title,
+          dueDate: t.due_date,
+        }))
+      );
+
+      results.duetoday = {
+        ok: digestResult.ann.ok && digestResult.tim.ok,
+        ann: digestResult.ann,
+        tim: digestResult.tim,
+      };
+    } catch (error) {
+      results.duetoday = {
+        ok: false,
+        ann: { ok: false, error: error instanceof Error ? error.message : "Unknown error" },
+        tim: { ok: false, error: error instanceof Error ? error.message : "Unknown error" },
+      };
+    }
+  }
+
   // Determine overall status
   const allOk =
-    (!results.overdue || results.overdue.ok) && (!results.assignees || results.assignees.ok);
+    (!results.overdue || results.overdue.ok) &&
+    (!results.assignees || results.assignees.ok) &&
+    (!results.duetoday || results.duetoday.ok);
 
   return NextResponse.json(
     {
