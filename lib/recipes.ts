@@ -464,6 +464,31 @@ export const recipes: Recipe[] = [
       "Bake with steam: Preheat your gas oven to 425°F (218°C) with an empty metal pan on the bottom rack. Slash the rolls, mist them with water, put them in, and pour 1 cup of boiling water into the bottom pan to create the steam needed for that crunchy crust. Bake for 18–22 minutes.",
     ],
   },
+  {
+    slug: "crispy-chili-garlic-bat-wings",
+    title: "Crispy Chili Garlic Bat Wings (Halloween)",
+    description: "Whole chicken wings marinated in a black chili-garlic glaze and baked into spooky bat-wing shapes.",
+    cookTime: "20 min",
+    servings: "6 wings",
+    ingredients: [
+      "6 whole chicken wings (not separated)",
+      "1/4 cup olive oil",
+      "1/4 cup soy sauce",
+      "2 tablespoons honey",
+      "2 tablespoons chili paste",
+      "1 tablespoon minced garlic",
+      "5 drops black food coloring",
+    ],
+    steps: [
+      "Put the whole wings in a Ziploc bag.",
+      "In a bowl, whisk together the olive oil, soy sauce, honey, chili paste, garlic and food coloring.",
+      "Pour the marinade over the wings, seal, massage it in, and marinate in the fridge overnight.",
+      "Stretch each wing open and wedge a toothpick between the wingette and drumette to hold a bat-wing shape.",
+      "Set the wings on a wire rack over a foil-lined baking sheet and pat dry with a paper towel.",
+      "Bake on convection at 425°F for 20 minutes.",
+      "Remove the toothpicks before serving.",
+    ],
+  },
 ];
 
 export function getRecipeBySlug(slug: string): Recipe | undefined {
