@@ -341,6 +341,7 @@ export const recipes: Recipe[] = [
     description: "Smooth blended salsa with tomatoes, jalapeño, cilantro, lime, and cumin. Best after sitting overnight.",
     prepTime: "10 min",
     servings: "About 3 cups",
+    image: "/recipes/restaurant-style-blended-salsa.webp",
     ingredients: [
       "1 lb 12 oz petite diced tomatoes",
       "¼ cup white or yellow onion, rough chopped",
@@ -368,6 +369,7 @@ export const recipes: Recipe[] = [
     prepTime: "45 min",
     cookTime: "1 hr 20 min (+ 4 hr rest)",
     servings: "10",
+    image: "/recipes/dutch-apple-pie.webp",
     ingredients: [
       "1 homemade single pie crust (1 sheet of pie dough)",
       "For the apple filling: ¼ tsp lemon zest",
@@ -422,6 +424,7 @@ export const recipes: Recipe[] = [
     prepTime: "10 min",
     cookTime: "5 min",
     servings: "18 (~3 quart jars)",
+    image: "/recipes/easy-refrigerator-dill-pickles.webp",
     ingredients: [
       "12 pickling cucumbers (quantity can vary depending on size)",
       "4 cups water",
@@ -448,6 +451,7 @@ export const recipes: Recipe[] = [
       "Crunchy crust rolls made with Lactaid milk. Lactaid is real milk with lactose broken down into glucose and galactose, so it tastes slightly sweeter than regular milk and helps the rolls brown beautifully—especially in a gas oven. Substitute Lactaid 1:1 for whole milk.",
     cookTime: "18–22 min",
     servings: "8–10 rolls",
+    image: "/recipes/lactaid-crunchy-rolls.webp",
     ingredients: [
       "500g bread flour",
       "200g Lactaid milk (warm, approx. 95°F / 35°C)",
@@ -470,6 +474,7 @@ export const recipes: Recipe[] = [
     description: "Whole chicken wings marinated in a black chili-garlic glaze and baked into spooky bat-wing shapes.",
     cookTime: "20 min",
     servings: "6 wings",
+    image: "/recipes/crispy-chili-garlic-bat-wings.webp",
     ingredients: [
       "6 whole chicken wings (not separated)",
       "1/4 cup olive oil",
@@ -495,6 +500,7 @@ export const recipes: Recipe[] = [
     description: "Golden, crispy Cornish hens with herb-infused compound butter, roasted over vegetables.",
     cookTime: "45–60 min",
     servings: "1 hen",
+    image: "/recipes/juicy-herb-butter-cornish-hens.webp",
     ingredients: [
       "1 Cornish hen",
       "½ stick unsalted butter, softened",
@@ -529,6 +535,7 @@ export const recipes: Recipe[] = [
     title: "Chicken Pot Pie",
     description: "Comforting pot pie with chicken and vegetables in a creamy sauce, topped with pie crust.",
     cookTime: "25–30 min",
+    image: "/recipes/chicken-pot-pie.webp",
     ingredients: [
       "1 pre-made pie crust (or homemade)",
       "1 1/2 cups cooked chicken, shredded or diced",
@@ -559,6 +566,7 @@ export const recipes: Recipe[] = [
     title: "Bagels",
     description: "Homemade bagels with a chewy interior and golden crust, boiled then baked.",
     servings: "8 bagels",
+    image: "/recipes/bagels.webp",
     ingredients: [
       "1 ½ cups warm water (110°F/45°C)",
       "2 ¼ teaspoons active dry yeast (1 packet)",
@@ -584,6 +592,7 @@ export const recipes: Recipe[] = [
     title: "Granola (No Seeds, Nuts, Fruit or Coconut)",
     description: "Simple, crunchy granola with oats, honey, and cinnamon.",
     cookTime: "20–25 min",
+    image: "/recipes/granola.webp",
     ingredients: [
       "3 cups old-fashioned rolled oats",
       "1/4 cup honey or maple syrup",
@@ -607,6 +616,7 @@ export const recipes: Recipe[] = [
     title: "Blueberry Muffins",
     description: "Classic blueberry muffins with optional cinnamon crumble topping.",
     cookTime: "20–25 min",
+    image: "/recipes/blueberry-muffins.webp",
     ingredients: [
       "1½ cups all-purpose flour",
       "¾ cup granulated sugar",
@@ -636,6 +646,7 @@ export const recipes: Recipe[] = [
     slug: "cherry-popsicles",
     title: "Cherry Popsicles",
     description: "Simple homemade cherry popsicles with lemon and vanilla.",
+    image: "/recipes/cherry-popsicles.webp",
     ingredients: [
       "2 cups fresh or frozen cherries, pitted",
       "1/2 cup water",
@@ -653,6 +664,7 @@ export const recipes: Recipe[] = [
     title: "Lemon Blueberry Cake",
     description: "Four-layer lemon cake with blueberry filling and lemon cream cheese frosting.",
     cookTime: "28–32 min",
+    image: "/recipes/lemon-blueberry-cake.webp",
     ingredients: [
       "Blueberry filling: 4 heaping cups blueberries (fresh or thawed), 1 cup granulated white sugar, juice of 2 lemons",
       "Lemon cake: 3 cups all-purpose flour (spooned and leveled), 1 tablespoon baking powder, ½ teaspoon salt, ½ cup unsalted butter (at room temperature), ½ cup vegetable oil, 1 ¾ cups granulated white sugar, 3 large eggs, 1 cup milk, ½ cup freshly squeezed lemon juice, 2 teaspoons vanilla extract, 1 tablespoon lemon zest",
@@ -675,6 +687,7 @@ export const recipes: Recipe[] = [
     slug: "bruschetta",
     title: "Bruschetta",
     description: "Toasted bread topped with fresh tomatoes, basil, and garlic.",
+    image: "/recipes/bruschetta.webp",
     ingredients: [
       "Ripe tomatoes (chopped)",
       "Fresh basil leaves (chopped)",
@@ -696,6 +709,7 @@ export const recipes: Recipe[] = [
     title: "Corn Casserole (Jiffy)",
     description: "Easy corn casserole made with Jiffy corn muffin mix, creamed corn, and sour cream.",
     cookTime: "1 hour",
+    image: "/recipes/corn-casserole-jiffy.webp",
     ingredients: [
       "1 can (about 14 oz) cream-style corn",
       "1 can (about 14 oz) whole kernel corn, drained",
@@ -719,6 +733,7 @@ export const recipes: Recipe[] = [
     title: "Chicken and Broccoli Casserole",
     description: "Baked casserole with chicken, broccoli, cheese, and a creamy sauce, topped with breadcrumbs.",
     cookTime: "25–30 min",
+    image: "/recipes/chicken-broccoli-casserole.webp",
     ingredients: [
       "4 boneless, skinless chicken breasts",
       "2 cups broccoli florets",
@@ -748,6 +763,7 @@ export const recipes: Recipe[] = [
     title: "Buffalo Dip",
     description: "Creamy, spicy dip with shredded chicken, Buffalo sauce, and cheese.",
     cookTime: "20 min",
+    image: "/recipes/buffalo-dip.webp",
     ingredients: [
       "2 cups of cooked and shredded chicken",
       "1 package (8 oz) of cream cheese, softened",
@@ -773,6 +789,7 @@ export const recipes: Recipe[] = [
     title: "Cream of Chicken Casserole",
     description: "Hearty casserole with chicken, rice, vegetables, and cream of mushroom soup.",
     cookTime: "25–30 min",
+    image: "/recipes/cream-of-chicken-casserole.webp",
     ingredients: [
       "2 cups of cooked chicken, shredded or diced",
       "1 can of cream of mushroom soup",
@@ -798,6 +815,7 @@ export const recipes: Recipe[] = [
     title: "Tomato Mozzarella Panini",
     description: "Quick and easy panini with fresh tomatoes, mozzarella, basil, and balsamic.",
     cookTime: "5 min",
+    image: "/recipes/tomato-mozzarella-panini.webp",
     ingredients: [
       "4 slices of bread (Italian or ciabatta works well)",
       "2 tomatoes, sliced",
