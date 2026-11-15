@@ -240,6 +240,22 @@ export default function AngelaGeometryApp() {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
       if (ctx) {
+        // Get the display size
+        const rect = canvas.getBoundingClientRect();
+        const displayWidth = rect.width;
+        const displayHeight = rect.height;
+        
+        // Handle high-DPI displays
+        const dpr = window.devicePixelRatio || 1;
+        
+        // Set actual size in memory (scaled for retina)
+        canvas.width = displayWidth * dpr;
+        canvas.height = displayHeight * dpr;
+        
+        // Scale the context so we can draw in CSS pixels
+        ctx.scale(dpr, dpr);
+        
+        // Now the render function can use displayWidth/displayHeight or canvas.width/height divided by dpr
         problem.renderGrid(ctx);
       }
     }
@@ -357,8 +373,6 @@ export default function AngelaGeometryApp() {
             <canvas
               ref={canvasRef}
               className="geometry-canvas"
-              width={320}
-              height={320}
             />
           )}
 
