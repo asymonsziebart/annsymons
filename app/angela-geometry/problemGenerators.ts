@@ -124,8 +124,9 @@ export function generateMidpointGraph(): Problem {
   const altAnswer = `${formatNumber(mx)},${formatNumber(my)}`;
 
   const renderGrid = (ctx: CanvasRenderingContext2D) => {
-    const width = ctx.canvas.width;
-    const height = ctx.canvas.height;
+    // Use the display size (accounting for DPR scaling)
+    const width = ctx.canvas.width / (window.devicePixelRatio || 1);
+    const height = ctx.canvas.height / (window.devicePixelRatio || 1);
     const scale = Math.min(width, height) / 12;
     const originX = width / 2;
     const originY = height / 2;
@@ -621,8 +622,9 @@ export function generateCongruentSegments(): Problem {
   const choices = [correctStatement, ...wrongStatements].sort(() => Math.random() - 0.5);
 
   const renderGrid = (ctx: CanvasRenderingContext2D) => {
-    const width = ctx.canvas.width;
-    const height = ctx.canvas.height;
+    // Use the display size (accounting for DPR scaling)
+    const width = ctx.canvas.width / (window.devicePixelRatio || 1);
+    const height = ctx.canvas.height / (window.devicePixelRatio || 1);
     const scale = Math.min(width, height) / 10;
     const originX = width / 2;
     const originY = height / 2;

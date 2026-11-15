@@ -313,8 +313,18 @@
   border: 2px solid #e2e8f0;
   border-radius: 0.75rem;
   background: white;
-  max-width: 100%;
-  height: auto;
+  width: 100%;
+  max-width: 400px;
+  height: 400px;
+  max-height: 400px;
+}
+
+@media (max-width: 640px) {
+  .geometry-canvas {
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
 }
 
 .geometry-input {
