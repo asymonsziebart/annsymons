@@ -353,16 +353,14 @@
   border-radius: 0.75rem;
   background: white;
   width: 100%;
-  max-width: 400px;
-  height: 400px;
-  max-height: 400px;
+  max-width: min(400px, 45vh);
+  height: auto;
+  aspect-ratio: 1;
 }
 
 @media (max-width: 640px) {
   .geometry-canvas {
-    max-width: 100%;
-    height: auto;
-    aspect-ratio: 1;
+    max-width: min(100%, 45vh);
   }
 }
 
@@ -705,11 +703,10 @@
 
   .geometry-canvas {
     width: 100%;
-    max-width: 100%;
+    max-width: min(100%, 45vh);
     height: auto;
     aspect-ratio: 1;
     margin: 1rem 0;
-    touch-action: none;
   }
 
   .geometry-plot-instruction {
