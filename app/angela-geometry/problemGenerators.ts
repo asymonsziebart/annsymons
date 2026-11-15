@@ -115,10 +115,17 @@ export function generateMidpointFormula(): Problem {
 // 2. MIDPOINT FROM A GRAPH
 // ============================================================
 export function generateMidpointGraph(): Problem {
-  const x1 = randInt(-5, 5);
-  const y1 = randInt(-5, 5);
-  const x2 = randInt(-5, 5);
-  const y2 = randInt(-5, 5);
+  let x1 = randInt(-5, 5);
+  let y1 = randInt(-5, 5);
+  let x2 = randInt(-5, 5);
+  let y2 = randInt(-5, 5);
+  
+  // Ensure points are distinct and reasonably separated (at least 2 units apart)
+  const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+  if (distance < 2) {
+    return generateMidpointGraph(); // Retry if points are too close
+  }
+  
   const mx = (x1 + x2) / 2;
   const my = (y1 + y2) / 2;
 
@@ -193,11 +200,30 @@ export function generateMidpointGraph(): Problem {
     ctx.arc(px2, py2, 5, 0, 2 * Math.PI);
     ctx.fill();
 
-    // Labels
+    // Labels with smart offset to avoid overlap
     ctx.fillStyle = "#1e3a5f";
     ctx.font = "14px sans-serif";
-    ctx.fillText(`(${x1}, ${y1})`, px1 + 8, py1 - 8);
-    ctx.fillText(`(${x2}, ${y2})`, px2 + 8, py2 - 8);
+    
+    // Calculate distance between points to determine if we need to offset labels
+    const pointDistance = Math.sqrt((px2 - px1) ** 2 + (py2 - py1) ** 2);
+    
+    let offset1 = { x: 8, y: -8 };
+    let offset2 = { x: 8, y: -8 };
+    
+    // If points are close, offset labels differently
+    if (pointDistance < 50) {
+      // Put labels on opposite sides
+      if (px2 > px1) {
+        offset1 = { x: -35, y: -8 }; // left of first point
+        offset2 = { x: 8, y: -8 };   // right of second point
+      } else {
+        offset1 = { x: 8, y: -8 };   // right of first point
+        offset2 = { x: -35, y: -8 }; // left of second point
+      }
+    }
+    
+    ctx.fillText(`(${x1}, ${y1})`, px1 + offset1.x, py1 + offset1.y);
+    ctx.fillText(`(${x2}, ${y2})`, px2 + offset2.x, py2 + offset2.y);
   };
 
   // Randomly choose between typing answer or plotting on graph
@@ -587,13 +613,29 @@ export function generateLinearEquation(): Problem {
 // 6. CONGRUENT SEGMENTS ON A GRID
 // ============================================================
 export function generateCongruentSegments(): Problem {
-  // Generate 4-6 points on a grid, some with congruent lengths
+  // Generate 4-6 distinct points on a grid, some with congruent lengths
   const points: Point[] = [];
   const labels = ["A", "B", "C", "D", "E", "F"];
   const numPoints = randInt(4, 6);
+  const pointSet = new Set<string>();
 
+  // Generate distinct points
   for (let i = 0; i < numPoints; i++) {
-    points.push({ x: randInt(-4, 4), y: randInt(-4, 4) });
+    let attempts = 0;
+    let point: Point;
+    let key: string;
+    do {
+      point = { x: randInt(-4, 4), y: randInt(-4, 4) };
+      key = `${point.x},${point.y}`;
+      attempts++;
+      if (attempts > 100) {
+        // Fallback: just use any point if we can't find a unique one
+        break;
+      }
+    } while (pointSet.has(key));
+    
+    pointSet.add(key);
+    points.push(point);
   }
 
   // Calculate all pairwise distances (only horizontal and vertical)
@@ -626,22 +668,41 @@ export function generateCongruentSegments(): Problem {
 
   if (congruentPairs.length === 0) return generateCongruentSegments();
 
+  // Helper to normalize segment names (alphabetical order)
+  const normalizeSegmentName = (seg1: string, seg2: string): string => {
+    const normalized = [seg1, seg2].sort().join(" ≅ ");
+    return normalized;
+  };
+
+  // Helper to create a unique key for a statement (order-independent)
+  const statementKey = (seg1: string, seg2: string): string => {
+    return [seg1, seg2].sort().join("|");
+  };
+
   // Pick one true congruence and generate wrong choices
   const correctPair = congruentPairs[randInt(0, congruentPairs.length - 1)];
-  const correctStatement = `${correctPair[0]} ≅ ${correctPair[1]}`;
+  const correctStatement = normalizeSegmentName(correctPair[0], correctPair[1]);
+  const usedKeys = new Set<string>([statementKey(correctPair[0], correctPair[1])]);
 
-  // Generate 3 wrong statements
+  // Generate 3 wrong statements (with distinct, normalized choices)
   const wrongStatements: string[] = [];
-  while (wrongStatements.length < 3) {
+  let attempts = 0;
+  while (wrongStatements.length < 3 && attempts < 100) {
+    attempts++;
     const i = randInt(0, segments.length - 1);
     const j = randInt(0, segments.length - 1);
     if (i !== j && segments[i].length !== segments[j].length) {
-      const wrong = `${segments[i].name} ≅ ${segments[j].name}`;
-      if (!wrongStatements.includes(wrong) && wrong !== correctStatement) {
+      const key = statementKey(segments[i].name, segments[j].name);
+      if (!usedKeys.has(key)) {
+        const wrong = normalizeSegmentName(segments[i].name, segments[j].name);
         wrongStatements.push(wrong);
+        usedKeys.add(key);
       }
     }
   }
+
+  // If we couldn't generate enough wrong answers, retry
+  if (wrongStatements.length < 3) return generateCongruentSegments();
 
   const choices = [correctStatement, ...wrongStatements].sort(() => Math.random() - 0.5);
 
@@ -683,18 +744,73 @@ export function generateCongruentSegments(): Problem {
     ctx.lineTo(width, originY);
     ctx.stroke();
 
-    // Points and labels
+    // Points and labels with smart offset to avoid overlap
     ctx.fillStyle = "#e63946";
     ctx.font = "14px sans-serif";
+    const labelOffsets: { x: number; y: number }[] = [];
+    
     points.forEach((p, i) => {
       if (i >= numPoints) return;
       const px = originX + p.x * scale;
       const py = originY - p.y * scale;
+      
+      // Draw point
       ctx.beginPath();
       ctx.arc(px, py, 5, 0, 2 * Math.PI);
       ctx.fill();
+      
+      // Smart label placement: check for nearby labels and offset if needed
+      let offsetX = 8;
+      let offsetY = -8;
+      
+      // Check for collisions with previously placed labels
+      for (let j = 0; j < i; j++) {
+        const otherPx = originX + points[j].x * scale;
+        const otherPy = originY - points[j].y * scale;
+        const distance = Math.sqrt((px - otherPx) ** 2 + (py - otherPy) ** 2);
+        
+        // If points are very close (within 30 pixels), adjust label offset
+        if (distance < 30) {
+          // Try different offsets to avoid collision
+          const offsets = [
+            { x: 8, y: -8 },   // top-right (default)
+            { x: -20, y: -8 }, // top-left
+            { x: 8, y: 12 },   // bottom-right
+            { x: -20, y: 12 }, // bottom-left
+            { x: 8, y: 2 },    // middle-right
+            { x: -20, y: 2 },  // middle-left
+          ];
+          
+          // Find the first offset that doesn't collide
+          for (const offset of offsets) {
+            let collides = false;
+            for (let k = 0; k < i; k++) {
+              const otherOffset = labelOffsets[k];
+              const otherPx2 = originX + points[k].x * scale;
+              const otherPy2 = originY - points[k].y * scale;
+              const labelDist = Math.sqrt(
+                (px + offset.x - (otherPx2 + otherOffset.x)) ** 2 +
+                (py + offset.y - (otherPy2 + otherOffset.y)) ** 2
+              );
+              if (labelDist < 20) {
+                collides = true;
+                break;
+              }
+            }
+            if (!collides) {
+              offsetX = offset.x;
+              offsetY = offset.y;
+              break;
+            }
+          }
+        }
+      }
+      
+      labelOffsets.push({ x: offsetX, y: offsetY });
+      
+      // Draw label
       ctx.fillStyle = "#1e3a5f";
-      ctx.fillText(labels[i], px + 8, py - 8);
+      ctx.fillText(labels[i], px + offsetX, py + offsetY);
       ctx.fillStyle = "#e63946";
     });
 
