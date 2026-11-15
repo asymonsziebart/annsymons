@@ -15,7 +15,12 @@ const exploreLinks = [
     label: "Hologram Tic-Tac-Toe",
     blurb: "Point, pinch, and play on a floating board",
   },
-  { href: "/interests", label: "Interests", blurb: "What I’m into outside of work" },
+  {
+    href: "/angela-geometry",
+    label: "Angela's Geometry Quest",
+    blurb: "Practice geometry for Geometry Unit 1",
+  },
+  { href: "/interests", label: "Interests", blurb: "What I'm into outside of work" },
 ] as const;
 
 export default async function Home() {
