@@ -121,6 +121,7 @@ export default function AngelaGeometryApp() {
   const [mixedCount, setMixedCount] = useState(0);
   const [mixedTotal] = useState(15);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [plottedPoint, setPlottedPoint] = useState<{ x: number; y: number } | null>(null);
 
   // Load saved stats from localStorage
   useEffect(() => {
@@ -166,6 +167,7 @@ export default function AngelaGeometryApp() {
     setShowSolution(false);
     setShowHint(false);
     setIsCorrect(null);
+    setPlottedPoint(null);
   }, []);
 
   const startTopic = useCallback(
@@ -187,7 +189,20 @@ export default function AngelaGeometryApp() {
 
   const checkUserAnswer = useCallback(() => {
     if (!problem) return;
-    const correct = checkAnswer(userAnswer, problem.answer);
+    
+    let correct = false;
+    
+    if (problem.type === "plot-point" && problem.correctPoint && plottedPoint) {
+      // Check if plotted point is within tolerance
+      const tolerance = problem.tolerance || 0.5;
+      const dx = Math.abs(plottedPoint.x - problem.correctPoint.x);
+      const dy = Math.abs(plottedPoint.y - problem.correctPoint.y);
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      correct = distance <= tolerance;
+    } else {
+      correct = checkAnswer(userAnswer, problem.answer);
+    }
+    
     setIsCorrect(correct);
     setShowSolution(true);
 
@@ -211,7 +226,7 @@ export default function AngelaGeometryApp() {
         streak: 0,
       }));
     }
-  }, [problem, userAnswer, currentTopic, saveStats]);
+  }, [problem, userAnswer, plottedPoint, currentTopic, saveStats]);
 
   const nextProblem = useCallback(() => {
     if (screen === "mixed") {
@@ -234,6 +249,46 @@ export default function AngelaGeometryApp() {
     setMixedCount(0);
   }, []);
 
+  // Handle canvas click/touch for plot-point problems
+  const handleCanvasClick = useCallback((e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (problem?.type !== "plot-point" || !canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+
+    // Get click/touch position
+    let clientX: number, clientY: number;
+    if ('touches' in e) {
+      if (e.touches.length === 0) return;
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+
+    // Convert to canvas coordinates
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+
+    // Convert to grid coordinates (-5 to 5 range)
+    const width = rect.width;
+    const height = rect.height;
+    const scale = Math.min(width, height) / 12;
+    const originX = width / 2;
+    const originY = height / 2;
+
+    const gridX = Math.round((x - originX) / scale);
+    const gridY = Math.round((originY - y) / scale);
+
+    // Clamp to grid bounds
+    if (gridX < -5 || gridX > 5 || gridY < -5 || gridY > 5) return;
+
+    setPlottedPoint({ x: gridX, y: gridY });
+    setUserAnswer(`(${gridX}, ${gridY})`);
+  }, [problem]);
+
   // Render canvas for graph problems
   useEffect(() => {
     if (problem?.renderGrid && canvasRef.current) {
@@ -255,11 +310,40 @@ export default function AngelaGeometryApp() {
         // Scale the context so we can draw in CSS pixels
         ctx.scale(dpr, dpr);
         
-        // Now the render function can use displayWidth/displayHeight or canvas.width/height divided by dpr
+        // Render the grid
         problem.renderGrid(ctx);
+
+        // Draw plotted point if exists
+        if (plottedPoint && problem.type === "plot-point") {
+          const width = canvas.width / dpr;
+          const height = canvas.height / dpr;
+          const scale = Math.min(width, height) / 12;
+          const originX = width / 2;
+          const originY = height / 2;
+          const px = originX + plottedPoint.x * scale;
+          const py = originY - plottedPoint.y * scale;
+
+          // Draw the plotted point
+          ctx.fillStyle = "#667eea";
+          ctx.beginPath();
+          ctx.arc(px, py, 8, 0, 2 * Math.PI);
+          ctx.fill();
+
+          // Draw a ring around it
+          ctx.strokeStyle = "#ffffff";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(px, py, 8, 0, 2 * Math.PI);
+          ctx.stroke();
+
+          // Label
+          ctx.fillStyle = "#1e3a5f";
+          ctx.font = "bold 14px sans-serif";
+          ctx.fillText(`(${plottedPoint.x}, ${plottedPoint.y})`, px + 12, py - 8);
+        }
       }
     }
-  }, [problem]);
+  }, [problem, plottedPoint]);
 
   // HOME SCREEN
   if (screen === "home") {
@@ -373,6 +457,9 @@ export default function AngelaGeometryApp() {
             <canvas
               ref={canvasRef}
               className="geometry-canvas"
+              onClick={problem.type === "plot-point" ? handleCanvasClick : undefined}
+              onTouchStart={problem.type === "plot-point" ? handleCanvasClick : undefined}
+              style={problem.type === "plot-point" ? { cursor: "crosshair" } : undefined}
             />
           )}
 
@@ -388,7 +475,7 @@ export default function AngelaGeometryApp() {
                   onKeyDown={(e) => e.key === "Enter" && checkUserAnswer()}
                   autoFocus
                 />
-              ) : (
+              ) : problem.type === "multiple-choice" ? (
                 <div className="geometry-choices">
                   {problem.choices?.map((choice, i) => (
                     <button
@@ -400,7 +487,24 @@ export default function AngelaGeometryApp() {
                     </button>
                   ))}
                 </div>
-              )}
+              ) : problem.type === "plot-point" ? (
+                <div className="geometry-plot-instruction">
+                  <div className="geometry-plot-icon">📍</div>
+                  <div className="geometry-plot-text">
+                    {plottedPoint ? (
+                      <>
+                        <strong>Point plotted:</strong> ({plottedPoint.x}, {plottedPoint.y})
+                        <div className="geometry-plot-subtext">Tap again to adjust, or check your answer</div>
+                      </>
+                    ) : (
+                      <>
+                        <strong>Tap on the graph</strong> to plot your answer
+                        <div className="geometry-plot-subtext">Tap the grid square where the midpoint should be</div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ) : null}
 
               <div className="geometry-actions">
                 {!showHint && (
@@ -411,7 +515,7 @@ export default function AngelaGeometryApp() {
                 <button
                   className="geometry-btn geometry-btn-primary"
                   onClick={checkUserAnswer}
-                  disabled={!userAnswer.trim()}
+                  disabled={problem.type === "plot-point" ? !plottedPoint : !userAnswer.trim()}
                 >
                   Check Answer
                 </button>

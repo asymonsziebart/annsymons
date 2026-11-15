@@ -68,10 +68,21 @@
   cursor: pointer;
   padding: 0.5rem 1rem;
   transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .geometry-back-btn:hover {
   color: #764ba2;
+}
+
+.geometry-back-btn:active {
+  opacity: 0.7;
 }
 
 .geometry-main {
@@ -115,12 +126,21 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .geometry-topic-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   border-color: currentColor;
+}
+
+.geometry-topic-card:active {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .geometry-topic-dot {
@@ -179,6 +199,10 @@
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .geometry-btn:disabled {
@@ -186,9 +210,14 @@
   cursor: not-allowed;
 }
 
+.geometry-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
 .geometry-btn-primary {
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .geometry-btn-primary:hover:not(:disabled) {
@@ -196,13 +225,23 @@
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
+.geometry-btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
 .geometry-btn-hint {
   background: #fbbf24;
   color: #78350f;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
 }
 
 .geometry-btn-hint:hover {
   background: #f59e0b;
+}
+
+.geometry-btn-hint:active {
+  transform: scale(0.98);
 }
 
 .geometry-btn-next {
@@ -336,11 +375,14 @@
   margin-bottom: 1rem;
   font-family: inherit;
   transition: border-color 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .geometry-input:focus {
   outline: none;
   border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .geometry-choices {
@@ -360,6 +402,13 @@
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }
 
 .geometry-choice:hover {
@@ -367,9 +416,14 @@
   background: #f8fafc;
 }
 
+.geometry-choice:active {
+  transform: scale(0.99);
+}
+
 .geometry-choice-selected {
   border-color: #667eea;
   background: #eef2ff;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .geometry-actions {
@@ -390,6 +444,40 @@
   color: #78350f;
   font-size: 0.9375rem;
   line-height: 1.6;
+}
+
+.geometry-plot-instruction {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #eef2ff;
+  border: 2px solid #667eea;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.geometry-plot-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.geometry-plot-text {
+  flex: 1;
+  font-size: 0.9375rem;
+  color: #1e293b;
+}
+
+.geometry-plot-text strong {
+  display: block;
+  font-size: 1.0625rem;
+  margin-bottom: 0.25rem;
+}
+
+.geometry-plot-subtext {
+  font-size: 0.8125rem;
+  color: #64748b;
+  margin-top: 0.25rem;
 }
 
 .geometry-feedback {
@@ -470,50 +558,272 @@
   font-size: 0.9375rem;
 }
 
-/* Mobile optimizations */
+/* Mobile optimizations - iPhone specific */
 @media (max-width: 640px) {
+  .geometry-app {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+
+  .geometry-header {
+    padding: 1rem 1rem;
+  }
+
   .geometry-title {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
+    line-height: 1.2;
   }
 
   .geometry-subtitle {
-    font-size: 1rem;
+    font-size: 0.9375rem;
+    line-height: 1.4;
+  }
+
+  .geometry-home-link {
+    font-size: 0.875rem;
   }
 
   .geometry-main {
-    padding: 1.5rem 1rem;
+    padding: 1rem 1rem 2rem;
   }
 
   .geometry-problem-main {
-    padding: 1rem 0.75rem;
+    padding: 0.5rem 1rem 2rem;
   }
 
   .geometry-section-title {
     font-size: 1.5rem;
+    margin-bottom: 1.25rem;
   }
 
   .geometry-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .geometry-topic-card {
+    padding: 1.25rem;
+  }
+
+  .geometry-topic-dot {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .geometry-topic-title {
+    font-size: 1.125rem;
+  }
+
+  .geometry-topic-desc {
+    font-size: 0.875rem;
+  }
+
+  .geometry-mixed-card {
+    padding: 1.5rem 1.25rem;
   }
 
   .geometry-stats-bar {
     grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .geometry-stat {
+    padding: 0.75rem;
+  }
+
+  .geometry-stat-label {
+    font-size: 0.625rem;
+  }
+
+  .geometry-stat-value {
+    font-size: 1.5rem;
   }
 
   .geometry-problem-card {
-    padding: 1.5rem;
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+  }
+
+  .geometry-problem-topic {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
   }
 
   .geometry-problem-question {
-    font-size: 1.125rem;
+    font-size: 1.0625rem;
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
+  }
+
+  .geometry-input {
+    padding: 0.875rem;
+    font-size: 1rem;
+    border-radius: 0.625rem;
+    margin-bottom: 0.875rem;
+    /* Prevent zoom on focus in iOS */
+    touch-action: manipulation;
+  }
+
+  .geometry-choice {
+    padding: 0.875rem 1rem;
+    font-size: 0.9375rem;
+    line-height: 1.4;
+    /* Better touch target */
+    min-height: 44px;
+  }
+
+  .geometry-choices {
+    gap: 0.625rem;
   }
 
   .geometry-actions {
     flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 0.875rem;
+  }
+
+  .geometry-btn {
+    padding: 0.875rem 1.25rem;
+    font-size: 1rem;
+    border-radius: 0.625rem;
+    /* Better touch target */
+    min-height: 44px;
+  }
+
+  .geometry-btn-next {
+    padding: 1rem;
+    font-size: 1.0625rem;
+  }
+
+  .geometry-hint {
+    padding: 0.875rem 1rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.625rem;
   }
 
   .geometry-canvas {
     width: 100%;
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    margin: 1rem 0;
+    touch-action: none;
+  }
+
+  .geometry-plot-instruction {
+    padding: 1rem;
+    gap: 0.75rem;
+  }
+
+  .geometry-plot-icon {
+    font-size: 1.5rem;
+  }
+
+  .geometry-plot-text {
+    font-size: 0.875rem;
+  }
+
+  .geometry-plot-text strong {
+    font-size: 0.9375rem;
+  }
+
+  .geometry-plot-subtext {
+    font-size: 0.75rem;
+  }
+
+  .geometry-feedback {
+    padding: 1rem;
+    gap: 0.875rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .geometry-feedback-icon {
+    font-size: 2rem;
+  }
+
+  .geometry-feedback-title {
+    font-size: 1.125rem;
+  }
+
+  .geometry-feedback-message {
+    font-size: 0.875rem;
+  }
+
+  .geometry-solution {
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .geometry-solution-title {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .geometry-solution-steps {
+    padding-left: 1.25rem;
+  }
+
+  .geometry-solution-steps li {
+    margin-bottom: 0.625rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .geometry-progress-bar-container {
+    height: 1.25rem;
+    margin-top: 0.75rem;
+  }
+
+  .geometry-progress-text {
+    font-size: 0.75rem;
+  }
+
+  .geometry-back-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9375rem;
+  }
+
+  .geometry-title-compact {
+    font-size: 1.25rem;
+  }
+
+  .geometry-footer {
+    padding: 1.25rem 1rem;
+    margin-top: 2rem;
+  }
+
+  .geometry-footer p {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+}
+
+/* Extra small phones */
+@media (max-width: 375px) {
+  .geometry-title {
+    font-size: 1.5rem;
+  }
+
+  .geometry-problem-question {
+    font-size: 1rem;
+  }
+
+  .geometry-stats-bar {
+    gap: 0.5rem;
+  }
+
+  .geometry-stat {
+    padding: 0.625rem;
+  }
+
+  .geometry-stat-value {
+    font-size: 1.25rem;
+  }
+
+  .geometry-problem-card {
+    padding: 1rem;
   }
 }
 
