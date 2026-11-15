@@ -10,9 +10,11 @@ export type Problem = {
   answer: string | string[]; // Can be multiple accepted forms
   solution: string[]; // Step-by-step explanation
   hint: string;
-  type: "input" | "multiple-choice";
+  type: "input" | "multiple-choice" | "plot-point";
   choices?: string[];
   renderGrid?: (ctx: CanvasRenderingContext2D) => void;
+  correctPoint?: { x: number; y: number }; // For plot-point type
+  tolerance?: number; // How close the plot needs to be (in grid units)
 };
 
 // Utility: random integer in [min, max]
@@ -197,6 +199,28 @@ export function generateMidpointGraph(): Problem {
     ctx.fillText(`(${x1}, ${y1})`, px1 + 8, py1 - 8);
     ctx.fillText(`(${x2}, ${y2})`, px2 + 8, py2 - 8);
   };
+
+  // Randomly choose between typing answer or plotting on graph
+  const usePlotting = Math.random() > 0.5;
+
+  if (usePlotting) {
+    return {
+      id: `midpoint-graph-plot-${Date.now()}-${Math.random()}`,
+      topic: "Midpoint from Graph",
+      question: "Tap on the graph to plot the midpoint of the segment.",
+      answer: [answer, altAnswer, answer.replace(/\s/g, "")],
+      solution: [
+        `From the graph: endpoints are (${x1}, ${y1}) and (${x2}, ${y2})`,
+        `Midpoint = ((${x1} + ${x2})/2, (${y1} + ${y2})/2)`,
+        `Midpoint = (${formatNumber(mx)}, ${formatNumber(my)})`,
+      ],
+      hint: "Count the squares to find the exact middle between the two endpoints.",
+      type: "plot-point",
+      correctPoint: { x: mx, y: my },
+      tolerance: 0.3, // Allow tapping within 0.3 grid units
+      renderGrid,
+    };
+  }
 
   return {
     id: `midpoint-graph-${Date.now()}-${Math.random()}`,
